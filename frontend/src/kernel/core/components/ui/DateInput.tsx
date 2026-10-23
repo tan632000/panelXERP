@@ -1,0 +1,236 @@
+"use client";
+
+import { offset } from "@floating-ui/react";
+import { enUS } from "date-fns/locale";
+import { forwardRef, useEffect, useRef, useState } from "react";
+import ReactDatePicker, { registerLocale } from "react-datepicker";
+
+import {
+  DATE_PICKER_CALENDAR_CLASS,
+  DATE_PICKER_POPPER_CLASS,
+  DATE_PICKER_PORTAL_ID,
+  DatePickerHeader,
+} from "@/kernel/core/components/ui/DatePickerHeader";
+import { Icon } from "@/kernel/core/components/ui/Icon";
+import { cn } from "@/kernel/core/lib/cn";
+import { parseIsoDate, toIsoDate } from "@/kernel/core/lib/date-picker-utils";
+
+import type { InputHTMLAttributes } from "react";
+
+registerLocale("en", enUS);
+
+interface DateInputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+  locked?: boolean;
+  error?: boolean;
+  onOpenCalendar?: () => void;
+}
+
+const DateInputField = forwardRef<HTMLInputElement, DateInputFieldProps>(
+  function DateInputField(
+    {
+      locked,
+      error,
+      className,
+      disabled,
+      onClick: _onClick,
+      onFocus,
+      onOpenCalendar,
+      ...inputProps
+    },
+    ref,
+  ) {
+    const isLocked = Boolean(locked || disabled);
+
+    return (
+      <div
+        className={cn(
+          "flex h-[38px] w-full items-center gap-1.5 rounded-md border border-border-secondary bg-surface-primary px-3 py-2 text-sm text-text-primary outline-none transition-[border,box-shadow] [font-family:inherit]",
+          isLocked
+            ? "cursor-not-allowed bg-surface-secondary text-text-secondary"
+            : "focus-within:border-brand focus-within:shadow-[0_0_0_2px_rgba(26,42,94,0.07)]",
+          error && "border-danger-text focus-within:border-danger-text",
+          className,
+        )}
+        aria-invalid={error ? true : undefined}
+      >
+        <input
+          ref={ref}
+          {...inputProps}
+          type="text"
+          autoComplete="off"
+          disabled={isLocked}
+          readOnly={isLocked}
+          onFocus={onFocus}
+          // The picker's own click-to-toggle is bypassed (controlled `open`
+          // state), so an explicit click opens the calendar like the icon
+          // does. Focus alone still does not open it (`preventOpenOnFocus`),
+          // keeping keyboard tab-through quiet.
+          onClick={() => {
+            if (!isLocked) onOpenCalendar?.();
+          }}
+          className={cn(
+            "min-w-0 flex-1 border-none bg-transparent text-sm tabular-nums text-text-primary outline-none [font-family:inherit]",
+            "placeholder:text-text-tertiary",
+            isLocked ? "cursor-not-allowed text-text-secondary" : "cursor-text",
+            className?.includes("text-xs") && "!text-xs",
+          )}
+        />
+        <button
+          type="button"
+          tabIndex={-1}
+          disabled={isLocked}
+          aria-label="Open calendar"
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => {
+            if (!isLocked) onOpenCalendar?.();
+          }}
+          className={cn(
+            "inline-flex shrink-0 border-none bg-transparent p-0 text-text-tertiary",
+            isLocked ? "cursor-not-allowed" : "cursor-pointer",
+          )}
+        >
+          <Icon name="calendar" size={16} />
+        </button>
+      </div>
+    );
+  },
+);
+
+export interface DateInputProps {
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  readOnly?: boolean;
+  min?: string;
+  max?: string;
+  placeholder?: string;
+  className?: string;
+  inputClassName?: string;
+  error?: boolean;
+  name?: string;
+  id?: string;
+}
+
+export function DateInput({
+  value,
+  onChange,
+  disabled = false,
+  readOnly = false,
+  min,
+  max,
+  placeholder = "dd/mm/yyyy",
+  className = "",
+  inputClassName = "",
+  error = false,
+  name,
+  id,
+}: Readonly<DateInputProps>) {
+  const locked = disabled || readOnly;
+  const selectedDate = parseIsoDate(value) ?? null;
+  const minDate = parseIsoDate(min ?? "");
+  const maxDate = parseIsoDate(max ?? "");
+  const [isOpen, setIsOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const closeOnScroll = (event: Event) => {
+      const target = event.target;
+      if (
+        target instanceof Element &&
+        target.closest(".date-input-popper, .date-filter-popper")
+      ) {
+        return;
+      }
+      setIsOpen(false);
+    };
+
+    const ignoreOutsideUntil = Date.now() + 200;
+    const onDocScroll = (event: Event) => {
+      if (Date.now() < ignoreOutsideUntil) return;
+      closeOnScroll(event);
+    };
+
+    const closeOnResize = () => setIsOpen(false);
+    document.addEventListener("scroll", onDocScroll, true);
+    window.addEventListener("resize", closeOnResize);
+
+    return () => {
+      document.removeEventListener("scroll", onDocScroll, true);
+      window.removeEventListener("resize", closeOnResize);
+    };
+  }, [isOpen]);
+
+  return (
+    <div ref={rootRef} className="w-full">
+      <ReactDatePicker
+        selected={selectedDate}
+        onChange={(date: Date | null) => {
+          if (!date) {
+            onChange("");
+            setIsOpen(false);
+            return;
+          }
+          const iso = toIsoDate(date);
+          if (min && iso < min) return;
+          if (max && iso > max) return;
+          onChange(iso);
+          setIsOpen(false);
+        }}
+        onChangeRaw={(event) => {
+          const target = event?.target;
+          if (
+            target instanceof HTMLInputElement &&
+            target.value.trim() === ""
+          ) {
+            onChange("");
+          }
+        }}
+        open={isOpen}
+        onClickOutside={(event) => {
+          const target = "target" in event ? event.target : null;
+          if (target instanceof Node && rootRef.current?.contains(target)) {
+            return;
+          }
+          setIsOpen(false);
+        }}
+        onCalendarClose={() => setIsOpen(false)}
+        locale="en"
+        dateFormat="dd/MM/yyyy"
+        placeholderText={placeholder}
+        minDate={minDate}
+        maxDate={maxDate}
+        filterDate={(date) => {
+          const iso = toIsoDate(date);
+          if (min && iso < min) return false;
+          if (max && iso > max) return false;
+          return true;
+        }}
+        disabled={locked}
+        name={name}
+        id={id}
+        preventOpenOnFocus
+        shouldCloseOnSelect
+        renderCustomHeader={DatePickerHeader}
+        formatWeekDay={(dayName) => dayName.slice(0, 2)}
+        showPopperArrow={false}
+        popperModifiers={[offset({ mainAxis: -2, crossAxis: 0 })]}
+        popperProps={{ strategy: "fixed" }}
+        portalId={DATE_PICKER_PORTAL_ID}
+        calendarClassName={DATE_PICKER_CALENDAR_CLASS}
+        popperClassName={cn(DATE_PICKER_POPPER_CLASS, "date-input-popper")}
+        popperPlacement="bottom"
+        wrapperClassName={cn("date-input-wrapper w-full", className)}
+        customInput={
+          <DateInputField
+            locked={locked}
+            error={error}
+            className={inputClassName}
+            onOpenCalendar={() => setIsOpen(true)}
+          />
+        }
+      />
+    </div>
+  );
+}

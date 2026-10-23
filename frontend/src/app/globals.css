@@ -1,0 +1,1048 @@
+@import "tailwindcss";
+@import "react-datepicker/dist/react-datepicker.css";
+
+/* Defaults on :root — utilities reference var(--color-*); ThemeProvider overrides at runtime */
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #171717;
+  /* Inter covers Latin (English) and Vietnamese. It has no kana/kanji, so Japanese text
+     falls through to the CJK families next; a Japanese web font goes in that slot. */
+  --font-sans:
+    "Twemoji Country Flags", var(--font-app-sans), "Hiragino Sans",
+    "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Meiryo", "Noto Sans JP",
+    ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono);
+
+  /* Brand palette — Ver2 */
+  --color-brand: #1a2a5e;
+  --color-brand-hover: #253a7e;
+  --color-brand-light: #e8edf8;
+  --color-brand-50: #f0f3fa;
+  --color-brand-100: #e0e6f4;
+
+  /* Surface */
+  --color-surface-primary: #ffffff;
+  --color-surface-secondary: #f5f6f8;
+  --color-surface-tertiary: #eef0f3;
+
+  /* Text */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6b7280;
+  --color-text-tertiary: #9ca3af;
+
+  /* Border */
+  --color-border-primary: #d1d5db;
+  --color-border-secondary: #e5e7eb;
+  --color-border-tertiary: #f3f4f6;
+
+  /* Sidebar (overridable per customer — dark or light) */
+  --color-sidebar-bg: #ffffff;
+  --color-sidebar-text: #111827;
+  --color-sidebar-text-muted: #6b7280;
+  --color-sidebar-border: #e5e7eb;
+
+  /* Status badges */
+  --color-success-bg: #eaf3de;
+  --color-success-text: #3b6d11;
+  --color-warning-bg: #faeeda;
+  --color-warning-text: #854f0b;
+  --color-info-bg: #e6f1fb;
+  --color-info-text: #185fa5;
+  --color-danger-bg: #fcebeb;
+  --color-danger-text: #a32d2d;
+  --color-purple-bg: #eeedfe;
+  --color-purple-text: #3c3489;
+
+  /* Sizing */
+  --sidebar-width: 248px;
+  /* Desktop height of the sidebar's brand bar and every page header, border included, so the
+     two bottom rules meet in one line across the screen. */
+  --app-header-height: 81px;
+}
+
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* The sweeping line inside the QR camera scan window (`QrCameraScanner`). */
+@keyframes qr-scan-line {
+  0% {
+    top: 0%;
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+
+/*
+ * List-table cell wrapping.
+ *
+ * Until the reader sizes the columns, every cell sits in `.table-cell-nowrap` and each value
+ * stays on one line, the columns taking the width their content needs — a `render` that
+ * wraps its own text included, so no screen opens on a column of broken words.
+ *
+ * Once a column is dragged (or the stored widths are restored) the cells switch to
+ * `.table-cell-wrap`, which breaks text across lines inside the width the reader chose,
+ * instead of cutting it off. A cell whose `render` returns its own single-line leaf
+ * (`truncate`, `whitespace-nowrap`) would still clip inside that wrapper, so those leaves
+ * wrap too, and every list screen breaks text the same way.
+ *
+ * `.inline-flex` elements are excluded because that is what every pill and status badge is:
+ * a badge broken over two lines loses the shape that makes it read as one.
+ */
+.table-cell-nowrap,
+.table-cell-nowrap * {
+  white-space: nowrap;
+}
+
+.table-cell-wrap > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/*
+ * A `render` that capped its own width (`max-w-[160px]`) for the one-line layout would keep
+ * wrapping at that cap however wide the reader drags the column, so the column decides.
+ */
+.table-cell-wrap :where([class*="max-w-"]) {
+  max-width: 100%;
+}
+
+/* Same for a floor (`min-w-[110px]`): a column dragged narrower must not clip its content. */
+.table-cell-wrap :where([class*="min-w-"]) {
+  min-width: 0;
+}
+
+/* A one-line clamp would hide the lines the wrapping just made room for. */
+.table-cell-wrap :where([class*="line-clamp-"]) {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
+}
+
+.table-cell-wrap
+  :where(.truncate, .whitespace-nowrap, .text-ellipsis):not(.inline-flex) {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+
+/* Thin flat scrollbar (sidebar, panels) */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(229 231 235 / 0.9) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgb(229 231 235);
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(209 213 219);
+}
+
+.date-filter-popper {
+  /* Above the record-picker overlay (z-index 200); 110 sat under it, so a
+     calendar opened from that dialog could not receive a day click. */
+  z-index: 260 !important;
+  overflow: visible !important;
+  color: var(--color-surface-primary);
+}
+
+.date-filter-input-wrapper {
+  display: inline-flex;
+  width: auto;
+}
+
+.date-input-wrapper,
+.date-input-wrapper.react-datepicker-wrapper,
+.date-input-wrapper .react-datepicker__input-container {
+  display: block;
+  width: 100%;
+}
+
+.date-filter-input-wrapper.react-datepicker-wrapper {
+  display: inline-flex;
+  width: auto;
+}
+
+.date-filter-input-wrapper .react-datepicker__input-container {
+  display: inline-flex;
+  width: auto;
+}
+
+/* A phone stretches a date filter over the room its row gives it (half a row in a range). */
+@media (max-width: 1023.98px) {
+  .date-filter-input-wrapper,
+  .date-filter-input-wrapper.react-datepicker-wrapper,
+  .date-filter-input-wrapper .react-datepicker__input-container {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+.date-filter-popper .react-datepicker {
+  position: relative;
+  z-index: 1;
+  /* Wider than the day grid so the year chevrons and month/year selects keep a
+     clear right margin instead of sitting against the border. */
+  width: 304px;
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+  font-family: inherit;
+  font-size: 13px;
+  overflow: visible;
+  padding: 0 12px 10px;
+}
+
+.date-filter-popper .react-datepicker__header {
+  background: transparent;
+  border-bottom: none;
+  padding: 8px 0 0;
+}
+
+.date-filter-popper .react-datepicker__header--custom {
+  background: transparent;
+  border-bottom: none;
+  padding: 0;
+}
+
+.date-filter-popper .react-datepicker__current-month,
+.date-filter-popper .react-datepicker__header__dropdown {
+  display: none;
+}
+
+.date-filter-popper .react-datepicker__navigation {
+  display: none;
+}
+
+.date-filter-popper .react-datepicker__day-names {
+  display: flex;
+  justify-content: space-around;
+  margin: 0 0 4px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-border-tertiary);
+}
+
+.date-filter-popper .react-datepicker__day-name {
+  width: 2.25rem;
+  line-height: 1.25rem;
+  margin: 0;
+  color: var(--color-text-tertiary);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.date-filter-popper .react-datepicker__month {
+  margin: 8px 0 0;
+}
+
+.date-filter-popper .react-datepicker__week {
+  display: flex;
+  justify-content: space-around;
+}
+
+.date-filter-popper .react-datepicker__day {
+  width: 2.25rem;
+  height: 2.25rem;
+  line-height: 2.25rem;
+  margin: 2px 0;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text-primary);
+}
+
+.date-filter-popper .react-datepicker__day:hover {
+  background: var(--color-surface-secondary);
+}
+
+.date-filter-popper .react-datepicker__day--selected,
+.date-filter-popper .react-datepicker__day--keyboard-selected {
+  background: var(--color-brand) !important;
+  color: #fff !important;
+  font-weight: 500;
+}
+
+.date-filter-popper .react-datepicker__day--outside-month {
+  color: var(--color-text-tertiary);
+  opacity: 0.45;
+}
+
+.date-filter-popper .react-datepicker__day--today {
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+.date-filter-popper
+  .react-datepicker__day--today.react-datepicker__day--selected {
+  color: #fff;
+}
+
+.date-filter-popper .react-datepicker__day--disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.date-filter-popper .react-datepicker__triangle {
+  display: none !important;
+}
+
+.date-filter-popper[data-placement^="bottom"] .react-datepicker::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 72px;
+  z-index: 2;
+  width: 11px;
+  height: 11px;
+  margin-left: -5.5px;
+  background: #ffffff;
+  border-left: 1px solid var(--color-border-secondary);
+  border-top: 1px solid var(--color-border-secondary);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+
+.date-filter-popper.date-input-popper,
+.react-datepicker-popper.date-input-popper {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.date-filter-popper.date-input-popper .react-datepicker::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  z-index: 2;
+  width: 11px;
+  height: 11px;
+  margin-left: -5.5px;
+  background: var(--color-surface-primary);
+  transform: rotate(45deg);
+  pointer-events: none;
+  border: 1px solid var(--color-border-secondary);
+}
+
+.date-filter-popper.date-input-popper[data-placement^="bottom"]
+  .react-datepicker::before {
+  top: -5px;
+  bottom: auto;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+}
+
+.date-filter-popper.date-input-popper[data-placement^="top"]
+  .react-datepicker::before {
+  top: auto;
+  bottom: -5px;
+  border-left-color: transparent;
+  border-top-color: transparent;
+}
+
+/**
+ * A number input without its spinner.
+ *
+ * `type="number"` reserves ~16px inside the box for the browser's up/down arrows. In a
+ * `table-fixed` line editor — where a VAT or discount column is under 100px wide — that is a
+ * sixth of the column spent on a control nobody uses to enter money. Applied through the line
+ * editors' own `LINE_NUMBER_CLASS`, so ordinary standalone form fields keep their spinner.
+ */
+@utility no-spinner {
+  -moz-appearance: textfield;
+  appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    margin: 0;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+}
+
+/*
+ * Wire drawing order card (`san-xuat-lenh-rut-day-v01.md`, Requirement 7 AC14) — the same markup
+ * and styling as the Sub work order card (mock `printLenhRD` / `printLDD`) — and the drawn-coil
+ * label (AC15, mock `printLenhRDTem`). Printed through the kernel `PrintSheet` popup, which owns
+ * the page size and the mock's 10mm page margin.
+ */
+
+.wire-drawing-print-card,
+.wire-drawing-print-label {
+  box-sizing: border-box;
+  color: #111;
+  background: #fff;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 12px;
+}
+
+.wire-drawing-print-card {
+  border: 2px solid #111;
+}
+
+.wire-drawing-print-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 2px solid #111;
+}
+
+.wire-drawing-print-header h1 {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+}
+
+.wire-drawing-print-header strong {
+  font-size: 15px;
+}
+
+.wire-drawing-print-subline {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 20px;
+  border-bottom: 1px solid #ccc;
+  background: #f5f5f5;
+  color: #444;
+  font-size: 11px;
+}
+
+.wire-drawing-print-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 14px 20px;
+}
+
+.wire-drawing-print-field {
+  display: flex;
+  padding: 6px 0;
+  border-bottom: 1px dotted #ccc;
+}
+
+.wire-drawing-print-field-full {
+  grid-column: 1 / -1;
+}
+
+.wire-drawing-print-label-text {
+  flex-shrink: 0;
+  min-width: 130px;
+  color: #555;
+}
+
+.wire-drawing-print-value {
+  font-weight: 600;
+}
+
+.wire-drawing-print-target {
+  color: #1e3a8a;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.wire-drawing-print-cancel {
+  color: #a32d2d;
+}
+
+.wire-drawing-print-tracking {
+  margin: 16px 20px 20px;
+}
+
+.wire-drawing-print-tracking h2 {
+  margin: 0 0 6px;
+  font-size: 12px;
+}
+
+.wire-drawing-print-tracking table {
+  width: calc(100% - 40px);
+  margin: 14px 20px 0;
+  border-collapse: collapse;
+}
+
+.wire-drawing-print-tracking th,
+.wire-drawing-print-tracking td {
+  height: 26px;
+  padding: 6px 8px;
+  border: 1px solid #ccc;
+  text-align: left;
+  font-size: 11px;
+}
+
+.wire-drawing-print-tracking th {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+
+.wire-drawing-print-signatures {
+  display: flex;
+  margin: 0 20px 20px;
+  padding-top: 30px;
+  border-top: 1px solid #ccc;
+}
+
+.wire-drawing-print-signatures div {
+  flex: 1;
+  text-align: center;
+  color: #555;
+  font-size: 11px;
+}
+
+.wire-drawing-print-signatures strong {
+  display: block;
+  margin-bottom: 40px;
+  color: #111;
+  font-size: 12px;
+}
+
+.wire-drawing-print-label {
+  max-width: 340px;
+  margin: 0 auto;
+  padding: 16px;
+  border: 2px solid #333;
+  border-radius: 8px;
+}
+
+.wire-drawing-print-label h1 {
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ccc;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+/* The HP logo sits at the left, vertically centred, without shifting the centred title text. */
+.wire-drawing-print-label-title {
+  position: relative;
+}
+
+.wire-drawing-print-label-logo {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-62%);
+  height: 30px;
+  width: auto;
+}
+
+.wire-drawing-print-label-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 7px;
+}
+
+.wire-drawing-print-label-row > span:first-child {
+  flex-shrink: 0;
+  min-width: 120px;
+  color: #666;
+  font-size: 11px;
+}
+
+.wire-drawing-print-label-row > span:last-child {
+  font-weight: 600;
+}
+
+.wire-drawing-print-label-weight {
+  align-items: center;
+  margin-top: 10px;
+}
+
+/* Left empty on purpose: the coil is weighed at the warehouse, not printed with the plan. */
+.wire-drawing-print-blank {
+  flex: 1;
+  height: 24px;
+  border: 1px dashed #999;
+  border-radius: 4px;
+}
+
+/*
+ * Phones and tablets read every screen at arm's length, so the small type a desktop uses for
+ * dense tables and captions steps up about a pixel below `lg`. Screen only: print documents keep
+ * their own sizes (an A4 page is narrower than `lg`). Unlayered, so these win over the utility
+ * classes they resize.
+ */
+@media screen and (max-width: 1023px) {
+  :root {
+    --text-xs: 13px;
+    --text-sm: 15px;
+  }
+  .text-\[8px\] {
+    font-size: 9px;
+  }
+  .text-\[9px\] {
+    font-size: 10px;
+  }
+  .text-\[9\.5px\] {
+    font-size: 10.5px;
+  }
+  .text-\[10px\] {
+    font-size: 11px;
+  }
+  .text-\[10\.5px\] {
+    font-size: 11.5px;
+  }
+  .text-\[11px\] {
+    font-size: 12px;
+  }
+  .text-\[12px\] {
+    font-size: 13px;
+  }
+  .text-\[13px\] {
+    font-size: 14px;
+  }
+  .text-\[14px\] {
+    font-size: 15px;
+  }
+}
+
+/*
+ * Type scale of the phone/tablet list cards (`TableMobileCardList`). A card is read at arm's
+ * length on a small screen, so its sizes step up with the screen instead of keeping the dense
+ * table's 10-13px: small phones, the common 390px+ phones, then tablets.
+ */
+[data-mobile-cards] {
+  --card-fs-micro: 11px;
+  --card-fs-caption: 12px;
+  --card-fs-body: 14px;
+  --card-fs-button: 14px;
+  --card-fs-title: 15px;
+  --card-fs-figure: 16px;
+}
+@media (min-width: 390px) {
+  [data-mobile-cards] {
+    --card-fs-body: 15px;
+    --card-fs-title: 16px;
+    --card-fs-figure: 17px;
+  }
+}
+@media (min-width: 640px) {
+  [data-mobile-cards] {
+    --card-fs-micro: 12px;
+    --card-fs-caption: 13px;
+    --card-fs-button: 15px;
+    --card-fs-title: 17px;
+    --card-fs-figure: 18px;
+  }
+}
+
+/*
+ * iOS Safari zooms the page in when a field under 16px takes focus. The fix is the field size,
+ * not a viewport zoom lock: `maximum-scale=1, user-scalable=no` left the document scrolled after
+ * the on-screen keyboard closed, and taps on the fixed dialogs missed their buttons until the
+ * iPad was rotated. Touch screens only, so the desktop keeps its compact fields.
+ */
+@media (hover: none) and (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+}
+
+/*
+ * Every document prints through the kernel popup (`buildPrintDocument` / `PrintSheet`), which
+ * copies these styles. User rule: everything printed or saved as PDF is Times New Roman, whatever
+ * the screen font.
+ */
+@media print {
+  body,
+  body * {
+    font-family: "Times New Roman", Times, serif !important;
+  }
+}
+
+/*
+ * A form grid is one column on a phone (`grid-cols-1 md:grid-cols-2`), but a field marked
+ * `col-span-2` for the desktop still asks for two columns there — and gets them, as an implicit
+ * second track that squeezes every field into a narrow left column. Spanning the explicit
+ * grid instead keeps the field full width without inventing a column.
+ */
+@media (max-width: 767.98px) {
+  .grid-cols-1 > .col-span-2,
+  .grid-cols-1 > .col-span-3 {
+    grid-column: 1 / -1;
+  }
+}
+
+/*
+ * A detail screen's hand-built line tables, redrawn as cards on a phone or a tablet
+ * (`DetailTableCards`). `labelCardTables` captions each cell with its column header and marks
+ * the table `data-card-table`; the attribute only exists below the `lg` breakpoint, so the
+ * desktop table is untouched. Mirrors the list cards of `TableMobileCardList`. A modal's
+ * line editors share these rules under `[data-form-cards]`.
+ */
+:is([data-detail-cards], [data-form-cards]) table[data-card-table] {
+  display: block;
+  width: 100% !important;
+  min-width: 0 !important;
+  border: 0;
+}
+
+/* The bordered, scrolling box around the table would frame the cards twice. */
+:is([data-detail-cards], [data-form-cards]) :has(> table[data-card-table]) {
+  overflow: visible !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+:is([data-detail-cards], [data-form-cards]) table[data-card-table] > thead {
+  display: none;
+}
+
+:is([data-detail-cards], [data-form-cards]) table[data-card-table] > tbody,
+:is([data-detail-cards], [data-form-cards]) table[data-card-table] > tfoot {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: transparent !important;
+}
+
+:is([data-detail-cards], [data-form-cards]) table[data-card-table] > tfoot {
+  margin-top: 10px;
+}
+
+:is([data-detail-cards], [data-form-cards]) table[data-card-table] > tbody > tr,
+:is([data-detail-cards], [data-form-cards])
+  table[data-card-table]
+  > tfoot
+  > tr {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border-secondary) !important;
+  border-left: 3px solid var(--color-violet-500) !important;
+  border-radius: 12px;
+  background: var(--color-surface-primary);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04);
+  white-space: normal !important;
+}
+
+:is([data-detail-cards], [data-form-cards])
+  table[data-card-table]
+  > tfoot
+  > tr {
+  border-left-color: var(--color-border-secondary) !important;
+  background: var(--color-surface-secondary);
+}
+
+:is([data-detail-cards], [data-form-cards])
+  table[data-card-table]
+  > tbody
+  > tr
+  > :is(td, th),
+:is([data-detail-cards], [data-form-cards])
+  table[data-card-table]
+  > tfoot
+  > tr
+  > :is(td, th) {
+  display: block;
+  min-width: 0;
+  width: auto !important;
+  max-width: none !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  position: static !important;
+  text-align: left !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+}
+
+/* A cell clipped or right-aligned for its table column reads whole, from the left, on a card. */
+:is([data-detail-cards], [data-form-cards])
+  table[data-card-table]
+  > :is(tbody, tfoot)
+  > tr
+  > :is(td, th)
+  * {
+  max-width: none;
+}
+:is([data-detail-cards], [data-form-cards])
+  table[data-card-table]
+  > :is(tbody, tfoot)
+  > tr
+  > :is(td, th)
+  .truncate {
+  overflow: visible;
+  white-space: normal;
+}
+/* A long chip ("Returned from the workshop") wraps inside its cell instead of running into the
+   next one. */
+:is([data-detail-cards], [data-form-cards])
+  table[data-card-table]
+  > :is(tbody, tfoot)
+  > tr
+  > :is(td, th)
+  :is(.rounded-full, .rounded-md):not(:empty) {
+  white-space: normal;
+  height: auto;
+}
+:is([data-detail-cards], [data-form-cards])
+  table[data-card-table]
+  > :is(tbody, tfoot)
+  > tr
+  > :is(td, th)
+  :is(.justify-end, .items-end) {
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+:is([data-detail-cards], [data-form-cards])
+  table[data-card-table]
+  > :is(tbody, tfoot)
+  > tr
+  > :is(td, th)
+  .text-right {
+  text-align: left;
+}
+
+:is([data-detail-cards], [data-form-cards])
+  table[data-card-table]
+  [data-label]::before {
+  content: attr(data-label);
+  display: block;
+  margin-bottom: 1px;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 14px;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--color-text-secondary);
+}
+
+:is([data-detail-cards], [data-form-cards])
+  table[data-card-table]
+  :is([data-card-wide], [data-card-index], [data-card-actions]) {
+  grid-column: 1 / -1;
+}
+
+[data-detail-cards] table[data-card-table] [data-card-index] {
+  font-size: 11px !important;
+  color: var(--color-text-tertiary);
+}
+[data-detail-cards] table[data-card-table] [data-card-index="number"]::before {
+  content: "#";
+}
+
+/* A row's icon buttons become equal-width labelled buttons, at most three to a row. */
+[data-detail-cards] table[data-card-table] [data-card-actions] {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(max(96px, calc((100% - 12px) / 3)), 1fr)
+  );
+  gap: 6px;
+}
+[data-detail-cards]
+  table[data-card-table]
+  [data-card-actions]
+  :is(div, span):has(:is(button, a[href], [role="button"])) {
+  display: contents !important;
+}
+[data-detail-cards]
+  table[data-card-table]
+  [data-card-actions]
+  [aria-disabled="true"] {
+  display: none !important;
+}
+[data-detail-cards]
+  table[data-card-table]
+  [data-card-actions]
+  :is(button, a[href], [role="button"]) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100% !important;
+  min-width: 0;
+  height: auto !important;
+  min-height: 38px;
+  padding: 4px 8px !important;
+  border-radius: 8px !important;
+  font-size: 13px;
+  font-weight: 500;
+}
+[data-detail-cards]
+  table[data-card-table]
+  [data-card-icon][data-card-label]::after {
+  content: attr(data-card-label);
+  min-width: 0;
+  line-height: 1.2;
+  text-align: center;
+}
+
+/*
+ * A create/edit modal's line editor on a phone or a tablet (`Modal`), a table or a `<div>`
+ * grid (`labelCardGrids`): one card of captioned fields per line, two to a row, numbered
+ * "#1", "#2"… in its top row whether or not the editor has a row-number column, with the
+ * remove button in that row's corner. The editor's own scroller grows with its cards
+ * instead, so the modal body is the only thing that scrolls.
+ */
+[data-form-cards] :has(> table[data-card-table]),
+[data-form-cards] :has(> [data-card-grid]),
+[data-form-cards] :has(> * > [data-card-grid]) {
+  max-height: none !important;
+  overflow: visible !important;
+}
+[data-form-cards] [data-card-grid] {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+}
+[data-form-cards] [data-card-grid] [data-card-grid-head] {
+  display: none !important;
+}
+[data-form-cards] [data-card-grid] :has(> [data-card-row]) {
+  align-items: stretch !important;
+  counter-reset: form-line;
+}
+[data-form-cards] [data-card-grid] [data-card-row] {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  width: 100% !important;
+  padding: 12px 14px !important;
+  border: 1px solid var(--color-border-secondary);
+  border-radius: 12px;
+}
+[data-form-cards] [data-card-grid] [data-card-row] > * {
+  min-width: 0;
+}
+[data-form-cards] table[data-card-table] > tbody {
+  counter-reset: form-line;
+}
+[data-form-cards] table[data-card-table] > tbody > tr,
+[data-form-cards] [data-card-grid] [data-card-row] {
+  position: relative;
+  gap: 10px 10px !important;
+  /* Lighter than the grey box of a read-only field, so that box still shows on the card. */
+  background: color-mix(
+    in srgb,
+    var(--color-surface-secondary) 45%,
+    var(--color-surface-primary)
+  );
+  box-shadow: none;
+}
+[data-form-cards] table[data-card-table] > tbody > tr {
+  border-left-width: 1px !important;
+  border-left-color: var(--color-border-secondary) !important;
+}
+[data-form-cards] table[data-card-table] > tbody > tr:has([data-label]),
+[data-form-cards] [data-card-grid] [data-card-row] {
+  counter-increment: form-line;
+}
+[data-form-cards] table[data-card-table] > tbody > tr:has([data-label])::before,
+[data-form-cards] [data-card-grid] [data-card-row]::before {
+  content: "#" counter(form-line);
+  grid-column: 1 / -1;
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-brand);
+}
+[data-form-cards] table[data-card-table] [data-card-index],
+/* A cell kept invisible for a line it does not apply to holds a column on a table, not a
+   slot on a card. */
+[data-form-cards] :is(table[data-card-table], [data-card-grid]) .invisible:is(td, th, [data-label]) {
+  display: none !important;
+}
+[data-form-cards] [data-card-grid] [data-card-wide] {
+  grid-column: 1 / -1;
+}
+[data-form-cards]
+  [data-card-grid]
+  :is([data-card-wide]:empty, [data-card-empty]) {
+  display: none;
+}
+/* Beats the card cell's own `display: block`. */
+:is([data-form-cards], [data-detail-cards])
+  table[data-card-table]
+  [data-card-empty] {
+  display: none !important;
+}
+[data-form-cards]
+  :is(table[data-card-table], [data-card-grid])
+  [data-label]::before {
+  content: attr(data-label);
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--color-text-secondary);
+}
+/* A field component (`FormInput`, `FormSelect`) is itself the cell: a flex column whose gap
+   already separates the caption from the box, so a margin on top would push the box below its
+   neighbour's, which sits in a plain wrapper. */
+[data-form-cards]
+  :is(table[data-card-table], [data-card-grid])
+  [data-label][class~="flex-col"]::before {
+  margin-bottom: 0;
+}
+/* Set per cell by `alignCardCaptions` when a neighbour's caption wraps onto a second line. */
+[data-form-cards]
+  :is(table[data-card-table], [data-card-grid])
+  [data-label]::before {
+  padding-bottom: var(--card-caption-pad, 0px);
+}
+/* A picker drawn as a field box keeps one line, like the inputs beside it: a placeholder
+   wrapped at half a card's width would make its box taller than the rest of the row. Beats the
+   chip rule above, which lets a rounded badge wrap. */
+[data-form-cards]
+  :is(table[data-card-table], [data-card-grid])
+  [data-label]
+  > button.w-full.rounded-md {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+[data-form-cards]
+  :is(table[data-card-table], [data-card-grid])
+  [data-card-actions] {
+  position: absolute !important;
+  top: 8px;
+  right: 10px;
+  display: flex;
+  gap: 4px;
+}
+[data-form-cards]
+  :is(table[data-card-table], [data-card-grid])
+  [data-card-actions]:is(button, a[href], [role="button"]),
+[data-form-cards]
+  :is(table[data-card-table], [data-card-grid])
+  [data-card-actions]
+  :is(button, a[href], [role="button"]) {
+  width: 32px !important;
+  height: 32px !important;
+  background: var(--color-surface-primary);
+}

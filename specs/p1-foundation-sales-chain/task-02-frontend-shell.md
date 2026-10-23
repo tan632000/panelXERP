@@ -1,6 +1,6 @@
 # Task 02 — Frontend shell with login and user/role administration
 
-Status: pending
+Status: done
 
 ## Outcome
 The Next.js app runs against the task-01 backend: login, profile, user and role admin pages, empty business navigation.
@@ -27,20 +27,42 @@ The Next.js app runs against the task-01 backend: login, profile, user and role 
 7. `docker compose up -d frontend`.
 
 ## Acceptance
-- AC-03: lint (incl. `lint:i18n`), typecheck, vitest pass; `/vi/login` returns 200.
+- AC-03: lint (incl. `lint:i18n`), typecheck, vitest pass; `/login` (default locale `vi`, `localePrefix: "as-needed"`) returns 200.
 
 ## Dependencies
 - task-01-backend-boot.md
 
 ## Verification Plan
-- Command: `docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npm test" && curl -fsS -o /dev/null -w '%{http_code}\n' http://localhost:${FRONTEND_PORT:-3000}/vi/login`
+- Command: `docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npm test" && curl -fsS -o /dev/null -w '%{http_code}\n' http://localhost:${FRONTEND_PORT:-3000}/login`
 - Named probe: `src/kernel/platform/tests/plugin-api-routes.test.ts`, `src/kernel/core/tests/i18n-enum-conformance.test.ts` (rewritten), login page.
 - Reachability: frontend port from copied `.env.example` (`FRONTEND_PORT`, confirm value at implementation; curl uses that value).
 - Oracle: commands exit 0; vitest ≥ 1 passed; curl prints `200`.
-- Counterexample: a remaining `@/plugins/warehouse` import fails typecheck; a vi key without en fails `lint:i18n`.
+- Counterexample: requesting `/vi/login` yields 307, not 200 (user-approved Command fix 2026-10-23); a remaining `@/plugins/warehouse` import fails typecheck; a vi key without en fails `lint:i18n`.
 - Artifacts: ephemeral.
 
 ## Failure Protocol
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npm test" && curl -fsS -o /dev/null -w '%{http_code}\n' http://localhost:${FRONTEND_PORT:-3000}/login
+Exit: 0
+Base: d770f34b1cf18f5d3806fe8b897089747960fd60
+Head: c218f4abf87919653ad10638688f9034d1122f0e8990da10a888c537afcfc9a0
+```text
+$ docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npm test" && curl -fsS -o /dev/null -w '%{http_code}\n' http://localhost:${FRONTEND_PORT:-3000}/login
+> eslint . --max-warnings=0 && npm run lint:i18n
+> panelxerp-frontend@0.1.0 lint:i18n
+      Tests  7 passed (7)
+> tsc --noEmit
+ ✓ src/kernel/platform/tests/plugin-api-routes.test.ts (2 tests)
+ ✓ src/kernel/core/tests/i18n-enum-conformance.test.ts (7 tests)
+ ✓ src/kernel/core/tests/classification-options.test.tsx (7 tests)
+ ↓ src/kernel/langs/tests/permission-labels.test.ts (6 tests | 6 skipped)
+ Test Files  114 passed | 1 skipped (115)
+      Tests  921 passed | 6 skipped (927)
+200
+Exit: 0
+```
+Notes: the 6 skipped tests need `../backend` beside the frontend, which the container does not mount (same as REF). Review (code-auditor): round 1 FAIL (High: 404/root linked `/sales`; Medium: kernel classification test deleted) → repaired → re-review PASS, Low only. Out-of-ownership edit with reason: `backend/eslint-plugin-erp/utils.js` legacy exemption emptied (same path as task-09). Follow-ups carried into task-04 Step 5.

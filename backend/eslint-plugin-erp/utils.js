@@ -34,14 +34,7 @@ const ALLOWED_CROSS_FEATURE_SEGMENTS = [
  * Importer paths (posix, relative to package src/) temporarily exempt from cross-feature bans.
  * Remove entries as gateway / module wiring replaces direct service/entity imports.
  */
-const LEGACY_CROSS_FEATURE_IMPORTERS = new Set([
-  "plugins/master-data/tool-equipment/services/tool-equipment.service.ts",
-  "plugins/master-data/material/services/material.service.ts",
-  "plugins/master-data/mold/services/mold.service.ts",
-  "plugins/master-data/product/services/product-price.service.ts",
-  "plugins/sales/quotation/services/quotation.service.ts",
-  "plugins/sales/reports/services/reports.service.ts",
-]);
+const LEGACY_CROSS_FEATURE_IMPORTERS = new Set([]);
 
 /**
  * Files fully exempt from the cross-plugin import rule.

@@ -14,7 +14,7 @@ Sales manages their customers (KH) and contacts; managers see all; other plugins
 
 ## Ownership
 - Create: `backend/src/plugins/crm/` (shell, `customer/`, `contact/`, `_shared/gateways/`), `frontend/src/plugins/crm/`, `frontend/src/app/[locale]/crm/customers/`
-- Modify: shared registration files listed in plan.md
+- Modify: shared registration files listed in plan.md, the four frontend scanner tests above
 - Read: `REF/backend/src/plugins/master-data/other-material/`, `REF/docs/feature-standard/references/runbook.md`
 
 ## Steps
@@ -22,7 +22,8 @@ Sales manages their customers (KH) and contacts; managers see all; other plugins
 2. Entities on `BaseEntity`; partial unique index on code `WHERE is_deleted = false`.
 3. Services apply `DataScopeService` (Sales: `salesOwnerId = me`, else 404).
 4. Frontend list/form with kernel components; permission-gated buttons.
-5. Specs: duplicate code 409; soft-deleted code reusable; Sales A reading Sales B's customer → 404; missing `customer:create` → 403; registered reference check → delete 409. Frontend: create button hidden without permission.
+5. Now that a business plugin exists, restore a "found > 0 item" guard in the frontend scanners left on an empty-walk guard by task-02 (`delete-confirmation`, `permission-gating-convention`, `api-error-message-keys`, `toast-namespace-messages`), and drop the unused `/countries` hook or add its endpoint if the CRM form needs it.
+6. Specs: duplicate code 409; soft-deleted code reusable; Sales A reading Sales B's customer → 404; missing `customer:create` → 403; registered reference check → delete 409. Frontend: create button hidden without permission.
 
 ## Acceptance
 - AC-04, AC-05, AC-06 for customers/contacts.

@@ -1,0 +1,2212 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [],
+        "summary": "Sign in and issue an access and refresh token pair",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [],
+        "summary": "Exchange a refresh token for a new token pair",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/forgot-password": {
+      "post": {
+        "description": "Always succeeds, whether or not the address belongs to an account, so the response cannot be used to discover who has one.",
+        "operationId": "AuthController_forgotPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [],
+        "summary": "Request a password reset link by email",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/reset-password": {
+      "post": {
+        "operationId": "AuthController_resetPassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [],
+        "summary": "Set a new password using a reset link token",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/change-password": {
+      "post": {
+        "operationId": "AuthController_changePassword",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change the signed-in user's own password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "description": "Signs out this device only; the account's sessions on other devices stay valid.",
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revoke the caller's session",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Read the signed-in user's own profile",
+        "tags": [
+          "auth"
+        ]
+      },
+      "patch": {
+        "operationId": "AuthController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProfileDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update the signed-in user's own directory fields",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/me/avatar": {
+      "post": {
+        "operationId": "AuthController_updateAvatar",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace the signed-in user's own avatar",
+        "tags": [
+          "auth"
+        ]
+      },
+      "delete": {
+        "operationId": "AuthController_removeAvatar",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove the signed-in user's own avatar",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/me/signature": {
+      "post": {
+        "description": "Applies at once for an administrator; anyone else submits it for administrator review.",
+        "operationId": "AuthController_updateSignature",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace the signed-in user's own electronic signature",
+        "tags": [
+          "auth"
+        ]
+      },
+      "delete": {
+        "operationId": "AuthController_removeSignature",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove the signed-in user's own electronic signature",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/me/signature/request": {
+      "delete": {
+        "operationId": "AuthController_withdrawSignatureRequest",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Withdraw the signed-in user's signature waiting for review",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/notifications": {
+      "get": {
+        "description": "One keyset page, newest first, each row carrying the read flag of the calling user only. Send the returned `nextCursor` back as `cursor` for the next page; a null `nextCursor` means there is nothing older left.",
+        "operationId": "NotificationController_findAll",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "cursor",
+            "required": false,
+            "in": "query",
+            "description": "Id of the last row of the previous page",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page for this user"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List notifications addressed to the current user",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/unread-count": {
+      "get": {
+        "operationId": "NotificationController_unreadCount",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Count notifications this user has neither read nor seen closed",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/read-all": {
+      "patch": {
+        "operationId": "NotificationController_markAllRead",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark every notification of this user read",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/notifications/{id}/read": {
+      "patch": {
+        "operationId": "NotificationController_markRead",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Notification is not addressed to this user"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Mark one notification read for this user",
+        "tags": [
+          "notifications"
+        ]
+      }
+    },
+    "/api/v1/users": {
+      "get": {
+        "description": "Paginated account list with keyword search, role filter and active filter.",
+        "operationId": "UsersController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.",
+            "schema": {
+              "default": "createdAt",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order. Defaults to DESC for createdAt, ASC otherwise.",
+            "schema": {
+              "default": "DESC",
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleCode",
+            "required": false,
+            "in": "query",
+            "description": "Filter by role code",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "description": "Filter by account state; omitted returns both",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List users",
+        "tags": [
+          "users"
+        ]
+      },
+      "post": {
+        "description": "Without a password the account is mailed a single-use link to set its own.",
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an account",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/column-values": {
+      "get": {
+        "description": "Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.",
+        "operationId": "UsersController_findColumnValues",
+        "parameters": [
+          {
+            "name": "column",
+            "required": true,
+            "in": "query",
+            "description": "Column key: username, fullName, email, phone, department, title, isActive, lastLoginAt, avatarUrl, signatureUrl, roleName",
+            "schema": {
+              "example": "classification",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search within the values",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Values per page",
+            "schema": {
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listSearch",
+            "required": false,
+            "in": "query",
+            "description": "Keyword search of the list itself",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "roleCode",
+            "required": false,
+            "in": "query",
+            "description": "Filter by role code",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "description": "Filter by account state; omitted returns both",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated distinct column values"
+          },
+          "400": {
+            "description": "Column is not filterable"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — requires *:*"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List distinct values of one filterable user column",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/roles": {
+      "get": {
+        "operationId": "UsersController_findAssignableRoles",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the roles an account can be assigned to",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/{id}": {
+      "get": {
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Read one account",
+        "tags": [
+          "users"
+        ]
+      },
+      "patch": {
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an account",
+        "tags": [
+          "users"
+        ]
+      },
+      "delete": {
+        "description": "Soft-deletes the account: it leaves the list, frees its username and email, and loses every session it holds.",
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an account",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/{id}/active": {
+      "patch": {
+        "description": "A deactivated account keeps its records but loses every session it holds.",
+        "operationId": "UsersController_setActive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetUserActiveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Deactivate or restore an account",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/{id}/signature/approve": {
+      "post": {
+        "description": "The waiting signature becomes the one printed documents stamp, replacing the old one.",
+        "operationId": "UsersController_approveSignature",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve an account's signature waiting for review",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/signatures/bulk-approve": {
+      "post": {
+        "description": "Approves the given ids through the same rules as the single-row approval, one at a time. A row that approval refuses is reported in `failed` and leaves the rest of the batch approved.",
+        "operationId": "UsersController_bulkApproveSignatures",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkApproveDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Per-id outcome: `{ approved: number[], failed: [{ id, message }] }`"
+          },
+          "400": {
+            "description": "Empty or invalid id list"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — requires *:*"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve selected user signatures",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/{id}/signature/reject": {
+      "post": {
+        "description": "The waiting signature is dropped; the reason is shown to the holder on their profile.",
+        "operationId": "UsersController_rejectSignature",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectSignatureDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reject an account's signature waiting for review",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/bulk-deactivate": {
+      "post": {
+        "description": "Reports per row: a refused account leaves the rest of the batch deactivated.",
+        "operationId": "UsersController_bulkDeactivate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkDeleteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Deactivate every ticked account",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/bulk-delete": {
+      "post": {
+        "description": "Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.",
+        "operationId": "UsersController_bulkRemove",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkDeleteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }`"
+          },
+          "400": {
+            "description": "Empty or invalid id list"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — requires *:*"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete selected user accounts",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/import": {
+      "post": {
+        "description": "All or nothing: each row is judged by the create form's own rules and saved through the same create, in one transaction. Any error rejects the file with every problem located by sheet row. No password is read from the file.",
+        "operationId": "UsersController_importUsers",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcelImportRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "{ created, updated }"
+          },
+          "400": {
+            "description": "Import rejected — errors[{ fileRow, field?, code, message? }]"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Import accounts from a parsed .xlsx",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/export": {
+      "post": {
+        "description": "Queues every account matching the posted search/filters/sort as a zipped .xlsx laid out like the list, one row per account. Follow the job on GET /excel/jobs/{id}/events and download it once from GET /excel/jobs/{id}/download.",
+        "operationId": "UsersController_export",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserExportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Queued; returns jobId"
+          },
+          "400": {
+            "description": "invalidSpec or unknownField — a column the list cannot export"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "429": {
+            "description": "tooManyJobs"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Queue an Excel export of the account list",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/users/{id}/reset-password": {
+      "post": {
+        "operationId": "UsersController_resetPassword",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminResetPasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set another account's password",
+        "tags": [
+          "users"
+        ]
+      }
+    },
+    "/api/v1/list-preferences/{moduleKey}": {
+      "get": {
+        "operationId": "ListPreferenceController_find",
+        "parameters": [
+          {
+            "name": "moduleKey",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "rfq_list_v3",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stored choice, or null when unset"
+          },
+          "400": {
+            "description": "Unknown module key"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Read the caller's column choice for one list",
+        "tags": [
+          "users/list-preferences"
+        ]
+      },
+      "put": {
+        "operationId": "ListPreferenceController_upsert",
+        "parameters": [
+          {
+            "name": "moduleKey",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "rfq_list_v3",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateListPreferenceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stored choice"
+          },
+          "400": {
+            "description": "Unknown module key or bad columns"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Store the caller's column choice for one list",
+        "tags": [
+          "users/list-preferences"
+        ]
+      }
+    },
+    "/api/v1/files/upload": {
+      "post": {
+        "operationId": "FilesController_upload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload one file and store it",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/files/{id}": {
+      "get": {
+        "operationId": "FilesController_getUrl",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "disposition",
+            "required": false,
+            "in": "query",
+            "description": "How the browser should treat the object. `inline` views it, `attachment` saves it.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "inline",
+                "attachment"
+              ]
+            }
+          },
+          {
+            "name": "fileName",
+            "required": false,
+            "in": "query",
+            "description": "Name the saved file should carry. Only used with `disposition=attachment`.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Issue a short-lived signed URL for one stored file",
+        "tags": [
+          "files"
+        ]
+      }
+    },
+    "/api/v1/excel/template": {
+      "post": {
+        "operationId": "ExcelController_template",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcelTemplateBodyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Header-only workbook"
+          },
+          "400": {
+            "description": "invalidSpec"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Build an empty import template from a sheet spec",
+        "tags": [
+          "excel"
+        ]
+      }
+    },
+    "/api/v1/excel/parse": {
+      "post": {
+        "operationId": "ExcelController_parse",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  },
+                  "sheet": {
+                    "type": "string"
+                  },
+                  "label": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Queued; returns jobId"
+          },
+          "400": {
+            "description": "invalidSpec, invalidFile or fileTooLarge"
+          },
+          "429": {
+            "description": "tooManyJobs"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Queue an uploaded .xlsx to be read against a sheet spec",
+        "tags": [
+          "excel"
+        ]
+      }
+    },
+    "/api/v1/excel/jobs/{id}": {
+      "get": {
+        "operationId": "ExcelController_snapshot",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Job snapshot"
+          },
+          "404": {
+            "description": "jobNotFound"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Current state of one of your Excel jobs",
+        "tags": [
+          "excel"
+        ]
+      }
+    },
+    "/api/v1/excel/jobs/{id}/events": {
+      "get": {
+        "description": "Sends one snapshot, then progress events, then one completed or failed event, then closes.",
+        "operationId": "ExcelController_events",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event stream"
+          },
+          "404": {
+            "description": "jobNotFound"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Server-sent events for one of your Excel jobs",
+        "tags": [
+          "excel"
+        ]
+      }
+    },
+    "/api/v1/excel/jobs/{id}/result": {
+      "get": {
+        "operationId": "ExcelController_result",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Keyed rows"
+          },
+          "404": {
+            "description": "jobNotFound"
+          },
+          "409": {
+            "description": "jobNotCompleted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Rows read by one of your finished parse jobs",
+        "tags": [
+          "excel"
+        ]
+      }
+    },
+    "/api/v1/excel/jobs/{id}/download": {
+      "get": {
+        "description": "The stored file is deleted as soon as this download completes, or 30 minutes after it was ready.",
+        "operationId": "ExcelController_download",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Zip stream"
+          },
+          "404": {
+            "description": "jobNotFound"
+          },
+          "409": {
+            "description": "jobNotCompleted"
+          },
+          "410": {
+            "description": "fileExpired"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download the zip of one of your finished exports, once",
+        "tags": [
+          "excel"
+        ]
+      }
+    },
+    "/api/v1/roles": {
+      "get": {
+        "operationId": "RolesController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List roles with the permissions they grant",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/v1/roles/permissions": {
+      "get": {
+        "operationId": "RolesController_findPermissionCatalog",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List every permission the build defines, grouped by resource",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/v1/roles/{id}/permissions": {
+      "patch": {
+        "operationId": "RolesController_updatePermissions",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRolePermissionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace a role's permission set",
+        "tags": [
+          "roles"
+        ]
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [],
+        "summary": "Report service liveness",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "panelXERP",
+    "description": "REST API — ERP Hải Phòng Manufacturing Platform",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [
+    {
+      "url": "/",
+      "description": "Current host"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearer": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "description": "Username or email"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password (min 6 characters)",
+            "minLength": 6
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ]
+      },
+      "ForgotPasswordDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email address the reset link is sent to"
+          }
+        },
+        "required": [
+          "email"
+        ]
+      },
+      "ResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Token from the reset link"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "Password must be at least 8 characters and contain a letter, a digit and a special character",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "token",
+          "newPassword"
+        ]
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "description": "The password currently in use"
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "Password must be at least 8 characters and contain a letter, a digit and a special character",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "currentPassword",
+          "newPassword"
+        ]
+      },
+      "UpdateProfileDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "currentPassword": {
+            "type": "string",
+            "description": "The password currently in use; required to change the email"
+          },
+          "fullName": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "phone": {
+            "type": "object",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "department": {
+            "type": "string",
+            "enum": [
+              "sales",
+              "planning",
+              "purchasing",
+              "technical",
+              "qcLab",
+              "warehouse",
+              "mechanical",
+              "surfaceTreatment",
+              "packaging",
+              "accounting",
+              "other"
+            ],
+            "nullable": true
+          },
+          "title": {
+            "type": "object",
+            "maxLength": 100,
+            "nullable": true
+          }
+        },
+        "required": [
+          "fullName"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "fullName": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "roleCode": {
+            "type": "string",
+            "description": "Role code the account is assigned to"
+          },
+          "password": {
+            "type": "string",
+            "description": "Password must be at least 8 characters and contain a letter, a digit and a special character",
+            "minLength": 8
+          },
+          "phone": {
+            "type": "object",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "department": {
+            "type": "string",
+            "enum": [
+              "sales",
+              "planning",
+              "purchasing",
+              "technical",
+              "qcLab",
+              "warehouse",
+              "mechanical",
+              "surfaceTreatment",
+              "packaging",
+              "accounting",
+              "other"
+            ],
+            "nullable": true
+          },
+          "title": {
+            "type": "object",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "username",
+          "email",
+          "fullName",
+          "roleCode"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "fullName": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "roleCode": {
+            "type": "string",
+            "description": "Role code the account is assigned to"
+          },
+          "phone": {
+            "type": "object",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "department": {
+            "type": "string",
+            "enum": [
+              "sales",
+              "planning",
+              "purchasing",
+              "technical",
+              "qcLab",
+              "warehouse",
+              "mechanical",
+              "surfaceTreatment",
+              "packaging",
+              "accounting",
+              "other"
+            ],
+            "nullable": true
+          },
+          "title": {
+            "type": "object",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "SetUserActiveDto": {
+        "type": "object",
+        "properties": {
+          "isActive": {
+            "type": "boolean",
+            "description": "False deactivates the account and revokes its sessions"
+          }
+        },
+        "required": [
+          "isActive"
+        ]
+      },
+      "BulkApproveDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "description": "Ids of the rows to approve (1–2000)",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "RejectSignatureDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 500,
+            "description": "Shown to the account holder on their profile"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "BulkDeleteDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "description": "Ids of the rows to delete (1–2000)",
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "ExcelImportRequestDto": {
+        "type": "object",
+        "properties": {
+          "documents": {
+            "type": "array",
+            "description": "Documents to create or update (1–500). Each is the feature's create payload plus `fileRow`, an optional `code` (an existing active code updates that record), and a `fileRow` on every line.",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "documents"
+        ]
+      },
+      "UserFilterDto": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "default": 1,
+            "description": "Page number"
+          },
+          "limit": {
+            "type": "number",
+            "default": 25,
+            "description": "Items per page"
+          },
+          "search": {
+            "type": "string",
+            "description": "Search keyword"
+          },
+          "searchClassifications": {
+            "description": "Enum values whose translated label matched the keyword",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "columnFilters": {
+            "type": "string",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}"
+          },
+          "sortBy": {
+            "type": "string",
+            "description": "Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.",
+            "default": "createdAt"
+          },
+          "sortOrder": {
+            "type": "string",
+            "description": "Sort order. Defaults to DESC for createdAt, ASC otherwise.",
+            "default": "DESC"
+          },
+          "roleCode": {
+            "type": "string",
+            "description": "Filter by role code"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Filter by account state; omitted returns both"
+          }
+        }
+      },
+      "ExcelFieldRefDto": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string",
+            "description": "Row field name",
+            "example": "orderDate"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "text",
+              "number",
+              "date"
+            ],
+            "default": "text"
+          },
+          "valueLabels": {
+            "type": "object",
+            "description": "Display label per stored value, e.g. an enum member",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "field"
+        ]
+      },
+      "ExcelColumnSpecDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Column key",
+            "example": "orderCode"
+          },
+          "label": {
+            "type": "string",
+            "description": "Display label drawn in the header"
+          },
+          "headerGroup": {
+            "description": "Header group labels, outermost first",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExcelFieldRefDto"
+            }
+          },
+          "combine": {
+            "type": "string",
+            "enum": [
+              "join",
+              "coalesce"
+            ],
+            "default": "join"
+          },
+          "joinWith": {
+            "type": "string",
+            "description": "Separator for `join`",
+            "default": " "
+          },
+          "numberFormat": {
+            "type": "string",
+            "description": "Excel number format, e.g. #,##0.00"
+          },
+          "groupSpan": {
+            "type": "boolean",
+            "description": "Write once per row group and merge across the group"
+          },
+          "width": {
+            "type": "number",
+            "description": "Column width in Excel characters"
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether this column must hold a value on every import row"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ]
+      },
+      "ExcelSheetSpecDto": {
+        "type": "object",
+        "properties": {
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExcelColumnSpecDto"
+            }
+          },
+          "rowGroupField": {
+            "type": "string",
+            "description": "Row field whose consecutive equal values form one record"
+          },
+          "sheetName": {
+            "type": "string",
+            "description": "Worksheet name"
+          }
+        },
+        "required": [
+          "columns"
+        ]
+      },
+      "UserExportDto": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "description": "The list search, filters, column filters and sort in force; page and limit are ignored",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserFilterDto"
+              }
+            ]
+          },
+          "sheet": {
+            "$ref": "#/components/schemas/ExcelSheetSpecDto"
+          },
+          "fileName": {
+            "type": "string",
+            "description": "File name without extension",
+            "example": "nguoi-dung_2026-10-14"
+          }
+        },
+        "required": [
+          "query",
+          "sheet",
+          "fileName"
+        ]
+      },
+      "AdminResetPasswordDto": {
+        "type": "object",
+        "properties": {
+          "newPassword": {
+            "type": "string",
+            "description": "Password must be at least 8 characters and contain a letter, a digit and a special character",
+            "minLength": 8
+          }
+        },
+        "required": [
+          "newPassword"
+        ]
+      },
+      "UpdateListPreferenceDto": {
+        "type": "object",
+        "properties": {
+          "visibleColumns": {
+            "description": "Column keys the user leaves visible",
+            "example": [
+              "customerCode",
+              "status"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "frozenColumn": {
+            "type": "string",
+            "nullable": true,
+            "description": "Last column pinned while scrolling sideways; null unfreezes, absent keeps the stored choice",
+            "example": "customerCode"
+          },
+          "columnWidths": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Width in pixels of each column the user dragged, keyed by column key; absent keeps the stored widths",
+            "example": {
+              "customerCode": 120,
+              "status": 96
+            }
+          }
+        },
+        "required": [
+          "visibleColumns"
+        ]
+      },
+      "ExcelTemplateBodyDto": {
+        "type": "object",
+        "properties": {
+          "sheet": {
+            "$ref": "#/components/schemas/ExcelSheetSpecDto"
+          }
+        },
+        "required": [
+          "sheet"
+        ]
+      },
+      "UpdateRolePermissionsDto": {
+        "type": "object",
+        "properties": {
+          "permissions": {
+            "description": "The full permission set the role should hold after the save",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "permissions"
+        ]
+      }
+    }
+  }
+}
