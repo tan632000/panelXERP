@@ -1,0 +1,38 @@
+{
+  "title": "Người liên hệ",
+  "name": "Họ tên",
+  "position": "Chức vụ",
+  "phone": "Số điện thoại",
+  "email": "Email",
+  "primary": "Chính",
+  "isPrimary": "Người liên hệ chính",
+  "isPrimaryHint": "Mỗi khách hàng chỉ có một người liên hệ chính.",
+  "addButton": "Thêm người liên hệ",
+  "addModalTitle": "Thêm người liên hệ",
+  "editModalTitle": "Sửa người liên hệ",
+  "confirmDeleteTitle": "Xoá người liên hệ",
+  "confirmDeleteDescription": "Bạn có chắc muốn xoá người liên hệ \"{name}\"?",
+  "noItems": "Chưa có người liên hệ nào",
+  "emptyValue": "-",
+  "placeholders": {
+    "name": "VD: Nguyễn Văn A",
+    "position": "VD: Trưởng phòng mua hàng",
+    "phone": "VD: 0901234567",
+    "email": "VD: a.nguyen@abc.vn"
+  },
+  "toast": {
+    "createContactSuccess": "Thêm người liên hệ thành công.",
+    "updateContactSuccess": "Cập nhật người liên hệ thành công.",
+    "deleteContactSuccess": "Xoá người liên hệ thành công.",
+    "systemError": "Đã có lỗi xảy ra, vui lòng thử lại sau.",
+    "forbidden": "Bạn không có quyền thực hiện chức năng này."
+  },
+  "validation": {
+    "nameRequired": "Vui lòng nhập Họ tên.",
+    "nameMax": "Họ tên không được vượt quá 255 ký tự.",
+    "positionMax": "Chức vụ không được vượt quá 100 ký tự.",
+    "phoneMax": "Số điện thoại không được vượt quá 20 ký tự.",
+    "emailInvalid": "Email không hợp lệ.",
+    "emailMax": "Email không được vượt quá 255 ký tự."
+  }
+}

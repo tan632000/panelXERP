@@ -69,11 +69,11 @@ describe("permission gating convention", () => {
   });
 
   it("declares every gated scope in a feature permission keys file", () => {
-    // Guards against a walk that silently found nothing; every keys file found is checked.
-    expect(sourceFiles.length).toBeGreaterThan(0);
     const keyFiles = sourceFiles.filter((file) =>
       file.endsWith("-permission.keys.ts"),
     );
+    // Guards against a walk that silently found nothing; every keys file found is checked.
+    expect(keyFiles.length).toBeGreaterThan(0);
 
     const malformed: string[] = [];
     for (const file of keyFiles) {

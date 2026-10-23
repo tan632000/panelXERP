@@ -745,6 +745,178 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/customers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List customers
+     * @description Paginated customer list with search and column filters. A Sales actor sees only the customers they own.
+     */
+    get: operations["CustomerController_findAll"];
+    put?: never;
+    /**
+     * Create customer
+     * @description Code must be unique among active customers. The owner defaults to the caller; only an actor who sees every customer may name another sales account.
+     */
+    post: operations["CustomerController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/customers/column-values": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List distinct values of one filterable customer column
+     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+     */
+    get: operations["CustomerController_findColumnValues"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/customers/next-code": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Preview next customer code
+     * @description Returns the next suggested KH_xxxx code without reserving it. The code stays editable on create.
+     */
+    get: operations["CustomerController_getNextCode"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/customers/owner-options": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List the accounts a customer may be assigned to
+     * @description Sales accounts for an actor who sees every customer; only the caller otherwise.
+     */
+    get: operations["CustomerController_listOwnerOptions"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/customers/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get customer by ID */
+    get: operations["CustomerController_findOne"];
+    put?: never;
+    post?: never;
+    /**
+     * Soft-delete customer
+     * @description Refused with 409 while any sales document references the customer.
+     */
+    delete: operations["CustomerController_remove"];
+    options?: never;
+    head?: never;
+    /**
+     * Update customer
+     * @description Code is immutable. Reassigning the owner needs full customer scope.
+     */
+    patch: operations["CustomerController_update"];
+    trace?: never;
+  };
+  "/api/v1/customers/bulk-delete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Soft-delete selected customers
+     * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
+     */
+    post: operations["CustomerController_bulkRemove"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/contacts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List contacts
+     * @description Paginated contact list, optionally of one customer. Contacts follow their customer: a Sales actor sees only the contacts of customers they own.
+     */
+    get: operations["ContactController_findAll"];
+    put?: never;
+    /**
+     * Create contact
+     * @description Adds a contact to a customer. Marking it primary demotes the customer’s previous primary contact.
+     */
+    post: operations["ContactController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/contacts/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get contact by ID */
+    get: operations["ContactController_findOne"];
+    put?: never;
+    post?: never;
+    /** Soft-delete contact */
+    delete: operations["ContactController_remove"];
+    options?: never;
+    head?: never;
+    /** Update contact */
+    patch: operations["ContactController_update"];
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -987,6 +1159,74 @@ export interface components {
     UpdateRolePermissionsDto: {
       /** @description The full permission set the role should hold after the save */
       permissions: string[];
+    };
+    CreateCustomerDto: {
+      /**
+       * @description Customer code (KH_xxxx)
+       * @example KH_0001
+       */
+      code: string;
+      /** @description Customer name */
+      name: string;
+      /** @description Tax code */
+      taxCode?: string;
+      /** @description Address */
+      address?: string;
+      /** @description Phone number */
+      phone?: string;
+      /** @description Email address */
+      email?: string;
+      /** @description Owning sales account. Defaults to the caller; only an actor who sees all customers may name another account. */
+      salesOwnerId?: number;
+      /** @description Note */
+      note?: string;
+    };
+    UpdateCustomerDto: {
+      /**
+       * @description Customer code (KH_xxxx)
+       * @example KH_0001
+       */
+      code?: string;
+      /** @description Customer name */
+      name?: string;
+      /** @description Tax code */
+      taxCode?: string;
+      /** @description Address */
+      address?: string;
+      /** @description Phone number */
+      phone?: string;
+      /** @description Email address */
+      email?: string;
+      /** @description Owning sales account. Defaults to the caller; only an actor who sees all customers may name another account. */
+      salesOwnerId?: number;
+      /** @description Note */
+      note?: string;
+    };
+    CreateContactDto: {
+      /** @description Customer the contact belongs to */
+      customerId: number;
+      /** @description Contact name */
+      name: string;
+      /** @description Position */
+      position?: string;
+      /** @description Phone number */
+      phone?: string;
+      /** @description Email address */
+      email?: string;
+      /** @description Primary contact of the customer; setting it demotes the previous primary contact. */
+      isPrimary?: boolean;
+    };
+    UpdateContactDto: {
+      /** @description Contact name */
+      name?: string;
+      /** @description Position */
+      position?: string;
+      /** @description Phone number */
+      phone?: string;
+      /** @description Email address */
+      email?: string;
+      /** @description Primary contact of the customer; setting it demotes the previous primary contact. */
+      isPrimary?: boolean;
     };
   };
   responses: never;
@@ -2181,6 +2421,519 @@ export interface operations {
     requestBody?: never;
     responses: {
       200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CustomerController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+        sortBy?: string;
+        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+        sortOrder?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated customer list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires customer:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CustomerController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateCustomerDto"];
+      };
+    };
+    responses: {
+      /** @description Customer created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error or owner not allowed */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires customer:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Duplicate customer code */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CustomerController_findColumnValues: {
+    parameters: {
+      query: {
+        /** @description Column key: code, name, taxCode, address, phone, email */
+        column: string;
+        /** @description Search within the values */
+        search?: string;
+        /** @description Page number */
+        page?: number;
+        /** @description Values per page */
+        limit?: number;
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Keyword search of the list itself */
+        listSearch?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated distinct column values */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Column is not filterable */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires customer:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CustomerController_getNextCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Next suggested code */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires customer:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CustomerController_listOwnerOptions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Owner options */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires customer:create or customer:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CustomerController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Customer found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, soft-deleted or owned by another sales account */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CustomerController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Customer soft-deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires customer:delete */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Customer not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Customer is referenced by a document */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CustomerController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateCustomerDto"];
+      };
+    };
+    responses: {
+      /** @description Customer updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires customer:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Customer not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  CustomerController_bulkRemove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkDeleteDto"];
+      };
+    };
+    responses: {
+      /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Empty or invalid id list */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires customer:delete */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ContactController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+        sortBy?: string;
+        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+        sortOrder?: string;
+        /** @description Only the contacts of this customer */
+        customerId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated contact list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires contact:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ContactController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateContactDto"];
+      };
+    };
+    responses: {
+      /** @description Contact created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires contact:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Customer not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ContactController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Contact found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found or its customer is owned by another sales account */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ContactController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Contact soft-deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires contact:delete */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Contact not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ContactController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateContactDto"];
+      };
+    };
+    responses: {
+      /** @description Contact updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires contact:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Contact not found */
+      404: {
         headers: {
           [name: string]: unknown;
         };

@@ -60,10 +60,10 @@ const deletePages = pluginFiles
   }));
 
 describe("every delete asks before it acts", () => {
-  it("reaches the plugin components it has to check", () => {
-    // Guards against a walk that silently found nothing; each delete surface found is then
-    // checked below.
-    expect(pluginFiles.length).toBeGreaterThan(0);
+  it("reaches the delete surfaces it has to check", () => {
+    // Guards against a walk that silently found nothing: a plugin that deletes records must
+    // be among the surfaces checked below, or every check here would pass over an empty list.
+    expect(deletePages.length).toBeGreaterThan(0);
   });
 
   it.each(deletePages.map((p) => [p.name, p.confirmation]))(

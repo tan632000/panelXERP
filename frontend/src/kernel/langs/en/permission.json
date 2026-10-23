@@ -1,5 +1,6 @@
 {
   "modules": {
+    "crm": "CRM",
     "master-data": "Master Data",
     "sales": "Sales",
     "plans": "Planning",
@@ -25,9 +26,11 @@
     "company": "Customer",
     "company:contact": "Customer contacts",
     "consumption_report": "XLBM material consumption rollup",
+    "contact": "Contacts",
     "corrosion_pending_commercial": "Corrosion test — commercial lots pending",
     "corrosion_pending_packaging": "Corrosion test — packaged lots pending",
     "corrosion_test": "Corrosion test — result report",
+    "customer": "Customers",
     "customer_sales_stats": "Customer sales statistics (on the Customer screen)",
     "delivery_note": "Delivery note",
     "delivery_plan_domestic": "Domestic delivery plan",
@@ -169,6 +172,7 @@
     "contact:export": "Export contacts to Excel",
     "contact:import": "Import contacts from Excel",
     "contact:read": "View contacts",
+    "create": "Create",
     "delete": "Delete",
     "delete:own_pending": "Delete own pending",
     "deliver": "Deliver sample",
@@ -194,6 +198,7 @@
     "read": "View",
     "receive": "Receive",
     "standard:approve": "Approve standards",
+    "update": "Update",
     "write": "Create / edit",
     "write:general": "Edit general information",
     "write:technical": "Edit technical information"

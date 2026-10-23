@@ -957,6 +957,423 @@ paths:
       summary: Report service liveness
       tags:
         - health
+  /api/v1/customers:
+    get:
+      description: Paginated customer list with search and column filters. A Sales actor sees only the customers they own.
+      operationId: CustomerController_findAll
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Items per page
+          schema:
+            default: 25
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search keyword
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: sortBy
+          required: false
+          in: query
+          description: Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.
+          schema:
+            default: createdAt
+            type: string
+        - name: sortOrder
+          required: false
+          in: query
+          description: Sort order. Defaults to DESC for createdAt, ASC otherwise.
+          schema:
+            default: DESC
+            type: string
+      responses:
+        '200':
+          description: Paginated customer list
+        '403':
+          description: Forbidden — requires customer:read
+      security: &ref_13
+        - bearer: []
+      summary: List customers
+      tags: &ref_14
+        - crm/customers
+    post:
+      description: >-
+        Code must be unique among active customers. The owner defaults to the caller; only an actor who sees every
+        customer may name another sales account.
+      operationId: CustomerController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomerDto'
+      responses:
+        '201':
+          description: Customer created
+        '400':
+          description: Validation error or owner not allowed
+        '403':
+          description: Forbidden — requires customer:create
+        '409':
+          description: Duplicate customer code
+      security: *ref_13
+      summary: Create customer
+      tags: *ref_14
+  /api/v1/customers/column-values:
+    get:
+      description: >-
+        Paginated, searchable distinct values of a filterable list column, for the column filter of the list table.
+        Values come from the whole table, not one page.
+      operationId: CustomerController_findColumnValues
+      parameters:
+        - name: column
+          required: true
+          in: query
+          description: 'Column key: code, name, taxCode, address, phone, email'
+          schema:
+            example: classification
+            type: string
+        - name: search
+          required: false
+          in: query
+          description: Search within the values
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Values per page
+          schema:
+            default: 50
+            type: number
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: listSearch
+          required: false
+          in: query
+          description: Keyword search of the list itself
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Paginated distinct column values
+        '400':
+          description: Column is not filterable
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — requires customer:read
+      security: *ref_13
+      summary: List distinct values of one filterable customer column
+      tags: *ref_14
+  /api/v1/customers/next-code:
+    get:
+      description: Returns the next suggested KH_xxxx code without reserving it. The code stays editable on create.
+      operationId: CustomerController_getNextCode
+      parameters: []
+      responses:
+        '200':
+          description: Next suggested code
+        '403':
+          description: Forbidden — requires customer:create
+      security: *ref_13
+      summary: Preview next customer code
+      tags: *ref_14
+  /api/v1/customers/owner-options:
+    get:
+      description: Sales accounts for an actor who sees every customer; only the caller otherwise.
+      operationId: CustomerController_listOwnerOptions
+      parameters: []
+      responses:
+        '200':
+          description: Owner options
+        '403':
+          description: Forbidden — requires customer:create or customer:update
+      security: *ref_13
+      summary: List the accounts a customer may be assigned to
+      tags: *ref_14
+  /api/v1/customers/{id}:
+    get:
+      operationId: CustomerController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Customer found
+        '404':
+          description: Not found, soft-deleted or owned by another sales account
+      security: *ref_13
+      summary: Get customer by ID
+      tags: *ref_14
+    patch:
+      description: Code is immutable. Reassigning the owner needs full customer scope.
+      operationId: CustomerController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerDto'
+      responses:
+        '200':
+          description: Customer updated
+        '403':
+          description: Forbidden — requires customer:update
+        '404':
+          description: Customer not found
+      security: *ref_13
+      summary: Update customer
+      tags: *ref_14
+    delete:
+      description: Refused with 409 while any sales document references the customer.
+      operationId: CustomerController_remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Customer soft-deleted
+        '403':
+          description: Forbidden — requires customer:delete
+        '404':
+          description: Customer not found
+        '409':
+          description: Customer is referenced by a document
+      security: *ref_13
+      summary: Soft-delete customer
+      tags: *ref_14
+  /api/v1/customers/bulk-delete:
+    post:
+      description: >-
+        Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard
+        refuses is reported in `failed` and leaves the rest of the batch deleted.
+      operationId: CustomerController_bulkRemove
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteDto'
+      responses:
+        '201':
+          description: 'Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }`'
+        '400':
+          description: Empty or invalid id list
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — requires customer:delete
+      security: *ref_13
+      summary: Soft-delete selected customers
+      tags: *ref_14
+  /api/v1/contacts:
+    get:
+      description: >-
+        Paginated contact list, optionally of one customer. Contacts follow their customer: a Sales actor sees only the
+        contacts of customers they own.
+      operationId: ContactController_findAll
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Items per page
+          schema:
+            default: 25
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search keyword
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: sortBy
+          required: false
+          in: query
+          description: Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.
+          schema:
+            default: createdAt
+            type: string
+        - name: sortOrder
+          required: false
+          in: query
+          description: Sort order. Defaults to DESC for createdAt, ASC otherwise.
+          schema:
+            default: DESC
+            type: string
+        - name: customerId
+          required: false
+          in: query
+          description: Only the contacts of this customer
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Paginated contact list
+        '403':
+          description: Forbidden — requires contact:read
+      security: &ref_15
+        - bearer: []
+      summary: List contacts
+      tags: &ref_16
+        - crm/contacts
+    post:
+      description: Adds a contact to a customer. Marking it primary demotes the customer’s previous primary contact.
+      operationId: ContactController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContactDto'
+      responses:
+        '201':
+          description: Contact created
+        '403':
+          description: Forbidden — requires contact:create
+        '404':
+          description: Customer not found
+      security: *ref_15
+      summary: Create contact
+      tags: *ref_16
+  /api/v1/contacts/{id}:
+    get:
+      operationId: ContactController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Contact found
+        '404':
+          description: Not found or its customer is owned by another sales account
+      security: *ref_15
+      summary: Get contact by ID
+      tags: *ref_16
+    patch:
+      operationId: ContactController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContactDto'
+      responses:
+        '200':
+          description: Contact updated
+        '403':
+          description: Forbidden — requires contact:update
+        '404':
+          description: Contact not found
+      security: *ref_15
+      summary: Update contact
+      tags: *ref_16
+    delete:
+      operationId: ContactController_remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Contact soft-deleted
+        '403':
+          description: Forbidden — requires contact:delete
+        '404':
+          description: Contact not found
+      security: *ref_15
+      summary: Soft-delete contact
+      tags: *ref_16
 info:
   title: panelXERP
   description: REST API — ERP Hải Phòng Manufacturing Platform
@@ -1041,7 +1458,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: &ref_13
+          enum: &ref_17
             - sales
             - planning
             - purchasing
@@ -1082,7 +1499,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_13
+          enum: *ref_17
           nullable: true
         title:
           type: object
@@ -1117,7 +1534,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_13
+          enum: *ref_17
           nullable: true
         title:
           type: object
@@ -1360,3 +1777,126 @@ components:
             type: string
       required:
         - permissions
+    CreateCustomerDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Customer code (KH_xxxx)
+          maxLength: 30
+          example: KH_0001
+        name:
+          type: string
+          description: Customer name
+          maxLength: 255
+        taxCode:
+          type: string
+          description: Tax code
+          maxLength: 20
+        address:
+          type: string
+          description: Address
+          maxLength: 500
+        phone:
+          type: string
+          description: Phone number
+          maxLength: 20
+        email:
+          type: string
+          description: Email address
+          maxLength: 255
+        salesOwnerId:
+          type: number
+          description: Owning sales account. Defaults to the caller; only an actor who sees all customers may name another account.
+        note:
+          type: string
+          description: Note
+          maxLength: 2000
+      required:
+        - code
+        - name
+    UpdateCustomerDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Customer code (KH_xxxx)
+          maxLength: 30
+          example: KH_0001
+        name:
+          type: string
+          description: Customer name
+          maxLength: 255
+        taxCode:
+          type: string
+          description: Tax code
+          maxLength: 20
+        address:
+          type: string
+          description: Address
+          maxLength: 500
+        phone:
+          type: string
+          description: Phone number
+          maxLength: 20
+        email:
+          type: string
+          description: Email address
+          maxLength: 255
+        salesOwnerId:
+          type: number
+          description: Owning sales account. Defaults to the caller; only an actor who sees all customers may name another account.
+        note:
+          type: string
+          description: Note
+          maxLength: 2000
+    CreateContactDto:
+      type: object
+      properties:
+        customerId:
+          type: number
+          description: Customer the contact belongs to
+        name:
+          type: string
+          description: Contact name
+          maxLength: 255
+        position:
+          type: string
+          description: Position
+          maxLength: 100
+        phone:
+          type: string
+          description: Phone number
+          maxLength: 20
+        email:
+          type: string
+          description: Email address
+          maxLength: 255
+        isPrimary:
+          type: boolean
+          description: Primary contact of the customer; setting it demotes the previous primary contact.
+      required:
+        - customerId
+        - name
+    UpdateContactDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Contact name
+          maxLength: 255
+        position:
+          type: string
+          description: Position
+          maxLength: 100
+        phone:
+          type: string
+          description: Phone number
+          maxLength: 20
+        email:
+          type: string
+          description: Email address
+          maxLength: 255
+        isPrimary:
+          type: boolean
+          description: Primary contact of the customer; setting it demotes the previous primary contact.

@@ -61,11 +61,9 @@ function collectTables(): TableUnderTest[] {
 describe("api error message keys", () => {
   const tables = collectTables();
 
-  it("reaches the plugin sources the tables live in", () => {
+  it("finds the error tables the plugins declare", () => {
     // Guards against a glob that silently found nothing; every table found is checked below.
-    expect(
-      fg.sync("src/plugins/**/*.ts", { cwd: process.cwd() }).length,
-    ).toBeGreaterThan(0);
+    expect(tables.length).toBeGreaterThan(0);
   });
 
   it.each(["vi", "en"] as const)(

@@ -4,6 +4,7 @@ import {
   validateFeatureDependencies,
 } from "@kernel/platform/features/resolve-enabled-features";
 
+import { CRM_FRONTEND_FEATURES } from "@/plugins/crm/crm.features";
 import { SYSTEM_FRONTEND_FEATURES } from "@/plugins/system/system.features";
 
 import type { ErpFrontendFeature } from "@kernel/platform/features/feature.contract";
@@ -15,6 +16,7 @@ import type { ErpFrontendFeature } from "@kernel/platform/features/feature.contr
  * are unregistered, so `isFrontendFeatureEnabled` waves them through whatever the env says.
  */
 export const FRONTEND_FEATURE_CATALOG: ErpFrontendFeature[] = [
+  ...CRM_FRONTEND_FEATURES,
   ...SYSTEM_FRONTEND_FEATURES,
 ];
 

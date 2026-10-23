@@ -70,9 +70,10 @@ describe("getLandingPath", () => {
     expect(getLandingPath(grants(), sections)).toBe(LANDING_FALLBACK_PATH);
   });
 
-  it("sends an administrator to the fallback while no business plugin is enabled", () => {
-    // The app navigation holds no business section yet, so even full access lands on the
-    // profile; a plugin's first sidebar entry takes over once one is registered.
-    expect(getLandingPath(() => true)).toBe(LANDING_FALLBACK_PATH);
+  it("sends full access to the first sidebar entry of the app navigation", () => {
+    // The crm plugin is the first business section, so it is where full access lands; the
+    // profile stays the landing of last resort for a user holding nothing.
+    expect(getLandingPath(() => true)).toBe("/crm/customers");
+    expect(getLandingPath(() => false)).toBe(LANDING_FALLBACK_PATH);
   });
 });

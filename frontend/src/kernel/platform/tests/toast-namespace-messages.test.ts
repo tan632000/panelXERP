@@ -60,9 +60,9 @@ function resolve(
 describe("toast namespaces", () => {
   const namespaces = declaredNamespaces();
 
-  it("reaches the plugin sources the namespaces are declared in", () => {
+  it("finds the toast namespaces the plugins declare", () => {
     // Guards against a walk that silently found nothing; every namespace found is checked below.
-    expect(sourceFiles(PLUGIN_ROOT).length).toBeGreaterThan(0);
+    expect(namespaces.length).toBeGreaterThan(0);
   });
 
   for (const [locale, messages] of [

@@ -9,8 +9,13 @@ import { appNavigationSections } from "@/kernel/platform/plugins/navigation.regi
 const LOCALE_ROOT = path.join(process.cwd(), "src/kernel/langs");
 
 describe("app sidebar", () => {
-  it("renders no business section while no business plugin is enabled", () => {
-    expect(appNavigationSections).toEqual([]);
+  it("renders the business sections of the enabled plugins, crm first", () => {
+    expect(appNavigationSections.map((section) => section.title)).toEqual([
+      "sidebarCrm",
+    ]);
+    expect(appNavigationSections[0].items.map((item) => item.href)).toEqual([
+      "/crm/customers",
+    ]);
   });
 
   it("tags every section with the namespace holding its labels", () => {

@@ -13,9 +13,6 @@ export const apiRoutes = {
     signatureRequest: "/auth/me/signature/request",
   },
   health: "/health",
-  reference: {
-    countries: "/countries",
-  },
   users: {
     list: "/users",
     resetPassword: (id: number) => `/users/${id}/reset-password`,

@@ -1,6 +1,8 @@
 {
   "sections": {},
-  "titles": {},
+  "titles": {
+    "customer": "Thêm khách hàng mới"
+  },
   "fields": {},
   "reportTypes": {},
   "placeholders": {}

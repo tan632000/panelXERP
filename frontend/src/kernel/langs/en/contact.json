@@ -1,0 +1,38 @@
+{
+  "title": "Contacts",
+  "name": "Name",
+  "position": "Position",
+  "phone": "Phone",
+  "email": "Email",
+  "primary": "Primary",
+  "isPrimary": "Primary contact",
+  "isPrimaryHint": "A customer has one primary contact.",
+  "addButton": "Add contact",
+  "addModalTitle": "Add contact",
+  "editModalTitle": "Edit contact",
+  "confirmDeleteTitle": "Delete contact",
+  "confirmDeleteDescription": "Delete contact \"{name}\"?",
+  "noItems": "No contacts yet",
+  "emptyValue": "-",
+  "placeholders": {
+    "name": "e.g. Jane Doe",
+    "position": "e.g. Purchasing manager",
+    "phone": "e.g. 0901234567",
+    "email": "e.g. jane.doe@abc.vn"
+  },
+  "toast": {
+    "createContactSuccess": "Contact added.",
+    "updateContactSuccess": "Contact updated.",
+    "deleteContactSuccess": "Contact deleted.",
+    "systemError": "Something went wrong. Please try again.",
+    "forbidden": "You do not have permission to perform this action."
+  },
+  "validation": {
+    "nameRequired": "Name is required.",
+    "nameMax": "Name must not exceed 255 characters.",
+    "positionMax": "Position must not exceed 100 characters.",
+    "phoneMax": "Phone must not exceed 20 characters.",
+    "emailInvalid": "Email is not valid.",
+    "emailMax": "Email must not exceed 255 characters."
+  }
+}

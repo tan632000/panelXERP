@@ -1,5 +1,6 @@
 {
   "modules": {
+    "crm": "CRM",
     "master-data": "Master Data",
     "sales": "Bán hàng",
     "plans": "Kế hoạch",
@@ -25,9 +26,11 @@
     "company": "Khách hàng",
     "company:contact": "Liên hệ khách hàng",
     "consumption_report": "Tổng hợp tiêu hao VTXLBM",
+    "contact": "Người liên hệ",
     "corrosion_pending_commercial": "Test ăn mòn — Hàng thương mại chờ kiểm",
     "corrosion_pending_packaging": "Test ăn mòn — Hàng đóng gói chờ kiểm",
     "corrosion_test": "Test ăn mòn — Báo cáo kết quả",
+    "customer": "Khách hàng",
     "customer_sales_stats": "Thống kê bán hàng của khách hàng (trong màn Khách hàng)",
     "delivery_note": "Phiếu giao hàng",
     "delivery_plan_domestic": "Kế hoạch giao hàng nội địa",
@@ -169,6 +172,7 @@
     "contact:export": "Xuất Excel người liên hệ",
     "contact:import": "Import Excel người liên hệ",
     "contact:read": "Xem người liên hệ",
+    "create": "Thêm mới",
     "delete": "Xoá",
     "delete:own_pending": "Xoá phiếu chờ duyệt của mình",
     "deliver": "Giao mẫu",
@@ -194,6 +198,7 @@
     "read": "Xem",
     "receive": "Nhận hàng",
     "standard:approve": "Duyệt tiêu chuẩn",
+    "update": "Sửa",
     "write": "Thêm / Sửa",
     "write:general": "Sửa thông tin chung",
     "write:technical": "Sửa thông tin kỹ thuật"

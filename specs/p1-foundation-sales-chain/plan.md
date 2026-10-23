@@ -54,7 +54,7 @@ Roadmap: [docs/development-roadmap.md](../../docs/development-roadmap.md). Host:
 | AC-02 | If `NODE_ENV=production` and any secret resolved by `resolveSecret` (e.g. `JWT_SECRET`) is `CHANGE_ME*` or shorter than 32 chars, the backend shall refuse to start; production seeding shall take the admin password from `SEED_ADMIN_PASSWORD` and never log it. | task-01 |
 | AC-03 | The frontend shall pass lint (incl. i18n), typecheck, tests, and render login + user/role admin pages. | task-02 |
 | AC-04 | When an actor lacks a `module:action` permission, the API shall return 403; when a Sales actor requests another owner's record, the API shall return 404. | task-03, task-04 |
-| AC-05 | When a customer, contact, project or item is created with a duplicate active code, the API shall return 409. | task-04, task-05, task-06 |
+| AC-05 | When a customer, project or item is created with a duplicate active code, the API shall return 409 (contacts carry no code; their rule is one primary contact per customer, also 409). | task-04, task-05, task-06 |
 | AC-06 | If a customer, project or item is referenced by a sales document, the system shall refuse deletion with 409. | task-04, task-05, task-06 |
 | AC-07 | When an item Excel file is imported, the system shall create all valid rows in one transaction and report invalid rows with row number and reason. | task-06 |
 | AC-08 | When a request is assigned, the system shall notify the engineer once; attachments outside the allowlist or failing magic-byte check shall be rejected; downloads shall require access to the request. | task-07 |

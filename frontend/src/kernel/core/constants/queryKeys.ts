@@ -3,9 +3,6 @@ export const queryKeys = {
   auth: {
     me: ["auth", "me"] as const,
   },
-  reference: {
-    countries: ["reference", "countries"] as const,
-  },
   /** Distinct values of one filterable list column, per endpoint, search term, and scope. */
   columnValues: (
     endpoint: string,
