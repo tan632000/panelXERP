@@ -1,0 +1,16 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": ".",
+  "testEnvironment": "node",
+  "testRegex": ".e2e-spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "moduleNameMapper": {
+    "^@src/(.*)$": "<rootDir>/../src/$1",
+    "^@kernel/(.*)$": "<rootDir>/../src/kernel/$1",
+    "^@shared/(.*)$": "<rootDir>/../src/kernel/shared/$1",
+    "^@plugins/(.*)$": "<rootDir>/../src/plugins/$1",
+    "^@webhooks/(.*)$": "<rootDir>/../src/webhooks/$1"
+  }
+}

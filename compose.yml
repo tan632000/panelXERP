@@ -1,0 +1,178 @@
+# Dev stack. Container names carry ${STACK_SUFFIX} and every published port is a
+# variable, so several worktrees of this repo can run side by side: set
+# STACK_SUFFIX and the five *_PORT vars in that worktree's .env (see .env.example).
+# Volumes and the network are already scoped by the Compose project name, which
+# Compose derives from the directory name, so each worktree keeps its own DB.
+services:
+  postgres:
+    container_name: panelx-postgres${STACK_SUFFIX:-}
+    build:
+      context: ./docker/rdb
+      dockerfile: Dockerfile
+    environment:
+      POSTGRES_DB: ${DB_NAME:-erp_platform}
+      POSTGRES_USER: ${DB_USER:-erp_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-erp_pass_dev}
+    ports:
+      - "${PG_PORT:-15432}:5432"
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-erp_user} -d ${DB_NAME:-erp_platform}"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    container_name: panelx-redis${STACK_SUFFIX:-}
+    build:
+      context: ./docker/redis
+      dockerfile: Dockerfile
+    ports:
+      - "${REDIS_PORT:-16379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+
+  localstack:
+    container_name: panelx-localstack${STACK_SUFFIX:-}
+    build:
+      context: .
+      dockerfile: docker/localstack/Dockerfile
+    ports:
+      - "${LOCALSTACK_PORT:-14566}:4566"
+    environment:
+      SERVICES: s3,sqs,ses
+      AWS_DEFAULT_REGION: ap-southeast-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      DATA_DIR: /var/lib/localstack/data
+      DEBUG: 0
+      SES_FROM_EMAIL: ${SES_FROM_EMAIL:-noreply@example.com}
+    volumes:
+      - localstack_data:/var/lib/localstack
+      - ./docker/localstack/init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh
+      - ./docker/localstack/init-sqs.sh:/etc/localstack/init/ready.d/init-sqs.sh
+      - ./docker/localstack/init-ses.sh:/etc/localstack/init/ready.d/init-ses.sh
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4566/_localstack/health | grep -q '\"s3\":'"]
+      interval: 5s
+      retries: 15
+
+  backend:
+    container_name: panelx-backend${STACK_SUFFIX:-}
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile.dev
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - ./backend:/app
+      - ./tools:/app/tools
+      # seed-roles.master-data.spec.ts parses the function list, which lives at the repo
+      # root; without this the spec finds nothing inside the container and fails.
+      - ./docs/permission:/app/docs/permission:ro
+      - /app/node_modules
+    env_file:
+      - backend/.env
+    environment:
+      NODE_ENV: development
+      PORT: 8080
+      APP_NAME: ${APP_NAME:-erp-api}
+      APP_DISPLAY_NAME: ${APP_DISPLAY_NAME:-ERP Platform API}
+      TENANT_ID: ${TENANT_ID:-default}
+      SEED_EMAIL_DOMAIN: ${SEED_EMAIL_DOMAIN:-example.com}
+      SES_FROM_EMAIL: ${SES_FROM_EMAIL:-noreply@example.com}
+      DATABASE_URL: postgresql://${DB_USER:-erp_user}:${DB_PASSWORD:-erp_pass_dev}@postgres:5432/${DB_NAME:-erp_platform}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-erp_platform}
+      DB_USER: ${DB_USER:-erp_user}
+      DB_PASSWORD: ${DB_PASSWORD:-erp_pass_dev}
+      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-key-change-in-production}
+      JWT_EXPIRES_IN: 8h
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev-refresh-secret-change-in-production}
+      JWT_REFRESH_EXPIRES_IN: 7d
+      LOG_STORAGE_MODE: file
+      LOG_DIR: logs
+      LOG_RETENTION_DAYS: 30
+      LOG_LEVEL: debug
+      LOG_FLUSH_INTERVAL_MS: 60000
+      LOG_SERVICE_NAME: erp-backend
+      LOG_TIMEZONE_OFFSET: "+07:00"
+      AWS_CLOUDWATCH_ENABLED: "false"
+      AWS_CLOUDWATCH_LOG_GROUP: /erp/development/app
+      AWS_CW_AUDIT_GROUP: /erp/development/audit
+      AWS_CW_ACTIVITIES_GROUP: /erp/development/activities
+      AWS_ENDPOINT: http://localstack:4566
+      AWS_S3_PUBLIC_ENDPOINT: http://localhost:${LOCALSTACK_PORT:-14566}
+      AWS_REGION: ap-southeast-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_FORCE_PATH_STYLE: "true"
+      AWS_S3_BUCKET: erp-files
+      AWS_S3_LOG_BUCKET: erp-logs
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:${FRONTEND_PORT:-3000}}
+      RUN_MIGRATIONS: "false"
+      ENABLED_PLUGINS: ${ENABLED_PLUGINS:-}
+      ENABLED_FEATURES: ${ENABLED_FEATURES:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+
+  frontend:
+    container_name: panelx-frontend${STACK_SUFFIX:-}
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile.dev
+    ports:
+      # App URLs — host port from FRONTEND_PORT (default 3000)
+      - "${FRONTEND_PORT:-3000}:3000"
+    volumes:
+      - ./frontend:/app
+      - ./tools:/app/tools
+      - /app/node_modules
+      - /app/.next
+    env_file:
+      # Optional until the frontend exists; scripts/sync-env.sh creates it from the example.
+      - path: frontend/.env
+        required: false
+    environment:
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:${BACKEND_PORT:-8080}/api/v1}
+      NEXT_PUBLIC_TENANT_ID: ${TENANT_ID:-default}
+      NEXT_PUBLIC_APP_NAME: ${APP_DISPLAY_NAME:-ERP Platform}
+      NEXT_PUBLIC_APP_SHORT_NAME: ${APP_SHORT_NAME:-ERP}
+      NEXT_PUBLIC_APP_DESCRIPTION: ${APP_DESCRIPTION:-Manufacturing ERP — modular monolith}
+      NEXT_PUBLIC_APP_LOGO_URL: ${NEXT_PUBLIC_APP_LOGO_URL:-}
+      NEXT_PUBLIC_COMPANY_NAME_VI: ${COMPANY_NAME_VI:-}
+      NEXT_PUBLIC_COMPANY_NAME_EN: ${COMPANY_NAME_EN:-}
+      NEXT_PUBLIC_COMPANY_SHORT_NAME_VI: ${COMPANY_SHORT_NAME_VI:-}
+      NEXT_PUBLIC_COMPANY_SHORT_NAME_EN: ${COMPANY_SHORT_NAME_EN:-}
+      NEXT_PUBLIC_COMPANY_ADDRESS_VI: ${COMPANY_ADDRESS_VI:-}
+      NEXT_PUBLIC_COMPANY_ADDRESS_EN: ${COMPANY_ADDRESS_EN:-}
+      NEXT_PUBLIC_COMPANY_PHONE: ${COMPANY_PHONE:-}
+      NEXT_PUBLIC_COMPANY_TAX_CODE: ${COMPANY_TAX_CODE:-}
+      ENABLED_PLUGINS: ${ENABLED_PLUGINS:-}
+      NEXT_PUBLIC_ENABLED_PLUGINS: ${ENABLED_PLUGINS:-}
+      ENABLED_FEATURES: ${ENABLED_FEATURES:-}
+      NEXT_PUBLIC_ENABLED_FEATURES: ${ENABLED_FEATURES:-}
+      NEXT_PUBLIC_THEME_PRIMARY_COLOR: ${NEXT_PUBLIC_THEME_PRIMARY_COLOR:-1a2a5e}
+      NEXT_PUBLIC_THEME_PRIMARY_HOVER: ${NEXT_PUBLIC_THEME_PRIMARY_HOVER:-253a7e}
+      NEXT_PUBLIC_THEME_PRIMARY_LIGHT: ${NEXT_PUBLIC_THEME_PRIMARY_LIGHT:-e8edf8}
+      NEXT_PUBLIC_THEME_SIDEBAR_BG: ${NEXT_PUBLIC_THEME_SIDEBAR_BG:-ffffff}
+      NEXT_PUBLIC_THEME_SIDEBAR_TEXT: ${NEXT_PUBLIC_THEME_SIDEBAR_TEXT:-111827}
+      NEXT_PUBLIC_THEME_SURFACE_BG: ${NEXT_PUBLIC_THEME_SURFACE_BG:-eef0f3}
+    depends_on:
+      - backend
+
+volumes:
+  pgdata_dev:
+  localstack_data:

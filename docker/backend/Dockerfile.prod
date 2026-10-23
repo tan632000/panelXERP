@@ -1,0 +1,30 @@
+FROM node:24.22.1-alpine AS builder
+
+WORKDIR /app
+
+RUN apk add --no-cache python3 make g++ libc6-compat
+
+COPY backend/package*.json ./
+ENV HUSKY=0
+RUN npm ci
+
+COPY backend/ .
+RUN npm run build
+
+FROM node:24.22.1-alpine
+
+WORKDIR /app
+
+RUN apk add --no-cache curl libc6-compat
+
+ENV NODE_ENV=production
+ENV HUSKY=0
+
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY backend/tsconfig.runtime.json ./tsconfig.json
+
+EXPOSE 8080
+
+CMD ["node", "-r", "tsconfig-paths/register", "dist/main.js"]

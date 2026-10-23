@@ -1,0 +1,6 @@
+# Normalize line endings so shell scripts run inside Linux containers.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.jpg binary
+*.png binary
+*.xlsx binary

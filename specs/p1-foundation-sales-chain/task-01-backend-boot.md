@@ -1,6 +1,6 @@
 # Task 01 — Backend boots from the REF kernel with hardened secrets
 
-Status: pending
+Status: done
 
 ## Outcome
 `docker compose up` starts Postgres, Redis, LocalStack and a NestJS backend with no business plugin; migrations + seed run on an empty DB; health and admin login work; production refuses weak secrets.
@@ -37,7 +37,8 @@ Status: pending
 - none
 
 ## Verification Plan
-- Command: `docker compose exec -T backend sh -c 'npm run lint && npm run typecheck && npx jest --ci && npm run validate:migrations && npm run migration:run && npm run seed && npm run test:e2e -- --ci && curl -fsS http://localhost:8080/api/v1/health && curl -fsS -o /dev/null -w "%{http_code}\n" -X POST http://localhost:8080/api/v1/auth/login -H "Content-Type: application/json" -d "{\"username\":\"admin\",\"password\":\"$SEED_ADMIN_PASSWORD\"}"'` (outer single quotes: the host shell does not expand; `$SEED_ADMIN_PASSWORD` expands inside the container from `backend/.env` via compose `env_file`; never echoed, never hard-coded)
+- Command: `docker compose exec -T backend sh -c 'npm run lint && npm run typecheck && npx jest --ci && npm run validate:migrations && npm run migration:run && npm run seed && npm run test:e2e -- --ci && curl -fsS http://localhost:8080/api/v1/health && curl -fsS -o /dev/null -w "%{http_code}\n" -X POST http://localhost:8080/api/v1/auth/login -H "Content-Type: application/json" -d "{\"username\":\"admin\",\"password\":\"$SEED_ADMIN_PASSWORD\"}"'`
+- Quoting: outer single quotes, so the host shell does not expand; `$SEED_ADMIN_PASSWORD` expands inside the container from `backend/.env` via compose `env_file`; never echoed, never hard-coded.
 - Named probe: `src/kernel/core/config/app.config.spec.ts`, `src/kernel/core/database/seeds/seed-users.spec.ts` (rewritten), `test/app.e2e-spec.ts`, health + login endpoints.
 - Reachability: host Docker/Compose known; backend port 8080 inside container (`REF/compose.yml:68`); `curl` present in `docker/backend/Dockerfile.dev`; login DTO field names confirmed from `auth.controller.ts` at implementation (adjust JSON keys, not the oracle).
 - Oracle: all sub-commands exit 0; jest ≥ 1 passed; health JSON printed; login prints `200` or `201`.
@@ -48,3 +49,30 @@ Status: pending
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c 'npm run lint && npm run typecheck && npx jest --ci && npm run validate:migrations && npm run migration:run && npm run seed && npm run test:e2e -- --ci && curl -fsS http://localhost:8080/api/v1/health && curl -fsS -o /dev/null -w "%{http_code}\n" -X POST http://localhost:8080/api/v1/auth/login -H "Content-Type: application/json" -d "{\"username\":\"admin\",\"password\":\"$SEED_ADMIN_PASSWORD\"}"'
+Exit: 0
+Base: ecd2c4078a4c95a401dc99201c788d696b35e177
+Head: d729f0e96603faa24cd53f0826b39c5ac64adc3210d6049a0e99cdf3f4f79e80
+```text
+$ docker compose exec -T backend sh -c '... (Command above, run on a freshly reset DB volume)'
+> panelxerp-backend@0.0.1 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
+> panelxerp-backend@0.0.1 typecheck
+> tsc --noEmit -p tsconfig.build.json
+PASS src/kernel/core/database/validate-migration-filenames.util.spec.ts
+Test Suites: 55 passed, 55 total
+Tests:       536 passed, 536 total
+> panelxerp-backend@0.0.1 validate:migrations
+Migration InitCore1784005029001 has been executed successfully.
+Migration AddAccentInsensitiveSearch1792482277453 has been executed successfully.
+[seed:users] 1 users created, 0 already existed and were left untouched (domain: example.com)
+[seed-runner] All seeds completed.
+    ✓ /api/v1/health (GET) (1014 ms)
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+{"status":"ok","timestamp":"2026-10-22T16:58:54.391Z"}201
+Exit: 0
+```
+Negative/extra proof (same Head): wrong-password login → 401; proof log scanned inside the container for `$SEED_ADMIN_PASSWORD` → "password not in log"; `grep -rnE "@/?plugins/" backend/src backend/scripts backend/test` → only the `@plugins` alias in `backend/test/jest-e2e.json` and the `not.toContain('@plugins/')` assertion. Review (code-auditor): PASS, 0 Critical/High/Medium; Low findings #4/#5 fixed before this run, #1/#2 carried into task-03 Steps.

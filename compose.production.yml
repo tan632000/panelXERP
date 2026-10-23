@@ -1,0 +1,232 @@
+# Production stack — https://erp.example.com/ (nginx :80/:443, Let's Encrypt)
+# /api/* → backend:8080 | /* → frontend:3000
+# Required env: see .env.production.example
+#
+#   make setup-prod && make certbot-init
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  postgres:
+    build:
+      context: ./docker/rdb
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME:-erp_platform}
+      POSTGRES_USER: ${DB_USER:-erp_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata_prod:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-erp_user} -d ${DB_NAME:-erp_platform}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging: *default-logging
+
+  redis:
+    build:
+      context: ./docker/redis
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "REDISCLI_AUTH=\"$$REDIS_PASSWORD\" redis-cli ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    logging: *default-logging
+
+  backend:
+    image: panelxerp-backend:latest
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile.prod
+    restart: always
+    expose:
+      - "8080"
+    volumes:
+      # Host bind mount — persists across image rebuild/redeploy (not removed by compose down)
+      - ./backend/logs:/app/logs
+    environment:
+      NODE_ENV: production
+      PORT: 8080
+      DATABASE_URL: postgresql://${DB_USER:-erp_user}:${DB_PASSWORD}@postgres:5432/${DB_NAME:-erp_platform}
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME:-erp_platform}
+      DB_USER: ${DB_USER:-erp_user}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      AWS_REGION: ${AWS_REGION:-ap-southeast-1}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_S3_BUCKET: ${AWS_S3_BUCKET}
+      AWS_S3_LOG_BUCKET: ${AWS_S3_LOG_BUCKET:-erp-logs}
+      LOG_STORAGE_MODE: file
+      LOG_DIR: logs
+      LOG_RETENTION_DAYS: 30
+      LOG_LEVEL: info
+      LOG_SERVICE_NAME: erp-backend
+      LOG_TIMEZONE_OFFSET: "+07:00"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+      RUN_MIGRATIONS: "true"
+      CORS_ORIGIN: ${CORS_ORIGIN:-https://erp.example.com}
+      APP_DISPLAY_NAME: ${APP_DISPLAY_NAME:-ERP Platform API}
+      TENANT_ID: ${TENANT_ID:-default}
+      SEED_EMAIL_DOMAIN: ${SEED_EMAIL_DOMAIN:-example.com}
+      SEED_SCOPE: ${SEED_SCOPE:-}
+      SES_FROM_EMAIL: ${SES_FROM_EMAIL:-}
+      MAIL_FROM_EMAIL: ${MAIL_FROM_EMAIL:-}
+      MAIL_DRIVER: ${MAIL_DRIVER:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      ENABLED_PLUGINS: ${ENABLED_PLUGINS:-}
+      ENABLED_FEATURES: ${ENABLED_FEATURES:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:8080/api/v1/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    logging: *default-logging
+
+  frontend:
+    image: panelxerp-frontend:latest
+    build:
+      context: .
+      dockerfile: docker/frontend/Dockerfile.prod
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
+        NEXT_PUBLIC_APP_NAME: ${APP_DISPLAY_NAME:-ERP Platform}
+        NEXT_PUBLIC_APP_DESCRIPTION: ${APP_DESCRIPTION:-Manufacturing ERP — modular monolith}
+        NEXT_PUBLIC_APP_SHORT_NAME: ${APP_SHORT_NAME:-ERP}
+        NEXT_PUBLIC_TENANT_ID: ${TENANT_ID:-default}
+        NEXT_PUBLIC_APP_LOGO_URL: ${NEXT_PUBLIC_APP_LOGO_URL:-}
+        NEXT_PUBLIC_COMPANY_NAME_VI: ${COMPANY_NAME_VI:-}
+        NEXT_PUBLIC_COMPANY_NAME_EN: ${COMPANY_NAME_EN:-}
+        NEXT_PUBLIC_COMPANY_SHORT_NAME_VI: ${COMPANY_SHORT_NAME_VI:-}
+        NEXT_PUBLIC_COMPANY_SHORT_NAME_EN: ${COMPANY_SHORT_NAME_EN:-}
+        NEXT_PUBLIC_COMPANY_ADDRESS_VI: ${COMPANY_ADDRESS_VI:-}
+        NEXT_PUBLIC_COMPANY_ADDRESS_EN: ${COMPANY_ADDRESS_EN:-}
+        NEXT_PUBLIC_COMPANY_PHONE: ${COMPANY_PHONE:-}
+        NEXT_PUBLIC_COMPANY_TAX_CODE: ${COMPANY_TAX_CODE:-}
+        NEXT_PUBLIC_ENABLED_PLUGINS: ${ENABLED_PLUGINS:-}
+        NEXT_PUBLIC_ENABLED_FEATURES: ${ENABLED_FEATURES:-}
+        # The type pass is skipped by default — `make typecheck` owns that gate.
+        # Only set this to "false" on a builder with 4GB+ free RAM.
+        NEXT_SKIP_TYPE_CHECK: ${NEXT_SKIP_TYPE_CHECK:-true}
+        # Build-time heap ceiling (MB). Keep it near the box's RAM, not above it.
+        NODE_BUILD_MEMORY: ${NODE_BUILD_MEMORY:-2048}
+    restart: always
+    expose:
+      - "3000"
+    environment:
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+      API_INTERNAL_URL: http://backend:8080
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:3000"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    logging: *default-logging
+
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      APP_HOST: ${APP_HOST:-erp.example.com}
+      BASIC_AUTH_USER: ${BASIC_AUTH_USER:-}
+      BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD:-}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_certs:/etc/letsencrypt
+    depends_on:
+      frontend:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/nginx-health | grep -q ok"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging: *default-logging
+
+  certbot:
+    image: certbot/certbot:v3.2.0
+    restart: always
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_certs:/etc/letsencrypt
+    entrypoint: /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h; done"
+    depends_on:
+      nginx:
+        condition: service_healthy
+    logging: *default-logging
+
+  certbot-init:
+    image: certbot/certbot:v3.2.0
+    profiles: ["certbot-init"]
+    environment:
+      APP_HOST: ${APP_HOST:-erp.example.com}
+      CERTBOT_EMAIL: ${CERTBOT_EMAIL}
+      CERTBOT_STAGING: ${CERTBOT_STAGING:-0}
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_certs:/etc/letsencrypt
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        extra=""
+        if [ "$$CERTBOT_STAGING" = "1" ]; then extra="--staging"; fi
+        exec certbot certonly --webroot -w /var/www/certbot \
+          -d "$$APP_HOST" --email "$$CERTBOT_EMAIL" \
+          --agree-tos --no-eff-email --non-interactive $$extra
+
+volumes:
+  pgdata_prod:
+  redis_data:
+  certbot_www:
+  certbot_certs:

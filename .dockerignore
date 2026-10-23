@@ -1,0 +1,11 @@
+backend/node_modules
+backend/dist
+backend/coverage
+backend/.env*
+backend/logs
+backend/*.tsbuildinfo
+frontend/node_modules
+frontend/.next
+frontend/coverage
+frontend/.env*
+.opencode

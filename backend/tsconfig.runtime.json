@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./dist",
+    "paths": {
+      "@shared/*": ["kernel/shared/*"],
+      "@kernel/*": ["kernel/*"],
+      "@kernel/core/*": ["kernel/core/*"],
+      "@kernel/shared/*": ["kernel/shared/*"],
+      "@kernel/platform/*": ["kernel/platform/*"],
+      "@plugins/*": ["plugins/*"],
+      "@webhooks/*": ["webhooks/*"],
+      "@src/*": ["./*"]
+    }
+  }
+}

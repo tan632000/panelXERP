@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# build
+dist/
+coverage/
+*.tsbuildinfo
+scripts/*.d.ts
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# logs
+logs/**/*
+!logs/.gitkeep
+!logs/**/.gitkeep
+*.log
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db

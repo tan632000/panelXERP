@@ -1,0 +1,125 @@
+#!/bin/sh
+set -e
+
+ROOT=$(git rev-parse --show-toplevel)
+cd "$ROOT" || exit 1
+
+STAGED=$(git diff --cached --name-only --diff-filter=d)
+
+ensure_service_running() {
+  service=$1
+  if ! docker compose ps --status running --services 2>/dev/null | grep -qx "$service"; then
+    echo "Error: docker service '$service' is not running."
+    echo "Start stack: docker compose up -d"
+    exit 1
+  fi
+}
+
+verify_service() {
+  service=$1
+  prefix=$2
+  file_pattern=$3
+
+  ensure_service_running "$service"
+
+  lintable=$(echo "$STAGED" | grep "^${prefix}/" | sed "s|^${prefix}/||" | grep -E "$file_pattern" | grep -v '\.d\.ts$' || true)
+
+  echo "→ ${prefix}: autofix staged [eslint --fix + prettier] [docker]"
+
+  if [ -n "$lintable" ]; then
+    # Wrap each file path in single quotes to protect special characters like parentheses
+    rel_files=$(echo "$lintable" | sed "s/'/'\\\\''/g; s/^/'/; s/$/'/" | tr '\n' ' ')
+    # Autofix pass only — it must not decide the outcome. `eslint --fix` exits
+    # non-zero on anything it could not fix, which would skip prettier and hide
+    # the full report. The authoritative gate is the staged-file lint below.
+    # shellcheck disable=SC2086
+    docker compose exec -T "$service" sh -c "npx eslint --fix $rel_files || true"
+    # shellcheck disable=SC2086
+    docker compose exec -T "$service" sh -c "npx prettier --write $rel_files"
+    # Re-stage only files this hook rewrote. Do not `git add .` — that would
+    # pick up unrelated dirty files and secrets.
+    echo "$lintable" | while IFS= read -r rel; do
+      [ -n "$rel" ] || continue
+      git add -- "${prefix}/${rel}" || exit 1
+    done
+  fi
+
+  # Staged-file gate: lint and tests cover only what this commit touches, so a
+  # commit stays fast. The full lint and test suites run in CI.
+  # `--no-warn-ignored` keeps a staged file the config ignores from counting
+  # against `--max-warnings=0`.
+  if [ -n "$lintable" ]; then
+    echo "→ ${prefix}: lint staged [eslint --max-warnings=0] [docker]"
+    # shellcheck disable=SC2086
+    docker compose exec -T "$service" sh -c "npx eslint --max-warnings=0 --no-warn-ignored $rel_files"
+  fi
+
+  # The i18n check compares key sets across both locales, so it stays whole-package.
+  if [ "$service" = frontend ]; then
+    echo "→ frontend: lint:i18n [docker]"
+    docker compose exec -T frontend npm run lint:i18n
+  fi
+
+  # Whole project: a per-file tsc run misses errors in callers of a changed file.
+  echo "→ ${prefix}: typecheck [docker]"
+  docker compose exec -T "$service" npm run typecheck
+
+  # Backend runs its whole suite. Frontend runs only the test files this commit stages: following
+  # the import graph from a kernel file pulls in nearly every test and takes minutes. The full
+  # frontend suite is `make test-fe-all`, and runs in CI.
+  if [ "$service" = backend ]; then
+    echo "→ backend: all tests [docker]"
+    docker compose exec -T backend npm test
+  else
+    tests=$(echo "$lintable" | grep -E '\.test\.tsx?$' || true)
+    if [ -n "$tests" ]; then
+      echo "→ frontend: staged tests [docker]"
+      rel_tests=$(echo "$tests" | sed "s/'/'\\\\''/g; s/^/'/; s/$/'/" | tr '\n' ' ')
+      # shellcheck disable=SC2086
+      docker compose exec -T frontend sh -c "npx vitest run --passWithNoTests $rel_tests"
+    else
+      echo "→ frontend: no staged test files"
+    fi
+  fi
+}
+
+sync_openapi_client() {
+  ensure_service_running backend
+  ensure_service_running frontend
+
+  echo "→ backend: generate:api-docs [docker]"
+  docker compose exec -T backend npm run generate:api-docs
+
+  echo "→ frontend: generate api client [docker]"
+  mkdir -p /tmp/opencode
+  docker compose cp backend:/app/docs/api/openapi.json /tmp/opencode/openapi.json
+  docker compose cp /tmp/opencode/openapi.json frontend:/app/openapi.json
+  docker compose exec -T frontend npx openapi-typescript openapi.json -o src/kernel/core/api/generated/api.ts
+  docker compose exec -T frontend rm -f /app/openapi.json
+
+  git add -- \
+    backend/docs/api/openapi.json \
+    backend/docs/api/openapi.yaml \
+    frontend/src/kernel/core/api/generated/api.ts
+}
+
+# Regen OpenAPI + typed client before format/lint/typecheck/test so those
+# commands see the generated files, not the stale spec.
+api_surface=$(echo "$STAGED" | grep -E '^backend/.+\.controller\.ts$|^backend/.+/dto/.+\.ts$|^backend/scripts/generate-openapi\.ts$' | grep -v '\.spec\.ts$' || true)
+if [ -n "$api_surface" ]; then
+  sync_openapi_client
+  STAGED=$(git diff --cached --name-only --diff-filter=d)
+fi
+
+if echo "$STAGED" | grep -q '^backend/'; then
+  # Full scan: a misnamed file (no 13-digit prefix) would be skipped by a timestamp-only glob.
+  ensure_service_running backend
+  echo "→ backend: validate:migrations [docker]"
+  docker compose exec -T backend npm run validate:migrations
+
+  verify_service backend backend '\.ts$'
+fi
+
+if echo "$STAGED" | grep -q '^frontend/'; then
+  verify_service frontend frontend '\.tsx?$'
+fi

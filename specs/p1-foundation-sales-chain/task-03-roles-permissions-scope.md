@@ -13,12 +13,12 @@ The seed creates the panel-shop roles; later tasks append `module:action` keys t
 - CP-03
 
 ## Ownership
-- Modify: `backend/src/kernel/core/database/seeds/seed-roles.ts`, `backend/src/kernel/core/database/seeds/seed-users.ts`
+- Modify: `backend/src/kernel/core/database/seeds/seed-roles.ts`, `backend/src/kernel/core/database/seeds/seed-users.ts`, `backend/src/kernel/core/auth/auth.service.ts`, `backend/src/kernel/core/auth/constants/signature-review.constant.ts`, `backend/src/kernel/shared/constants/invoice-edit-roles.ts`, `backend/src/kernel/core/users/constants/user-department.constant.ts`
 - Create: `backend/src/kernel/core/database/seeds/seed-roles.panel.spec.ts`, `backend/src/kernel/shared/services/data-scope.service.ts`, `backend/src/kernel/shared/services/data-scope.service.spec.ts`
 - Read: `REF/docs/permission/permission-convention.md:25`, `REF/backend/src/kernel/core/database/seeds/permission-scope-conversion.ts:13-22` (`holds()` and wildcard)
 
 ## Steps
-1. Define roles + map; keys follow `module:action` (e.g. `quotation:approve`).
+1. Define roles + map; keys follow `module:action` (e.g. `quotation:approve`). Before seeding `director`, remove the REF role-code bypass `backend/src/kernel/core/auth/auth.service.ts:712` (`role.code === 'director'` → `*:*`) and the `sale_staff` fallback near line 705, and repoint REF hard-coded role codes (`auth/constants/signature-review.constant.ts`, `shared/constants/invoice-edit-roles.ts`, `users/constants/user-department.constant.ts`) to panelXERP roles/departments (task-01 review findings).
 2. Implement `DataScopeService` reading the actor from the request context store.
 3. Kernel file routes (`REF/backend/src/kernel/core/files/files.controller.ts`: `POST /files/upload`, `GET /files/:id`) sign any S3 key: grant `file:*` to `admin` only; business attachments go through feature endpoints (task-07).
 4. Spec asserts via `holds()` (incl. wildcard): `sales` does not hold `quotation:approve`; `engineer` does not hold `order:create`; no non-admin role holds `file:read` or `file:write` (kernel keys per `REF/backend/src/kernel/core/files/permissions/file.permissions.ts`); `admin` holds all; scope per role matches D-12.
