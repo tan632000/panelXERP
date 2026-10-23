@@ -16,7 +16,7 @@ import {
 import viCommon from "@/kernel/langs/vi/common.json";
 
 const { auth, patch } = vi.hoisted(() => ({
-  auth: { role: "purchase_staff", permissions: [] as string[] },
+  auth: { role: "purchasing", permissions: [] as string[] },
   patch: vi.fn(),
 }));
 
@@ -67,14 +67,14 @@ function renderAction(
 
 afterEach(cleanup);
 beforeEach(() => {
-  auth.role = "purchase_staff";
+  auth.role = "purchasing";
   auth.permissions = [];
   patch.mockReset().mockResolvedValue({ data: {} });
 });
 
 describe("line invoices action", () => {
   it("is hidden from a role outside the purchasing team", () => {
-    auth.role = "warehouse_keeper";
+    auth.role = "engineer";
     renderAction();
 
     expect(
@@ -112,7 +112,7 @@ describe("line invoices action", () => {
       screen.queryByRole("button", { name: viCommon.lineInvoices.button });
 
     it("shows the button to a holder of the scope, whatever its role", () => {
-      auth.role = "warehouse_keeper";
+      auth.role = "engineer";
       auth.permissions = [SCOPE];
       renderAction({ permission: SCOPE });
 
@@ -120,7 +120,7 @@ describe("line invoices action", () => {
     });
 
     it("hides it from a purchasing role that does not hold the scope", () => {
-      auth.role = "purchase_staff";
+      auth.role = "purchasing";
       auth.permissions = ["raw_material_receipt_ok:read"];
       renderAction({ permission: SCOPE });
 
@@ -136,8 +136,8 @@ describe("line invoices action", () => {
   });
 
   it.each([
-    ["accounting_staff", false],
-    ["purchase_staff", true],
+    ["sales", false],
+    ["purchasing", true],
   ])(
     "keeps the role list for a document with no scope yet: %s -> %s",
     (role, shown) => {

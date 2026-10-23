@@ -531,9 +531,6 @@
     "technical": "Technical",
     "qcLab": "QC-Lab",
     "warehouse": "Warehouse",
-    "mechanical": "Mechanical",
-    "surfaceTreatment": "Surface treatment",
-    "packaging": "Packaging",
     "accounting": "Accounting",
     "other": "Other"
   },

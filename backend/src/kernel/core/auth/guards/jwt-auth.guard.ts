@@ -30,10 +30,18 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       throw err || new UnauthorizedException();
     }
 
-    const authUser = user as { userId?: number; username?: string };
+    const authUser = user as {
+      userId?: number;
+      username?: string;
+      role?: string;
+      permissions?: string[];
+    };
     RequestContextStore.patch({
       userId: authUser.userId,
       username: authUser.username,
+      role: authUser.role,
+      // A copy, so code reading the context cannot mutate the cached principal.
+      permissions: authUser.permissions ? [...authUser.permissions] : undefined,
     });
 
     return user;

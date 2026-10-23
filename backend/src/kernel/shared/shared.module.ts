@@ -10,6 +10,7 @@ import { LoggingInterceptor } from '@shared/interceptors/logging.interceptor';
 import { ErpLogFormatter } from '@shared/logger/erp-log.formatter';
 import { LogRetentionService } from '@shared/logger/log-retention.service';
 import { LoggerService } from '@shared/logger/logger.service';
+import { DataScopeService } from '@shared/services/data-scope.service';
 import { EmailService } from '@shared/services/email.service';
 import { ExcelSheetParser } from '@shared/services/excel-sheet.parser';
 import { ExcelWorkbookBuilder } from '@shared/services/excel-workbook.builder';
@@ -28,6 +29,7 @@ import { S3StorageService } from '@shared/services/s3-storage.service';
     ExcelSheetParser,
     AuditTrailService,
     ActivityLogService,
+    DataScopeService,
     HookRegistry,
     LoggingInterceptor,
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
@@ -40,6 +42,7 @@ import { S3StorageService } from '@shared/services/s3-storage.service';
     ExcelSheetParser,
     AuditTrailService,
     ActivityLogService,
+    DataScopeService,
     HookRegistry,
     DocumentCodeModule,
   ],

@@ -3,8 +3,8 @@ export const SIGNATURE_REVIEW_REQUESTED_EVENT = 'signature_review_requested';
 export const SIGNATURE_REVIEW_APPROVED_EVENT = 'signature_review_approved';
 export const SIGNATURE_REVIEW_REJECTED_EVENT = 'signature_review_rejected';
 
-/** Only full system access reviews a signature; the director is the role that carries it. */
-export const SIGNATURE_REVIEWER_ROLE_CODES = ['director'] as const;
+/** Only full system access reviews a signature; the administrator is the role that carries it. */
+export const SIGNATURE_REVIEWER_ROLE_CODES = ['admin'] as const;
 export const SIGNATURE_REVIEWER_SCOPE = '*:*';
 
 export const SIGNATURE_REJECTION_REASON_MAX_LENGTH = 500;

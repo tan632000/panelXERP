@@ -4,11 +4,7 @@
  * are decided by their own scope — see `UpdateLineInvoicesOptions.permission`. Checked against
  * `AuthUserPayload.role` (the `seed-roles.ts` role keys).
  */
-export const INVOICE_EDIT_ROLES = [
-  'director',
-  'purchase_manager',
-  'purchase_staff',
-] as const;
+export const INVOICE_EDIT_ROLES = ['admin', 'director', 'purchasing'] as const;
 
 export function canEditLineInvoices(
   role: string | undefined,

@@ -33,7 +33,72 @@ const ADMIN_USER_SPEC: SeedUserSpec = {
  * One demo account per role, created outside production only. Feature tasks append an entry
  * when they add a role; demo accounts share the admin password of the environment.
  */
-export const DEMO_USER_SPECS: readonly SeedUserSpec[] = [];
+export const DEMO_USER_SPECS: readonly SeedUserSpec[] = [
+  {
+    username: 'director',
+    emailLocal: 'director',
+    fullName: 'Demo Director',
+    roleCode: 'director',
+    department: 'other',
+    title: 'Director',
+  },
+  {
+    username: 'sales_mgr',
+    emailLocal: 'sales.mgr',
+    fullName: 'Demo Sales Manager',
+    roleCode: 'salesManager',
+    department: 'sales',
+    title: 'Sales Manager',
+  },
+  {
+    username: 'sales_a',
+    emailLocal: 'sales.a',
+    fullName: 'Demo Sales A',
+    roleCode: 'sales',
+    department: 'sales',
+    title: 'Sales',
+  },
+  {
+    username: 'sales_b',
+    emailLocal: 'sales.b',
+    fullName: 'Demo Sales B',
+    roleCode: 'sales',
+    department: 'sales',
+    title: 'Sales',
+  },
+  {
+    username: 'eng_lead',
+    emailLocal: 'eng.lead',
+    fullName: 'Demo Engineering Lead',
+    roleCode: 'engineeringLead',
+    department: 'technical',
+    title: 'Engineering Lead',
+  },
+  {
+    username: 'engineer_a',
+    emailLocal: 'engineer.a',
+    fullName: 'Demo Engineer A',
+    roleCode: 'engineer',
+    department: 'technical',
+    title: 'Engineer',
+  },
+  {
+    username: 'engineer_b',
+    emailLocal: 'engineer.b',
+    fullName: 'Demo Engineer B',
+    roleCode: 'engineer',
+    department: 'technical',
+    title: 'Engineer',
+  },
+  {
+    username: 'purchasing',
+    emailLocal: 'purchasing',
+    fullName: 'Demo Purchasing',
+    roleCode: 'purchasing',
+    department: 'purchasing',
+    title: 'Purchasing',
+  },
+];
 
 /**
  * The admin password comes from `SEED_ADMIN_PASSWORD` in every environment. Production

@@ -22,8 +22,8 @@ Sales records a quote request (hồ sơ báo giá ban đầu) with drawings/spec
 2. Transition table + port; invalid → 409.
 3. Attachment endpoints and validation.
 4. Notification after commit.
-5. Frontend list (status, engineer, due date filters), detail with attachments and activity timeline.
-6. Specs: assign → exactly one notification; rollback → none; `draft → won` 409; `.html` upload or pdf extension with non-PDF bytes → 400; Sales B reads Sales A's request or downloads its attachment → 404; a `sales` actor calling kernel `GET /files/:id` with the attachment's key → 403; deleting a customer/project referenced by a request → 409 (registered reference check); two concurrent creates → distinct codes (real DB); clock fixed at `2026-12-31T17:30:00Z` → code year `2027` (Asia/Ho_Chi_Minh).
+5. Frontend list (status, engineer, due date filters), detail with attachments and activity timeline. The request detail response embeds the customer, project and contact summary (via `CrmGateway`), so the assigned engineer sees them without `customer:read` (engineers hold no direct customer/project read since task-03).
+6. Specs: the assigned engineer reads the request detail with its embedded customer/project summary (200) while holding no `customer:read`; assign → exactly one notification; rollback → none; `draft → won` 409; `.html` upload or pdf extension with non-PDF bytes → 400; Sales B reads Sales A's request or downloads its attachment → 404; a `sales` actor calling kernel `GET /files/:id` with the attachment's key → 403; deleting a customer/project referenced by a request → 409 (registered reference check); two concurrent creates → distinct codes (real DB); clock fixed at `2026-12-31T17:30:00Z` → code year `2027` (Asia/Ho_Chi_Minh).
 
 ## Acceptance
 - AC-08, AC-14.

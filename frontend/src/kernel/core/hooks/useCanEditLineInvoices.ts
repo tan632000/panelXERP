@@ -6,11 +6,7 @@ import { useAuth } from "@/kernel/core/auth/AuthContext";
  * Fallback roles for a document that has no `<res>:invoice:write` scope yet (the purchase
  * delivery note). Mirrors the backend's `INVOICE_EDIT_ROLES`; the server refuses every other role.
  */
-export const INVOICE_EDIT_ROLES = [
-  "director",
-  "purchase_manager",
-  "purchase_staff",
-] as const;
+export const INVOICE_EDIT_ROLES = ["admin", "director", "purchasing"] as const;
 
 export function canEditLineInvoices(
   role: string | undefined,

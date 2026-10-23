@@ -9,9 +9,6 @@ export const USER_DEPARTMENTS = [
   'technical',
   'qcLab',
   'warehouse',
-  'mechanical',
-  'surfaceTreatment',
-  'packaging',
   'accounting',
   'other',
 ] as const;

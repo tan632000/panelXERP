@@ -786,9 +786,6 @@ export interface components {
         | "technical"
         | "qcLab"
         | "warehouse"
-        | "mechanical"
-        | "surfaceTreatment"
-        | "packaging"
         | "accounting"
         | "other"
         | null;
@@ -811,9 +808,6 @@ export interface components {
         | "technical"
         | "qcLab"
         | "warehouse"
-        | "mechanical"
-        | "surfaceTreatment"
-        | "packaging"
         | "accounting"
         | "other"
         | null;
@@ -836,9 +830,6 @@ export interface components {
         | "technical"
         | "qcLab"
         | "warehouse"
-        | "mechanical"
-        | "surfaceTreatment"
-        | "packaging"
         | "accounting"
         | "other"
         | null;

@@ -1048,9 +1048,6 @@ components:
             - technical
             - qcLab
             - warehouse
-            - mechanical
-            - surfaceTreatment
-            - packaging
             - accounting
             - other
           nullable: true

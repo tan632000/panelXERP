@@ -5,10 +5,124 @@ import { getAllPluginPermissions } from '@kernel/platform/plugins/enabled-plugin
 
 import type { SeedContext } from '@kernel/core/database/seeds/helpers/seed-context';
 
-/** [name, code, description, permissions] — feature tasks append their roles and scopes here. */
+/**
+ * Sales-chain scopes per module, `module:action`. A plugin declares the same keys in its own
+ * `*.permissions.ts`; until it does, `seedRoles` reports them and leaves them out of the stored set.
+ */
+const CUSTOMER_READ = ['customer:read', 'contact:read', 'project:read'];
+const CUSTOMER_WRITE = [
+  ...CUSTOMER_READ,
+  'customer:create',
+  'customer:update',
+  'contact:create',
+  'contact:update',
+  'project:create',
+  'project:update',
+];
+const CUSTOMER_ALL = ['customer:*', 'contact:*', 'project:*'];
+const ITEM_ALL = ['item:*'];
+const REQUEST_SALES = [
+  'request:read',
+  'request:create',
+  'request:update',
+  'request:assign',
+  'request:cancel',
+];
+const ESTIMATE_WRITE = [
+  'estimate:read',
+  'estimate:create',
+  'estimate:update',
+  'estimate:submit',
+];
+const QUOTATION_SALES = [
+  'quotation:read',
+  'quotation:create',
+  'quotation:update',
+  'quotation:submit',
+  'quotation:confirm',
+  'quotation:cancel',
+  'quotation:export',
+];
+const ORDER_SALES = ['order:read', 'order:create'];
+
+/** Every sales-chain module, granted whole to the roles that run the business. */
+const SALES_CHAIN_ALL = [
+  ...CUSTOMER_ALL,
+  ...ITEM_ALL,
+  'request:*',
+  'estimate:*',
+  'quotation:*',
+  'order:*',
+];
+
+/**
+ * [name, code, description, permissions] in seed order (D-11, D-12). Kernel file routes
+ * (`file:read`, `file:write`) sign any stored key, so only the administrator holds them;
+ * business attachments go through their feature's own endpoints.
+ */
 const ROLES: ReadonlyArray<
   readonly [string, string, string, readonly string[]]
-> = [['Administrator', 'admin', 'Full system access', ['*:*']]];
+> = [
+  ['Administrator', 'admin', 'Full system access', ['*:*']],
+  [
+    'Director',
+    'director',
+    'Runs the business: every sales-chain module, quotation approval included',
+    SALES_CHAIN_ALL,
+  ],
+  [
+    'Sales Manager',
+    'salesManager',
+    'Manages sales: all customers and requests, approves quotations',
+    [
+      ...CUSTOMER_ALL,
+      'item:read',
+      'request:*',
+      'estimate:read',
+      'quotation:*',
+      'order:*',
+    ],
+  ],
+  [
+    'Sales',
+    'sales',
+    'Handles own customers, requests, quotations and orders',
+    [
+      ...CUSTOMER_WRITE,
+      'item:read',
+      ...REQUEST_SALES,
+      'estimate:read',
+      ...QUOTATION_SALES,
+      ...ORDER_SALES,
+    ],
+  ],
+  [
+    'Engineering Lead',
+    'engineeringLead',
+    'Leads engineering: assigns requests, edits every estimate, maintains items',
+    [
+      ...CUSTOMER_READ,
+      ...ITEM_ALL,
+      'request:read',
+      'request:assign',
+      'estimate:*',
+    ],
+  ],
+  [
+    'Engineer',
+    'engineer',
+    'Builds the BOM and estimate of the requests assigned to them',
+    // No direct customer/project read: the engineer's scope is the requests assigned to
+    // them, and a request shows its customer and project summary itself.
+    ['item:read', 'request:read', ...ESTIMATE_WRITE],
+  ],
+  [
+    'Purchasing',
+    'purchasing',
+    'Maintains the item catalog and its reference purchase prices',
+    ITEM_ALL,
+  ],
+];
 
 interface SeededRole {
   name: string;

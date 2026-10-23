@@ -6,6 +6,9 @@ export interface RequestContextData {
   ip?: string;
   userId?: string | number;
   username?: string;
+  /** Role code and permissions of the signed-in actor, for record-level scope checks. */
+  role?: string;
+  permissions?: string[];
 }
 
 export class RequestContextStore {

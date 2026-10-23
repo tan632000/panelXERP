@@ -189,8 +189,21 @@ describe('AuthService', () => {
     expect(result.user.role).toBe('warehouse_keeper');
   });
 
-  it('collapses the director role to a single wildcard permission', async () => {
-    const { service } = await buildService('director', ['rfq:read']);
+  // Full access used to be granted by the role code `director`; it now comes from the role's
+  // own permission set alone, so the matrix decides what every role reaches.
+  it('grants a director only the permissions its role holds', async () => {
+    const { service } = await buildService('director', ['quotation:approve']);
+
+    const result = await service.login({
+      username: USER.username,
+      password: PASSWORD,
+    });
+
+    expect(result.permissions).toEqual(['quotation:approve']);
+  });
+
+  it('grants full access only through a role that holds the wildcard', async () => {
+    const { service } = await buildService('admin', ['*:*']);
 
     const result = await service.login({
       username: USER.username,
@@ -594,7 +607,7 @@ describe('AuthService', () => {
     ])(
       'refuses an email change %s, even from a full-access account',
       async (_case, currentPassword) => {
-        const { service, userRepo } = await buildService('director', []);
+        const { service, userRepo } = await buildService('admin', ['*:*']);
 
         await expect(
           service.updateProfile(USER.id, {
@@ -608,7 +621,7 @@ describe('AuthService', () => {
     );
 
     it('refuses an identity another account already holds', async () => {
-      const { service, userRepo } = await buildService('director', []);
+      const { service, userRepo } = await buildService('admin', ['*:*']);
       userRepo.findOne
         .mockResolvedValueOnce({
           ...USER,
@@ -743,7 +756,7 @@ describe('AuthService', () => {
     });
 
     it('stores the object key under its own prefix and signs a URL for the session', async () => {
-      const { service, userRepo, s3 } = await buildService('director', []);
+      const { service, userRepo, s3 } = await buildService('admin', ['*:*']);
       s3.uploadFile.mockResolvedValue({ key: 'signatures/new.png' });
 
       const result = await service.updateSignature(USER.id, file);
@@ -757,7 +770,7 @@ describe('AuthService', () => {
     });
 
     it('drops the signature it replaces and leaves the avatar alone', async () => {
-      const { service, s3 } = await buildService('director', [], {
+      const { service, s3 } = await buildService('admin', ['*:*'], {
         user: {
           avatarUrl: 'avatars/me.png',
           signatureUrl: 'signatures/old.png',
@@ -771,7 +784,7 @@ describe('AuthService', () => {
     });
 
     it('drops the new upload when the account cannot be saved, leaving the old one', async () => {
-      const { service, userRepo, s3 } = await buildService('director', [], {
+      const { service, userRepo, s3 } = await buildService('admin', ['*:*'], {
         user: { signatureUrl: 'signatures/old.png' },
       });
       s3.uploadFile.mockResolvedValue({ key: 'signatures/new.png' });
@@ -785,7 +798,7 @@ describe('AuthService', () => {
     });
 
     it('still succeeds when the replaced signature cannot be deleted', async () => {
-      const { service, s3 } = await buildService('director', [], {
+      const { service, s3 } = await buildService('admin', ['*:*'], {
         user: { signatureUrl: 'signatures/old.png' },
       });
       s3.uploadFile.mockResolvedValue({ key: 'signatures/new.png' });

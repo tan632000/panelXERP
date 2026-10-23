@@ -1,6 +1,6 @@
 # Task 03 — Panel-shop roles, `module:action` permissions and data-scope helper
 
-Status: pending
+Status: done
 
 ## Outcome
 The seed creates the panel-shop roles; later tasks append `module:action` keys to a role→permission map; a reusable kernel helper enforces the D-12 data scope.
@@ -41,3 +41,22 @@ The seed creates the panel-shop roles; later tasks append `module:action` keys t
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npx jest --ci src/kernel/core/database/seeds/seed-roles.panel.spec.ts src/kernel/shared/services/data-scope.service.spec.ts"
+Exit: 0
+Base: b245e099609d706edc5af8877b568665805db637
+Head: 73ac7b85d1d2665365895f0888c1b7646c4ae38137bd6b71d0f14fa336b6958d
+```text
+$ docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npx jest --ci src/kernel/core/database/seeds/seed-roles.panel.spec.ts src/kernel/shared/services/data-scope.service.spec.ts"
+> panelxerp-backend@0.0.1 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
+> panelxerp-backend@0.0.1 typecheck
+> tsc --noEmit -p tsconfig.build.json
+PASS src/kernel/shared/services/data-scope.service.spec.ts
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts
+Test Suites: 2 passed, 2 total
+Tests:       21 passed, 21 total
+Exit: 0
+```
+Extra evidence (same Head, not the canonical command): full backend jest 57 suites / 558 passed; frontend lint, typecheck, vitest 921 passed / 6 skipped; live after `docker compose restart backend`: director login holds 8 module wildcards and no `*:*`, admin holds `*:*`. Review (code-auditor): round 1 PASS_WITH_WARNINGS (M1 undeclared scopes dropped silently, M2 engineer read vs scope, M3 frontend invoice-role mirror) → repaired → re-review PASS. Out-of-ownership edits with reason: `jwt-auth.guard.ts`, `request-context.store.ts`, `shared.module.ts` (Step 2 wiring), frontend department/invoice-role mirrors, regenerated `api.ts`/OpenAPI, `auth.service.spec.ts`, `signature-review.service.spec.ts`, `line-invoice.util.spec.ts`.

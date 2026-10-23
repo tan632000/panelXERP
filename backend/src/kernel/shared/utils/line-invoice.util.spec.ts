@@ -11,7 +11,7 @@ import type { DataSource } from 'typeorm';
 class Header {}
 class Line {}
 
-const PURCHASE_STAFF = { userId: 7, role: 'purchase_staff' } as AuthUserPayload;
+const PURCHASE_STAFF = { userId: 7, role: 'purchasing' } as AuthUserPayload;
 const WAREHOUSE_KEEPER = {
   userId: 8,
   role: 'warehouse_keeper',
@@ -169,7 +169,7 @@ describe('updateLineInvoices', () => {
       const refused = run(
         {
           userId: 7,
-          role: 'purchase_staff',
+          role: 'purchasing',
           permissions: [],
         },
         SCOPE,

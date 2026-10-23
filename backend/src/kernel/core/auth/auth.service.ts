@@ -701,16 +701,19 @@ export class AuthService {
       where: { userId },
       relations: ['role'],
     });
+    // An account without a role gets no role code rather than a borrowed one: its scope and
+    // permissions then fall to the narrowest defaults.
     return {
-      roleCode: userRoles[0]?.role?.code ?? 'sale_staff',
+      roleCode: userRoles[0]?.role?.code ?? '',
       permissions: this.mergePermissions(userRoles),
     };
   }
 
+  /**
+   * The union of the account's role permissions. Full access comes only from a role that
+   * holds `*:*` itself, never from a role code, so the permission matrix stays authoritative.
+   */
   private mergePermissions(userRoles: UserRole[]): string[] {
-    for (const ur of userRoles) {
-      if (ur.role?.code === 'director') return ['*:*'];
-    }
     const permSet = new Set<string>();
     for (const ur of userRoles) {
       for (const p of ur.role?.permissions ?? []) {

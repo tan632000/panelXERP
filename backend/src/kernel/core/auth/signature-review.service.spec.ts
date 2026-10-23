@@ -81,7 +81,7 @@ describe('SignatureReviewService', () => {
       expect(notifications.emit).toHaveBeenCalledWith(
         expect.objectContaining({
           eventType: SIGNATURE_REVIEW_REQUESTED_EVENT,
-          roleCodes: ['director'],
+          roleCodes: ['admin'],
           requiredScope: '*:*',
           dedupeKey: 'user:12',
           link: '/system/users?signatureReview=12',
