@@ -66,6 +66,7 @@
     "daysAgo": "{count} ngày trước",
     "fallbackMessage": "Bạn có thông báo mới",
     "events": {
+      "sales_request_assigned": "Bạn được giao dự toán yêu cầu báo giá {code} — {title}.",
       "sp_can_bo_sung_ky_thuat": "Sản phẩm {sfgCode} — {productName} cần bổ sung thông tin kỹ thuật.",
       "purchaseRequestAwaitingReceipt": "Yêu cầu mua hàng {prId} ({department, select, sales {Sales} purchasing {Mua hàng} mechanical {Cơ khí} surfaceTreatment {XLBM} warehouse {Kho} packaging {Đóng gói} accounting {Kế toán} hr {HR} technical {Kỹ thuật} qc {QC} lab {Lab} housekeeping {Tạp vụ} security {Bảo vệ} it {IT} other {{department}}}) đang chờ tiếp nhận.",
       "purchaseRequestReceived": "Yêu cầu mua hàng {prId} đã được tiếp nhận, đang chờ bạn duyệt.",

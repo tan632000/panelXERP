@@ -20,6 +20,7 @@ import {
   FakeRepo,
   type FakeRow,
 } from '@plugins/crm/_shared/crm-fake-repo.helper-spec';
+import { CustomerOwnerChangeRegistry } from '@plugins/crm/_shared/gateways/customer-owner-change-registry';
 import { ReferenceCheckRegistry } from '@plugins/crm/_shared/gateways/reference-check-registry';
 import { CustomerController } from '@plugins/crm/customer/customer.controller';
 import { Customer } from '@plugins/crm/customer/entities/customer.entity';
@@ -87,6 +88,7 @@ describe('CustomerController', () => {
         CustomerService,
         DataScopeService,
         ReferenceCheckRegistry,
+        CustomerOwnerChangeRegistry,
         { provide: getRepositoryToken(Customer), useValue: customers },
         { provide: getRepositoryToken(User), useValue: users },
         { provide: APP_GUARD, useClass: HeaderAuthGuard },

@@ -102,6 +102,9 @@ export const NOTIFICATION_REQUIRED_SCOPES = [
   // The BTP OK receipt's
   // pending-QC notice is stamped with the semi-finished receipt scope.
   "semi_finished_receipt_ok:read",
+  // The sales request assignment record names the engineer it is for; engineers hold this
+  // scope and none of the above.
+  "request:read",
 ] as const;
 
 /** Badge stops counting past this and renders the overflow marker instead. */
@@ -114,6 +117,7 @@ export const NOTIFICATION_BADGE_MAX = 99;
  */
 export const NOTIFICATION_EVENT_KEYS = [
   "sp_can_bo_sung_ky_thuat",
+  "sales.request.assigned",
   "purchaseRequestAwaitingReceipt",
   "purchaseRequestReceived",
   "purchaseRequestApproved",
@@ -1138,6 +1142,14 @@ export function resolveNotificationMessage(
           warehouse: String(payload.warehouse ?? "").trim(),
           count: displayNumber(payload.pendingCount),
         },
+      };
+    }
+
+    if (item.eventType === "sales.request.assigned") {
+      return {
+        kind: "key",
+        key: "events.sales_request_assigned",
+        values: { code: field(payload.code), title: field(payload.title) },
       };
     }
 

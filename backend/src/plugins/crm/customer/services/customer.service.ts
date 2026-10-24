@@ -30,6 +30,7 @@ import { softDeleteWithAudit } from '@shared/utils/soft-delete.util';
 import { buildIlikeOrWhere } from '@shared/utils/typeorm-search.util';
 import { assertCaseInsensitiveUnique } from '@shared/utils/unique-field.util';
 
+import { CustomerOwnerChangeRegistry } from '@plugins/crm/_shared/gateways/customer-owner-change-registry';
 import { ReferenceCheckRegistry } from '@plugins/crm/_shared/gateways/reference-check-registry';
 import { ownerCondition } from '@plugins/crm/_shared/utils/owner-scope.util';
 import { requireText, trimToNull } from '@plugins/crm/_shared/utils/text.util';
@@ -76,6 +77,7 @@ export class CustomerService {
     private readonly userRepo: Repository<User>,
     private readonly dataScope: DataScopeService,
     private readonly referenceChecks: ReferenceCheckRegistry,
+    private readonly ownerChanges: CustomerOwnerChangeRegistry,
   ) {}
 
   /** The list's keyword and owner-scope conditions, before any column selection. */
@@ -190,17 +192,30 @@ export class CustomerService {
     if (dto.email !== undefined) customer.email = trimToNull(dto.email);
     if (dto.note !== undefined) customer.note = trimToNull(dto.note);
     // A null owner is not a clear request (the owner is mandatory): it changes nothing.
+    let newOwnerId: number | null = null;
     if (
       dto.salesOwnerId !== undefined &&
       dto.salesOwnerId !== null &&
       dto.salesOwnerId !== customer.salesOwnerId
     ) {
       await this.assertMayAssignOwner(actor, dto.salesOwnerId);
-      customer.salesOwnerId = dto.salesOwnerId;
+      newOwnerId = dto.salesOwnerId;
     }
     customer.updatedBy = actor.userId;
 
-    const saved = await this.customerRepo.save(customer);
+    // A new owner takes the customer's documents with it, in the same transaction: a request
+    // left with the old owner would be invisible to the one who now owns the customer.
+    const saved =
+      newOwnerId === null
+        ? await this.customerRepo.save(customer)
+        : await this.customerRepo.manager.transaction(async (manager) => {
+            customer.salesOwnerId = newOwnerId;
+            const updated = await manager
+              .getRepository(Customer)
+              .save(customer);
+            await this.ownerChanges.apply(manager, customer.id, newOwnerId);
+            return updated;
+          });
     const [view] = await this.withOwnerNames([saved]);
     return view;
   }

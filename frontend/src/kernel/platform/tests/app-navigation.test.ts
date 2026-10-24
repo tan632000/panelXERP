@@ -13,6 +13,7 @@ describe("app sidebar", () => {
     expect(appNavigationSections.map((section) => section.title)).toEqual([
       "sidebarCrm",
       "sidebarCatalog",
+      "sidebarSales",
     ]);
     expect(appNavigationSections[0].items.map((item) => item.href)).toEqual([
       "/crm/customers",

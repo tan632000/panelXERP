@@ -125,6 +125,32 @@ export class FakeRepo<T extends FakeRow> {
     return Promise.resolve(this.visible(options)[0] ?? null);
   });
 
+  /** Mirrors `repo.manager.transaction`: work on this repo that rolls back when it throws. */
+  manager = {
+    transaction: async <R>(
+      work: (manager: { getRepository: () => FakeRepo<T> }) => Promise<R>,
+    ): Promise<R> => {
+      const snapshot = this.rows.map((row) => ({ ...row }));
+      try {
+        return await work({ getRepository: () => this });
+      } catch (error) {
+        this.rows = snapshot;
+        throw error;
+      }
+    },
+  };
+
+  find = jest.fn((options: FindOptions): Promise<T[]> => {
+    const all = this.visible(options);
+    const start = options.skip ?? 0;
+    const end = options.take === undefined ? undefined : start + options.take;
+    return Promise.resolve(all.slice(start, end));
+  });
+
+  exists = jest.fn((options: FindOptions): Promise<boolean> => {
+    return Promise.resolve(this.visible(options).length > 0);
+  });
+
   findAndCount = jest.fn((options: FindOptions): Promise<[T[], number]> => {
     const all = this.visible(options);
     const start = options.skip ?? 0;

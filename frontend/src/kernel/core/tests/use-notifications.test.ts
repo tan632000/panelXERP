@@ -160,6 +160,7 @@ describe("notification bell surface", () => {
         // The BTP OK receipt's
         // pending-QC notice is stamped with the semi-finished receipt scope.
         "semi_finished_receipt_ok:read",
+        "request:read",
       ]);
     });
   });

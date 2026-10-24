@@ -1429,6 +1429,12 @@ paths:
           schema:
             default: DESC
             type: string
+        - name: customerId
+          required: false
+          in: query
+          description: Only the projects of this customer
+          schema:
+            type: number
       responses:
         '200':
           description: Paginated project list
@@ -1517,6 +1523,12 @@ paths:
             type: array
             items:
               type: string
+        - name: customerId
+          required: false
+          in: query
+          description: Only the projects of this customer
+          schema:
+            type: number
       responses:
         '200':
           description: Paginated distinct column values
@@ -1916,6 +1928,498 @@ paths:
       security: *ref_19
       summary: Soft-delete selected items
       tags: *ref_20
+  /api/v1/sales/requests:
+    get:
+      description: >-
+        Paginated request list with search, status, engineer and quotation-due filters. A Sales actor sees only the
+        requests they own; an Engineer only the requests assigned to them.
+      operationId: RequestController_findAll
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Items per page
+          schema:
+            default: 25
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search keyword
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: sortBy
+          required: false
+          in: query
+          description: Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.
+          schema:
+            default: createdAt
+            type: string
+        - name: sortOrder
+          required: false
+          in: query
+          description: Sort order. Defaults to DESC for createdAt, ASC otherwise.
+          schema:
+            default: DESC
+            type: string
+        - name: status
+          required: false
+          in: query
+          description: Only this status
+          schema:
+            type: string
+            enum:
+              - draft
+              - assigned
+              - estimating
+              - estimated
+              - quoted
+              - won
+              - lost
+              - cancelled
+        - name: assignedEngineerId
+          required: false
+          in: query
+          description: Only requests assigned to this engineer
+          schema:
+            type: number
+        - name: quotationDueFrom
+          required: false
+          in: query
+          description: Quotation due on or after this date (YYYY-MM-DD)
+          schema:
+            type: string
+        - name: quotationDueTo
+          required: false
+          in: query
+          description: Quotation due on or before this date (YYYY-MM-DD)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated request list
+        '403':
+          description: Forbidden — requires request:read
+      security: &ref_21
+        - bearer: []
+      summary: List quote requests
+      tags: &ref_22
+        - sales/requests
+    post:
+      description: >-
+        The code (YC_YYYY_NNNN) is generated. The customer must be visible to the caller; project and contact must
+        belong to it. The owner defaults to the caller; only an actor who sees every request may name another sales
+        account.
+      operationId: RequestController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRequestDto'
+      responses:
+        '201':
+          description: Request created as a draft
+        '400':
+          description: Validation error, foreign project or contact, owner not allowed
+        '403':
+          description: Forbidden — requires request:create
+        '404':
+          description: Customer not found
+      security: *ref_21
+      summary: Create quote request
+      tags: *ref_22
+  /api/v1/sales/requests/column-values:
+    get:
+      description: >-
+        Paginated, searchable distinct values of a filterable list column, for the column filter of the list table.
+        Values come from the whole table, not one page.
+      operationId: RequestController_findColumnValues
+      parameters:
+        - name: column
+          required: true
+          in: query
+          description: 'Column key: code, title, status'
+          schema:
+            example: classification
+            type: string
+        - name: search
+          required: false
+          in: query
+          description: Search within the values
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Values per page
+          schema:
+            default: 50
+            type: number
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: listSearch
+          required: false
+          in: query
+          description: Keyword search of the list itself
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+        - name: status
+          required: false
+          in: query
+          description: Only this status
+          schema:
+            type: string
+            enum:
+              - draft
+              - assigned
+              - estimating
+              - estimated
+              - quoted
+              - won
+              - lost
+              - cancelled
+        - name: assignedEngineerId
+          required: false
+          in: query
+          description: Only requests assigned to this engineer
+          schema:
+            type: number
+        - name: quotationDueFrom
+          required: false
+          in: query
+          description: Quotation due on or after this date (YYYY-MM-DD)
+          schema:
+            type: string
+        - name: quotationDueTo
+          required: false
+          in: query
+          description: Quotation due on or before this date (YYYY-MM-DD)
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paginated distinct column values
+        '400':
+          description: Column is not filterable
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — requires request:read
+      security: *ref_21
+      summary: List distinct values of one filterable request column
+      tags: *ref_22
+  /api/v1/sales/requests/engineer-options:
+    get:
+      description: Active engineers and engineering leads.
+      operationId: RequestController_listEngineerOptions
+      parameters: []
+      responses:
+        '200':
+          description: Engineer options
+        '403':
+          description: Forbidden — requires request:assign
+      security: *ref_21
+      summary: List the accounts a request may be assigned to
+      tags: *ref_22
+  /api/v1/sales/requests/{id}:
+    get:
+      description: >-
+        Embeds the customer, project and contact summary, so an assigned engineer sees them without customer or project
+        read permission.
+      operationId: RequestController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Request found
+        '404':
+          description: Not found, or outside the caller’s data scope
+      security: *ref_21
+      summary: Get quote request by ID
+      tags: *ref_22
+    patch:
+      description: Only while the request is a draft or assigned. Code and customer are immutable.
+      operationId: RequestController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRequestDto'
+      responses:
+        '200':
+          description: Request updated
+        '403':
+          description: Forbidden — requires request:update
+        '404':
+          description: Request not found
+        '409':
+          description: Request can no longer be edited
+      security: *ref_21
+      summary: Update quote request
+      tags: *ref_22
+  /api/v1/sales/requests/{id}/activities:
+    get:
+      operationId: RequestController_listActivities
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Timeline, oldest first
+        '404':
+          description: Request not found
+      security: *ref_21
+      summary: Timeline of a quote request
+      tags: *ref_22
+  /api/v1/sales/requests/{id}/assign:
+    post:
+      description: The first assignment moves a draft to assigned. The engineer is notified once, after the change is saved.
+      operationId: RequestController_assign
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignRequestDto'
+      responses:
+        '200':
+          description: Request assigned
+        '400':
+          description: Engineer is not an active engineer or engineering lead
+        '403':
+          description: Forbidden — requires request:assign
+        '404':
+          description: Request not found
+        '409':
+          description: Request can no longer be assigned
+      security: *ref_21
+      summary: Assign or reassign the engineer
+      tags: *ref_22
+  /api/v1/sales/requests/{id}/cancel:
+    post:
+      description: Needs a reason. Possible until the request has been quoted.
+      operationId: RequestController_cancel
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestReasonDto'
+      responses:
+        '200':
+          description: Request cancelled
+        '403':
+          description: Forbidden — requires request:cancel
+        '404':
+          description: Request not found
+        '409':
+          description: Request can no longer be cancelled
+      security: *ref_21
+      summary: Cancel a quote request
+      tags: *ref_22
+  /api/v1/sales/requests/{id}/lost:
+    post:
+      description: Needs a reason. Possible once the request is estimated or quoted.
+      operationId: RequestController_markLost
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestReasonDto'
+      responses:
+        '200':
+          description: Request marked lost
+        '403':
+          description: Forbidden — requires request:cancel
+        '404':
+          description: Request not found
+        '409':
+          description: Request cannot be lost from here
+      security: *ref_21
+      summary: Mark a quote request lost
+      tags: *ref_22
+  /api/v1/sales/requests/{id}/attachments:
+    get:
+      operationId: RequestAttachmentController_list
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Attachments, oldest first
+        '404':
+          description: Request not found
+      security: &ref_23
+        - bearer: []
+      summary: List the files of a quote request
+      tags: &ref_24
+        - sales/requests
+    post:
+      description: >-
+        Allowed: pdf, dwg, dxf, xlsx, png, jpg/jpeg — by extension and by content — up to 20 MB each, 20 per request,
+        while the request is a draft, assigned or being estimated.
+      operationId: RequestAttachmentController_upload
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        '201':
+          description: File attached
+        '400':
+          description: File missing, type not allowed, content mismatch, or limit reached
+        '403':
+          description: Forbidden — requires request:update
+        '404':
+          description: Request not found
+        '409':
+          description: Request no longer accepts files
+        '413':
+          description: File larger than 20 MB
+      security: *ref_23
+      summary: Attach a file to a quote request
+      tags: *ref_24
+  /api/v1/sales/requests/{id}/attachments/{attachmentId}:
+    get:
+      description: Served as an attachment, never inline. Requires access to the request.
+      operationId: RequestAttachmentController_download
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+        - name: attachmentId
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: File content
+        '404':
+          description: Request or file not found, or outside the caller’s data scope
+      security: *ref_23
+      summary: Download a file of a quote request
+      tags: *ref_24
+    delete:
+      description: Only while the request is a draft, assigned or being estimated.
+      operationId: RequestAttachmentController_remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+        - name: attachmentId
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: File removed
+        '403':
+          description: Forbidden — requires request:update
+        '404':
+          description: Request or file not found
+        '409':
+          description: Request no longer accepts changes
+      security: *ref_23
+      summary: Remove a file of a quote request
+      tags: *ref_24
 info:
   title: panelXERP
   description: REST API — ERP Hải Phòng Manufacturing Platform
@@ -2000,7 +2504,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: &ref_21
+          enum: &ref_25
             - sales
             - planning
             - purchasing
@@ -2041,7 +2545,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_21
+          enum: *ref_25
           nullable: true
         title:
           type: object
@@ -2076,7 +2580,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_21
+          enum: *ref_25
           nullable: true
         title:
           type: object
@@ -2511,7 +3015,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: &ref_22
+          enum: &ref_26
             - enclosure
             - breaker
             - contactor
@@ -2561,7 +3065,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: *ref_22
+          enum: *ref_26
         unit:
           type: string
           description: Unit of measure, e.g. pcs, m, set
@@ -2574,3 +3078,86 @@ components:
           type: string
           description: Note
           maxLength: 2000
+    CreateRequestDto:
+      type: object
+      properties:
+        customerId:
+          type: number
+          description: Customer the request is for
+        projectId:
+          type: object
+          description: Project of that customer the request belongs to
+          nullable: true
+        contactId:
+          type: object
+          description: Contact person of that customer
+          nullable: true
+        title:
+          type: string
+          description: Request title
+          maxLength: 255
+        technicalRequirements:
+          type: object
+          description: Technical requirements
+          maxLength: 10000
+          nullable: true
+        requestedDeliveryDate:
+          type: object
+          description: Date the customer wants delivery (YYYY-MM-DD)
+          example: '2027-02-15'
+          nullable: true
+        quotationDueDate:
+          type: object
+          description: Date the quotation is due (YYYY-MM-DD)
+          example: '2027-01-20'
+          nullable: true
+      required:
+        - customerId
+        - title
+    UpdateRequestDto:
+      type: object
+      properties:
+        projectId:
+          type: object
+          description: Project of that customer the request belongs to
+          nullable: true
+        contactId:
+          type: object
+          description: Contact person of that customer
+          nullable: true
+        title:
+          type: string
+          description: Request title
+          maxLength: 255
+        technicalRequirements:
+          type: object
+          description: Technical requirements
+          maxLength: 10000
+          nullable: true
+        requestedDeliveryDate:
+          type: object
+          description: Date the customer wants delivery (YYYY-MM-DD)
+          example: '2027-02-15'
+          nullable: true
+        quotationDueDate:
+          type: object
+          description: Date the quotation is due (YYYY-MM-DD)
+          example: '2027-01-20'
+          nullable: true
+    AssignRequestDto:
+      type: object
+      properties:
+        engineerId:
+          type: number
+          description: Engineer (or engineering lead) to assign
+      required:
+        - engineerId
+    RequestReasonDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          description: Why the request is closed
+          maxLength: 1000
+      required:
+        - reason

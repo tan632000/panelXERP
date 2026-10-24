@@ -1155,6 +1155,216 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/sales/requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List quote requests
+     * @description Paginated request list with search, status, engineer and quotation-due filters. A Sales actor sees only the requests they own; an Engineer only the requests assigned to them.
+     */
+    get: operations["RequestController_findAll"];
+    put?: never;
+    /**
+     * Create quote request
+     * @description The code (YC_YYYY_NNNN) is generated. The customer must be visible to the caller; project and contact must belong to it. The owner defaults to the caller; only an actor who sees every request may name another sales account.
+     */
+    post: operations["RequestController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/requests/column-values": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List distinct values of one filterable request column
+     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+     */
+    get: operations["RequestController_findColumnValues"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/requests/engineer-options": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List the accounts a request may be assigned to
+     * @description Active engineers and engineering leads.
+     */
+    get: operations["RequestController_listEngineerOptions"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/requests/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get quote request by ID
+     * @description Embeds the customer, project and contact summary, so an assigned engineer sees them without customer or project read permission.
+     */
+    get: operations["RequestController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update quote request
+     * @description Only while the request is a draft or assigned. Code and customer are immutable.
+     */
+    patch: operations["RequestController_update"];
+    trace?: never;
+  };
+  "/api/v1/sales/requests/{id}/activities": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Timeline of a quote request */
+    get: operations["RequestController_listActivities"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/requests/{id}/assign": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Assign or reassign the engineer
+     * @description The first assignment moves a draft to assigned. The engineer is notified once, after the change is saved.
+     */
+    post: operations["RequestController_assign"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/requests/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel a quote request
+     * @description Needs a reason. Possible until the request has been quoted.
+     */
+    post: operations["RequestController_cancel"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/requests/{id}/lost": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Mark a quote request lost
+     * @description Needs a reason. Possible once the request is estimated or quoted.
+     */
+    post: operations["RequestController_markLost"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/requests/{id}/attachments": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List the files of a quote request */
+    get: operations["RequestAttachmentController_list"];
+    put?: never;
+    /**
+     * Attach a file to a quote request
+     * @description Allowed: pdf, dwg, dxf, xlsx, png, jpg/jpeg — by extension and by content — up to 20 MB each, 20 per request, while the request is a draft, assigned or being estimated.
+     */
+    post: operations["RequestAttachmentController_upload"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/requests/{id}/attachments/{attachmentId}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download a file of a quote request
+     * @description Served as an attachment, never inline. Requires access to the request.
+     */
+    get: operations["RequestAttachmentController_download"];
+    put?: never;
+    post?: never;
+    /**
+     * Remove a file of a quote request
+     * @description Only while the request is a draft, assigned or being estimated.
+     */
+    delete: operations["RequestAttachmentController_remove"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1561,6 +1771,56 @@ export interface components {
       referencePrice?: number | null;
       /** @description Note */
       note?: string;
+    };
+    CreateRequestDto: {
+      /** @description Customer the request is for */
+      customerId: number;
+      /** @description Project of that customer the request belongs to */
+      projectId?: Record<string, never> | null;
+      /** @description Contact person of that customer */
+      contactId?: Record<string, never> | null;
+      /** @description Request title */
+      title: string;
+      /** @description Technical requirements */
+      technicalRequirements?: Record<string, never> | null;
+      /**
+       * @description Date the customer wants delivery (YYYY-MM-DD)
+       * @example 2027-02-15
+       */
+      requestedDeliveryDate?: Record<string, never> | null;
+      /**
+       * @description Date the quotation is due (YYYY-MM-DD)
+       * @example 2027-01-20
+       */
+      quotationDueDate?: Record<string, never> | null;
+    };
+    UpdateRequestDto: {
+      /** @description Project of that customer the request belongs to */
+      projectId?: Record<string, never> | null;
+      /** @description Contact person of that customer */
+      contactId?: Record<string, never> | null;
+      /** @description Request title */
+      title?: string;
+      /** @description Technical requirements */
+      technicalRequirements?: Record<string, never> | null;
+      /**
+       * @description Date the customer wants delivery (YYYY-MM-DD)
+       * @example 2027-02-15
+       */
+      requestedDeliveryDate?: Record<string, never> | null;
+      /**
+       * @description Date the quotation is due (YYYY-MM-DD)
+       * @example 2027-01-20
+       */
+      quotationDueDate?: Record<string, never> | null;
+    };
+    AssignRequestDto: {
+      /** @description Engineer (or engineering lead) to assign */
+      engineerId: number;
+    };
+    RequestReasonDto: {
+      /** @description Why the request is closed */
+      reason: string;
     };
   };
   responses: never;
@@ -3292,6 +3552,8 @@ export interface operations {
         sortBy?: string;
         /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
         sortOrder?: string;
+        /** @description Only the projects of this customer */
+        customerId?: number;
       };
       header?: never;
       path?: never;
@@ -3382,6 +3644,8 @@ export interface operations {
         listSearch?: string;
         /** @description Enum values whose translated label matched the keyword */
         searchClassifications?: string[];
+        /** @description Only the projects of this customer */
+        customerId?: number;
       };
       header?: never;
       path?: never;
@@ -3950,6 +4214,600 @@ export interface operations {
       };
       /** @description Forbidden — requires item:delete */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+        sortBy?: string;
+        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+        sortOrder?: string;
+        /** @description Only this status */
+        status?:
+          | "draft"
+          | "assigned"
+          | "estimating"
+          | "estimated"
+          | "quoted"
+          | "won"
+          | "lost"
+          | "cancelled";
+        /** @description Only requests assigned to this engineer */
+        assignedEngineerId?: number;
+        /** @description Quotation due on or after this date (YYYY-MM-DD) */
+        quotationDueFrom?: string;
+        /** @description Quotation due on or before this date (YYYY-MM-DD) */
+        quotationDueTo?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated request list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires request:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateRequestDto"];
+      };
+    };
+    responses: {
+      /** @description Request created as a draft */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error, foreign project or contact, owner not allowed */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires request:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Customer not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestController_findColumnValues: {
+    parameters: {
+      query: {
+        /** @description Column key: code, title, status */
+        column: string;
+        /** @description Search within the values */
+        search?: string;
+        /** @description Page number */
+        page?: number;
+        /** @description Values per page */
+        limit?: number;
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Keyword search of the list itself */
+        listSearch?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description Only this status */
+        status?:
+          | "draft"
+          | "assigned"
+          | "estimating"
+          | "estimated"
+          | "quoted"
+          | "won"
+          | "lost"
+          | "cancelled";
+        /** @description Only requests assigned to this engineer */
+        assignedEngineerId?: number;
+        /** @description Quotation due on or after this date (YYYY-MM-DD) */
+        quotationDueFrom?: string;
+        /** @description Quotation due on or before this date (YYYY-MM-DD) */
+        quotationDueTo?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated distinct column values */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Column is not filterable */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires request:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestController_listEngineerOptions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Engineer options */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires request:assign */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Request found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateRequestDto"];
+      };
+    };
+    responses: {
+      /** @description Request updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires request:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request can no longer be edited */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestController_listActivities: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Timeline, oldest first */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestController_assign: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["AssignRequestDto"];
+      };
+    };
+    responses: {
+      /** @description Request assigned */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Engineer is not an active engineer or engineering lead */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires request:assign */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request can no longer be assigned */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestReasonDto"];
+      };
+    };
+    responses: {
+      /** @description Request cancelled */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires request:cancel */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request can no longer be cancelled */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestController_markLost: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestReasonDto"];
+      };
+    };
+    responses: {
+      /** @description Request marked lost */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires request:cancel */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request cannot be lost from here */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestAttachmentController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Attachments, oldest first */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestAttachmentController_upload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string;
+        };
+      };
+    };
+    responses: {
+      /** @description File attached */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File missing, type not allowed, content mismatch, or limit reached */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires request:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request no longer accepts files */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File larger than 20 MB */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestAttachmentController_download: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        attachmentId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description File content */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request or file not found, or outside the caller’s data scope */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  RequestAttachmentController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        attachmentId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description File removed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires request:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request or file not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request no longer accepts changes */
+      409: {
         headers: {
           [name: string]: unknown;
         };

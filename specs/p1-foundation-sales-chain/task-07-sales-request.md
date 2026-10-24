@@ -1,6 +1,6 @@
 # Task 07 — Sales request with safe attachments and engineer assignment
 
-Status: pending
+Status: done
 
 ## Outcome
 Sales records a quote request (hồ sơ báo giá ban đầu) with drawings/specs, assigns an engineer who is notified once; codes never collide; files are only reachable by people who can see the request.
@@ -8,6 +8,10 @@ Sales records a quote request (hồ sơ báo giá ban đầu) with drawings/spec
 ## Scope
 - In: `sales` plugin shell + `request` feature. Request (code `YC_YYYY_NNNN` per D-09, customer, project, contact, title, technical requirements, requested delivery date, quotation due date, `salesOwnerId`, `assignedEngineerId`). Status `draft → assigned → estimating → estimated → quoted → won | lost | cancelled` (cancel/lost need reason), forward-only. `RequestStatusPort.advance(manager, id, to)` used synchronously by later features (D-07). Attachments: `POST /sales/requests/:id/attachments` (allowlist pdf, dwg, dxf, xlsx, png, jpg; extension + magic bytes; ≤ 20 MB), table with FK to request, download via `GET /sales/requests/:id/attachments/:attId` with scope check and `Content-Disposition: attachment`. Assign/reassign → after-commit notification to engineer + activity log. Scope D-12. Register reference checks for customer/project.
 - Out: estimate (task-08); email/SMS.
+
+## Decisions (user, 2026-10-24)
+- A request's sales owner is always its customer's sales owner: set from the customer on create, never chosen in the request form or API; when a manager reassigns the customer in CRM, that customer's requests move to the new owner inside the same transaction through a CRM owner-change hook that the sales plugin registers (synchronous, like `ReferenceCheckRegistry`; no after-commit event).
+- Drawing attachments accept text DXF only (binary DXF is refused; DWG and PDF remain accepted).
 
 ## Coverage
 - CP-07
@@ -43,3 +47,36 @@ Sales records a quote request (hồ sơ báo giá ban đầu) with drawings/spec
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npx jest --ci src/plugins/sales/request src/plugins/sales/_shared && npm run validate:migrations" && docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npx vitest run src/plugins/sales/request"
+Exit: 0
+Base: d61e6834b17a8f023f916202783ec2d94811fae6
+Head: 4df86a1fc3f3d093ae1396e30d84181e4be59e9c421268172004c8d51e9a37f5
+```text
+$ docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npx jest --ci src/plugins/sales/request src/plugins/sales/_shared && npm run validate:migrations" && docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npx vitest run src/plugins/sales/request"
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+PASS src/plugins/sales/request/services/request-owner-race.spec.ts (6.269 s)
+PASS src/plugins/sales/request/services/request.service.spec.ts (6.634 s)
+PASS src/plugins/sales/_shared/ports/request-status.port.spec.ts
+PASS src/plugins/sales/_shared/utils/sales-document-code.util.spec.ts
+PASS src/plugins/sales/request/services/request-attachment.service.spec.ts
+PASS src/plugins/sales/request/request.controller.spec.ts (15.309 s)
+Test Suites: 6 passed, 6 total
+Tests:       233 passed, 233 total
+> panelxerp-backend@0.0.1 validate:migrations
+Migration filename check passed (22 files).
+> panelxerp-frontend@0.1.0 lint
+> panelxerp-frontend@0.1.0 lint:i18n
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+ ✓ src/plugins/sales/request/tests/request-form.test.tsx (3 tests)
+ ✓ src/plugins/sales/request/tests/request-attachments.test.tsx (20 tests)
+ ✓ src/plugins/sales/request/tests/request-detail.test.tsx (4 tests)
+ ✓ src/plugins/sales/request/tests/request-list.test.tsx (5 tests)
+ Test Files  4 passed (4)
+      Tests  32 passed (32)
+Exit: 0
+```
+No test in the run above was skipped: the real-Postgres concurrency (`sales-document-code.util.spec.ts`) and owner-race (`request-owner-race.spec.ts`) specs executed. Extra evidence (same Head, not the canonical command): full backend jest 77 suites / 957 passed; the touched kernel/CRM specs (`soft-delete-unique-index.spec.ts`, `seed-roles.panel.spec.ts`, `src/plugins/crm`) 11 suites / 114 passed; full frontend 128 files / 1022 passed / 6 skipped (permission-labels needs `../backend`); live smoke after migrate + seed + `docker compose restart backend` (statuses only): sales_a creates customer 201 and request 201 (`YC_2026_NNNN`); body with salesOwnerId 400; sales_b GET 404; assign engineer_a 200 and engineer_a gains exactly 1 `sales.request.assigned` notification; engineer_a detail 200 with embedded customer summary (no customer:read); engineer_b GET 404; real PDF upload 201, fake .pdf (HTML bytes) 400; sales_b download 404; sales_mgr delete referenced customer 409; sales_mgr reassigns customer to sales_b 200 → sales_a GET 404, sales_b GET 200. Cleanup: smoke request/activities/attachment row/notification removed by targeted SQL (no request delete endpoint by design), customer deleted through the API; one smoke PDF object remains in the dev LocalStack bucket. Review (code-auditor): round 1 PASS_WITH_WARNINGS (generic assignment notification, silently skipping DB spec, specs outside the command) + user decisions (request owner = customer owner with in-transaction CRM owner-change hook; text DXF only) → round 2 FAIL (create vs owner-change race) → `FOR SHARE` owner read inside each create attempt with fake + real-DB specs and negative controls → re-review PASS, Low only. Known limitations: `owner_changed` timeline rows carry no actor; the real-DB race spec relies on a 600 ms wait and on seeded accounts sales_a/sales_b; an engineer reassigned away keeps the earlier notification text; form has no owner field by decision; picker limit 100; multer memory storage; RFC 5987 parentheses in `filename*`.

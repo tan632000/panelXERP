@@ -8,6 +8,7 @@ import { ENABLED_PLUGINS } from '@kernel/platform/plugins/enabled-plugins';
 
 import { CATALOG_FEATURES } from '@plugins/catalog/catalog.features';
 import { CRM_FEATURES } from '@plugins/crm/crm.features';
+import { SALES_FEATURES } from '@plugins/sales/sales.features';
 
 import type { ErpFeature } from '@kernel/platform/features/feature.contract';
 
@@ -18,7 +19,11 @@ import type { ErpFeature } from '@kernel/platform/features/feature.contract';
  * plugin left out here has its migrations silently skipped and its own feature keys rejected
  * as unknown. Add a plugin's `*_FEATURES` here the moment the plugin is registered.
  */
-const FEATURE_CATALOG: ErpFeature[] = [...CRM_FEATURES, ...CATALOG_FEATURES];
+const FEATURE_CATALOG: ErpFeature[] = [
+  ...CRM_FEATURES,
+  ...CATALOG_FEATURES,
+  ...SALES_FEATURES,
+];
 
 function resolveGlobalEnabledFeatures(): ErpFeature[] {
   const pluginNames = new Set(ENABLED_PLUGINS.map((plugin) => plugin.name));

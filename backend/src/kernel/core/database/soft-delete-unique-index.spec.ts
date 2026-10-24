@@ -219,6 +219,16 @@ function releasedColumns(): Set<string> {
   return released;
 }
 
+/**
+ * Document numbers are the deliberate exception: a quote number that has been issued stays
+ * reserved after its document is deleted, so the same number never names two documents. The
+ * creators of these documents retry on a lost race (`createWithDocumentCode`), which is why
+ * they can rely on the index counting deleted rows.
+ */
+const DOCUMENT_NUMBER_INDEXES: ReadonlySet<string> = new Set([
+  'uq_sales_requests_code',
+]);
+
 describe('unique indexes free the values of a deleted record', () => {
   const created = createdUniqueIndexes();
   const dropped = droppedIndexes(created);
@@ -256,6 +266,7 @@ describe('unique indexes free the values of a deleted record', () => {
       if (dropped.has(key)) continue;
       if (!softTables.has(index.table)) continue;
       if (/is_deleted/i.test(index.statement)) continue;
+      if (DOCUMENT_NUMBER_INDEXES.has(key)) continue;
 
       reserving.push(
         `${index.table}.${index.name} (${index.migration}) — ` +

@@ -11,6 +11,10 @@ import {
   customerApiRoutes,
   customerPageRoutes,
 } from "@plugins/crm/customer/constants";
+import {
+  requestApiRoutes,
+  requestPageRoutes,
+} from "@plugins/sales/request/constants";
 
 describe("apiRoutes", () => {
   it("should expose auth me endpoint", () => {
@@ -33,5 +37,16 @@ describe("apiRoutes", () => {
     expect(itemApiRoutes.bulkDelete).toBe("/items/bulk-delete");
     expect(itemApiRoutes.import).toBe("/items/import");
     expect(itemPageRoutes.list).toBe("/catalog/items");
+  });
+
+  it("should expose the sales request routes", () => {
+    expect(requestApiRoutes.detail(7)).toBe("/sales/requests/7");
+    expect(requestApiRoutes.attachment(7, 2)).toBe(
+      "/sales/requests/7/attachments/2",
+    );
+    expect(requestApiRoutes.engineerOptions).toBe(
+      "/sales/requests/engineer-options",
+    );
+    expect(requestPageRoutes.detail(7)).toBe("/sales/requests/7");
   });
 });

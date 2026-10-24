@@ -12,12 +12,17 @@ import {
 
 import { catalogPlugin } from '@plugins/catalog/catalog.plugin';
 import { crmPlugin } from '@plugins/crm/crm.plugin';
+import { salesPlugin } from '@plugins/sales/sales.plugin';
 
 import type { ErpPlugin } from '@kernel/platform/plugins/plugin.contract';
 import type { DataSource } from 'typeorm';
 
 /** All plugins shipped in this build — add new plugins here only */
-export const PLUGIN_CATALOG: ErpPlugin[] = [crmPlugin, catalogPlugin];
+export const PLUGIN_CATALOG: ErpPlugin[] = [
+  crmPlugin,
+  catalogPlugin,
+  salesPlugin,
+];
 
 const defaultPluginNames = PLUGIN_CATALOG.map((plugin) => plugin.name);
 

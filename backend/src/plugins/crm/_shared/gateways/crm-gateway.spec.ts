@@ -4,20 +4,28 @@ import {
 } from '@plugins/crm/_shared/crm-fake-repo.helper-spec';
 import { CrmGateway } from '@plugins/crm/_shared/gateways/crm-gateway';
 
+import type { Contact } from '@plugins/crm/contact/entities/contact.entity';
 import type { Customer } from '@plugins/crm/customer/entities/customer.entity';
 import type { Project } from '@plugins/crm/project/entities/project.entity';
 
 type CustomerRow = Customer & FakeRow;
 type ProjectRow = Project & FakeRow;
+type ContactRow = Contact & FakeRow;
 
 describe('CrmGateway', () => {
   function build() {
     const customers = new FakeRepo<CustomerRow>();
     const projects = new FakeRepo<ProjectRow>();
+    const contacts = new FakeRepo<ContactRow>();
     return {
       customers,
       projects,
-      gateway: new CrmGateway(customers as never, projects as never),
+      contacts,
+      gateway: new CrmGateway(
+        customers as never,
+        projects as never,
+        contacts as never,
+      ),
     };
   }
 
@@ -118,5 +126,88 @@ describe('CrmGateway', () => {
   it('answers null for a project id that never existed', async () => {
     const { gateway } = build();
     await expect(gateway.getProjectSummary(404)).resolves.toBeNull();
+  });
+
+  it('summarises many customers in one read, deleted ones included', async () => {
+    const { customers, gateway } = build();
+    const live = customers.seed({
+      code: 'KH_0001',
+      name: 'Alpha',
+      salesOwnerId: 11,
+    } as Omit<CustomerRow, 'id' | 'isDeleted'>);
+    const deleted = customers.seed({
+      code: 'KH_0002',
+      name: 'Beta',
+      salesOwnerId: 11,
+      isDeleted: true,
+      deletedAt: new Date(),
+    } as Omit<CustomerRow, 'id'>);
+
+    const summaries = await gateway.getCustomerSummaries([
+      live.id,
+      deleted.id,
+      live.id,
+      999,
+    ]);
+
+    expect([...summaries.keys()].sort()).toEqual([live.id, deleted.id].sort());
+    expect(summaries.get(deleted.id)?.isDeleted).toBe(true);
+    expect(customers.find).toHaveBeenCalledTimes(1);
+    await expect(gateway.getCustomerSummaries([])).resolves.toEqual(new Map());
+  });
+
+  it('summarises a contact, soft-deleted rows included', async () => {
+    const { contacts, gateway } = build();
+    const live = contacts.seed({
+      customerId: 5,
+      name: 'Nguyen An',
+      position: 'Buyer',
+      phone: '0900000001',
+      email: 'an@example.com',
+      isPrimary: true,
+    } as Omit<ContactRow, 'id' | 'isDeleted'>);
+    const deleted = contacts.seed({
+      customerId: 5,
+      name: 'Tran Binh',
+      isPrimary: false,
+      isDeleted: true,
+      deletedAt: new Date(),
+    } as Omit<ContactRow, 'id'>);
+
+    await expect(gateway.getContactSummary(live.id)).resolves.toEqual({
+      id: live.id,
+      customerId: 5,
+      name: 'Nguyen An',
+      position: 'Buyer',
+      phone: '0900000001',
+      email: 'an@example.com',
+      isDeleted: false,
+    });
+    await expect(gateway.getContactSummary(deleted.id)).resolves.toMatchObject({
+      name: 'Tran Binh',
+      position: null,
+      isDeleted: true,
+    });
+    await expect(gateway.getContactSummary(404)).resolves.toBeNull();
+  });
+
+  it('reads the owner under a shared lock inside the caller transaction', async () => {
+    const { gateway } = build();
+    const query = jest.fn().mockResolvedValue([{ sales_owner_id: 12 }]);
+    const manager = { query } as never;
+
+    await expect(gateway.lockCustomerOwner(manager, 5)).resolves.toBe(12);
+
+    const [sql, params] = query.mock.calls[0] as [string, unknown[]];
+    expect(sql).toContain('FOR SHARE');
+    expect(sql).toContain('is_deleted = false');
+    expect(params).toEqual([5]);
+  });
+
+  it('answers null for an unknown or deleted customer', async () => {
+    const { gateway } = build();
+    const manager = { query: jest.fn().mockResolvedValue([]) } as never;
+
+    await expect(gateway.lockCustomerOwner(manager, 5)).resolves.toBeNull();
   });
 });

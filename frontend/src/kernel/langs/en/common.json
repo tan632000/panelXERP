@@ -66,6 +66,7 @@
     "daysAgo": "{count} days ago",
     "fallbackMessage": "You have a new notification",
     "events": {
+      "sales_request_assigned": "You have been assigned to estimate quote request {code} — {title}.",
       "sp_can_bo_sung_ky_thuat": "Product {sfgCode} — {productName} needs technical information.",
       "purchaseRequestAwaitingReceipt": "Purchase request {prId} ({department, select, sales {Sales} purchasing {Purchasing} mechanical {Mechanical} surfaceTreatment {Surface Treatment} warehouse {Warehouse} packaging {Packaging} accounting {Accounting} hr {HR} technical {Technical} qc {QC} lab {Lab} housekeeping {Housekeeping} security {Security} it {IT} other {{department}}}) is awaiting receipt.",
       "purchaseRequestReceived": "Purchase request {prId} has been received and is awaiting your approval.",

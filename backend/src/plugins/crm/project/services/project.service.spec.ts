@@ -10,6 +10,7 @@ import {
   FakeRepo,
   type FakeRow,
 } from '@plugins/crm/_shared/crm-fake-repo.helper-spec';
+import { CustomerOwnerChangeRegistry } from '@plugins/crm/_shared/gateways/customer-owner-change-registry';
 import { ReferenceCheckRegistry } from '@plugins/crm/_shared/gateways/reference-check-registry';
 import { CustomerService } from '@plugins/crm/customer/services/customer.service';
 import { ProjectService } from '@plugins/crm/project/services/project.service';
@@ -63,6 +64,7 @@ function buildService() {
     {} as never,
     new DataScopeService(),
     registry,
+    new CustomerOwnerChangeRegistry(),
   );
 
   const customerOf = (
@@ -195,6 +197,18 @@ describe('ProjectService', () => {
         'DA_0002',
       ]);
       expect(forEngineer.data).toEqual([]);
+    });
+
+    it('narrows the list to one customer when asked', async () => {
+      const { service, customerOf } = buildService();
+      const first = customerOf(SALES_A.userId, 'KH_0001');
+      const second = customerOf(SALES_A.userId, 'KH_0002');
+      await service.create(dto(first.id, { code: 'DA_0001' }), SALES_A);
+      await service.create(dto(second.id, { code: 'DA_0002' }), SALES_A);
+
+      const listed = await service.findAll({ customerId: second.id }, SALES_A);
+
+      expect(listed.data.map((row) => row.code)).toEqual(['DA_0002']);
     });
 
     it('hides the projects of a soft-deleted customer', async () => {

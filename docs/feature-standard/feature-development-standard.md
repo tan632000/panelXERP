@@ -253,7 +253,10 @@ business logic — they parse, delegate, and return.
   (`WHERE is_deleted = false`) — `soft-delete-unique-index.spec.ts` checks this. This is what makes
   a deleted record fully re-creatable: after a soft delete, the same code and the same field values
   must be accepted again as a brand-new record (§3.6.2). A plain `UNIQUE` constraint would block
-  that and is a defect.
+  that and is a defect. The one exception is a document number (e.g. `YC_2027_0001`):
+  a generated document code stays unique across soft-deleted rows so a number is never issued
+  twice; such an index is listed in `DOCUMENT_NUMBER_INDEXES` of `soft-delete-unique-index.spec.ts`
+  and its creator retries on a lost race (`createWithDocumentCode`).
 - Migrations are discovered per feature by glob (`getFeatureMigrationGlobs`), so a migration is
   only picked up once the feature is registered in the plugin's `*.features.ts` (§9).
 

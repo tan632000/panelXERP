@@ -76,7 +76,7 @@ Strictly sequential (one writer per shared registration file, R-08).
 | 04 | Customer + contact | P1 | AC-04, AC-05, AC-06 | `*/src/plugins/crm/customer`, `contact` | 03 | done |
 | 05 | Project | P1 | AC-05, AC-06 | `*/src/plugins/crm/project` | 04 | done |
 | 06 | Item catalog + import | P1 | AC-05, AC-06, AC-07 | `*/src/plugins/catalog/` | 05 | done |
-| 07 | Sales request + attachments + assignment | P1 | AC-08, AC-14 | `*/src/plugins/sales/request` | 06 | pending |
+| 07 | Sales request + attachments + assignment | P1 | AC-08, AC-14 | `*/src/plugins/sales/request` | 06 | done |
 | 08 | Estimate (BOM + costing) | P1 | AC-09 | `*/src/plugins/sales/estimate` | 07 | pending |
 | 09 | Quotation pricing + versions | P1 | AC-10, AC-11 (revise race) | `*/src/plugins/sales/quotation` | 08 | pending |
 | 10 | Quotation approval + feedback + PDF | P1 | AC-11 (revise–confirm race), AC-12 | `*/src/plugins/sales/quotation` (approval, feedback, pdf) | 09 | pending |

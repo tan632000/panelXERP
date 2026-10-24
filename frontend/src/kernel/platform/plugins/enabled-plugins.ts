@@ -12,6 +12,7 @@ import {
 
 import { catalogFrontendPlugin } from "@plugins/catalog/plugin";
 import { crmFrontendPlugin } from "@plugins/crm/plugin";
+import { salesFrontendPlugin } from "@plugins/sales/plugin";
 
 import type { ErpFrontendPlugin } from "@kernel/platform/plugins/plugin.contract";
 
@@ -19,6 +20,7 @@ import type { ErpFrontendPlugin } from "@kernel/platform/plugins/plugin.contract
 export const FRONTEND_PLUGIN_CATALOG: ErpFrontendPlugin[] = [
   crmFrontendPlugin,
   catalogFrontendPlugin,
+  salesFrontendPlugin,
 ];
 
 const defaultPluginKeys = FRONTEND_PLUGIN_CATALOG.map((plugin) => plugin.key);

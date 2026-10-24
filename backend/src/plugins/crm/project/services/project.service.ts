@@ -80,7 +80,7 @@ export class ProjectService implements OnModuleInit {
 
   /** The list's keyword and owner-scope conditions, before any column selection. */
   private listWhere(
-    query: Pick<ProjectFilterDto, 'search'>,
+    query: Pick<ProjectFilterDto, 'search' | 'customerId'>,
     actor: AuthUserPayload,
   ) {
     const base: Record<string, unknown> = {
@@ -91,6 +91,7 @@ export class ProjectService implements OnModuleInit {
         ...ownerCondition(this.dataScope.scopeOf(actor), actor.userId),
       },
     };
+    if (query.customerId) base.customerId = query.customerId;
     return buildIlikeOrWhere(
       base,
       ['code', 'name', 'siteAddress'],

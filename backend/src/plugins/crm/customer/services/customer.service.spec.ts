@@ -10,6 +10,7 @@ import {
   FakeRepo,
   type FakeRow,
 } from '@plugins/crm/_shared/crm-fake-repo.helper-spec';
+import { CustomerOwnerChangeRegistry } from '@plugins/crm/_shared/gateways/customer-owner-change-registry';
 import { ReferenceCheckRegistry } from '@plugins/crm/_shared/gateways/reference-check-registry';
 import { CustomerService } from '@plugins/crm/customer/services/customer.service';
 
@@ -51,13 +52,15 @@ function buildService(options: { eligibleOwner?: boolean } = {}) {
     createQueryBuilder: jest.fn().mockReturnValue(ownerQuery),
   };
   const registry = new ReferenceCheckRegistry();
+  const ownerChanges = new CustomerOwnerChangeRegistry();
   const service = new CustomerService(
     customers as never,
     users as never,
     new DataScopeService(),
     registry,
+    ownerChanges,
   );
-  return { service, customers, users, ownerQuery, registry };
+  return { service, customers, users, ownerQuery, registry, ownerChanges };
 }
 
 function dto(overrides: Partial<CreateCustomerDto> = {}): CreateCustomerDto {
@@ -163,6 +166,53 @@ describe('CustomerService', () => {
       await expect(
         service.update(mine.id, { salesOwnerId: SALES_B.userId }, SALES_A),
       ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('tells the owner-change hooks inside the same transaction, only when the owner changes', async () => {
+      const { service, ownerChanges } = buildService();
+      const handler = jest.fn().mockResolvedValue(undefined);
+      ownerChanges.register('request', handler);
+      const created = await service.create(
+        dto({ salesOwnerId: SALES_A.userId }),
+        MANAGER,
+      );
+
+      await service.update(created.id, { name: 'Renamed' }, MANAGER);
+      await service.update(
+        created.id,
+        { salesOwnerId: SALES_A.userId },
+        MANAGER,
+      );
+      expect(handler).not.toHaveBeenCalled();
+
+      await service.update(
+        created.id,
+        { salesOwnerId: SALES_B.userId },
+        MANAGER,
+      );
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledWith(
+        expect.anything(),
+        created.id,
+        SALES_B.userId,
+      );
+    });
+
+    it('rolls the reassignment back when a hook fails', async () => {
+      const { service, customers, ownerChanges } = buildService();
+      ownerChanges.register('request', () =>
+        Promise.reject(new Error('hook failed')),
+      );
+      const created = await service.create(
+        dto({ salesOwnerId: SALES_A.userId }),
+        MANAGER,
+      );
+
+      await expect(
+        service.update(created.id, { salesOwnerId: SALES_B.userId }, MANAGER),
+      ).rejects.toThrow('hook failed');
+
+      expect(customers.rows[0].salesOwnerId).toBe(SALES_A.userId);
     });
 
     it('lets a manager assign and reassign to an eligible sales account', async () => {
