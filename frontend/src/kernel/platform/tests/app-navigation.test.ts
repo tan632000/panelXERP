@@ -12,6 +12,7 @@ describe("app sidebar", () => {
   it("renders the business sections of the enabled plugins, crm first", () => {
     expect(appNavigationSections.map((section) => section.title)).toEqual([
       "sidebarCrm",
+      "sidebarCatalog",
     ]);
     expect(appNavigationSections[0].items.map((item) => item.href)).toEqual([
       "/crm/customers",

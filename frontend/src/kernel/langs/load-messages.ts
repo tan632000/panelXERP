@@ -1,8 +1,10 @@
 import authEn from "@kernel/langs/en/auth.json";
+import catalogEn from "@kernel/langs/en/catalog.json";
 import commonEn from "@kernel/langs/en/common.json";
 import contactEn from "@kernel/langs/en/contact.json";
 import crmEn from "@kernel/langs/en/crm.json";
 import customerEn from "@kernel/langs/en/customer.json";
+import itemEn from "@kernel/langs/en/item.json";
 import metadataEn from "@kernel/langs/en/metadata.json";
 import modalEn from "@kernel/langs/en/modal.json";
 import permissionEn from "@kernel/langs/en/permission.json";
@@ -10,10 +12,12 @@ import projectEn from "@kernel/langs/en/project.json";
 import statusEn from "@kernel/langs/en/status.json";
 import systemEn from "@kernel/langs/en/system.json";
 import authVi from "@kernel/langs/vi/auth.json";
+import catalogVi from "@kernel/langs/vi/catalog.json";
 import commonVi from "@kernel/langs/vi/common.json";
 import contactVi from "@kernel/langs/vi/contact.json";
 import crmVi from "@kernel/langs/vi/crm.json";
 import customerVi from "@kernel/langs/vi/customer.json";
+import itemVi from "@kernel/langs/vi/item.json";
 import metadataVi from "@kernel/langs/vi/metadata.json";
 import modalVi from "@kernel/langs/vi/modal.json";
 import permissionVi from "@kernel/langs/vi/permission.json";
@@ -27,6 +31,8 @@ export const enMessages = {
   customer: customerEn,
   contact: contactEn,
   project: projectEn,
+  catalog: catalogEn,
+  item: itemEn,
   system: systemEn,
   permission: permissionEn,
   common: commonEn,
@@ -41,6 +47,8 @@ export const viMessages = {
   customer: customerVi,
   contact: contactVi,
   project: projectVi,
+  catalog: catalogVi,
+  item: itemVi,
   system: systemVi,
   permission: permissionVi,
   common: commonVi,

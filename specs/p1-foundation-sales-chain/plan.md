@@ -13,7 +13,7 @@ Roadmap: [docs/development-roadmap.md](../../docs/development-roadmap.md). Host:
 
 ## Out of scope
 - Stock check, purchase suggestion, barcode, warehouse (P2); production, QC, delivery, accounting, KPI (P3–P6); e-invoice.
-- Quotation diff view, Excel exports, BOM Excel import, KPI timing fields (cut by R-15). Item catalog Excel import stays.
+- Quotation diff view, list Excel exports, BOM Excel import, KPI timing fields (cut by R-15). Item catalog Excel import stays; the customer-facing quotation .xlsx export in the `docs/BG.xlsx` layout is IN (user decision 2026-10-24).
 - Configurable approval engine, custom fields, multi-tenant, mobile app, CI pipeline.
 
 ## Decisions
@@ -75,7 +75,7 @@ Strictly sequential (one writer per shared registration file, R-08).
 | 03 | Roles, permissions, data scope | P1 | AC-04 | `backend/src/kernel/core/database/seeds/`, `backend/src/kernel/shared/` scope helper | 02 | done |
 | 04 | Customer + contact | P1 | AC-04, AC-05, AC-06 | `*/src/plugins/crm/customer`, `contact` | 03 | done |
 | 05 | Project | P1 | AC-05, AC-06 | `*/src/plugins/crm/project` | 04 | done |
-| 06 | Item catalog + import | P1 | AC-05, AC-06, AC-07 | `*/src/plugins/catalog/` | 05 | pending |
+| 06 | Item catalog + import | P1 | AC-05, AC-06, AC-07 | `*/src/plugins/catalog/` | 05 | done |
 | 07 | Sales request + attachments + assignment | P1 | AC-08, AC-14 | `*/src/plugins/sales/request` | 06 | pending |
 | 08 | Estimate (BOM + costing) | P1 | AC-09 | `*/src/plugins/sales/estimate` | 07 | pending |
 | 09 | Quotation pricing + versions | P1 | AC-10, AC-11 (revise race) | `*/src/plugins/sales/quotation` | 08 | pending |
@@ -90,3 +90,4 @@ Shared registration files every feature task appends to (owned by the running ta
 - Sweep 1: files reread 12 / deltas 11 / stale references fixed 5 / conflicts left 0.
 - Closure pass 2 (fresh reviewer): R-04, R-06, R-12, R-14 and the 4 earlier contradictions → PASS (R-14 replayed independently in bash; compose `env_file` confirmed). 3 new contradictions repaired: `file:upload` → `file:write` (task-03); shared `createWithDocumentCode` helper in task-07 reused by tasks 08/09/11 (D-09 for all codes); D-03 adds `draft` + `submit` transition (task-09/10). Paper-review budget (2 rounds) exhausted: further findings require runtime evidence.
 - Limitation: Commands are written for Git Bash; quoting from PowerShell 5.1 is unverified.
+- Scope update (2026-10-24, user decision after supplying `docs/BG.xlsx`, the company quotation): item import reads the BG layout (task-06 Import rules); every catalog item needs a code; quotation number `NN-ddmmyyyy/BG` per day (task-09, extends D-09); quotation output in .xlsx + PDF following the BG layout with editable default terms (task-10).

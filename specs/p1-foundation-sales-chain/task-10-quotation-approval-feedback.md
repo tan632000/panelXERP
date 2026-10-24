@@ -6,7 +6,7 @@ Status: pending
 A quotation version is approved internally in one step by someone other than its creator, can be printed as PDF for the customer, and customer feedback and final decision are recorded.
 
 ## Scope
-- In: `submit` (`draft → pending_approval`, by the version creator or SalesManager; notifies approvers after commit); approval per D-11 (`quotation:approve` for `salesManager`, `director`, `admin`; approver ≠ `version.createdBy` → 403); reject sets the version `rejected` with reason (immutable, D-03); Sales revises to N+1. Approve on first approved version advances request to `quoted` synchronously (D-07). Customer feedback log (date, channel, content). `customer_confirmed` only from `approved`; `cancelled` with reason → request `lost`. All transitions lock the header (D-08). Notifications after commit: approvers on `submit`, sales owner on approve/reject. PDF of an approved version (kernel print utilities).
+- In: `submit` (`draft → pending_approval`, by the version creator or SalesManager; notifies approvers after commit); approval per D-11 (`quotation:approve` for `salesManager`, `director`, `admin`; approver ≠ `version.createdBy` → 403); reject sets the version `rejected` with reason (immutable, D-03); Sales revises to N+1. Approve on first approved version advances request to `quoted` synchronously (D-07). Customer feedback log (date, channel, content). `customer_confirmed` only from `approved`; `cancelled` with reason → request `lost`. All transitions lock the header (D-08). Notifications after commit: approvers on `submit`, sales owner on approve/reject. Customer-facing output of an approved version in BOTH .xlsx and PDF following the layout of `docs/BG.xlsx` (user decision 2026-10-24): company letterhead (name, address, website, tax code, bank accounts from config), title `BẢNG CHÀO GIÁ`, number `NN-ddmmyyyy/BG`, quotation date, `Kính gửi` customer, recipient contact name/phone/email, sender (sales owner) name/phone/email, one Roman-numbered section per panel with its quantity, unit price and amount, the panel's BOM lines listed below it (description, code, brand, unit, quantity), subtotal, VAT at the version rate, total after tax, numbered terms, and the `Xác nhận đặt hàng` / place-and-date block. Default terms (warranty 12 months; delivery 1–2 weeks; delivery at the seller's workshop; 50% advance after contract, balance before delivery; valid 15 days) are copied into each new quotation and editable per version.
 - Out: e-signature, email sending, configurable approval engine.
 
 ## Coverage
@@ -21,8 +21,8 @@ A quotation version is approved internally in one step by someone other than its
 1. Approval service with SoD check and row lock.
 2. Feedback entity/migration + service.
 3. Confirm/cancel transitions + request status port.
-4. PDF render for approved versions only.
-5. Frontend approval panel, feedback log, confirm/cancel actions, PDF button.
+4. Excel + PDF render (BG layout) for approved versions only; spec: the generated xlsx has the header row `STT | MÔ TẢ | MÃ HÀNG | HÃNG SẢN XUẤT | ĐV TÍNH | SỐ LƯỢNG | Đơn giá (VNĐ) | Thành tiền (VNĐ)`, one Roman-numbered row per panel, and the VAT/total rows matching the version totals.
+5. Frontend approval panel, feedback log, confirm/cancel actions, Excel and PDF download buttons.
 6. Specs: submit moves `draft → pending_approval` and notifies approvers once; approve a `draft` → 409; creator approves own version → 403; `sales` approves → 403; confirm `pending_approval` → 409; reject → version `rejected`, revise from it succeeds; approve sets request `quoted`; PDF of non-approved → 409; revise and confirm on the same approved version via `Promise.all` on real DB → exactly one succeeds and the version is not both `closed` and `customer_confirmed`.
 
 ## Acceptance

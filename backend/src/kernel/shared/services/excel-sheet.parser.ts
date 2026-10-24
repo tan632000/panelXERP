@@ -180,6 +180,39 @@ function declaredUncompressedSize(entry: JSZip.JSZipObject): number | null {
 }
 
 /**
+ * Opens an uploaded zip and rejects it when its entries claim more total decompressed content
+ * than `maxBytes` (default `EXCEL_IMPORT_MAX_DECOMPRESSED_BYTES`), read from the central
+ * directory before any entry is decompressed. An entry whose declared size cannot be trusted is
+ * refused outright, since an unreadable size is exactly what a zip bomb depends on to hide its
+ * real cost. Callers that load the workbook another way (a feature reading it whole) run this
+ * first.
+ */
+export async function openBoundedZip(
+  buffer: Buffer,
+  maxBytes: number = EXCEL_IMPORT_MAX_DECOMPRESSED_BYTES,
+): Promise<JSZip> {
+  let zip: JSZip;
+  try {
+    zip = await JSZip.loadAsync(buffer);
+  } catch {
+    throw new ExcelParseError('invalidFile');
+  }
+
+  let totalBytes = 0;
+  for (const name of Object.keys(zip.files)) {
+    const entry = zip.files[name];
+    if (entry.dir) continue;
+    const size = declaredUncompressedSize(entry);
+    if (size === null) throw new ExcelParseError('invalidFile');
+    totalBytes += size;
+    if (totalBytes > maxBytes) {
+      throw new ExcelParseError('invalidFile');
+    }
+  }
+  return zip;
+}
+
+/**
  * Reads the first worksheet of an uploaded `.xlsx` into rows keyed by the spec's columns.
  *
  * Rows are read with the streaming reader so a small, highly compressed file with one styled
@@ -393,33 +426,8 @@ export class ExcelSheetParser {
     return raw;
   }
 
-  /**
-   * Rejects a zip whose entries claim more total decompressed content than
-   * `EXCEL_IMPORT_MAX_DECOMPRESSED_BYTES`, read from the central directory before any entry is
-   * decompressed. `JSZip.loadAsync` itself only parses that directory (bounded by the upload's
-   * own size cap); an entry whose declared size cannot be trusted is refused outright, since an
-   * unreadable size is exactly what a zip bomb depends on to hide its real cost.
-   */
-  private async assertBoundedZip(buffer: Buffer): Promise<JSZip> {
-    let zip: JSZip;
-    try {
-      zip = await JSZip.loadAsync(buffer);
-    } catch {
-      throw new ExcelParseError('invalidFile');
-    }
-
-    let totalBytes = 0;
-    for (const name of Object.keys(zip.files)) {
-      const entry = zip.files[name];
-      if (entry.dir) continue;
-      const size = declaredUncompressedSize(entry);
-      if (size === null) throw new ExcelParseError('invalidFile');
-      totalBytes += size;
-      if (totalBytes > EXCEL_IMPORT_MAX_DECOMPRESSED_BYTES) {
-        throw new ExcelParseError('invalidFile');
-      }
-    }
-    return zip;
+  private assertBoundedZip(buffer: Buffer): Promise<JSZip> {
+    return openBoundedZip(buffer);
   }
 
   /**

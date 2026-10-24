@@ -1026,6 +1026,135 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/items": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List items
+     * @description Paginated item list with search and column filters.
+     */
+    get: operations["ItemController_findAll"];
+    put?: never;
+    /**
+     * Create item
+     * @description Code must be unique among active items (case-insensitive).
+     */
+    post: operations["ItemController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/items/column-values": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List distinct values of one filterable item column
+     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+     */
+    get: operations["ItemController_findColumnValues"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/items/import-template": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download the item import template
+     * @description An .xlsx with the header row the import reads: STT, MÔ TẢ, MÃ HÀNG, HÃNG SẢN XUẤT, ĐV TÍNH, ĐƠN GIÁ (VNĐ), NHÓM, QUY CÁCH, GHI CHÚ.
+     */
+    get: operations["ItemController_importTemplate"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/items/import": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Import items from an Excel quotation sheet
+     * @description Reads the first worksheet of an .xlsx (max 5 MB, 2000 data rows). The header row is found within the first 50 rows by its "MÔ TẢ" and "MÃ HÀNG" cells. Every row is validated first; valid rows are inserted in one transaction and invalid rows are reported by sheet row.
+     */
+    post: operations["ItemController_import"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/items/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get item by ID */
+    get: operations["ItemController_findOne"];
+    put?: never;
+    post?: never;
+    /**
+     * Soft-delete item
+     * @description Refused with 409 while any sales document references the item.
+     */
+    delete: operations["ItemController_remove"];
+    options?: never;
+    head?: never;
+    /**
+     * Update item
+     * @description The code is immutable.
+     */
+    patch: operations["ItemController_update"];
+    trace?: never;
+  };
+  "/api/v1/items/bulk-delete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Soft-delete selected items
+     * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
+     */
+    post: operations["ItemController_bulkRemove"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1362,6 +1491,74 @@ export interface components {
       name?: string;
       /** @description Site address */
       siteAddress?: string;
+      /** @description Note */
+      note?: string;
+    };
+    CreateItemDto: {
+      /**
+       * @description Manufacturer part number or internal code
+       * @example LC1D09M7
+       */
+      code: string;
+      /** @description Item name */
+      name: string;
+      /** @description Technical specification */
+      specification?: string;
+      /** @description Brand */
+      brand?: string;
+      /**
+       * @description Item group
+       * @enum {string}
+       */
+      group:
+        | "enclosure"
+        | "breaker"
+        | "contactor"
+        | "relay"
+        | "plc"
+        | "inverter"
+        | "cable"
+        | "terminal"
+        | "accessory"
+        | "other";
+      /** @description Unit of measure, e.g. pcs, m, set */
+      unit: string;
+      /** @description Reference purchase price in VND (>= 0) */
+      referencePrice?: number | null;
+      /** @description Note */
+      note?: string;
+    };
+    UpdateItemDto: {
+      /**
+       * @description Manufacturer part number or internal code
+       * @example LC1D09M7
+       */
+      code?: string;
+      /** @description Item name */
+      name?: string;
+      /** @description Technical specification */
+      specification?: string;
+      /** @description Brand */
+      brand?: string;
+      /**
+       * @description Item group
+       * @enum {string}
+       */
+      group?:
+        | "enclosure"
+        | "breaker"
+        | "contactor"
+        | "relay"
+        | "plc"
+        | "inverter"
+        | "cable"
+        | "terminal"
+        | "accessory"
+        | "other";
+      /** @description Unit of measure, e.g. pcs, m, set */
+      unit?: string;
+      /** @description Reference purchase price in VND (>= 0) */
+      referencePrice?: number | null;
       /** @description Note */
       note?: string;
     };
@@ -3388,6 +3585,370 @@ export interface operations {
         content?: never;
       };
       /** @description Forbidden — requires project:delete */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ItemController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+        sortBy?: string;
+        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+        sortOrder?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated item list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires item:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ItemController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateItemDto"];
+      };
+    };
+    responses: {
+      /** @description Item created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires item:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Duplicate item code */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ItemController_findColumnValues: {
+    parameters: {
+      query: {
+        /** @description Column key: code, name, brand, group, unit */
+        column: string;
+        /** @description Search within the values */
+        search?: string;
+        /** @description Page number */
+        page?: number;
+        /** @description Values per page */
+        limit?: number;
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Keyword search of the list itself */
+        listSearch?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated distinct column values */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Column is not filterable */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires item:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ItemController_importTemplate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The template workbook */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires item:import */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ItemController_import: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description Created count and the rows that were rejected */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not an .xlsx, too large, no header row or no data rows */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires item:import */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Import rolled back */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ItemController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Item found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found or soft-deleted */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ItemController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Item soft-deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires item:delete */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Item not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Item is referenced by a document */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ItemController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateItemDto"];
+      };
+    };
+    responses: {
+      /** @description Item updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error or attempt to change the code */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires item:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Item not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ItemController_bulkRemove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkDeleteDto"];
+      };
+    };
+    responses: {
+      /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Empty or invalid id list */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires item:delete */
       403: {
         headers: {
           [name: string]: unknown;

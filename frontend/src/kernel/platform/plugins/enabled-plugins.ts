@@ -10,6 +10,7 @@ import {
   parseEnabledPluginKeys,
 } from "@kernel/platform/plugins/resolve-enabled-plugins";
 
+import { catalogFrontendPlugin } from "@plugins/catalog/plugin";
 import { crmFrontendPlugin } from "@plugins/crm/plugin";
 
 import type { ErpFrontendPlugin } from "@kernel/platform/plugins/plugin.contract";
@@ -17,6 +18,7 @@ import type { ErpFrontendPlugin } from "@kernel/platform/plugins/plugin.contract
 /** All frontend plugins shipped in this build */
 export const FRONTEND_PLUGIN_CATALOG: ErpFrontendPlugin[] = [
   crmFrontendPlugin,
+  catalogFrontendPlugin,
 ];
 
 const defaultPluginKeys = FRONTEND_PLUGIN_CATALOG.map((plugin) => plugin.key);

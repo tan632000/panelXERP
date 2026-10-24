@@ -1,7 +1,8 @@
 {
   "sections": {},
   "titles": {
-    "customer": "Add new customer"
+    "customer": "Add new customer",
+    "item": "Add new item"
   },
   "fields": {},
   "reportTypes": {},

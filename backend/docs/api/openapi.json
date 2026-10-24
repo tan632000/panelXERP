@@ -2715,6 +2715,465 @@
           "crm/projects"
         ]
       }
+    },
+    "/api/v1/items": {
+      "get": {
+        "description": "Paginated item list with search and column filters.",
+        "operationId": "ItemController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.",
+            "schema": {
+              "default": "createdAt",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order. Defaults to DESC for createdAt, ASC otherwise.",
+            "schema": {
+              "default": "DESC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated item list"
+          },
+          "403": {
+            "description": "Forbidden — requires item:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List items",
+        "tags": [
+          "catalog/items"
+        ]
+      },
+      "post": {
+        "description": "Code must be unique among active items (case-insensitive).",
+        "operationId": "ItemController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Item created"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Forbidden — requires item:create"
+          },
+          "409": {
+            "description": "Duplicate item code"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create item",
+        "tags": [
+          "catalog/items"
+        ]
+      }
+    },
+    "/api/v1/items/column-values": {
+      "get": {
+        "description": "Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.",
+        "operationId": "ItemController_findColumnValues",
+        "parameters": [
+          {
+            "name": "column",
+            "required": true,
+            "in": "query",
+            "description": "Column key: code, name, brand, group, unit",
+            "schema": {
+              "example": "classification",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search within the values",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Values per page",
+            "schema": {
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listSearch",
+            "required": false,
+            "in": "query",
+            "description": "Keyword search of the list itself",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated distinct column values"
+          },
+          "400": {
+            "description": "Column is not filterable"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — requires item:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List distinct values of one filterable item column",
+        "tags": [
+          "catalog/items"
+        ]
+      }
+    },
+    "/api/v1/items/import-template": {
+      "get": {
+        "description": "An .xlsx with the header row the import reads: STT, MÔ TẢ, MÃ HÀNG, HÃNG SẢN XUẤT, ĐV TÍNH, ĐƠN GIÁ (VNĐ), NHÓM, QUY CÁCH, GHI CHÚ.",
+        "operationId": "ItemController_importTemplate",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "The template workbook"
+          },
+          "403": {
+            "description": "Forbidden — requires item:import"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download the item import template",
+        "tags": [
+          "catalog/items"
+        ]
+      }
+    },
+    "/api/v1/items/import": {
+      "post": {
+        "description": "Reads the first worksheet of an .xlsx (max 5 MB, 2000 data rows). The header row is found within the first 50 rows by its \"MÔ TẢ\" and \"MÃ HÀNG\" cells. Every row is validated first; valid rows are inserted in one transaction and invalid rows are reported by sheet row.",
+        "operationId": "ItemController_import",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created count and the rows that were rejected"
+          },
+          "400": {
+            "description": "Not an .xlsx, too large, no header row or no data rows"
+          },
+          "403": {
+            "description": "Forbidden — requires item:import"
+          },
+          "409": {
+            "description": "Import rolled back"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Import items from an Excel quotation sheet",
+        "tags": [
+          "catalog/items"
+        ]
+      }
+    },
+    "/api/v1/items/{id}": {
+      "get": {
+        "operationId": "ItemController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item found"
+          },
+          "404": {
+            "description": "Not found or soft-deleted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get item by ID",
+        "tags": [
+          "catalog/items"
+        ]
+      },
+      "patch": {
+        "description": "The code is immutable.",
+        "operationId": "ItemController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateItemDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Item updated"
+          },
+          "400": {
+            "description": "Validation error or attempt to change the code"
+          },
+          "403": {
+            "description": "Forbidden — requires item:update"
+          },
+          "404": {
+            "description": "Item not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update item",
+        "tags": [
+          "catalog/items"
+        ]
+      },
+      "delete": {
+        "description": "Refused with 409 while any sales document references the item.",
+        "operationId": "ItemController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item soft-deleted"
+          },
+          "403": {
+            "description": "Forbidden — requires item:delete"
+          },
+          "404": {
+            "description": "Item not found"
+          },
+          "409": {
+            "description": "Item is referenced by a document"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete item",
+        "tags": [
+          "catalog/items"
+        ]
+      }
+    },
+    "/api/v1/items/bulk-delete": {
+      "post": {
+        "description": "Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.",
+        "operationId": "ItemController_bulkRemove",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkDeleteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }`"
+          },
+          "400": {
+            "description": "Empty or invalid id list"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — requires item:delete"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete selected items",
+        "tags": [
+          "catalog/items"
+        ]
+      }
     }
   },
   "info": {
@@ -3505,6 +3964,124 @@
             "type": "string",
             "description": "Site address",
             "maxLength": 500
+          },
+          "note": {
+            "type": "string",
+            "description": "Note",
+            "maxLength": 2000
+          }
+        }
+      },
+      "CreateItemDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Manufacturer part number or internal code",
+            "maxLength": 64,
+            "example": "LC1D09M7"
+          },
+          "name": {
+            "type": "string",
+            "description": "Item name",
+            "maxLength": 255
+          },
+          "specification": {
+            "type": "string",
+            "description": "Technical specification"
+          },
+          "brand": {
+            "type": "string",
+            "description": "Brand",
+            "maxLength": 255
+          },
+          "group": {
+            "type": "string",
+            "description": "Item group",
+            "enum": [
+              "enclosure",
+              "breaker",
+              "contactor",
+              "relay",
+              "plc",
+              "inverter",
+              "cable",
+              "terminal",
+              "accessory",
+              "other"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit of measure, e.g. pcs, m, set",
+            "maxLength": 20
+          },
+          "referencePrice": {
+            "type": "number",
+            "description": "Reference purchase price in VND (>= 0)",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "description": "Note",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "group",
+          "unit"
+        ]
+      },
+      "UpdateItemDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Manufacturer part number or internal code",
+            "maxLength": 64,
+            "example": "LC1D09M7"
+          },
+          "name": {
+            "type": "string",
+            "description": "Item name",
+            "maxLength": 255
+          },
+          "specification": {
+            "type": "string",
+            "description": "Technical specification"
+          },
+          "brand": {
+            "type": "string",
+            "description": "Brand",
+            "maxLength": 255
+          },
+          "group": {
+            "type": "string",
+            "description": "Item group",
+            "enum": [
+              "enclosure",
+              "breaker",
+              "contactor",
+              "relay",
+              "plc",
+              "inverter",
+              "cable",
+              "terminal",
+              "accessory",
+              "other"
+            ]
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit of measure, e.g. pcs, m, set",
+            "maxLength": 20
+          },
+          "referencePrice": {
+            "type": "number",
+            "description": "Reference purchase price in VND (>= 0)",
+            "nullable": true
           },
           "note": {
             "type": "string",

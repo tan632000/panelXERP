@@ -10,13 +10,14 @@ import {
   parseEnabledPluginNames,
 } from '@kernel/platform/plugins/resolve-enabled-plugins';
 
+import { catalogPlugin } from '@plugins/catalog/catalog.plugin';
 import { crmPlugin } from '@plugins/crm/crm.plugin';
 
 import type { ErpPlugin } from '@kernel/platform/plugins/plugin.contract';
 import type { DataSource } from 'typeorm';
 
 /** All plugins shipped in this build — add new plugins here only */
-export const PLUGIN_CATALOG: ErpPlugin[] = [crmPlugin];
+export const PLUGIN_CATALOG: ErpPlugin[] = [crmPlugin, catalogPlugin];
 
 const defaultPluginNames = PLUGIN_CATALOG.map((plugin) => plugin.name);
 

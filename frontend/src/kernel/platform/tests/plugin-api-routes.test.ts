@@ -2,6 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { apiRoutes } from "@/kernel/core/constants/apiRoutes";
 
+import {
+  itemApiRoutes,
+  itemPageRoutes,
+} from "@plugins/catalog/item/constants";
 import { contactApiRoutes } from "@plugins/crm/contact/constants";
 import {
   customerApiRoutes,
@@ -22,5 +26,12 @@ describe("apiRoutes", () => {
     expect(customerApiRoutes.bulkDelete).toBe("/customers/bulk-delete");
     expect(customerPageRoutes.detail(7)).toBe("/crm/customers/7");
     expect(contactApiRoutes.detail(3)).toBe("/contacts/3");
+  });
+
+  it("should expose the catalog item routes", () => {
+    expect(itemApiRoutes.detail(7)).toBe("/items/7");
+    expect(itemApiRoutes.bulkDelete).toBe("/items/bulk-delete");
+    expect(itemApiRoutes.import).toBe("/items/import");
+    expect(itemPageRoutes.list).toBe("/catalog/items");
   });
 });

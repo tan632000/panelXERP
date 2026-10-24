@@ -4,6 +4,7 @@ import {
   validateFeatureDependencies,
 } from "@kernel/platform/features/resolve-enabled-features";
 
+import { CATALOG_FRONTEND_FEATURES } from "@/plugins/catalog/catalog.features";
 import { CRM_FRONTEND_FEATURES } from "@/plugins/crm/crm.features";
 import { SYSTEM_FRONTEND_FEATURES } from "@/plugins/system/system.features";
 
@@ -17,6 +18,7 @@ import type { ErpFrontendFeature } from "@kernel/platform/features/feature.contr
  */
 export const FRONTEND_FEATURE_CATALOG: ErpFrontendFeature[] = [
   ...CRM_FRONTEND_FEATURES,
+  ...CATALOG_FRONTEND_FEATURES,
   ...SYSTEM_FRONTEND_FEATURES,
 ];
 
