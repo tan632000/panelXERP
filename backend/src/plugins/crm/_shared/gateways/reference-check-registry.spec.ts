@@ -24,6 +24,21 @@ describe('ReferenceCheckRegistry', () => {
     await expect(registry.referencingCustomer(2)).resolves.toEqual([]);
   });
 
+  it('keeps project checks apart from customer checks and names the ones that fire', async () => {
+    const registry = new ReferenceCheckRegistry();
+    await expect(registry.referencingProject(1)).resolves.toEqual([]);
+
+    registry.registerCustomerCheck('project', () => Promise.resolve(true));
+    registry.registerProjectCheck('request', (id) => Promise.resolve(id === 1));
+    registry.registerProjectCheck('order', () => Promise.resolve(false));
+
+    await expect(registry.referencingProject(1)).resolves.toEqual(['request']);
+    await expect(registry.referencingProject(2)).resolves.toEqual([]);
+    expect(() =>
+      registry.registerProjectCheck('request', () => Promise.resolve(false)),
+    ).toThrow('already registered');
+  });
+
   it('rejects a second check under the same name', () => {
     const registry = new ReferenceCheckRegistry();
     registry.registerCustomerCheck('project', () => Promise.resolve(false));

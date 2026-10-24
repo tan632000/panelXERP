@@ -1,0 +1,52 @@
+{
+  "title": "Projects",
+  "description": "Manage the projects of each customer",
+  "code": "Project code",
+  "codeAuto": "Project code (auto-suggested, editable)",
+  "name": "Project name",
+  "customer": "Customer",
+  "siteAddress": "Site address",
+  "note": "Note",
+  "addButton": "Add project",
+  "addModalTitle": "Add new project",
+  "editModalTitle": "Edit project: {code}",
+  "searchPlaceholder": "Search code, name, site address...",
+  "confirmDeleteTitle": "Delete project",
+  "confirmDeleteDescription": "Delete project \"{code} — {name}\"?",
+  "noItems": "No projects yet",
+  "noItemsFound": "No projects match your filters",
+  "paginationItem": "projects",
+  "emptyValue": "-",
+  "pickerTitle": "Select customer",
+  "pickerSearchPlaceholder": "Search customer code or name...",
+  "pickerEmpty": "No customers available",
+  "pickerCode": "Customer code",
+  "pickerName": "Customer name",
+  "placeholders": {
+    "code": "e.g. DA_0001",
+    "customer": "Select a customer",
+    "name": "e.g. ABC Factory phase 1",
+    "siteAddress": "Site address",
+    "note": "Note..."
+  },
+  "toast": {
+    "createProjectSuccess": "Project created.",
+    "updateProjectSuccess": "Project updated.",
+    "deleteProjectSuccess": "Project deleted.",
+    "deleteInUseDocument": "Cannot delete the project: it is used by sales documents.",
+    "systemError": "Something went wrong. Please try again.",
+    "forbidden": "You do not have permission to perform this action.",
+    "nextCodeFailed": "Could not fetch the next code. Please try again."
+  },
+  "validation": {
+    "codeRequired": "Project code is required.",
+    "codeMax": "Project code must not exceed 30 characters.",
+    "codeExists": "Project code already exists.",
+    "codePrefix": "Project code must start with \"DA_\" followed by 4 digits, then any characters without spaces.",
+    "customerRequired": "Customer is required.",
+    "nameRequired": "Project name is required.",
+    "nameMax": "Project name must not exceed 255 characters.",
+    "siteAddressMax": "Site address must not exceed 500 characters.",
+    "noteMax": "Note must not exceed 2000 characters."
+  }
+}

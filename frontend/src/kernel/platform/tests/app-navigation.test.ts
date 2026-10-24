@@ -15,6 +15,7 @@ describe("app sidebar", () => {
     ]);
     expect(appNavigationSections[0].items.map((item) => item.href)).toEqual([
       "/crm/customers",
+      "/crm/projects",
     ]);
   });
 

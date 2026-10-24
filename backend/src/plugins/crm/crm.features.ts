@@ -2,6 +2,8 @@ import { ContactModule } from '@plugins/crm/contact/contact.module';
 import { contactPermissions } from '@plugins/crm/contact/permissions/contact.permissions';
 import { CustomerModule } from '@plugins/crm/customer/customer.module';
 import { customerPermissions } from '@plugins/crm/customer/permissions/customer.permissions';
+import { projectPermissions } from '@plugins/crm/project/permissions/project.permissions';
+import { ProjectModule } from '@plugins/crm/project/project.module';
 
 import type { ErpFeature } from '@kernel/platform/features/feature.contract';
 
@@ -19,5 +21,12 @@ export const CRM_FEATURES: ErpFeature[] = [
     dependsOn: ['customer'],
     module: ContactModule,
     permissions: contactPermissions,
+  },
+  {
+    key: 'project',
+    plugin: 'crm',
+    dependsOn: ['customer'],
+    module: ProjectModule,
+    permissions: projectPermissions,
   },
 ];

@@ -5,13 +5,20 @@ import {
 import { CrmGateway } from '@plugins/crm/_shared/gateways/crm-gateway';
 
 import type { Customer } from '@plugins/crm/customer/entities/customer.entity';
+import type { Project } from '@plugins/crm/project/entities/project.entity';
 
 type CustomerRow = Customer & FakeRow;
+type ProjectRow = Project & FakeRow;
 
 describe('CrmGateway', () => {
   function build() {
     const customers = new FakeRepo<CustomerRow>();
-    return { customers, gateway: new CrmGateway(customers as never) };
+    const projects = new FakeRepo<ProjectRow>();
+    return {
+      customers,
+      projects,
+      gateway: new CrmGateway(customers as never, projects as never),
+    };
   }
 
   it('summarises a live customer', async () => {
@@ -63,5 +70,53 @@ describe('CrmGateway', () => {
   it('answers null for an id that never existed', async () => {
     const { gateway } = build();
     await expect(gateway.getCustomerSummary(404)).resolves.toBeNull();
+  });
+
+  it('summarises a live project', async () => {
+    const { projects, gateway } = build();
+    const row = projects.seed({
+      code: 'DA_0001',
+      customerId: 5,
+      name: 'Tower A',
+      siteAddress: '1 Site Road',
+      note: 'Phase 1',
+    } as Omit<ProjectRow, 'id' | 'isDeleted'>);
+
+    await expect(gateway.getProjectSummary(row.id)).resolves.toEqual({
+      id: row.id,
+      code: 'DA_0001',
+      name: 'Tower A',
+      siteAddress: '1 Site Road',
+      customerId: 5,
+      isDeleted: false,
+    });
+  });
+
+  it('still resolves a soft-deleted project, flagged as deleted', async () => {
+    const { projects, gateway } = build();
+    const row = projects.seed({
+      code: 'DA_0001',
+      customerId: 5,
+      name: 'Tower A',
+      isDeleted: true,
+      deletedAt: new Date(),
+    } as Omit<ProjectRow, 'id'>);
+
+    const summary = await gateway.getProjectSummary(row.id);
+
+    expect(summary).toMatchObject({
+      id: row.id,
+      name: 'Tower A',
+      siteAddress: null,
+      isDeleted: true,
+    });
+    expect(projects.findOne).toHaveBeenCalledWith(
+      expect.objectContaining({ withDeleted: true }),
+    );
+  });
+
+  it('answers null for a project id that never existed', async () => {
+    const { gateway } = build();
+    await expect(gateway.getProjectSummary(404)).resolves.toBeNull();
   });
 });

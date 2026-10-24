@@ -3,14 +3,18 @@ import { Injectable } from '@nestjs/common';
 /** Answers whether any live document of the registering plugin still points at the customer. */
 export type CustomerReferenceCheck = (customerId: number) => Promise<boolean>;
 
+/** Answers whether any live document of the registering plugin still points at the project. */
+export type ProjectReferenceCheck = (projectId: number) => Promise<boolean>;
+
 /**
  * Lets plugins that hold documents about a customer (projects, requests, quotations, orders)
- * veto its deletion without CRM importing them: each registers one check at start-up and the
- * customer delete asks all of them.
+ * or a project (requests, orders) veto its deletion without CRM importing them: each registers
+ * one check at start-up and the delete asks all of them.
  */
 @Injectable()
 export class ReferenceCheckRegistry {
   private readonly customerChecks = new Map<string, CustomerReferenceCheck>();
+  private readonly projectChecks = new Map<string, ProjectReferenceCheck>();
 
   /** `name` identifies the registering document kind; a second check under it is a bug. */
   registerCustomerCheck(name: string, check: CustomerReferenceCheck): void {
@@ -22,11 +26,33 @@ export class ReferenceCheckRegistry {
     this.customerChecks.set(name, check);
   }
 
+  /** `name` identifies the registering document kind; a second check under it is a bug. */
+  registerProjectCheck(name: string, check: ProjectReferenceCheck): void {
+    if (this.projectChecks.has(name)) {
+      throw new Error(
+        `Project reference check "${name}" is already registered`,
+      );
+    }
+    this.projectChecks.set(name, check);
+  }
+
   /** The names of the checks that report the customer as referenced, in registration order. */
   async referencingCustomer(customerId: number): Promise<string[]> {
+    return this.referencing(this.customerChecks, customerId);
+  }
+
+  /** The names of the checks that report the project as referenced, in registration order. */
+  async referencingProject(projectId: number): Promise<string[]> {
+    return this.referencing(this.projectChecks, projectId);
+  }
+
+  private async referencing(
+    checks: Map<string, (id: number) => Promise<boolean>>,
+    id: number,
+  ): Promise<string[]> {
     const referencing: string[] = [];
-    for (const [name, check] of this.customerChecks) {
-      if (await check(customerId)) referencing.push(name);
+    for (const [name, check] of checks) {
+      if (await check(id)) referencing.push(name);
     }
     return referencing;
   }

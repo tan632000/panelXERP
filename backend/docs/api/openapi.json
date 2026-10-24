@@ -2302,6 +2302,419 @@
           "crm/contacts"
         ]
       }
+    },
+    "/api/v1/projects": {
+      "get": {
+        "description": "Paginated project list with search and column filters. Projects follow their customer: a Sales actor sees only the projects of customers they own.",
+        "operationId": "ProjectController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.",
+            "schema": {
+              "default": "createdAt",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order. Defaults to DESC for createdAt, ASC otherwise.",
+            "schema": {
+              "default": "DESC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated project list"
+          },
+          "403": {
+            "description": "Forbidden — requires project:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List projects",
+        "tags": [
+          "crm/projects"
+        ]
+      },
+      "post": {
+        "description": "Code must be unique among active projects. The customer is fixed at creation.",
+        "operationId": "ProjectController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Project created"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Forbidden — requires project:create"
+          },
+          "404": {
+            "description": "Customer not found or owned by another sales account"
+          },
+          "409": {
+            "description": "Duplicate project code"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create project",
+        "tags": [
+          "crm/projects"
+        ]
+      }
+    },
+    "/api/v1/projects/column-values": {
+      "get": {
+        "description": "Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.",
+        "operationId": "ProjectController_findColumnValues",
+        "parameters": [
+          {
+            "name": "column",
+            "required": true,
+            "in": "query",
+            "description": "Column key: code, name, siteAddress, customerName",
+            "schema": {
+              "example": "classification",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search within the values",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Values per page",
+            "schema": {
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listSearch",
+            "required": false,
+            "in": "query",
+            "description": "Keyword search of the list itself",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated distinct column values"
+          },
+          "400": {
+            "description": "Column is not filterable"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — requires project:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List distinct values of one filterable project column",
+        "tags": [
+          "crm/projects"
+        ]
+      }
+    },
+    "/api/v1/projects/next-code": {
+      "get": {
+        "description": "Returns the next suggested DA_xxxx code without reserving it. The code stays editable on create.",
+        "operationId": "ProjectController_getNextCode",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Next suggested code"
+          },
+          "403": {
+            "description": "Forbidden — requires project:create"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Preview next project code",
+        "tags": [
+          "crm/projects"
+        ]
+      }
+    },
+    "/api/v1/projects/{id}": {
+      "get": {
+        "operationId": "ProjectController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project found"
+          },
+          "404": {
+            "description": "Not found, soft-deleted, or its customer is owned by another sales account"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get project by ID",
+        "tags": [
+          "crm/projects"
+        ]
+      },
+      "patch": {
+        "description": "Code and customer are immutable.",
+        "operationId": "ProjectController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Project updated"
+          },
+          "403": {
+            "description": "Forbidden — requires project:update"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update project",
+        "tags": [
+          "crm/projects"
+        ]
+      },
+      "delete": {
+        "description": "Refused with 409 while any sales document references the project.",
+        "operationId": "ProjectController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Project soft-deleted"
+          },
+          "403": {
+            "description": "Forbidden — requires project:delete"
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "409": {
+            "description": "Project is referenced by a document"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete project",
+        "tags": [
+          "crm/projects"
+        ]
+      }
+    },
+    "/api/v1/projects/bulk-delete": {
+      "post": {
+        "description": "Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.",
+        "operationId": "ProjectController_bulkRemove",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkDeleteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }`"
+          },
+          "400": {
+            "description": "Empty or invalid id list"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — requires project:delete"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete selected projects",
+        "tags": [
+          "crm/projects"
+        ]
+      }
     }
   },
   "info": {
@@ -3036,6 +3449,67 @@
           "isPrimary": {
             "type": "boolean",
             "description": "Primary contact of the customer; setting it demotes the previous primary contact."
+          }
+        }
+      },
+      "CreateProjectDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Project code (DA_xxxx)",
+            "maxLength": 30,
+            "example": "DA_0001"
+          },
+          "customerId": {
+            "type": "number",
+            "description": "Customer the project belongs to"
+          },
+          "name": {
+            "type": "string",
+            "description": "Project name",
+            "maxLength": 255
+          },
+          "siteAddress": {
+            "type": "string",
+            "description": "Site address",
+            "maxLength": 500
+          },
+          "note": {
+            "type": "string",
+            "description": "Note",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "code",
+          "customerId",
+          "name"
+        ]
+      },
+      "UpdateProjectDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Project code (DA_xxxx)",
+            "maxLength": 30,
+            "example": "DA_0001"
+          },
+          "name": {
+            "type": "string",
+            "description": "Project name",
+            "maxLength": 255
+          },
+          "siteAddress": {
+            "type": "string",
+            "description": "Site address",
+            "maxLength": 500
+          },
+          "note": {
+            "type": "string",
+            "description": "Note",
+            "maxLength": 2000
           }
         }
       }

@@ -70,11 +70,11 @@ Strictly sequential (one writer per shared registration file, R-08).
 
 | # | Task | Priority | Criteria | Primary ownership | Dependencies | Status |
 |---|---|---|---|---|---|---|
-| 01 | Backend boot from REF kernel | P1 | AC-01, AC-02 | `backend/`, `docker/`, `compose*.yml`, root infra | - | pending |
-| 02 | Frontend shell from REF kernel | P1 | AC-03 | `frontend/` | 01 | pending |
-| 03 | Roles, permissions, data scope | P1 | AC-04 | `backend/src/kernel/core/database/seeds/`, `backend/src/kernel/shared/` scope helper | 02 | pending |
-| 04 | Customer + contact | P1 | AC-04, AC-05, AC-06 | `*/src/plugins/crm/customer`, `contact` | 03 | pending |
-| 05 | Project | P1 | AC-05, AC-06 | `*/src/plugins/crm/project` | 04 | pending |
+| 01 | Backend boot from REF kernel | P1 | AC-01, AC-02 | `backend/`, `docker/`, `compose*.yml`, root infra | - | done |
+| 02 | Frontend shell from REF kernel | P1 | AC-03 | `frontend/` | 01 | done |
+| 03 | Roles, permissions, data scope | P1 | AC-04 | `backend/src/kernel/core/database/seeds/`, `backend/src/kernel/shared/` scope helper | 02 | done |
+| 04 | Customer + contact | P1 | AC-04, AC-05, AC-06 | `*/src/plugins/crm/customer`, `contact` | 03 | done |
+| 05 | Project | P1 | AC-05, AC-06 | `*/src/plugins/crm/project` | 04 | done |
 | 06 | Item catalog + import | P1 | AC-05, AC-06, AC-07 | `*/src/plugins/catalog/` | 05 | pending |
 | 07 | Sales request + attachments + assignment | P1 | AC-08, AC-14 | `*/src/plugins/sales/request` | 06 | pending |
 | 08 | Estimate (BOM + costing) | P1 | AC-09 | `*/src/plugins/sales/estimate` | 07 | pending |

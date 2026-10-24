@@ -1,5 +1,6 @@
 import { contactFeature } from "@plugins/crm/contact/contact.feature";
 import { customerFeature } from "@plugins/crm/customer/customer.feature";
+import { projectFeature } from "@plugins/crm/project/project.feature";
 
 import type { ErpFrontendFeature } from "@/kernel/platform/features/feature.contract";
 
@@ -10,4 +11,5 @@ import type { ErpFrontendFeature } from "@/kernel/platform/features/feature.cont
 export const CRM_FRONTEND_FEATURES: ErpFrontendFeature[] = [
   customerFeature,
   contactFeature,
+  projectFeature,
 ];

@@ -1,0 +1,52 @@
+{
+  "title": "Công trình",
+  "description": "Quản lý công trình của khách hàng",
+  "code": "Mã công trình",
+  "codeAuto": "Mã công trình (tự sinh, có thể sửa)",
+  "name": "Tên công trình",
+  "customer": "Khách hàng",
+  "siteAddress": "Địa chỉ công trình",
+  "note": "Ghi chú",
+  "addButton": "Thêm công trình",
+  "addModalTitle": "Thêm công trình mới",
+  "editModalTitle": "Sửa công trình: {code}",
+  "searchPlaceholder": "Tìm mã, tên, địa chỉ công trình...",
+  "confirmDeleteTitle": "Xoá công trình",
+  "confirmDeleteDescription": "Bạn có chắc muốn xoá công trình \"{code} — {name}\"?",
+  "noItems": "Chưa có công trình nào",
+  "noItemsFound": "Không tìm thấy công trình nào",
+  "paginationItem": "công trình",
+  "emptyValue": "-",
+  "pickerTitle": "Chọn khách hàng",
+  "pickerSearchPlaceholder": "Tìm mã, tên khách hàng...",
+  "pickerEmpty": "Không có khách hàng nào",
+  "pickerCode": "Mã khách hàng",
+  "pickerName": "Tên khách hàng",
+  "placeholders": {
+    "code": "VD: DA_0001",
+    "customer": "Chọn khách hàng",
+    "name": "VD: Nhà máy ABC giai đoạn 1",
+    "siteAddress": "Địa chỉ thi công",
+    "note": "Ghi chú..."
+  },
+  "toast": {
+    "createProjectSuccess": "Tạo công trình thành công.",
+    "updateProjectSuccess": "Cập nhật công trình thành công.",
+    "deleteProjectSuccess": "Xoá công trình thành công.",
+    "deleteInUseDocument": "Không thể xoá công trình vì đang được sử dụng trong chứng từ bán hàng.",
+    "systemError": "Đã có lỗi xảy ra, vui lòng thử lại sau.",
+    "forbidden": "Bạn không có quyền thực hiện chức năng này.",
+    "nextCodeFailed": "Không lấy được mã tự động. Vui lòng thử lại."
+  },
+  "validation": {
+    "codeRequired": "Vui lòng nhập Mã công trình.",
+    "codeMax": "Mã công trình không được vượt quá 30 ký tự.",
+    "codeExists": "Mã công trình đã tồn tại trong hệ thống.",
+    "codePrefix": "Mã công trình phải bắt đầu bằng \"DA_\" và theo sau là 4 chữ số, sau đó có thể là ký tự bất kỳ và không chứa dấu cách.",
+    "customerRequired": "Vui lòng chọn Khách hàng.",
+    "nameRequired": "Vui lòng nhập Tên công trình.",
+    "nameMax": "Tên công trình không được vượt quá 255 ký tự.",
+    "siteAddressMax": "Địa chỉ công trình không được vượt quá 500 ký tự.",
+    "noteMax": "Ghi chú không được vượt quá 2000 ký tự."
+  }
+}

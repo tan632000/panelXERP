@@ -1,5 +1,6 @@
 {
   "moduleName": "Customers",
   "sidebarCrm": "Customers",
-  "customers": "Customer list"
+  "customers": "Customer list",
+  "projects": "Projects"
 }

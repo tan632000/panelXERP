@@ -917,6 +917,115 @@ export interface paths {
     patch: operations["ContactController_update"];
     trace?: never;
   };
+  "/api/v1/projects": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List projects
+     * @description Paginated project list with search and column filters. Projects follow their customer: a Sales actor sees only the projects of customers they own.
+     */
+    get: operations["ProjectController_findAll"];
+    put?: never;
+    /**
+     * Create project
+     * @description Code must be unique among active projects. The customer is fixed at creation.
+     */
+    post: operations["ProjectController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/column-values": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List distinct values of one filterable project column
+     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+     */
+    get: operations["ProjectController_findColumnValues"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/next-code": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Preview next project code
+     * @description Returns the next suggested DA_xxxx code without reserving it. The code stays editable on create.
+     */
+    get: operations["ProjectController_getNextCode"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/projects/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get project by ID */
+    get: operations["ProjectController_findOne"];
+    put?: never;
+    post?: never;
+    /**
+     * Soft-delete project
+     * @description Refused with 409 while any sales document references the project.
+     */
+    delete: operations["ProjectController_remove"];
+    options?: never;
+    head?: never;
+    /**
+     * Update project
+     * @description Code and customer are immutable.
+     */
+    patch: operations["ProjectController_update"];
+    trace?: never;
+  };
+  "/api/v1/projects/bulk-delete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Soft-delete selected projects
+     * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
+     */
+    post: operations["ProjectController_bulkRemove"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1227,6 +1336,34 @@ export interface components {
       email?: string;
       /** @description Primary contact of the customer; setting it demotes the previous primary contact. */
       isPrimary?: boolean;
+    };
+    CreateProjectDto: {
+      /**
+       * @description Project code (DA_xxxx)
+       * @example DA_0001
+       */
+      code: string;
+      /** @description Customer the project belongs to */
+      customerId: number;
+      /** @description Project name */
+      name: string;
+      /** @description Site address */
+      siteAddress?: string;
+      /** @description Note */
+      note?: string;
+    };
+    UpdateProjectDto: {
+      /**
+       * @description Project code (DA_xxxx)
+       * @example DA_0001
+       */
+      code?: string;
+      /** @description Project name */
+      name?: string;
+      /** @description Site address */
+      siteAddress?: string;
+      /** @description Note */
+      note?: string;
     };
   };
   responses: never;
@@ -2934,6 +3071,324 @@ export interface operations {
       };
       /** @description Contact not found */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProjectController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+        sortBy?: string;
+        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+        sortOrder?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated project list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires project:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProjectController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateProjectDto"];
+      };
+    };
+    responses: {
+      /** @description Project created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires project:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Customer not found or owned by another sales account */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Duplicate project code */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProjectController_findColumnValues: {
+    parameters: {
+      query: {
+        /** @description Column key: code, name, siteAddress, customerName */
+        column: string;
+        /** @description Search within the values */
+        search?: string;
+        /** @description Page number */
+        page?: number;
+        /** @description Values per page */
+        limit?: number;
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Keyword search of the list itself */
+        listSearch?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated distinct column values */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Column is not filterable */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires project:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProjectController_getNextCode: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Next suggested code */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires project:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProjectController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Project found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, soft-deleted, or its customer is owned by another sales account */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProjectController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Project soft-deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires project:delete */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Project not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Project is referenced by a document */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProjectController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateProjectDto"];
+      };
+    };
+    responses: {
+      /** @description Project updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires project:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Project not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProjectController_bulkRemove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkDeleteDto"];
+      };
+    };
+    responses: {
+      /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Empty or invalid id list */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires project:delete */
+      403: {
         headers: {
           [name: string]: unknown;
         };
