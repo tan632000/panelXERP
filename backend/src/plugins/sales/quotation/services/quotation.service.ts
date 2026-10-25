@@ -22,6 +22,7 @@ import {
   dailyDocumentCode,
 } from '@plugins/sales/_shared/utils/sales-document-code.util';
 import {
+  DEFAULT_QUOTATION_TERMS,
   DEFAULT_VAT_RATE,
   QUOTATION_CODE_PREFIX,
   QUOTATION_CODE_UNIQUE_INDEX,
@@ -83,6 +84,11 @@ export type QuotationDetail = Quotation & {
   versions: QuotationVersionSummary[];
   /** The version asked for, or the latest. */
   current: QuotationVersionView;
+  /**
+   * The newest version is a draft built on an estimate revision that is no longer the latest
+   * submitted one: it cannot be submitted until it is refreshed from the estimate.
+   */
+  estimateStale: boolean;
 };
 
 @Injectable()
@@ -200,14 +206,19 @@ export class QuotationService {
     const current = versions.find((version) => version.ver === wanted);
     if (!current) throw new NotFoundException('Version not found');
 
-    const [tree, summary] = await Promise.all([
+    const [tree, summary, estimateStale] = await Promise.all([
       loadVersionTree(this.dataSource.manager, current.id),
       this.requestSummary(request),
+      current.status === QuotationVersionStatus.DRAFT &&
+      current.ver === quotation.latestVer
+        ? this.isEstimateStale(request.id, current.estimateRevisionId)
+        : false,
     ]);
     return Object.assign(quotation, {
       request: summary,
       versions: versions.map((version) => this.versionSummary(version)),
       current: toVersionView(current, tree),
+      estimateStale,
     });
   }
 
@@ -306,6 +317,7 @@ export class QuotationService {
             discountType: DiscountType.PERCENT,
             discountValue: 0,
             vatRate: DEFAULT_VAT_RATE,
+            terms: [...DEFAULT_QUOTATION_TERMS],
             createdBy: actor.userId,
           }),
         );
@@ -326,6 +338,17 @@ export class QuotationService {
     );
 
     return this.findOne(created.id, actor);
+  }
+
+  private async isEstimateStale(
+    requestId: number,
+    estimateRevisionId: number,
+  ): Promise<boolean> {
+    const latest = await this.estimates.getLatestSubmitted(
+      this.dataSource.manager,
+      requestId,
+    );
+    return latest?.revisionId !== estimateRevisionId;
   }
 
   private versionSummary(version: QuotationVersion): QuotationVersionSummary {

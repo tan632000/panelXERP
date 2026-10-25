@@ -28,6 +28,9 @@ import { QuotationPermission } from "@plugins/sales/quotation/permissions/quotat
 import { quotationFeature } from "@plugins/sales/quotation/quotation.feature";
 import { requestPageRoutes } from "@plugins/sales/request/constants";
 
+import { QuotationApprovalPanel } from "./approval/QuotationApprovalPanel";
+import { QuotationTermsEditor } from "./approval/QuotationTermsEditor";
+import { QuotationFeedbackLog } from "./feedback/QuotationFeedbackLog";
 import { QuotationPricingEditor } from "./QuotationPricingEditor";
 import { QuotationStatusBadge } from "./QuotationStatusBadge";
 
@@ -182,6 +185,8 @@ export function QuotationDetailPage() {
         ) : null}
       </DetailSection>
 
+      <QuotationApprovalPanel quotation={quotation} />
+
       <QuotationPricingEditor
         key={`${quotation.id}-${version.id}`}
         version={version}
@@ -189,6 +194,16 @@ export function QuotationDetailPage() {
         saving={save.isPending}
         onSave={(dto) => save.mutate(dto)}
       />
+
+      <QuotationTermsEditor
+        key={`terms-${quotation.id}-${version.id}`}
+        version={version}
+        editable={editable}
+        saving={save.isPending}
+        onSave={(terms) => save.mutate({ terms })}
+      />
+
+      <QuotationFeedbackLog quotationId={quotation.id} />
     </DetailPageLayout>
   );
 }

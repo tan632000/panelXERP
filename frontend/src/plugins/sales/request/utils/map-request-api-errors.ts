@@ -6,6 +6,7 @@ import {
 export type RequestToastKey =
   | "statusConflict"
   | "engineerInvalid"
+  | "quotationConfirmed"
   | "attachmentLimit"
   | "attachmentTypeInvalid"
   | "attachmentContentInvalid"
@@ -36,6 +37,7 @@ export const mapRequestApiErrorsToForm = createApiErrorFormMapper<
 /** Maps the server's refusal of an assignment, a close or a file action to a localized toast key. */
 export const resolveRequestToastKey =
   createDeleteToastKeyResolver<RequestToastKey>([
+    [["confirmed by the customer"], "quotationConfirmed"],
     [["can no longer", "cannot become", "cannot be"], "statusConflict"],
     [["engineer must be"], "engineerInvalid"],
     [["at most 20 files"], "attachmentLimit"],

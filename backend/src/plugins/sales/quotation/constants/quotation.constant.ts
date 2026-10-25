@@ -21,3 +21,33 @@ export const MAX_DISCOUNT_PERCENT = 100;
  * bounds a fixed discount.
  */
 export const MAX_QUOTATION_AMOUNT = 1_000_000_000_000_000;
+
+/** Notifications: approvers on submit, the sales owner on the decision. */
+export const QUOTATION_SUBMITTED_EVENT = 'sales.quotation.submitted';
+export const QUOTATION_APPROVED_EVENT = 'sales.quotation.approved';
+export const QUOTATION_REJECTED_EVENT = 'sales.quotation.rejected';
+
+/** Roles that hold `quotation:approve`; they are told of a submission. */
+export const QUOTATION_APPROVER_ROLE_CODES = [
+  'salesManager',
+  'director',
+  'admin',
+] as const;
+
+/** Besides its creator, these roles may hand a draft in for approval. */
+export const QUOTATION_SUBMIT_ANY_ROLE_CODES = QUOTATION_APPROVER_ROLE_CODES;
+
+/**
+ * Terms every new quotation starts with (the wording of the company's quotation sheet); each
+ * version may edit its own copy while it is a draft.
+ */
+export const DEFAULT_QUOTATION_TERMS: readonly string[] = [
+  'Thời gian bảo hành thiết bị: 12 tháng',
+  'Thời gian giao hàng: 1 - 2 tuần',
+  'Địa điểm giao hàng: tại xưởng bên bán',
+  'Thanh toán: Tạm ứng 50% sau ký hợp đồng, thanh toán số còn lại khi có thông báo giao hàng trước khi nhận hàng.',
+  'Báo giá trên có giá trị trong vòng 15 ngày kể từ ngày chào giá',
+];
+
+export const MAX_TERMS = 20;
+export const MAX_TERM_LENGTH = 500;

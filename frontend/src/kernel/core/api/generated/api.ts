@@ -1605,8 +1605,8 @@ export interface paths {
     options?: never;
     head?: never;
     /**
-     * Set margins, discount and VAT of the draft version
-     * @description Only what the body names changes; margins are per line (0–1000%), the discount a percent (0–100) or an amount not above the subtotal, VAT one of 0/5/8/10. The server recomputes and stores every total.
+     * Set margins, discount, VAT and terms of the draft version
+     * @description Only what the body names changes; margins are per line (0–1000%), the discount a percent (0–100) or an amount not above the subtotal, VAT one of 0/5/8/10, and the terms replace the printed list. The server recomputes and stores every total.
      */
     patch: operations["QuotationController_updatePricing"];
     trace?: never;
@@ -1625,6 +1625,190 @@ export interface paths {
      * @description Opens the next version as a draft copying the latest one and closes the latest. Allowed only from pending_approval, approved or rejected; two concurrent revises produce exactly one new version.
      */
     post: operations["QuotationController_revise"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/quotations/{id}/refresh-estimate": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Update the draft from the latest submitted estimate
+     * @description Rebuilds the draft panel lines and frozen BOM from the latest submitted estimate revision, keeping the margin of every panel whose tag still exists. Discount, VAT and terms stay. A draft already on the latest revision is returned unchanged.
+     */
+    post: operations["QuotationController_refreshEstimate"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/quotations/{id}/submit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Submit the draft for approval
+     * @description draft → pending_approval, by the version creator or a manager; the approvers are notified after the commit. A draft built on an estimate revision that is no longer the latest submitted one answers 409.
+     */
+    post: operations["QuotationController_submit"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/quotations/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve the version
+     * @description pending_approval → approved in one step, by someone other than the version creator. The first approval moves the request from estimated to quoted in the same transaction; the sales owner is notified after the commit.
+     */
+    post: operations["QuotationController_approve"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/quotations/{id}/reject": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject the version
+     * @description pending_approval → rejected with a reason, by someone other than the version creator. The version stays as it was; Sales revises it into the next version.
+     */
+    post: operations["QuotationController_reject"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/quotations/{id}/confirm": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Record that the customer accepted
+     * @description approved → customer_confirmed; any other status answers 409.
+     */
+    post: operations["QuotationController_confirm"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/quotations/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel the quotation
+     * @description From draft, pending_approval, approved or rejected: the version becomes cancelled and the request lost, with the reason, in one transaction. A confirmed or already cancelled quotation answers 409.
+     */
+    post: operations["QuotationController_cancel"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/quotations/{id}/feedback": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List the customer feedback of a quotation
+     * @description Newest first: date, channel, content and who recorded it.
+     */
+    get: operations["QuotationController_listFeedback"];
+    put?: never;
+    /**
+     * Record what the customer answered
+     * @description Appends one entry to the feedback log of the quotation.
+     */
+    post: operations["QuotationController_addFeedback"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/quotations/{id}/export.xlsx": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download the customer-facing quotation as .xlsx
+     * @description The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.
+     */
+    get: operations["QuotationController_exportXlsx"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/quotations/{id}/export.pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download the customer-facing quotation as PDF
+     * @description The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.
+     */
+    get: operations["QuotationController_exportPdf"];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -2164,6 +2348,19 @@ export interface components {
       discountValue?: number;
       /** @enum {number} */
       vatRate?: 0 | 5 | 8 | 10;
+      /** @description The numbered terms printed under the table; replaces the whole list */
+      terms?: string[];
+    };
+    CreateQuotationFeedbackDto: {
+      /**
+       * @description The day the customer answered (YYYY-MM-DD)
+       * @example 2027-01-20
+       */
+      feedbackDate: string;
+      /** @enum {string} */
+      channel: "phone" | "email" | "meeting" | "chat" | "other";
+      /** @description What the customer said */
+      content: string;
     };
   };
   responses: never;
@@ -5923,6 +6120,407 @@ export interface operations {
         content?: never;
       };
       /** @description The latest version is a draft, confirmed, cancelled or closed, or changed meanwhile */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_refreshEstimate: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Draft refreshed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The latest version is not a draft, or no estimate is submitted */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_submit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Submitted for approval */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:submit, and the version creator or a manager */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not a draft, or the estimate was revised since */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Approved */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:approve, and not the version creator */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not pending approval */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_reject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestReasonDto"];
+      };
+    };
+    responses: {
+      /** @description Rejected */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:approve, and not the version creator */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not pending approval */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_confirm: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Confirmed by the customer */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:confirm */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not approved */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestReasonDto"];
+      };
+    };
+    responses: {
+      /** @description Cancelled; the request is lost */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:cancel */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Confirmed, cancelled or closed, or the request cannot be lost */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_listFeedback: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The feedback log */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_addFeedback: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateQuotationFeedbackDto"];
+      };
+    };
+    responses: {
+      /** @description Feedback recorded */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_exportXlsx: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The workbook */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:export */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not approved or confirmed */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_exportPdf: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The PDF */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:export */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not approved or confirmed */
       409: {
         headers: {
           [name: string]: unknown;

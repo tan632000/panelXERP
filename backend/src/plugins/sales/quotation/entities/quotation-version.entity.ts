@@ -96,8 +96,32 @@ export class QuotationVersion {
   @Column({ ...money })
   total: number;
 
+  /** The terms printed under the table; this version's own copy, editable while it is a draft. */
+  @Column({ type: 'jsonb', default: () => `'[]'::jsonb` })
+  terms: string[];
+
   @Column({ type: 'int', name: 'created_by', nullable: true })
   createdBy?: number | null;
+
+  /** Who last edited the price or the terms; `null` until someone does. */
+  @Column({ type: 'int', name: 'last_edited_by', nullable: true })
+  lastEditedBy?: number | null;
+
+  /** Who approved, rejected or cancelled the version, and when. */
+  @Column({ type: 'int', name: 'decided_by', nullable: true })
+  decidedBy?: number | null;
+
+  @Column({ type: 'timestamptz', name: 'decided_at', nullable: true })
+  decidedAt?: Date | null;
+
+  /** The reason of a rejection or a cancellation. */
+  @Column({
+    type: 'varchar',
+    length: 1000,
+    name: 'decision_reason',
+    nullable: true,
+  })
+  decisionReason?: string | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;

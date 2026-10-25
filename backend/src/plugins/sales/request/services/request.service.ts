@@ -37,6 +37,7 @@ import {
 } from '@plugins/crm/_shared/gateways/crm-gateway';
 import { CustomerOwnerChangeRegistry } from '@plugins/crm/_shared/gateways/customer-owner-change-registry';
 import { ReferenceCheckRegistry } from '@plugins/crm/_shared/gateways/reference-check-registry';
+import { RequestCloseRegistry } from '@plugins/sales/_shared/ports/request-close-registry';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
 import { SalesUserLookup } from '@plugins/sales/_shared/services/sales-user-lookup.service';
 import { recordRequestActivity } from '@plugins/sales/_shared/utils/request-activity.util';
@@ -151,6 +152,7 @@ export class RequestService implements OnModuleInit {
     private readonly statusPort: RequestStatusPort,
     private readonly referenceChecks: ReferenceCheckRegistry,
     private readonly ownerChanges: CustomerOwnerChangeRegistry,
+    private readonly closeHooks: RequestCloseRegistry,
   ) {}
 
   /** A customer or project a live request points at cannot be deleted: the request keeps naming it. */
@@ -484,7 +486,10 @@ export class RequestService implements OnModuleInit {
     return this.toDetail(request);
   }
 
-  /** Closes a request that goes no further, for a stated reason. */
+  /**
+   * Closes a request that goes no further, for a stated reason. An open quotation is cancelled
+   * in the same transaction; a confirmed one blocks the close.
+   */
   cancel(
     id: number,
     dto: RequestReasonDto,
@@ -515,6 +520,12 @@ export class RequestService implements OnModuleInit {
       // Closing again is a no-op: the first reason stands.
       if (request.status === to) return request;
 
+      // Documents hanging off the request close with it, or refuse (409) and keep it open.
+      await this.closeHooks.apply(manager, {
+        requestId: id,
+        reason,
+        actorId: actor.userId,
+      });
       const advanced = await this.statusPort.advance(manager, id, to, {
         actorId: actor.userId,
         note: reason,

@@ -11,6 +11,7 @@ import { ReferenceCheckRegistry } from '@plugins/crm/_shared/gateways/reference-
 import { Contact } from '@plugins/crm/contact/entities/contact.entity';
 import { Customer } from '@plugins/crm/customer/entities/customer.entity';
 import { Project } from '@plugins/crm/project/entities/project.entity';
+import { RequestCloseRegistry } from '@plugins/sales/_shared/ports/request-close-registry';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
 import { SalesRequestActivity } from '@plugins/sales/request/entities/request-activity.entity';
 import { SalesRequest } from '@plugins/sales/request/entities/request.entity';
@@ -97,6 +98,7 @@ describeWithDatabase('RequestService.create against Postgres', () => {
       new RequestStatusPort(),
       new ReferenceCheckRegistry(),
       new CustomerOwnerChangeRegistry(),
+      new RequestCloseRegistry(),
     );
   });
 

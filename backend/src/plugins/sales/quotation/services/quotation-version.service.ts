@@ -2,15 +2,16 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { DataScopeService } from '@shared/services/data-scope.service';
 
+import { EstimateReadPort } from '@plugins/sales/_shared/ports/estimate-read.port';
 import { recordRequestActivity } from '@plugins/sales/_shared/utils/request-activity.util';
 import { MAX_DISCOUNT_PERCENT } from '@plugins/sales/quotation/constants/quotation.constant';
 import { UpdateQuotationPricingDto } from '@plugins/sales/quotation/dto/update-quotation-pricing.dto';
+import { QuotationLine } from '@plugins/sales/quotation/entities/quotation-line.entity';
 import { QuotationVersion } from '@plugins/sales/quotation/entities/quotation-version.entity';
 import { Quotation } from '@plugins/sales/quotation/entities/quotation.entity';
 import { DiscountType } from '@plugins/sales/quotation/enums/discount-type.enum';
@@ -22,28 +23,19 @@ import {
   QuotationService,
   type QuotationDetail,
 } from '@plugins/sales/quotation/services/quotation.service';
+import { lockQuotation } from '@plugins/sales/quotation/utils/quotation-lock.util';
 import {
   copyVersionTree,
   loadVersionTree,
   recalculateVersion,
+  snapshotEstimatePanels,
 } from '@plugins/sales/quotation/utils/quotation-version.util';
-import { SalesRequest } from '@plugins/sales/request/entities/request.entity';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
-import type { EntityManager } from 'typeorm';
-
-const QUOTATION_LABEL = 'Quotation';
-
-/** What a write works on: the locked header, its request and its newest version. */
-interface LockedQuotation {
-  quotation: Quotation;
-  request: SalesRequest;
-  version: QuotationVersion;
-}
 
 /**
  * Changes to a quotation's versions: pricing edits of the draft and revisions. Each runs in one
- * transaction that holds the header row `FOR UPDATE`, so concurrent edits and revises of one
+ * transaction that holds the request and then the header row `FOR UPDATE`, so concurrent edits and revises of one
  * quotation run one after another and none acts on a status it read before.
  */
 @Injectable()
@@ -52,11 +44,12 @@ export class QuotationVersionService {
     private readonly dataSource: DataSource,
     private readonly dataScope: DataScopeService,
     private readonly quotations: QuotationService,
+    private readonly estimates: EstimateReadPort,
   ) {}
 
   /**
-   * Sets margins per line, the discount and the VAT rate of the draft version; only what the
-   * body names changes. Every total is recomputed by the server from the stored figures.
+   * Sets margins per line, the discount, the VAT rate and the printed terms of the draft
+   * version; only what the body names changes. Every total is recomputed by the server from the stored figures.
    */
   async updatePricing(
     id: number,
@@ -64,8 +57,9 @@ export class QuotationVersionService {
     actor: AuthUserPayload,
   ): Promise<QuotationDetail> {
     await this.dataSource.transaction(async (manager) => {
-      const { quotation, version } = await this.lockForWrite(
+      const { quotation, version } = await lockQuotation(
         manager,
+        this.dataScope,
         id,
         actor,
       );
@@ -90,6 +84,8 @@ export class QuotationVersionService {
         version.discountValue = dto.discountValue;
       }
       if (dto.vatRate !== undefined) version.vatRate = dto.vatRate;
+      if (dto.terms !== undefined) version.terms = dto.terms;
+      version.lastEditedBy = actor.userId;
       if (
         version.discountType === DiscountType.PERCENT &&
         version.discountValue > MAX_DISCOUNT_PERCENT
@@ -116,8 +112,9 @@ export class QuotationVersionService {
    */
   async revise(id: number, actor: AuthUserPayload): Promise<QuotationDetail> {
     await this.dataSource.transaction(async (manager) => {
-      const { quotation, request, version } = await this.lockForWrite(
+      const { quotation, request, version } = await lockQuotation(
         manager,
+        this.dataScope,
         id,
         actor,
       );
@@ -150,6 +147,7 @@ export class QuotationVersionService {
           discountType: version.discountType,
           discountValue: version.discountValue,
           vatRate: version.vatRate,
+          terms: version.terms,
           subtotal: version.subtotal,
           discountAmount: version.discountAmount,
           taxable: version.taxable,
@@ -175,31 +173,68 @@ export class QuotationVersionService {
   }
 
   /**
-   * Locks the quotation header for the rest of the transaction, checks the actor's data scope
-   * reaches its request (404 otherwise) and reads the newest version under that lock.
+   * Rebuilds the draft's panel lines and frozen BOM from the latest submitted estimate
+   * revision, keeping the margin of every panel whose tag still exists (a new panel starts at
+   * 0). Discount, VAT and terms stay. A draft already on the latest revision is left as is.
    */
-  private async lockForWrite(
-    manager: EntityManager,
+  async refreshEstimate(
     id: number,
     actor: AuthUserPayload,
-  ): Promise<LockedQuotation> {
-    const quotation = await manager.getRepository(Quotation).findOne({
-      where: { id, isDeleted: false },
-      lock: { mode: 'pessimistic_write' },
+  ): Promise<QuotationDetail> {
+    await this.dataSource.transaction(async (manager) => {
+      const { quotation, request, version } = await lockQuotation(
+        manager,
+        this.dataScope,
+        id,
+        actor,
+      );
+      this.assertDraft(version);
+
+      const latest = await this.estimates.getLatestSubmitted(
+        manager,
+        request.id,
+      );
+      if (!latest) {
+        throw new ConflictException(
+          'The request has no submitted estimate to quote.',
+        );
+      }
+      if (latest.revisionId === version.estimateRevisionId) return;
+
+      const margins = new Map(
+        (await loadVersionTree(manager, version.id)).lines.map(({ line }) => [
+          line.tag,
+          line.marginPercent,
+        ]),
+      );
+      // The BOM and cost-line copies go with their lines (cascade).
+      await manager
+        .getRepository(QuotationLine)
+        .delete({ versionId: version.id });
+      const tree = await snapshotEstimatePanels(
+        manager,
+        version.id,
+        latest.panels,
+      );
+      for (const { line } of tree.lines) {
+        line.marginPercent = margins.get(line.tag) ?? 0;
+      }
+      version.estimateRevisionId = latest.revisionId;
+      version.estimateRevision = latest.revision;
+      version.lastEditedBy = actor.userId;
+      await recalculateVersion(manager, version, tree);
+
+      quotation.updatedBy = actor.userId;
+      await manager.getRepository(Quotation).save(quotation);
+      await recordRequestActivity(manager, {
+        requestId: request.id,
+        action: 'quotation_estimate_refreshed',
+        actorId: actor.userId,
+        note: `${quotation.code} #${version.ver} ← ${latest.code} #${latest.revision}`,
+      });
     });
-    if (!quotation) throw new NotFoundException(`${QUOTATION_LABEL} not found`);
-    const request = this.dataScope.assertVisible(
-      actor,
-      await manager.getRepository(SalesRequest).findOne({
-        where: { id: quotation.requestId, isDeleted: false },
-      }),
-      QUOTATION_LABEL,
-    );
-    const version = await manager.getRepository(QuotationVersion).findOne({
-      where: { quotationId: quotation.id, ver: quotation.latestVer },
-    });
-    if (!version) throw new NotFoundException('Version not found');
-    return { quotation, request, version };
+
+    return this.quotations.findOne(id, actor);
   }
 
   /** Only a draft version is editable; the others are read-only. */

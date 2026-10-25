@@ -53,7 +53,7 @@ export function useQuotation(id?: number | null, ver?: number) {
 }
 
 /** Feedback every quotation mutation shares: the toast namespace and the refusal wording table. */
-function useQuotationFeedback() {
+export function useQuotationToast() {
   const t = useTranslations("quotation.toast");
   const feedback = useToastMutationFeedback("quotation.toast");
   return {
@@ -71,7 +71,7 @@ function useQuotationFeedback() {
 }
 
 export function useCreateQuotation() {
-  const { t, feedback } = useQuotationFeedback();
+  const { t, feedback } = useQuotationToast();
   const qc = useQueryClient();
   return useMutationFeedback({
     mutationFn: (data: CreateQuotationDto) => createQuotation(data),
@@ -90,7 +90,7 @@ export function useCreateQuotation() {
  * the stored ones.
  */
 export function useUpdateQuotationPricing(id: number, ver?: number) {
-  const { t, feedback } = useQuotationFeedback();
+  const { t, feedback } = useQuotationToast();
   const qc = useQueryClient();
   return useMutationFeedback({
     mutationFn: (data: UpdateQuotationPricingDto) =>

@@ -9,6 +9,7 @@ import {
 } from '@plugins/crm/_shared/crm-fake-repo.helper-spec';
 import { CustomerOwnerChangeRegistry } from '@plugins/crm/_shared/gateways/customer-owner-change-registry';
 import { ReferenceCheckRegistry } from '@plugins/crm/_shared/gateways/reference-check-registry';
+import { RequestCloseRegistry } from '@plugins/sales/_shared/ports/request-close-registry';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
 import { SalesRequestActivity } from '@plugins/sales/request/entities/request-activity.entity';
 import { SalesRequestAttachment } from '@plugins/sales/request/entities/request-attachment.entity';
@@ -221,6 +222,7 @@ export function buildRequestFixture(
     statusPort,
     registry,
     ownerChanges,
+    new RequestCloseRegistry(),
   );
   const attachmentService = new RequestAttachmentService(
     attachments as never,

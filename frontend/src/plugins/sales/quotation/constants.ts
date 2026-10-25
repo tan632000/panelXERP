@@ -15,6 +15,41 @@ export type QuotationVersionStatus =
 export const DISCOUNT_TYPES = ["percent", "amount"] as const;
 export type DiscountType = (typeof DISCOUNT_TYPES)[number];
 
+/** How the customer answered; values match the API enum. */
+export const FEEDBACK_CHANNELS = [
+  "phone",
+  "email",
+  "meeting",
+  "chat",
+  "other",
+] as const;
+export type FeedbackChannel = (typeof FEEDBACK_CHANNELS)[number];
+
+/** Bounds the server enforces too. */
+export const FEEDBACK_CONTENT_MAX = 2000;
+export const REASON_MAX = 1000;
+export const TERM_MAX = 500;
+export const TERMS_MAX_COUNT = 20;
+
+/** States a quotation may be cancelled from; a revise is open from the first three. */
+export const QUOTATION_CANCELLABLE_STATUSES: readonly QuotationVersionStatus[] =
+  ["draft", "pending_approval", "approved", "rejected"];
+export const QUOTATION_REVISABLE_STATUSES: readonly QuotationVersionStatus[] = [
+  "pending_approval",
+  "approved",
+  "rejected",
+];
+/** Only these may be shown to the customer. */
+export const QUOTATION_EXPORTABLE_STATUSES: readonly QuotationVersionStatus[] =
+  ["approved", "customer_confirmed"];
+
+/** Besides its creator, only these roles may hand a draft in for approval. */
+export const QUOTATION_SUBMIT_ANY_ROLES: readonly string[] = [
+  "salesManager",
+  "director",
+  "admin",
+];
+
 /** The VAT rates a quotation may carry, in percent. */
 export const VAT_RATES = [0, 5, 8, 10] as const;
 export type VatRate = (typeof VAT_RATES)[number];
@@ -38,7 +73,23 @@ export const quotationPageRoutes = {
 export const quotationApiRoutes = {
   list: "/sales/quotations",
   detail: (id: number | string) => `/sales/quotations/${id}`,
+  action: (id: number | string, action: QuotationAction) =>
+    `/sales/quotations/${id}/${action}`,
+  feedback: (id: number | string) => `/sales/quotations/${id}/feedback`,
+  exportFile: (id: number | string, format: QuotationExportFormat) =>
+    `/sales/quotations/${id}/export.${format}`,
 } as const;
+
+/** The state-changing POST routes of one quotation. */
+export type QuotationAction =
+  | "submit"
+  | "approve"
+  | "reject"
+  | "confirm"
+  | "cancel"
+  | "revise"
+  | "refresh-estimate";
+export type QuotationExportFormat = "xlsx" | "pdf";
 
 export const quotationQueryKeys = {
   all: ["sales-quotations"] as const,
@@ -47,6 +98,8 @@ export const quotationQueryKeys = {
   detail: (id: number | string, ver?: number) =>
     [...quotationQueryKeys.all, id, ver ?? "latest"] as const,
   detailAll: (id: number | string) => [...quotationQueryKeys.all, id] as const,
+  feedback: (id: number | string) =>
+    [...quotationQueryKeys.all, id, "feedback"] as const,
   ofRequest: (requestId: number | string) =>
     [...quotationQueryKeys.all, "request", requestId] as const,
 };

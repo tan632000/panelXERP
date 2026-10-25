@@ -52,8 +52,13 @@ export interface QuotationVersionView {
   taxable: number;
   vatAmount: number;
   total: number;
+  terms: string[];
   createdBy: number | null;
+  lastEditedBy: number | null;
   createdAt: Date;
+  decidedBy: number | null;
+  decidedAt: Date | null;
+  decisionReason: string | null;
   lines: QuotationLineView[];
 }
 
@@ -115,8 +120,13 @@ export function toVersionView(
     taxable: version.taxable,
     vatAmount: version.vatAmount,
     total: version.total,
+    terms: version.terms,
     createdBy: version.createdBy ?? null,
+    lastEditedBy: version.lastEditedBy ?? null,
     createdAt: version.createdAt,
+    decidedBy: version.decidedBy ?? null,
+    decidedAt: version.decidedAt ?? null,
+    decisionReason: version.decisionReason ?? null,
     lines: tree.lines.map(({ line, bomLines, costLines }) => ({
       id: line.id,
       tag: line.tag,

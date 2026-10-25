@@ -8,6 +8,11 @@ export const QuotationPermission = {
   read: "quotation:read",
   create: "quotation:create",
   update: "quotation:update",
+  submit: "quotation:submit",
+  approve: "quotation:approve",
+  confirm: "quotation:confirm",
+  cancel: "quotation:cancel",
+  export: "quotation:export",
 } as const;
 
 export type QuotationPermissionKey =

@@ -11,6 +11,13 @@ export interface UserOption {
   fullName: string;
 }
 
+/** How a customer reaches the account that sends them a document. */
+export interface UserContact {
+  fullName: string;
+  phone: string | null;
+  email: string | null;
+}
+
 /**
  * The few things the sales documents ask about accounts: who may be named in a role-bound
  * field (owner, engineer), and what to call an account on a list. Reading through here keeps
@@ -55,6 +62,21 @@ export class SalesUserLookup {
       withDeleted: true,
     });
     return new Map(accounts.map(({ id, fullName }) => [id, fullName]));
+  }
+
+  /** Name, phone and email of one account, deleted ones included; `null` for an unknown id. */
+  async contactOf(id: number): Promise<UserContact | null> {
+    const account = await this.userRepo.findOne({
+      where: { id },
+      select: { id: true, fullName: true, phone: true, email: true },
+      withDeleted: true,
+    });
+    if (!account) return null;
+    return {
+      fullName: account.fullName,
+      phone: account.phone ?? null,
+      email: account.email ?? null,
+    };
   }
 
   private activeWithRoles(roleCodes: readonly string[]) {

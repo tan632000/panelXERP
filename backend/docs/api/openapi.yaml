@@ -2982,7 +2982,8 @@ paths:
     patch:
       description: >-
         Only what the body names changes; margins are per line (0–1000%), the discount a percent (0–100) or an amount
-        not above the subtotal, VAT one of 0/5/8/10. The server recomputes and stores every total.
+        not above the subtotal, VAT one of 0/5/8/10, and the terms replace the printed list. The server recomputes and
+        stores every total.
       operationId: QuotationController_updatePricing
       parameters:
         - name: id
@@ -3008,7 +3009,7 @@ paths:
         '409':
           description: The latest version is not a draft
       security: *ref_27
-      summary: Set margins, discount and VAT of the draft version
+      summary: Set margins, discount, VAT and terms of the draft version
       tags: *ref_28
   /api/v1/sales/quotations/{id}/revise:
     post:
@@ -3033,6 +3034,248 @@ paths:
           description: The latest version is a draft, confirmed, cancelled or closed, or changed meanwhile
       security: *ref_27
       summary: Revise the quotation
+      tags: *ref_28
+  /api/v1/sales/quotations/{id}/refresh-estimate:
+    post:
+      description: >-
+        Rebuilds the draft panel lines and frozen BOM from the latest submitted estimate revision, keeping the margin of
+        every panel whose tag still exists. Discount, VAT and terms stay. A draft already on the latest revision is
+        returned unchanged.
+      operationId: QuotationController_refreshEstimate
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Draft refreshed
+        '403':
+          description: Forbidden — requires quotation:update
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
+        '409':
+          description: The latest version is not a draft, or no estimate is submitted
+      security: *ref_27
+      summary: Update the draft from the latest submitted estimate
+      tags: *ref_28
+  /api/v1/sales/quotations/{id}/submit:
+    post:
+      description: >-
+        draft → pending_approval, by the version creator or a manager; the approvers are notified after the commit. A
+        draft built on an estimate revision that is no longer the latest submitted one answers 409.
+      operationId: QuotationController_submit
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Submitted for approval
+        '403':
+          description: Forbidden — requires quotation:submit, and the version creator or a manager
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
+        '409':
+          description: Not a draft, or the estimate was revised since
+      security: *ref_27
+      summary: Submit the draft for approval
+      tags: *ref_28
+  /api/v1/sales/quotations/{id}/approve:
+    post:
+      description: >-
+        pending_approval → approved in one step, by someone other than the version creator. The first approval moves the
+        request from estimated to quoted in the same transaction; the sales owner is notified after the commit.
+      operationId: QuotationController_approve
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Approved
+        '403':
+          description: Forbidden — requires quotation:approve, and not the version creator
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
+        '409':
+          description: Not pending approval
+      security: *ref_27
+      summary: Approve the version
+      tags: *ref_28
+  /api/v1/sales/quotations/{id}/reject:
+    post:
+      description: >-
+        pending_approval → rejected with a reason, by someone other than the version creator. The version stays as it
+        was; Sales revises it into the next version.
+      operationId: QuotationController_reject
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestReasonDto'
+      responses:
+        '200':
+          description: Rejected
+        '403':
+          description: Forbidden — requires quotation:approve, and not the version creator
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
+        '409':
+          description: Not pending approval
+      security: *ref_27
+      summary: Reject the version
+      tags: *ref_28
+  /api/v1/sales/quotations/{id}/confirm:
+    post:
+      description: approved → customer_confirmed; any other status answers 409.
+      operationId: QuotationController_confirm
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Confirmed by the customer
+        '403':
+          description: Forbidden — requires quotation:confirm
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
+        '409':
+          description: Not approved
+      security: *ref_27
+      summary: Record that the customer accepted
+      tags: *ref_28
+  /api/v1/sales/quotations/{id}/cancel:
+    post:
+      description: >-
+        From draft, pending_approval, approved or rejected: the version becomes cancelled and the request lost, with the
+        reason, in one transaction. A confirmed or already cancelled quotation answers 409.
+      operationId: QuotationController_cancel
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestReasonDto'
+      responses:
+        '200':
+          description: Cancelled; the request is lost
+        '403':
+          description: Forbidden — requires quotation:cancel
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
+        '409':
+          description: Confirmed, cancelled or closed, or the request cannot be lost
+      security: *ref_27
+      summary: Cancel the quotation
+      tags: *ref_28
+  /api/v1/sales/quotations/{id}/feedback:
+    get:
+      description: 'Newest first: date, channel, content and who recorded it.'
+      operationId: QuotationController_listFeedback
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: The feedback log
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
+      security: *ref_27
+      summary: List the customer feedback of a quotation
+      tags: *ref_28
+    post:
+      description: Appends one entry to the feedback log of the quotation.
+      operationId: QuotationController_addFeedback
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuotationFeedbackDto'
+      responses:
+        '201':
+          description: Feedback recorded
+        '403':
+          description: Forbidden — requires quotation:update
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
+      security: *ref_27
+      summary: Record what the customer answered
+      tags: *ref_28
+  /api/v1/sales/quotations/{id}/export.xlsx:
+    get:
+      description: The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.
+      operationId: QuotationController_exportXlsx
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: The workbook
+        '403':
+          description: Forbidden — requires quotation:export
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
+        '409':
+          description: Not approved or confirmed
+      security: *ref_27
+      summary: Download the customer-facing quotation as .xlsx
+      tags: *ref_28
+  /api/v1/sales/quotations/{id}/export.pdf:
+    get:
+      description: The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.
+      operationId: QuotationController_exportPdf
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: The PDF
+        '403':
+          description: Forbidden — requires quotation:export
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
+        '409':
+          description: Not approved or confirmed
+      security: *ref_27
+      summary: Download the customer-facing quotation as PDF
       tags: *ref_28
 info:
   title: panelXERP
@@ -3941,3 +4184,32 @@ components:
             - 5
             - 8
             - 10
+        terms:
+          description: The numbered terms printed under the table; replaces the whole list
+          maxItems: 20
+          type: array
+          items:
+            type: string
+    CreateQuotationFeedbackDto:
+      type: object
+      properties:
+        feedbackDate:
+          type: string
+          description: The day the customer answered (YYYY-MM-DD)
+          example: '2027-01-20'
+        channel:
+          type: string
+          enum:
+            - phone
+            - email
+            - meeting
+            - chat
+            - other
+        content:
+          type: string
+          description: What the customer said
+          maxLength: 2000
+      required:
+        - feedbackDate
+        - channel
+        - content

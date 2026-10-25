@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
   IsArray,
@@ -8,14 +8,19 @@ import {
   IsInt,
   IsNumber,
   IsOptional,
+  IsString,
   Max,
+  MaxLength,
   Min,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 
 import {
   MAX_MARGIN_PERCENT,
   MAX_QUOTATION_AMOUNT,
+  MAX_TERM_LENGTH,
+  MAX_TERMS,
   VAT_RATES,
 } from '@plugins/sales/quotation/constants/quotation.constant';
 import { DiscountType } from '@plugins/sales/quotation/enums/discount-type.enum';
@@ -81,4 +86,30 @@ export class UpdateQuotationPricingDto {
   @Type(() => Number)
   @IsIn(VAT_RATES, { message: 'VAT must be 0, 5, 8 or 10 percent.' })
   vatRate?: number;
+
+  @ApiPropertyOptional({
+    type: [String],
+    description:
+      'The numbered terms printed under the table; replaces the whole list',
+    maxItems: MAX_TERMS,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(MAX_TERMS, {
+    message: `At most ${MAX_TERMS} terms are allowed.`,
+  })
+  @Transform(({ value }: { value: unknown }) =>
+    Array.isArray(value)
+      ? value.map((term: unknown) =>
+          typeof term === 'string' ? term.trim() : term,
+        )
+      : value,
+  )
+  @IsString({ each: true, message: 'A term must be text.' })
+  @MinLength(1, { each: true, message: 'A term must not be empty.' })
+  @MaxLength(MAX_TERM_LENGTH, {
+    each: true,
+    message: `A term must not exceed ${MAX_TERM_LENGTH} characters.`,
+  })
+  terms?: string[];
 }

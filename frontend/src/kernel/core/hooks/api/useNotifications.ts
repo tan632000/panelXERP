@@ -119,6 +119,9 @@ export const NOTIFICATION_EVENT_KEYS = [
   "sp_can_bo_sung_ky_thuat",
   "sales.request.assigned",
   "sales.estimate.submitted",
+  "sales.quotation.submitted",
+  "sales.quotation.approved",
+  "sales.quotation.rejected",
   "purchaseRequestAwaitingReceipt",
   "purchaseRequestReceived",
   "purchaseRequestApproved",
@@ -1162,6 +1165,23 @@ export function resolveNotificationMessage(
           code: field(payload.code),
           requestCode: field(payload.requestCode),
           revision: displayNumber(payload.revision),
+        },
+      };
+    }
+
+    if (
+      item.eventType === "sales.quotation.submitted" ||
+      item.eventType === "sales.quotation.approved" ||
+      item.eventType === "sales.quotation.rejected"
+    ) {
+      return {
+        kind: "key",
+        key: `events.${item.eventType.replace(/\./g, "_")}`,
+        values: {
+          code: field(payload.code),
+          requestCode: field(payload.requestCode),
+          ver: displayNumber(payload.ver),
+          reason: field(payload.reason),
         },
       };
     }

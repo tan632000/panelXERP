@@ -22,6 +22,8 @@ ENV HUSKY=0
 
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/dist ./dist
+# Fonts and logo the printed quotation reads at run time (see quotation-document.util).
+COPY --from=builder /app/assets ./assets
 COPY --from=builder /app/node_modules ./node_modules
 COPY backend/tsconfig.runtime.json ./tsconfig.json
 

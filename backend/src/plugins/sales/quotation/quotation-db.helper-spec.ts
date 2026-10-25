@@ -5,7 +5,10 @@ import { DataSource } from 'typeorm';
 import { DataScopeService } from '@shared/services/data-scope.service';
 
 import { ReferenceCheckRegistry } from '@plugins/catalog/_shared/gateways/reference-check-registry';
+import { CustomerOwnerChangeRegistry } from '@plugins/crm/_shared/gateways/customer-owner-change-registry';
+import { ReferenceCheckRegistry as CrmReferenceCheckRegistry } from '@plugins/crm/_shared/gateways/reference-check-registry';
 import { EstimateReadPort } from '@plugins/sales/_shared/ports/estimate-read.port';
+import { RequestCloseRegistry } from '@plugins/sales/_shared/ports/request-close-registry';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
 import { EstimateBomLine } from '@plugins/sales/estimate/entities/estimate-bom-line.entity';
 import { EstimateCostLine } from '@plugins/sales/estimate/entities/estimate-cost-line.entity';
@@ -16,13 +19,18 @@ import { EstimateEditService } from '@plugins/sales/estimate/services/estimate-e
 import { EstimateService } from '@plugins/sales/estimate/services/estimate.service';
 import { QuotationBomLine } from '@plugins/sales/quotation/entities/quotation-bom-line.entity';
 import { QuotationCostLine } from '@plugins/sales/quotation/entities/quotation-cost-line.entity';
+import { QuotationFeedback } from '@plugins/sales/quotation/entities/quotation-feedback.entity';
 import { QuotationLine } from '@plugins/sales/quotation/entities/quotation-line.entity';
 import { QuotationVersion } from '@plugins/sales/quotation/entities/quotation-version.entity';
 import { Quotation } from '@plugins/sales/quotation/entities/quotation.entity';
+import { QuotationApprovalService } from '@plugins/sales/quotation/services/quotation-approval.service';
+import { QuotationFeedbackService } from '@plugins/sales/quotation/services/quotation-feedback.service';
+import { QuotationPdfService } from '@plugins/sales/quotation/services/quotation-pdf.service';
 import { QuotationVersionService } from '@plugins/sales/quotation/services/quotation-version.service';
 import { QuotationService } from '@plugins/sales/quotation/services/quotation.service';
 import { SalesRequestActivity } from '@plugins/sales/request/entities/request-activity.entity';
 import { SalesRequest } from '@plugins/sales/request/entities/request.entity';
+import { RequestService } from '@plugins/sales/request/services/request.service';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 
@@ -51,6 +59,13 @@ export interface QuotationDb {
   editor: EstimateEditService;
   quotations: QuotationService;
   versions: QuotationVersionService;
+  approvals: QuotationApprovalService;
+  feedback: QuotationFeedbackService;
+  exports: QuotationPdfService;
+  /** The request service wired with the quotation's close hook, for closing a request. */
+  requests: RequestService;
+  /** Stands in for the notification service: every emitted notice lands here. */
+  notifications: { emit: jest.Mock };
   tag: string;
   itemId: number;
   customerId: number;
@@ -59,6 +74,7 @@ export interface QuotationDb {
   manager: AuthUserPayload;
   engineer: AuthUserPayload;
   lead: AuthUserPayload;
+  director: AuthUserPayload;
   /** An estimated request: assigned, estimate with the panels built and submitted. */
   estimatedRequest(panels?: PanelSpec[]): Promise<{
     requestId: number;
@@ -67,6 +83,11 @@ export interface QuotationDb {
   }>;
   /** A request row at `status`, tracked for cleanup, with no estimate. */
   requestAt(status: string): Promise<number>;
+  /** Gives the request a contact of its customer, removed by `cleanup`. */
+  addContact(
+    requestId: number,
+    contact: { name: string; phone: string; email: string },
+  ): Promise<void>;
   cleanup(): Promise<void>;
   close(): Promise<void>;
 }
@@ -104,6 +125,7 @@ export async function openQuotationDb(
       QuotationLine,
       QuotationBomLine,
       QuotationCostLine,
+      QuotationFeedback,
       ...foreignEntities,
     ],
   });
@@ -118,7 +140,7 @@ export async function openQuotationDb(
   const accounts: Array<{ id: number; username: string }> =
     await dataSource.query(
       `SELECT id, username FROM users
-       WHERE username IN ('sales_a', 'sales_b', 'sales_mgr', 'engineer_a', 'eng_lead')`,
+       WHERE username IN ('sales_a', 'sales_b', 'sales_mgr', 'engineer_a', 'eng_lead', 'director')`,
     );
   const idOf = (username: string): number => {
     const account = accounts.find((entry) => entry.username === username);
@@ -137,11 +159,24 @@ export async function openQuotationDb(
   const notifications = { emit: jest.fn().mockResolvedValue(1) };
   const users = {
     namesOf: () => Promise.resolve(new Map<number, string>()),
+    contactOf: () =>
+      Promise.resolve({
+        fullName: 'Sales A',
+        phone: '0900000001',
+        email: 'sales.a@example.test',
+      }),
   };
   const crm = {
     getCustomerSummary: (id: number) =>
       Promise.resolve({ id, code: 'KH', name: 'Customer' }),
     getCustomerSummaries: () => Promise.resolve(new Map()),
+    getContactSummary: async (id: number) => {
+      const [row]: Array<{ id: number; name: string }> = await dataSource.query(
+        `SELECT id, name, phone, email FROM contacts WHERE id = $1`,
+        [id],
+      );
+      return row ?? null;
+    },
   };
   const estimateService = new EstimateService(
     dataSource.getRepository(Estimate),
@@ -166,10 +201,47 @@ export async function openQuotationDb(
     users as never,
     crm as never,
   );
+  const estimateRead = new EstimateReadPort();
   const versions = new QuotationVersionService(
     dataSource,
     dataScope,
     quotations,
+    estimateRead,
+  );
+  const closeHooks = new RequestCloseRegistry();
+  const approvals = new QuotationApprovalService(
+    dataSource,
+    dataScope,
+    quotations,
+    estimateRead,
+    statusPort,
+    notifications as never,
+    closeHooks,
+  );
+  approvals.onModuleInit();
+  const feedback = new QuotationFeedbackService(
+    dataSource,
+    dataScope,
+    users as never,
+  );
+  const exports = new QuotationPdfService(
+    dataSource,
+    dataScope,
+    crm as never,
+    users as never,
+  );
+  const requests = new RequestService(
+    dataSource.getRepository(SalesRequest),
+    dataSource.getRepository(SalesRequestActivity),
+    dataSource,
+    dataScope,
+    crm as never,
+    users as never,
+    notifications as never,
+    statusPort,
+    new CrmReferenceCheckRegistry(),
+    new CustomerOwnerChangeRegistry(),
+    closeHooks,
   );
 
   const [customer]: Array<{ id: number }> = await dataSource.query(
@@ -183,6 +255,7 @@ export async function openQuotationDb(
   );
 
   const requestIds: number[] = [];
+  const contactIds: number[] = [];
   const engineer: AuthUserPayload = { userId: engineerId, role: 'engineer' };
 
   const requestAt = async (status: string): Promise<number> => {
@@ -207,6 +280,11 @@ export async function openQuotationDb(
     editor,
     quotations,
     versions,
+    approvals,
+    feedback,
+    exports,
+    requests,
+    notifications,
     tag,
     itemId: item.id,
     customerId: customer.id,
@@ -215,7 +293,20 @@ export async function openQuotationDb(
     manager: { userId: idOf('sales_mgr'), role: 'salesManager' },
     engineer,
     lead: { userId: idOf('eng_lead'), role: 'engineeringLead' },
+    director: { userId: idOf('director'), role: 'director' },
     requestAt,
+    async addContact(requestId, contact) {
+      const [row]: Array<{ id: number }> = await dataSource.query(
+        `INSERT INTO contacts (customer_id, name, phone, email)
+         VALUES ($1, $2, $3, $4) RETURNING id`,
+        [customer.id, contact.name, contact.phone, contact.email],
+      );
+      contactIds.push(row.id);
+      await dataSource.query(
+        `UPDATE sales_requests SET contact_id = $2 WHERE id = $1`,
+        [requestId, row.id],
+      );
+    },
     async estimatedRequest(panels = DEFAULT_PANELS) {
       const requestId = await requestAt('assigned');
       const estimate = await estimateService.create({ requestId }, engineer);
@@ -257,6 +348,12 @@ export async function openQuotationDb(
         requestIds,
       ]);
       requestIds.length = 0;
+      if (contactIds.length > 0) {
+        await dataSource.query(`DELETE FROM contacts WHERE id = ANY($1)`, [
+          contactIds,
+        ]);
+        contactIds.length = 0;
+      }
     },
     async close() {
       if (!dataSource.isInitialized) return;

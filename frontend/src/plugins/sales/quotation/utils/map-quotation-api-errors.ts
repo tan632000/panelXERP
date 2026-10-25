@@ -6,6 +6,10 @@ export type QuotationToastKey =
   | "noEstimate"
   | "staleRevision"
   | "requestState"
+  | "staleEstimate"
+  | "versionState"
+  | "changedMeanwhile"
+  | "requestCannotMove"
   | "discountTooLarge"
   | "amountTooLarge";
 
@@ -22,4 +26,8 @@ export const resolveQuotationToastKey =
     [["cannot exceed the subtotal"], "discountTooLarge"],
     [["exceeds"], "amountTooLarge"],
     [["cannot be quoted"], "requestState"],
+    [["estimate was revised"], "staleEstimate"],
+    [["changed while"], "changedMeanwhile"],
+    [["and cannot be"], "versionState"],
+    [["cannot become"], "requestCannotMove"],
   ]);

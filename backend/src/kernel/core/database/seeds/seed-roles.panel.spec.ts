@@ -32,15 +32,10 @@ const PENDING_MODULES: Readonly<Record<string, string>> = {
 
 /**
  * Scopes of a module whose plugin is declared but not yet complete, with the task that
- * declares each. The quotation plugin declares read/create/update first; `approve` reaches
- * the sales manager and director only through `quotation:*`, so it is not seeded explicitly.
+ * declares each. Empty while every declared module is complete; a task that adds a module in
+ * stages lists the scopes of the later stages here until it declares them.
  */
-const PENDING_SCOPES: Readonly<Record<string, string>> = {
-  'quotation:submit': 'task-10',
-  'quotation:confirm': 'task-10',
-  'quotation:cancel': 'task-10',
-  'quotation:export': 'task-10',
-};
+const PENDING_SCOPES: Readonly<Record<string, string>> = {};
 
 /**
  * Seeded scopes no plugin declares and nothing excuses: not a pending scope, not on a
@@ -163,10 +158,13 @@ describe('panel-shop role matrix', () => {
   it('flags a typo in a scope of a declared module, from a local fixture matrix', () => {
     const fixture: Array<[string, string[]]> = [
       ['salesManager', ['quotation:aprove', 'quotation:submit']],
-      ['sales', ['order:read', 'quotation:confirm']],
+      ['sales', ['order:read', 'quotation:submit']],
     ];
+    const pending = { 'quotation:submit': 'a later task' };
 
-    expect(strayScopes(fixture)).toEqual(['salesManager: quotation:aprove']);
+    expect(strayScopes(fixture, pending)).toEqual([
+      'salesManager: quotation:aprove',
+    ]);
   });
 
   it('grants a module wildcard only on a declared or pending module', () => {

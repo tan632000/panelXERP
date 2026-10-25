@@ -8,6 +8,7 @@ import {
   Patch,
   Post,
   Query,
+  StreamableFile,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -23,17 +24,32 @@ import {
   RequirePermission,
 } from '@kernel/core/auth/decorators/auth.decorators';
 
+import { buildAttachmentContentDisposition } from '@shared/utils/content-disposition.util';
+
+import { CreateQuotationFeedbackDto } from '@plugins/sales/quotation/dto/create-quotation-feedback.dto';
 import { CreateQuotationDto } from '@plugins/sales/quotation/dto/create-quotation.dto';
 import { QuotationFilterDto } from '@plugins/sales/quotation/dto/quotation-filter.dto';
 import { QuotationVersionQueryDto } from '@plugins/sales/quotation/dto/quotation-version-query.dto';
 import { UpdateQuotationPricingDto } from '@plugins/sales/quotation/dto/update-quotation-pricing.dto';
 import {
+  QUOTATION_APPROVE,
+  QUOTATION_CANCEL,
+  QUOTATION_CONFIRM,
   QUOTATION_CREATE,
+  QUOTATION_EXPORT,
   QUOTATION_READ,
+  QUOTATION_SUBMIT,
   QUOTATION_UPDATE,
 } from '@plugins/sales/quotation/permissions/quotation.permissions';
+import { QuotationApprovalService } from '@plugins/sales/quotation/services/quotation-approval.service';
+import { QuotationFeedbackService } from '@plugins/sales/quotation/services/quotation-feedback.service';
+import {
+  QuotationPdfService,
+  type QuotationExportFile,
+} from '@plugins/sales/quotation/services/quotation-pdf.service';
 import { QuotationVersionService } from '@plugins/sales/quotation/services/quotation-version.service';
 import { QuotationService } from '@plugins/sales/quotation/services/quotation.service';
+import { RequestReasonDto } from '@plugins/sales/request/dto/request-reason.dto';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 
@@ -47,6 +63,9 @@ export class QuotationController {
   constructor(
     private readonly service: QuotationService,
     private readonly versions: QuotationVersionService,
+    private readonly approvals: QuotationApprovalService,
+    private readonly feedback: QuotationFeedbackService,
+    private readonly exports: QuotationPdfService,
   ) {}
 
   @Get()
@@ -115,9 +134,9 @@ export class QuotationController {
   @Patch(':id')
   @RequirePermission(QUOTATION_UPDATE)
   @ApiOperation({
-    summary: 'Set margins, discount and VAT of the draft version',
+    summary: 'Set margins, discount, VAT and terms of the draft version',
     description:
-      'Only what the body names changes; margins are per line (0–1000%), the discount a percent (0–100) or an amount not above the subtotal, VAT one of 0/5/8/10. The server recomputes and stores every total.',
+      'Only what the body names changes; margins are per line (0–1000%), the discount a percent (0–100) or an amount not above the subtotal, VAT one of 0/5/8/10, and the terms replace the printed list. The server recomputes and stores every total.',
   })
   @ApiParam({ name: 'id', type: Number })
   @ApiBody({ type: UpdateQuotationPricingDto })
@@ -168,5 +187,250 @@ export class QuotationController {
     @CurrentUser() user: AuthUserPayload,
   ) {
     return this.versions.revise(id, user);
+  }
+
+  @Post(':id/refresh-estimate')
+  @HttpCode(200)
+  @RequirePermission(QUOTATION_UPDATE)
+  @ApiOperation({
+    summary: 'Update the draft from the latest submitted estimate',
+    description:
+      'Rebuilds the draft panel lines and frozen BOM from the latest submitted estimate revision, keeping the margin of every panel whose tag still exists. Discount, VAT and terms stay. A draft already on the latest revision is returned unchanged.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Draft refreshed' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden — requires quotation:update',
+  })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({
+    status: 409,
+    description:
+      'The latest version is not a draft, or no estimate is submitted',
+  })
+  refreshEstimate(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.versions.refreshEstimate(id, user);
+  }
+
+  @Post(':id/submit')
+  @HttpCode(200)
+  @RequirePermission(QUOTATION_SUBMIT)
+  @ApiOperation({
+    summary: 'Submit the draft for approval',
+    description:
+      'draft → pending_approval, by the version creator or a manager; the approvers are notified after the commit. A draft built on an estimate revision that is no longer the latest submitted one answers 409.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Submitted for approval' })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Forbidden — requires quotation:submit, and the version creator or a manager',
+  })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({
+    status: 409,
+    description: 'Not a draft, or the estimate was revised since',
+  })
+  submit(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.approvals.submit(id, user);
+  }
+
+  @Post(':id/approve')
+  @HttpCode(200)
+  @RequirePermission(QUOTATION_APPROVE)
+  @ApiOperation({
+    summary: 'Approve the version',
+    description:
+      'pending_approval → approved in one step, by someone other than the version creator. The first approval moves the request from estimated to quoted in the same transaction; the sales owner is notified after the commit.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Approved' })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Forbidden — requires quotation:approve, and not the version creator',
+  })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({ status: 409, description: 'Not pending approval' })
+  approve(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.approvals.approve(id, user);
+  }
+
+  @Post(':id/reject')
+  @HttpCode(200)
+  @RequirePermission(QUOTATION_APPROVE)
+  @ApiOperation({
+    summary: 'Reject the version',
+    description:
+      'pending_approval → rejected with a reason, by someone other than the version creator. The version stays as it was; Sales revises it into the next version.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({ type: RequestReasonDto })
+  @ApiResponse({ status: 200, description: 'Rejected' })
+  @ApiResponse({
+    status: 403,
+    description:
+      'Forbidden — requires quotation:approve, and not the version creator',
+  })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({ status: 409, description: 'Not pending approval' })
+  reject(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: RequestReasonDto,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.approvals.reject(id, dto, user);
+  }
+
+  @Post(':id/confirm')
+  @HttpCode(200)
+  @RequirePermission(QUOTATION_CONFIRM)
+  @ApiOperation({
+    summary: 'Record that the customer accepted',
+    description: 'approved → customer_confirmed; any other status answers 409.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Confirmed by the customer' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden — requires quotation:confirm',
+  })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({ status: 409, description: 'Not approved' })
+  confirm(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.approvals.confirm(id, user);
+  }
+
+  @Post(':id/cancel')
+  @HttpCode(200)
+  @RequirePermission(QUOTATION_CANCEL)
+  @ApiOperation({
+    summary: 'Cancel the quotation',
+    description:
+      'From draft, pending_approval, approved or rejected: the version becomes cancelled and the request lost, with the reason, in one transaction. A confirmed or already cancelled quotation answers 409.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({ type: RequestReasonDto })
+  @ApiResponse({ status: 200, description: 'Cancelled; the request is lost' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden — requires quotation:cancel',
+  })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({
+    status: 409,
+    description:
+      'Confirmed, cancelled or closed, or the request cannot be lost',
+  })
+  cancel(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: RequestReasonDto,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.approvals.cancel(id, dto, user);
+  }
+
+  @Get(':id/feedback')
+  @RequirePermission(QUOTATION_READ)
+  @ApiOperation({
+    summary: 'List the customer feedback of a quotation',
+    description: 'Newest first: date, channel, content and who recorded it.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'The feedback log' })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  listFeedback(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.feedback.list(id, user);
+  }
+
+  @Post(':id/feedback')
+  @RequirePermission(QUOTATION_UPDATE)
+  @ApiOperation({
+    summary: 'Record what the customer answered',
+    description: 'Appends one entry to the feedback log of the quotation.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({ type: CreateQuotationFeedbackDto })
+  @ApiResponse({ status: 201, description: 'Feedback recorded' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden — requires quotation:update',
+  })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  addFeedback(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateQuotationFeedbackDto,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.feedback.add(id, dto, user);
+  }
+
+  @Get(':id/export.xlsx')
+  @RequirePermission(QUOTATION_EXPORT)
+  @ApiOperation({
+    summary: 'Download the customer-facing quotation as .xlsx',
+    description:
+      'The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'The workbook' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden — requires quotation:export',
+  })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({ status: 409, description: 'Not approved or confirmed' })
+  async exportXlsx(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUserPayload,
+  ): Promise<StreamableFile> {
+    return this.download(await this.exports.exportXlsx(id, user));
+  }
+
+  @Get(':id/export.pdf')
+  @RequirePermission(QUOTATION_EXPORT)
+  @ApiOperation({
+    summary: 'Download the customer-facing quotation as PDF',
+    description:
+      'The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'The PDF' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden — requires quotation:export',
+  })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({ status: 409, description: 'Not approved or confirmed' })
+  async exportPdf(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUserPayload,
+  ): Promise<StreamableFile> {
+    return this.download(await this.exports.exportPdf(id, user));
+  }
+
+  private download(file: QuotationExportFile): StreamableFile {
+    return new StreamableFile(file.body, {
+      type: file.contentType,
+      disposition: buildAttachmentContentDisposition(file.fileName),
+      length: file.body.length,
+    });
   }
 }

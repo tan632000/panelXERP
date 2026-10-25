@@ -86,7 +86,7 @@
   },
   "toast": {
     "createSuccess": "Đã tạo báo giá.",
-    "saveSuccess": "Đã lưu giá.",
+    "saveSuccess": "Đã lưu thay đổi.",
     "readOnly": "Phiên bản này không thể sửa; chỉ bản nháp mới sửa được.",
     "alreadyExists": "Yêu cầu này đã có báo giá.",
     "noEstimate": "Yêu cầu này chưa có dự toán đã nộp để báo giá.",
@@ -95,6 +95,87 @@
     "discountTooLarge": "Chiết khấu không được vượt quá tiền hàng.",
     "amountTooLarge": "Giá trị vượt quá giới hạn cho phép.",
     "systemError": "Đã xảy ra lỗi, vui lòng thử lại sau.",
-    "forbidden": "Bạn không có quyền thực hiện thao tác này."
+    "forbidden": "Bạn không có quyền thực hiện thao tác này.",
+    "submitSuccess": "Đã gửi báo giá đi duyệt.",
+    "approveSuccess": "Đã duyệt báo giá.",
+    "rejectSuccess": "Đã từ chối báo giá.",
+    "confirmSuccess": "Đã ghi nhận khách xác nhận.",
+    "cancelSuccess": "Đã hủy báo giá.",
+    "reviseSuccess": "Đã tạo phiên bản mới.",
+    "refreshSuccess": "Đã cập nhật từ dự toán mới nhất.",
+    "refreshDiscountTooLarge": "Chiết khấu cố định lớn hơn tiền hàng sau khi cập nhật; hãy giảm chiết khấu trước rồi cập nhật lại.",
+    "feedbackSuccess": "Đã ghi nhận phản hồi.",
+    "staleEstimate": "Dự toán đã được sửa; hãy cập nhật báo giá từ dự toán mới nhất rồi gửi lại.",
+    "versionState": "Trạng thái hiện tại của phiên bản không cho phép thao tác này.",
+    "changedMeanwhile": "Phiên bản vừa được người khác thay đổi; hãy tải lại rồi thử lại.",
+    "requestCannotMove": "Trạng thái hiện tại của yêu cầu không cho phép thao tác này."
+  },
+  "approval": {
+    "title": "Phê duyệt và xử lý",
+    "hint": {
+      "draft": "Bản nháp: chỉnh biên lợi nhuận, chiết khấu, VAT và điều khoản rồi gửi duyệt.",
+      "pending_approval": "Đang chờ người có quyền duyệt (không phải người tạo phiên bản) quyết định.",
+      "approved": "Đã duyệt: tải bản gửi khách, ghi nhận phản hồi, và bấm xác nhận khi khách đồng ý.",
+      "rejected": "Bị từ chối: sửa lại bằng cách tạo phiên bản mới.",
+      "customer_confirmed": "Khách đã xác nhận báo giá này.",
+      "cancelled": "Báo giá đã hủy và yêu cầu đã chuyển sang mất.",
+      "closed": "Phiên bản đã đóng, đã có phiên bản mới thay thế."
+    },
+    "stale": "Dự toán đã có bản nộp mới hơn bản này đang dùng. Hãy cập nhật từ dự toán mới nhất trước khi gửi duyệt.",
+    "creatorCannotDecide": "Bạn đã tạo hoặc sửa giá/điều khoản của phiên bản này nên cần người khác duyệt hoặc từ chối.",
+    "reasonOf": {
+      "rejected": "Lý do từ chối:",
+      "cancelled": "Lý do hủy:"
+    },
+    "submit": "Gửi duyệt",
+    "submitBlockedStale": "Cập nhật từ dự toán mới nhất trước khi gửi duyệt",
+    "refresh": "Cập nhật từ dự toán mới nhất",
+    "approve": "Duyệt",
+    "reject": "Từ chối",
+    "confirm": "Khách đã xác nhận",
+    "revise": "Tạo phiên bản mới",
+    "cancel": "Hủy báo giá",
+    "exportXlsx": "Tải Excel",
+    "exportPdf": "Tải PDF",
+    "rejectTitle": "Từ chối báo giá {code}",
+    "rejectDescription": "Phiên bản này được giữ nguyên; nhân viên kinh doanh sẽ tạo phiên bản mới để sửa.",
+    "rejectSubmit": "Xác nhận từ chối",
+    "cancelTitle": "Hủy báo giá {code}",
+    "cancelDescription": "Báo giá sẽ kết thúc và yêu cầu báo giá được ghi nhận là mất. Khách quay lại sẽ cần một yêu cầu mới.",
+    "cancelSubmit": "Xác nhận hủy báo giá",
+    "reason": {
+      "label": "Lý do",
+      "placeholder": "Nhập lý do...",
+      "required": "Vui lòng nhập lý do.",
+      "max": "Lý do tối đa {max} ký tự."
+    }
+  },
+  "terms": {
+    "title": "Điều khoản",
+    "save": "Lưu điều khoản",
+    "add": "Thêm điều khoản",
+    "remove": "Xóa điều khoản {n}",
+    "termN": "Điều khoản {n}",
+    "empty": "Chưa có điều khoản nào.",
+    "validation": {
+      "blank": "Điều khoản không được để trống."
+    }
+  },
+  "feedback": {
+    "title": "Phản hồi của khách hàng",
+    "date": "Ngày",
+    "channel": "Kênh",
+    "channels": {
+      "phone": "Điện thoại",
+      "email": "Email",
+      "meeting": "Gặp mặt",
+      "chat": "Tin nhắn",
+      "other": "Khác"
+    },
+    "content": "Nội dung",
+    "contentPlaceholder": "Khách nói gì...",
+    "add": "Ghi nhận phản hồi",
+    "loading": "Đang tải...",
+    "empty": "Chưa có phản hồi nào."
   }
 }

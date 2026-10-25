@@ -86,7 +86,7 @@
   },
   "toast": {
     "createSuccess": "Quotation created.",
-    "saveSuccess": "Pricing saved.",
+    "saveSuccess": "Changes saved.",
     "readOnly": "This version cannot be edited; only a draft can.",
     "alreadyExists": "This request already has a quotation.",
     "noEstimate": "This request has no submitted estimate to quote.",
@@ -95,6 +95,87 @@
     "discountTooLarge": "The discount cannot exceed the subtotal.",
     "amountTooLarge": "The value exceeds the allowed limit.",
     "systemError": "Something went wrong, please try again later.",
-    "forbidden": "You do not have permission to do this."
+    "forbidden": "You do not have permission to do this.",
+    "submitSuccess": "Quotation submitted for approval.",
+    "approveSuccess": "Quotation approved.",
+    "rejectSuccess": "Quotation rejected.",
+    "confirmSuccess": "Customer confirmation recorded.",
+    "cancelSuccess": "Quotation cancelled.",
+    "reviseSuccess": "New version created.",
+    "refreshSuccess": "Updated from the latest estimate.",
+    "refreshDiscountTooLarge": "The fixed discount would exceed the updated subtotal; lower the discount first, then update again.",
+    "feedbackSuccess": "Feedback recorded.",
+    "staleEstimate": "The estimate was revised; update the quotation from the latest estimate and submit again.",
+    "versionState": "The version's current status does not allow this.",
+    "changedMeanwhile": "Someone else just changed the version; reload and try again.",
+    "requestCannotMove": "The request's current status does not allow this."
+  },
+  "approval": {
+    "title": "Approval and follow-up",
+    "hint": {
+      "draft": "Draft: adjust margins, discount, VAT and terms, then submit for approval.",
+      "pending_approval": "Waiting for an approver other than the version's creator to decide.",
+      "approved": "Approved: download the customer file, record feedback, and confirm when the customer accepts.",
+      "rejected": "Rejected: revise it into a new version to fix it.",
+      "customer_confirmed": "The customer has confirmed this quotation.",
+      "cancelled": "The quotation is cancelled and the request is marked lost.",
+      "closed": "This version is closed; a newer version replaced it."
+    },
+    "stale": "The estimate has a newer submitted revision than this draft uses. Update from the latest estimate before submitting.",
+    "creatorCannotDecide": "You created this version or last edited its price or terms, so someone else must approve or reject it.",
+    "reasonOf": {
+      "rejected": "Reason for rejection:",
+      "cancelled": "Reason for cancelling:"
+    },
+    "submit": "Submit for approval",
+    "submitBlockedStale": "Update from the latest estimate before submitting",
+    "refresh": "Update from the latest estimate",
+    "approve": "Approve",
+    "reject": "Reject",
+    "confirm": "Customer confirmed",
+    "revise": "Create new version",
+    "cancel": "Cancel quotation",
+    "exportXlsx": "Download Excel",
+    "exportPdf": "Download PDF",
+    "rejectTitle": "Reject quotation {code}",
+    "rejectDescription": "This version is kept as it is; the salesperson will open a new version to fix it.",
+    "rejectSubmit": "Confirm rejection",
+    "cancelTitle": "Cancel quotation {code}",
+    "cancelDescription": "The quotation ends and the request is recorded as lost. A returning customer needs a new request.",
+    "cancelSubmit": "Confirm cancellation",
+    "reason": {
+      "label": "Reason",
+      "placeholder": "Enter the reason...",
+      "required": "Please enter a reason.",
+      "max": "The reason can be at most {max} characters."
+    }
+  },
+  "terms": {
+    "title": "Terms",
+    "save": "Save terms",
+    "add": "Add a term",
+    "remove": "Remove term {n}",
+    "termN": "Term {n}",
+    "empty": "No terms yet.",
+    "validation": {
+      "blank": "A term must not be empty."
+    }
+  },
+  "feedback": {
+    "title": "Customer feedback",
+    "date": "Date",
+    "channel": "Channel",
+    "channels": {
+      "phone": "Phone",
+      "email": "Email",
+      "meeting": "Meeting",
+      "chat": "Chat",
+      "other": "Other"
+    },
+    "content": "Content",
+    "contentPlaceholder": "What the customer said...",
+    "add": "Record feedback",
+    "loading": "Loading...",
+    "empty": "No feedback yet."
   }
 }

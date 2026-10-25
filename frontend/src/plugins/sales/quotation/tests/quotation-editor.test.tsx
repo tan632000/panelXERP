@@ -140,6 +140,7 @@ function detail(options: DetailOptions = {}) {
       taxable: 2969134,
       vatAmount: 237531,
       total: 3206665,
+      terms: ["Warranty 12 months"],
       lines: lines(),
     },
   };

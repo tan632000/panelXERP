@@ -1,5 +1,6 @@
 import type {
   DiscountType,
+  FeedbackChannel,
   QuotationVersionStatus,
 } from "@plugins/sales/quotation/constants";
 
@@ -80,8 +81,16 @@ export interface QuotationVersion {
   taxable: number;
   vatAmount: number;
   total: number;
+  /** The terms printed under the table; this version's own copy. */
+  terms: string[];
   createdBy?: number | null;
+  /** Who last edited the price or the terms. */
+  lastEditedBy?: number | null;
   createdAt?: string;
+  decidedBy?: number | null;
+  decidedAt?: string | null;
+  /** The reason of a rejection or a cancellation. */
+  decisionReason?: string | null;
   lines: QuotationLine[];
 }
 
@@ -93,6 +102,8 @@ export interface QuotationDetail extends Omit<
   request: QuotationRequestSummary;
   versions: QuotationVersionSummary[];
   current: QuotationVersion;
+  /** The newest version is a draft built on a superseded estimate revision. */
+  estimateStale?: boolean;
 }
 
 export interface QuotationListParams {
@@ -115,4 +126,24 @@ export interface UpdateQuotationPricingDto {
   discountType?: DiscountType;
   discountValue?: number;
   vatRate?: number;
+  terms?: string[];
+}
+
+/** One answer of the customer, as the feedback log lists it. */
+export interface QuotationFeedback {
+  id: number;
+  quotationId: number;
+  /** `YYYY-MM-DD`. */
+  feedbackDate: string;
+  channel: FeedbackChannel;
+  content: string;
+  createdBy?: number | null;
+  createdByName?: string | null;
+  createdAt?: string;
+}
+
+export interface CreateQuotationFeedbackDto {
+  feedbackDate: string;
+  channel: FeedbackChannel;
+  content: string;
 }
