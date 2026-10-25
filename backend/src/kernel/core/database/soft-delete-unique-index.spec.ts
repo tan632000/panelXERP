@@ -228,6 +228,7 @@ function releasedColumns(): Set<string> {
 const DOCUMENT_NUMBER_INDEXES: ReadonlySet<string> = new Set([
   'uq_sales_requests_code',
   'uq_sales_estimates_code',
+  'uq_sales_quotations_code',
 ]);
 
 describe('unique indexes free the values of a deleted record', () => {

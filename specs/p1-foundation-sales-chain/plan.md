@@ -78,7 +78,7 @@ Strictly sequential (one writer per shared registration file, R-08).
 | 06 | Item catalog + import | P1 | AC-05, AC-06, AC-07 | `*/src/plugins/catalog/` | 05 | done |
 | 07 | Sales request + attachments + assignment | P1 | AC-08, AC-14 | `*/src/plugins/sales/request` | 06 | done |
 | 08 | Estimate (BOM + costing) | P1 | AC-09 | `*/src/plugins/sales/estimate` | 07 | done |
-| 09 | Quotation pricing + versions | P1 | AC-10, AC-11 (revise race) | `*/src/plugins/sales/quotation` | 08 | pending |
+| 09 | Quotation pricing + versions | P1 | AC-10, AC-11 (revise race) | `*/src/plugins/sales/quotation` | 08 | done |
 | 10 | Quotation approval + feedback + PDF | P1 | AC-11 (revise–confirm race), AC-12 | `*/src/plugins/sales/quotation` (approval, feedback, pdf) | 09 | pending |
 | 11 | Order + chain e2e | P1 | AC-13 | `*/src/plugins/sales/order`, `backend/test/sales-chain.e2e-spec.ts` | 10 | pending |
 

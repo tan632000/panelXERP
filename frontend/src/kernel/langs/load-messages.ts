@@ -10,6 +10,7 @@ import metadataEn from "@kernel/langs/en/metadata.json";
 import modalEn from "@kernel/langs/en/modal.json";
 import permissionEn from "@kernel/langs/en/permission.json";
 import projectEn from "@kernel/langs/en/project.json";
+import quotationEn from "@kernel/langs/en/quotation.json";
 import requestEn from "@kernel/langs/en/request.json";
 import salesEn from "@kernel/langs/en/sales.json";
 import statusEn from "@kernel/langs/en/status.json";
@@ -26,6 +27,7 @@ import metadataVi from "@kernel/langs/vi/metadata.json";
 import modalVi from "@kernel/langs/vi/modal.json";
 import permissionVi from "@kernel/langs/vi/permission.json";
 import projectVi from "@kernel/langs/vi/project.json";
+import quotationVi from "@kernel/langs/vi/quotation.json";
 import requestVi from "@kernel/langs/vi/request.json";
 import salesVi from "@kernel/langs/vi/sales.json";
 import statusVi from "@kernel/langs/vi/status.json";
@@ -42,6 +44,7 @@ export const enMessages = {
   sales: salesEn,
   request: requestEn,
   estimate: estimateEn,
+  quotation: quotationEn,
   system: systemEn,
   permission: permissionEn,
   common: commonEn,
@@ -61,6 +64,7 @@ export const viMessages = {
   sales: salesVi,
   request: requestVi,
   estimate: estimateVi,
+  quotation: quotationVi,
   system: systemVi,
   permission: permissionVi,
   common: commonVi,

@@ -1,0 +1,100 @@
+{
+  "title": "Quotations",
+  "description": "Price the estimate of each panel with a margin, a discount and VAT, and keep every version of the quotation",
+  "detailTitle": "Quotation detail",
+  "detailNotFound": "Quotation not found",
+  "code": "Quotation no.",
+  "request": "Quote request",
+  "customer": "Customer",
+  "status": "Status",
+  "version": "Version",
+  "versions": "Versions",
+  "estimateRevision": "Estimate revision",
+  "salesOwner": "Sales owner",
+  "total": "Total",
+  "updatedAt": "Updated",
+  "createdAt": "Version created",
+  "infoBasic": "General information",
+  "emptyValue": "-",
+  "searchPlaceholder": "Search quotation no., request code or title...",
+  "noQuotations": "No quotations yet",
+  "noQuotationsFound": "No quotations found",
+  "paginationItem": "quotations",
+  "noneYet": "This request has no quotation yet.",
+  "create": "Create quotation",
+  "createTitle": "Create quotation",
+  "createRequest": "Estimated request",
+  "createRequestPlaceholder": "Pick an estimated request...",
+  "noEstimatedRequests": "No estimated requests available",
+  "olderVersion": "This is an older version, view only.",
+  "readOnlyStatus": "This version is \"{status}\" and cannot be edited.",
+  "readOnlyNoRights": "You can only view this quotation.",
+  "filters": {
+    "status": "Status",
+    "customer": "Customer",
+    "code": "Quotation no.",
+    "codePlaceholder": "Quotation no. (Enter)"
+  },
+  "statuses": {
+    "draft": "Draft",
+    "pending_approval": "Pending approval",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "customer_confirmed": "Customer confirmed",
+    "cancelled": "Cancelled",
+    "closed": "Closed"
+  },
+  "panels": {
+    "title": "Panels",
+    "position": "No.",
+    "panel": "Panel",
+    "quantity": "Qty",
+    "unitCost": "Unit cost",
+    "margin": "Margin",
+    "unitPrice": "Unit price",
+    "amount": "Amount",
+    "marginOf": "Margin of panel {tag}"
+  },
+  "bom": {
+    "position": "No.",
+    "description": "Description",
+    "code": "Code",
+    "brand": "Brand",
+    "unit": "Unit",
+    "quantity": "Quantity"
+  },
+  "pricing": {
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "discountType": "Discount type",
+    "discountTypes": {
+      "percent": "Percent (%)",
+      "amount": "Amount (VND)"
+    },
+    "discountValue": "Discount value",
+    "taxable": "After discount",
+    "vat": "VAT",
+    "vatRate": "VAT rate",
+    "total": "Total",
+    "hint": "Figures shown while typing are for reference; the system calculates and stores them when you save. A percent discount is at most {max}.",
+    "save": "Save pricing"
+  },
+  "validation": {
+    "discountPercentInvalid": "A percent discount is a number from 0 to 100 with at most 2 decimals.",
+    "discountInvalid": "A discount amount is a number of at least 0 with at most 2 decimals.",
+    "discountTooLarge": "The discount cannot exceed the subtotal."
+  },
+  "toast": {
+    "createSuccess": "Quotation created.",
+    "saveSuccess": "Pricing saved.",
+    "readOnly": "This version cannot be edited; only a draft can.",
+    "alreadyExists": "This request already has a quotation.",
+    "noEstimate": "This request has no submitted estimate to quote.",
+    "staleRevision": "The estimate has a newer submitted revision; reload and try again.",
+    "requestState": "The request's current status does not allow a quotation.",
+    "discountTooLarge": "The discount cannot exceed the subtotal.",
+    "amountTooLarge": "The value exceeds the allowed limit.",
+    "systemError": "Something went wrong, please try again later.",
+    "forbidden": "You do not have permission to do this."
+  }
+}

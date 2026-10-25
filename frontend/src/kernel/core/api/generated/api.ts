@@ -1563,6 +1563,74 @@ export interface paths {
     patch: operations["EstimateController_updateCostLine"];
     trace?: never;
   };
+  "/api/v1/sales/quotations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List quotations
+     * @description Paginated list with the request and the latest version of each; filter by the latest version status, code, customer or request. The keyword matches the quotation code or the code or title of its request. A Sales actor sees the quotations of the requests they own.
+     */
+    get: operations["QuotationController_findAll"];
+    put?: never;
+    /**
+     * Quote an estimated request
+     * @description Builds version 1 (draft, code NN-ddmmyyyy/BG) from the latest submitted estimate revision and leaves the request estimated. A revision that is not the latest submitted one, a request not estimated, or a request that already has a quotation answer 409.
+     */
+    post: operations["QuotationController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/quotations/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a quotation with one version
+     * @description The header, the request it answers, the version list, and the lines with their frozen BOM and cost-line copies of the version asked for (the latest by default).
+     */
+    get: operations["QuotationController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Set margins, discount and VAT of the draft version
+     * @description Only what the body names changes; margins are per line (0–1000%), the discount a percent (0–100) or an amount not above the subtotal, VAT one of 0/5/8/10. The server recomputes and stores every total.
+     */
+    patch: operations["QuotationController_updatePricing"];
+    trace?: never;
+  };
+  "/api/v1/sales/quotations/{id}/revise": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Revise the quotation
+     * @description Opens the next version as a draft copying the latest one and closes the latest. Allowed only from pending_approval, approved or rejected; two concurrent revises produce exactly one new version.
+     */
+    post: operations["QuotationController_revise"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2066,15 +2134,36 @@ export interface components {
       /** @enum {string} */
       category: "design" | "labor" | "installation" | "transport" | "other";
       description?: Record<string, never> | null;
-      /** @description Cost for ONE panel, VND */
+      /** @description Cost for ONE panel, whole VND */
       amount: number;
     };
     UpdateCostLineDto: {
       /** @enum {string} */
       category?: "design" | "labor" | "installation" | "transport" | "other";
       description?: Record<string, never> | null;
-      /** @description Cost for ONE panel, VND */
+      /** @description Cost for ONE panel, whole VND */
       amount?: number;
+    };
+    CreateQuotationDto: {
+      /** @description The estimated request to quote */
+      requestId: number;
+      /** @description Estimate revision to build from; it must be the latest submitted one (409 otherwise). The latest submitted revision when omitted. */
+      estimateRevisionId?: number;
+    };
+    LineMarginDto: {
+      /** @description The quotation line (one estimate panel) */
+      lineId: number;
+      /** @description Margin over the panel cost, percent, 0–1000, up to 2 decimals */
+      marginPercent: number;
+    };
+    UpdateQuotationPricingDto: {
+      lines?: Array<components["schemas"]["LineMarginDto"]>;
+      /** @enum {string} */
+      discountType?: "percent" | "amount";
+      /** @description Percent (0–100) or VND per the discount type, up to 2 decimals; the cap per type is checked by the server */
+      discountValue?: number;
+      /** @enum {number} */
+      vatRate?: 0 | 5 | 8 | 10;
     };
   };
   responses: never;
@@ -5617,6 +5706,223 @@ export interface operations {
         content?: never;
       };
       /** @description The revision is submitted or superseded and read-only */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Status of the latest version */
+        status?:
+          | "draft"
+          | "pending_approval"
+          | "approved"
+          | "rejected"
+          | "customer_confirmed"
+          | "cancelled"
+          | "closed";
+        /** @description Part of the quotation code */
+        code?: string;
+        /** @description Only quotations of this customer */
+        customerId?: number;
+        /** @description Only the quotation of this request */
+        requestId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated quotation list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateQuotationDto"];
+      };
+    };
+    responses: {
+      /** @description Quotation created as a draft */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No submitted estimate, not the latest revision, request not estimated, or a quotation exists */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_findOne: {
+    parameters: {
+      query?: {
+        /** @description Version number to read; the latest when omitted */
+        ver?: number;
+      };
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Quotation found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_updatePricing: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateQuotationPricingDto"];
+      };
+    };
+    responses: {
+      /** @description Pricing updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Invalid figure, or a discount above the subtotal */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The latest version is not a draft */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  QuotationController_revise: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description New draft version opened */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires quotation:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The latest version is a draft, confirmed, cancelled or closed, or changed meanwhile */
       409: {
         headers: {
           [name: string]: unknown;

@@ -110,4 +110,29 @@ describe('EstimateReadPort', () => {
     expect(latest?.revision).toBe(2);
     expect(latest?.total).toBe(17500);
   });
+
+  it('holds the estimate row FOR SHARE only when asked to lock', async () => {
+    const fixture = buildEstimateFixture();
+    const { request, estimate } = await draftEstimate(fixture);
+    await fixture.service.submit(estimate.id, ENGINEER_A);
+    fixture.estimates.findOne.mockClear();
+
+    await fixture.readPort.getLatestSubmitted(
+      fixture.manager as never,
+      request.id,
+    );
+    expect(fixture.estimates.findOne).toHaveBeenLastCalledWith(
+      expect.not.objectContaining({ lock: expect.anything() as unknown }),
+    );
+
+    const locked = await fixture.readPort.getLatestSubmitted(
+      fixture.manager as never,
+      request.id,
+      { lock: true },
+    );
+    expect(locked?.revision).toBe(1);
+    expect(fixture.estimates.findOne).toHaveBeenLastCalledWith(
+      expect.objectContaining({ lock: { mode: 'pessimistic_read' } }),
+    );
+  });
 });

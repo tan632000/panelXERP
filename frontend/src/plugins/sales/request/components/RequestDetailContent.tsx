@@ -11,6 +11,7 @@ import { displayDetailValue } from "@/kernel/core/lib/display-detail-value";
 import { formatIsoDate } from "@/kernel/core/lib/formatters";
 
 import { RequestEstimateSection } from "@plugins/sales/estimate/components/RequestEstimateSection";
+import { RequestQuotationSection } from "@plugins/sales/quotation/components/RequestQuotationSection";
 
 import { RequestAttachments } from "./RequestAttachments";
 import { RequestStatusBadge } from "./RequestStatusBadge";
@@ -147,6 +148,11 @@ export function RequestDetailContent({
         requestId={request.id}
         requestStatus={request.status}
         assignedEngineerId={request.assignedEngineerId}
+      />
+
+      <RequestQuotationSection
+        requestId={request.id}
+        requestStatus={request.status}
       />
 
       <RequestAttachments requestId={request.id} status={request.status} />

@@ -1,6 +1,6 @@
 # Task 09 — Quotation pricing and versions
 
-Status: pending
+Status: done
 
 ## Outcome
 Sales creates a priced quotation from the latest submitted estimate, edits margins/discount/VAT, and revises it as versions with complete history; concurrent revisions cannot corrupt versions.
@@ -48,3 +48,34 @@ Sales creates a priced quotation from the latest submitted estimate, edits margi
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npx jest --ci src/plugins/sales/quotation && npm run validate:migrations" && docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npx vitest run src/plugins/sales/quotation"
+Exit: 0
+Base: fd51487d40fdd50c9ec76f25d26cead95342f144
+Head: f49f0bb50b9609a80392467560a57f93e4854481c1b20d9bdb0786c726aa0d2a
+```text
+$ docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npx jest --ci src/plugins/sales/quotation && npm run validate:migrations" && docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npx vitest run src/plugins/sales/quotation"
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+PASS src/plugins/sales/quotation/services/quotation-code.spec.ts (5.246 s)
+PASS src/plugins/sales/quotation/services/quotation-pricing.spec.ts
+PASS src/plugins/sales/quotation/services/quotation-version.service.spec.ts (8.655 s)
+PASS src/plugins/sales/quotation/quotation.controller.spec.ts (18.402 s)
+Test Suites: 4 passed, 4 total
+Tests:       71 passed, 71 total
+> panelxerp-backend@0.0.1 validate:migrations
+Migration filename check passed (24 files).
+> panelxerp-frontend@0.1.0 lint
+> panelxerp-frontend@0.1.0 lint:i18n
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+ ✓ src/plugins/sales/quotation/tests/quotation-pricing.test.ts (16 tests) 25ms
+ ✓ src/plugins/sales/quotation/tests/request-quotation-section.test.tsx (5 tests) 287ms
+ ✓ src/plugins/sales/quotation/tests/quotation-editor.test.tsx (13 tests) 1153ms
+ Test Files  3 passed (3)
+      Tests  34 passed (34)
+Exit: 0
+```
+No test in the run above was skipped: the real-Postgres revise race in `quotation-version.service.spec.ts` executed. Extra evidence (same Head, not the canonical command): full backend jest 86 suites / 1136 passed; full frontend 135 files passed, 1 skipped / 1103 passed, 6 skipped (permission-labels needs `../backend`); live smoke after migrate + seed + `docker compose restart backend` (statuses/amounts only): estimate with MSB-01 qty 2 at 1 234 567 and DB-02 qty 1 at 500 000 submitted; sales_a creates the quotation 201, code `01-25102026/BG`, draft total at margin 0 = 3 206 665; margins 12.5% / 0.1%, discount 5%, VAT 8% → subtotal 3 278 276, discount 163 914, taxable 3 114 362, VAT 249 149, total 3 363 511 (worked example); the request stays `estimated`; sales_b GET 404 and its list shows 0 rows; second create for the request 409, also after the engineer revises and resubmits the estimate (the draft keeps estimate revision 1 and total 3 363 511); revise a draft 409; discount above subtotal 400; VAT 7 400; engineer lists quotations 403. The smoke script expected 201 for estimate revise, which returns 200 since task-08; that line is a script expectation, not a product failure. Cleanup: smoke quotation, estimate, request (children by cascade) and notifications 15–20 (18–20 from this run, 15–17 orphaned by an earlier smoke whose request was already gone) removed by targeted SQL; item and customer deleted through the API; counts verified 0. Review (code-auditor): round 1 FAIL (Critical: creating a quotation moved the request to `quoted`, outside scope; a pending-module entry for `quotation` weakened the seed typo guard) → request stays `estimated` with one quotation per request, guard narrowed to `PENDING_SCOPES` with a typo fixture → re-review PASS, Low only; controller added the orphaned-pending-scope test for Low #1. Known limitations: revise is reachable only from `pending_approval|approved|rejected`, which only task-10 can produce, so live revise was checked only as 409 from a draft (the success path and race are spec-proven); a draft is not refreshed when a newer estimate revision is submitted; one quotation per request even after cancellation; open questions for task-10 (stale draft on resubmit, cancelling a request with a draft, Revise button, re-quoting after cancel, letterhead config); no browser walkthrough of the UI.

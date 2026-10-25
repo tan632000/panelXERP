@@ -27,9 +27,39 @@ const PANEL_ROLES = [
  * is empty once P1 is built; until then `seedRoles` stores none of these scopes.
  */
 const PENDING_MODULES: Readonly<Record<string, string>> = {
-  quotation: 'task-09',
   order: 'task-11',
 };
+
+/**
+ * Scopes of a module whose plugin is declared but not yet complete, with the task that
+ * declares each. The quotation plugin declares read/create/update first; `approve` reaches
+ * the sales manager and director only through `quotation:*`, so it is not seeded explicitly.
+ */
+const PENDING_SCOPES: Readonly<Record<string, string>> = {
+  'quotation:submit': 'task-10',
+  'quotation:confirm': 'task-10',
+  'quotation:cancel': 'task-10',
+  'quotation:export': 'task-10',
+};
+
+/**
+ * Seeded scopes no plugin declares and nothing excuses: not a pending scope, not on a
+ * pending module. A typo such as `quotation:aprove` lands here.
+ */
+function strayScopes(
+  seeded: Array<[string, string[]]>,
+  pendingScopes: Readonly<Record<string, string>> = PENDING_SCOPES,
+  pendingModules: Readonly<Record<string, string>> = PENDING_MODULES,
+): string[] {
+  return seeded.flatMap(([role, scopes]) =>
+    scopes
+      .filter(
+        (scope) =>
+          !(scope in pendingScopes) && !(moduleOf(scope) in pendingModules),
+      )
+      .map((scope) => `${role}: ${scope}`),
+  );
+}
 
 const declaredPermissions = (): string[] => [
   ...getAllPluginPermissions(),
@@ -124,14 +154,19 @@ describe('panel-shop role matrix', () => {
 
   // `seedRoles` silently drops a scope no plugin declares, and keeps any `module:*`; a typo in
   // either would surface only as a runtime 403. Each must belong to a module still pending.
-  it('grants an undeclared scope only on a module whose plugin is still pending', () => {
-    const stray = unrecognizedRolePermissions(declaredPermissions()).flatMap(
-      ([role, scopes]) =>
-        scopes
-          .filter((scope) => !(moduleOf(scope) in PENDING_MODULES))
-          .map((scope) => `${role}: ${scope}`),
-    );
-    expect(stray).toEqual([]);
+  it('grants an undeclared scope only while its scope or module is still pending', () => {
+    expect(
+      strayScopes(unrecognizedRolePermissions(declaredPermissions())),
+    ).toEqual([]);
+  });
+
+  it('flags a typo in a scope of a declared module, from a local fixture matrix', () => {
+    const fixture: Array<[string, string[]]> = [
+      ['salesManager', ['quotation:aprove', 'quotation:submit']],
+      ['sales', ['order:read', 'quotation:confirm']],
+    ];
+
+    expect(strayScopes(fixture)).toEqual(['salesManager: quotation:aprove']);
   });
 
   it('grants a module wildcard only on a declared or pending module', () => {
@@ -155,6 +190,23 @@ describe('panel-shop role matrix', () => {
       declaredModules.has(module),
     );
     expect(stale).toEqual([]);
+  });
+
+  it('drops a scope from the pending list once its plugin declares it', () => {
+    const declared = new Set(declaredPermissions());
+    const stale = Object.keys(PENDING_SCOPES).filter((scope) =>
+      declared.has(scope),
+    );
+    expect(stale).toEqual([]);
+  });
+
+  it('lists only scopes some seeded role actually grants as pending', () => {
+    // A scope dropped from the matrix must leave the pending list too, or it lingers unseen.
+    const seeded = new Set(PANEL_ROLES.flatMap((role) => [...grantsOf(role)]));
+    const orphaned = Object.keys(PENDING_SCOPES).filter(
+      (scope) => !seeded.has(scope),
+    );
+    expect(orphaned).toEqual([]);
   });
 
   it('does not let engineers read customers directly (they reach them through a request)', () => {

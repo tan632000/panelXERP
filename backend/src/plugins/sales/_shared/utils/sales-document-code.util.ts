@@ -16,6 +16,19 @@ export function salesDocumentYear(now: Date): number {
   );
 }
 
+/** The calendar date `now` falls on at the shop, as `ddmmyyyy`. */
+export function salesDocumentDate(now: Date): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: SALES_TIME_ZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now);
+  const part = (type: string) =>
+    parts.find((entry) => entry.type === type)?.value ?? '';
+  return `${part('day')}${part('month')}${part('year')}`;
+}
+
 /** Everything a code format needs to read the numbers already issued and produce the next. */
 export interface DocumentCodeContext {
   /** The transaction the document is created in, so the read sees its own earlier inserts. */
@@ -51,6 +64,31 @@ export const yearlyDocumentCode: DocumentCodeFormat = ({
     year: salesDocumentYear(now),
     includeDeleted: true,
   });
+
+/**
+ * `NN-ddmmyyyy/SUFFIX` (e.g. `03-08092026/BG`): the highest sequence used on the shop's
+ * calendar day plus one, at least two digits, deleted rows counted. Every day restarts at
+ * `01`. `prefix` is the suffix after the slash.
+ */
+export const dailyDocumentCode: DocumentCodeFormat = async ({
+  manager,
+  table,
+  prefix,
+  now,
+}) => {
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(table)) {
+    throw new Error(`Invalid table for a daily document code: ${table}`);
+  }
+  const date = salesDocumentDate(now);
+  const rows: Array<{ highest: number }> = await manager.query(
+    `SELECT COALESCE(MAX(split_part(code, '-', 1)::int), 0) AS highest
+     FROM ${table}
+     WHERE code ~ $1`,
+    [`^[0-9]+-${date}/${prefix}$`],
+  );
+  const next = Number(rows[0]?.highest ?? 0) + 1;
+  return `${String(next).padStart(2, '0')}-${date}/${prefix}`;
+};
 
 export interface CreateWithDocumentCodeOptions {
   table: string;

@@ -2,5 +2,6 @@
   "moduleName": "Sales",
   "sidebarSales": "Sales",
   "requests": "Quote requests",
-  "estimates": "Estimates"
+  "estimates": "Estimates",
+  "quotations": "Quotations"
 }

@@ -4692,6 +4692,295 @@
           "sales/estimates"
         ]
       }
+    },
+    "/api/v1/sales/quotations": {
+      "get": {
+        "description": "Paginated list with the request and the latest version of each; filter by the latest version status, code, customer or request. The keyword matches the quotation code or the code or title of its request. A Sales actor sees the quotations of the requests they own.",
+        "operationId": "QuotationController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Status of the latest version",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "pending_approval",
+                "approved",
+                "rejected",
+                "customer_confirmed",
+                "cancelled",
+                "closed"
+              ]
+            }
+          },
+          {
+            "name": "code",
+            "required": false,
+            "in": "query",
+            "description": "Part of the quotation code",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "customerId",
+            "required": false,
+            "in": "query",
+            "description": "Only quotations of this customer",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "requestId",
+            "required": false,
+            "in": "query",
+            "description": "Only the quotation of this request",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated quotation list"
+          },
+          "403": {
+            "description": "Forbidden — requires quotation:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List quotations",
+        "tags": [
+          "sales/quotations"
+        ]
+      },
+      "post": {
+        "description": "Builds version 1 (draft, code NN-ddmmyyyy/BG) from the latest submitted estimate revision and leaves the request estimated. A revision that is not the latest submitted one, a request not estimated, or a request that already has a quotation answer 409.",
+        "operationId": "QuotationController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateQuotationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Quotation created as a draft"
+          },
+          "403": {
+            "description": "Forbidden — requires quotation:create"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)"
+          },
+          "409": {
+            "description": "No submitted estimate, not the latest revision, request not estimated, or a quotation exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Quote an estimated request",
+        "tags": [
+          "sales/quotations"
+        ]
+      }
+    },
+    "/api/v1/sales/quotations/{id}": {
+      "get": {
+        "description": "The header, the request it answers, the version list, and the lines with their frozen BOM and cost-line copies of the version asked for (the latest by default).",
+        "operationId": "QuotationController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "ver",
+            "required": false,
+            "in": "query",
+            "description": "Version number to read; the latest when omitted",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Quotation found"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a quotation with one version",
+        "tags": [
+          "sales/quotations"
+        ]
+      },
+      "patch": {
+        "description": "Only what the body names changes; margins are per line (0–1000%), the discount a percent (0–100) or an amount not above the subtotal, VAT one of 0/5/8/10. The server recomputes and stores every total.",
+        "operationId": "QuotationController_updatePricing",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateQuotationPricingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pricing updated"
+          },
+          "400": {
+            "description": "Invalid figure, or a discount above the subtotal"
+          },
+          "403": {
+            "description": "Forbidden — requires quotation:update"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)"
+          },
+          "409": {
+            "description": "The latest version is not a draft"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set margins, discount and VAT of the draft version",
+        "tags": [
+          "sales/quotations"
+        ]
+      }
+    },
+    "/api/v1/sales/quotations/{id}/revise": {
+      "post": {
+        "description": "Opens the next version as a draft copying the latest one and closes the latest. Allowed only from pending_approval, approved or rejected; two concurrent revises produce exactly one new version.",
+        "operationId": "QuotationController_revise",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "New draft version opened"
+          },
+          "403": {
+            "description": "Forbidden — requires quotation:update"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)"
+          },
+          "409": {
+            "description": "The latest version is a draft, confirmed, cancelled or closed, or changed meanwhile"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Revise the quotation",
+        "tags": [
+          "sales/quotations"
+        ]
+      }
     }
   },
   "info": {
@@ -5843,7 +6132,7 @@
           },
           "amount": {
             "type": "number",
-            "description": "Cost for ONE panel, VND",
+            "description": "Cost for ONE panel, whole VND",
             "minimum": 0
           }
         },
@@ -5872,8 +6161,76 @@
           },
           "amount": {
             "type": "number",
-            "description": "Cost for ONE panel, VND",
+            "description": "Cost for ONE panel, whole VND",
             "minimum": 0
+          }
+        }
+      },
+      "CreateQuotationDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "number",
+            "description": "The estimated request to quote"
+          },
+          "estimateRevisionId": {
+            "type": "number",
+            "description": "Estimate revision to build from; it must be the latest submitted one (409 otherwise). The latest submitted revision when omitted."
+          }
+        },
+        "required": [
+          "requestId"
+        ]
+      },
+      "LineMarginDto": {
+        "type": "object",
+        "properties": {
+          "lineId": {
+            "type": "number",
+            "description": "The quotation line (one estimate panel)"
+          },
+          "marginPercent": {
+            "type": "number",
+            "description": "Margin over the panel cost, percent, 0–1000, up to 2 decimals",
+            "minimum": 0,
+            "maximum": 1000
+          }
+        },
+        "required": [
+          "lineId",
+          "marginPercent"
+        ]
+      },
+      "UpdateQuotationPricingDto": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LineMarginDto"
+            }
+          },
+          "discountType": {
+            "type": "string",
+            "enum": [
+              "percent",
+              "amount"
+            ]
+          },
+          "discountValue": {
+            "type": "number",
+            "description": "Percent (0–100) or VND per the discount type, up to 2 decimals; the cap per type is checked by the server",
+            "minimum": 0,
+            "maximum": 1000000000000000
+          },
+          "vatRate": {
+            "type": "number",
+            "enum": [
+              0,
+              5,
+              8,
+              10
+            ]
           }
         }
       }

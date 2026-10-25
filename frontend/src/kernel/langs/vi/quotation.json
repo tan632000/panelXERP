@@ -1,0 +1,100 @@
+{
+  "title": "Báo giá",
+  "description": "Định giá dự toán từng tủ bằng biên lợi nhuận, chiết khấu và VAT, lưu lại mọi phiên bản của báo giá",
+  "detailTitle": "Chi tiết báo giá",
+  "detailNotFound": "Không tìm thấy báo giá",
+  "code": "Số báo giá",
+  "request": "Yêu cầu báo giá",
+  "customer": "Khách hàng",
+  "status": "Trạng thái",
+  "version": "Phiên bản",
+  "versions": "Các phiên bản",
+  "estimateRevision": "Bản dự toán",
+  "salesOwner": "Nhân viên kinh doanh",
+  "total": "Tổng cộng",
+  "updatedAt": "Cập nhật",
+  "createdAt": "Phiên bản tạo lúc",
+  "infoBasic": "Thông tin chung",
+  "emptyValue": "-",
+  "searchPlaceholder": "Tìm số báo giá, mã hoặc tiêu đề yêu cầu...",
+  "noQuotations": "Chưa có báo giá nào",
+  "noQuotationsFound": "Không tìm thấy báo giá",
+  "paginationItem": "báo giá",
+  "noneYet": "Yêu cầu này chưa có báo giá.",
+  "create": "Tạo báo giá",
+  "createTitle": "Tạo báo giá",
+  "createRequest": "Yêu cầu đã có dự toán",
+  "createRequestPlaceholder": "Chọn yêu cầu đã có dự toán...",
+  "noEstimatedRequests": "Không có yêu cầu nào đã có dự toán",
+  "olderVersion": "Đây là phiên bản cũ, chỉ xem.",
+  "readOnlyStatus": "Phiên bản này ở trạng thái \"{status}\" nên không thể sửa.",
+  "readOnlyNoRights": "Bạn chỉ có thể xem báo giá này.",
+  "filters": {
+    "status": "Trạng thái",
+    "customer": "Khách hàng",
+    "code": "Số báo giá",
+    "codePlaceholder": "Số báo giá (Enter)"
+  },
+  "statuses": {
+    "draft": "Nháp",
+    "pending_approval": "Chờ duyệt",
+    "approved": "Đã duyệt",
+    "rejected": "Bị từ chối",
+    "customer_confirmed": "Khách đã xác nhận",
+    "cancelled": "Đã hủy",
+    "closed": "Đã đóng"
+  },
+  "panels": {
+    "title": "Các tủ",
+    "position": "STT",
+    "panel": "Tủ",
+    "quantity": "SL",
+    "unitCost": "Giá vốn",
+    "margin": "Biên lợi nhuận",
+    "unitPrice": "Đơn giá",
+    "amount": "Thành tiền",
+    "marginOf": "Biên lợi nhuận của tủ {tag}"
+  },
+  "bom": {
+    "position": "STT",
+    "description": "Mô tả",
+    "code": "Mã",
+    "brand": "Hãng",
+    "unit": "ĐVT",
+    "quantity": "Số lượng"
+  },
+  "pricing": {
+    "subtotal": "Cộng tiền hàng",
+    "discount": "Chiết khấu",
+    "discountType": "Loại chiết khấu",
+    "discountTypes": {
+      "percent": "Phần trăm (%)",
+      "amount": "Số tiền (VND)"
+    },
+    "discountValue": "Giá trị chiết khấu",
+    "taxable": "Sau chiết khấu",
+    "vat": "VAT",
+    "vatRate": "Thuế suất VAT",
+    "total": "Tổng cộng",
+    "hint": "Số liệu hiển thị khi nhập chỉ để tham khảo; hệ thống tính và lưu lại khi bạn bấm lưu. Chiết khấu theo phần trăm tối đa {max}.",
+    "save": "Lưu giá"
+  },
+  "validation": {
+    "discountPercentInvalid": "Chiết khấu theo phần trăm là số từ 0 đến 100, tối đa 2 chữ số thập phân.",
+    "discountInvalid": "Chiết khấu theo số tiền là số không âm, tối đa 2 chữ số thập phân.",
+    "discountTooLarge": "Chiết khấu không được vượt quá tiền hàng."
+  },
+  "toast": {
+    "createSuccess": "Đã tạo báo giá.",
+    "saveSuccess": "Đã lưu giá.",
+    "readOnly": "Phiên bản này không thể sửa; chỉ bản nháp mới sửa được.",
+    "alreadyExists": "Yêu cầu này đã có báo giá.",
+    "noEstimate": "Yêu cầu này chưa có dự toán đã nộp để báo giá.",
+    "staleRevision": "Dự toán đã có bản nộp mới hơn; hãy tải lại rồi thử lại.",
+    "requestState": "Trạng thái hiện tại của yêu cầu không cho phép tạo báo giá.",
+    "discountTooLarge": "Chiết khấu không được vượt quá tiền hàng.",
+    "amountTooLarge": "Giá trị vượt quá giới hạn cho phép.",
+    "systemError": "Đã xảy ra lỗi, vui lòng thử lại sau.",
+    "forbidden": "Bạn không có quyền thực hiện thao tác này."
+  }
+}
