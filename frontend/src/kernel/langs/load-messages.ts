@@ -4,6 +4,7 @@ import commonEn from "@kernel/langs/en/common.json";
 import contactEn from "@kernel/langs/en/contact.json";
 import crmEn from "@kernel/langs/en/crm.json";
 import customerEn from "@kernel/langs/en/customer.json";
+import estimateEn from "@kernel/langs/en/estimate.json";
 import itemEn from "@kernel/langs/en/item.json";
 import metadataEn from "@kernel/langs/en/metadata.json";
 import modalEn from "@kernel/langs/en/modal.json";
@@ -19,6 +20,7 @@ import commonVi from "@kernel/langs/vi/common.json";
 import contactVi from "@kernel/langs/vi/contact.json";
 import crmVi from "@kernel/langs/vi/crm.json";
 import customerVi from "@kernel/langs/vi/customer.json";
+import estimateVi from "@kernel/langs/vi/estimate.json";
 import itemVi from "@kernel/langs/vi/item.json";
 import metadataVi from "@kernel/langs/vi/metadata.json";
 import modalVi from "@kernel/langs/vi/modal.json";
@@ -39,6 +41,7 @@ export const enMessages = {
   item: itemEn,
   sales: salesEn,
   request: requestEn,
+  estimate: estimateEn,
   system: systemEn,
   permission: permissionEn,
   common: commonEn,
@@ -57,6 +60,7 @@ export const viMessages = {
   item: itemVi,
   sales: salesVi,
   request: requestVi,
+  estimate: estimateVi,
   system: systemVi,
   permission: permissionVi,
   common: commonVi,

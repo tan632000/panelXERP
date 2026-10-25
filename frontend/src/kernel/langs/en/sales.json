@@ -1,5 +1,6 @@
 {
   "moduleName": "Sales",
   "sidebarSales": "Sales",
-  "requests": "Quote requests"
+  "requests": "Quote requests",
+  "estimates": "Estimates"
 }

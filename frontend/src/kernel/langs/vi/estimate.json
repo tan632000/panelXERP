@@ -1,0 +1,141 @@
+{
+  "title": "Dự toán",
+  "description": "Lập BOM vật tư và chi phí cho từng tủ điện, gửi lại cho kinh doanh để báo giá",
+  "detailTitle": "Chi tiết dự toán",
+  "detailNotFound": "Không tìm thấy dự toán",
+  "code": "Mã dự toán",
+  "request": "Yêu cầu báo giá",
+  "customer": "Khách hàng",
+  "status": "Trạng thái",
+  "revision": "Bản dự toán",
+  "revisions": "Các bản dự toán",
+  "total": "Tổng giá vốn",
+  "assignedEngineer": "Kỹ sư dự toán",
+  "salesOwner": "Nhân viên kinh doanh",
+  "updatedAt": "Cập nhật",
+  "submittedAt": "Gửi lúc",
+  "infoBasic": "Thông tin chung",
+  "emptyValue": "-",
+  "searchPlaceholder": "Tìm mã dự toán, mã hoặc tiêu đề yêu cầu...",
+  "noEstimates": "Chưa có dự toán nào",
+  "noEstimatesFound": "Không tìm thấy dự toán nào",
+  "paginationItem": "dự toán",
+  "noneYet": "Yêu cầu này chưa có dự toán.",
+  "create": "Tạo dự toán",
+  "submit": "Gửi dự toán",
+  "revise": "Lập bản mới",
+  "confirmSubmitTitle": "Gửi dự toán {code}",
+  "confirmSubmitDescription": "Sau khi gửi, bản dự toán này không thể sửa nữa. Yêu cầu chuyển sang \"Đã dự toán\" và nhân viên kinh doanh được thông báo.",
+  "confirmReviseTitle": "Lập bản mới của {code}",
+  "confirmReviseDescription": "Bản mới được sao chép từ bản đã gửi. Bản đã gửi vẫn là bản hiện hành cho đến khi bản mới được gửi.",
+  "submitBlocked": {
+    "incomplete": "Cần ít nhất một tủ và mỗi tủ cần ít nhất một vật tư để gửi.",
+    "unsaved": "Đang lưu thay đổi, vui lòng chờ."
+  },
+  "olderRevision": "Đây là bản cũ, chỉ để xem.",
+  "readOnlyNoRights": "Bạn chỉ có quyền xem bản dự toán này.",
+  "readOnlySubmitted": "Bản này đã gửi nên không thể sửa. Dùng \"Lập bản mới\" để chỉnh.",
+  "filters": {
+    "status": "Trạng thái",
+    "engineer": "Kỹ sư"
+  },
+  "statuses": {
+    "draft": "Nháp",
+    "submitted": "Đã gửi",
+    "superseded": "Đã thay thế"
+  },
+  "categories": {
+    "design": "Thiết kế",
+    "labor": "Nhân công",
+    "installation": "Lắp đặt",
+    "transport": "Vận chuyển",
+    "other": "Khác"
+  },
+  "panels": "Tủ điện",
+  "noPanels": "Chưa có tủ nào, hãy thêm tủ đầu tiên",
+  "panel": {
+    "add": "Thêm tủ",
+    "addTitle": "Thêm tủ",
+    "editTitle": "Sửa tủ",
+    "edit": "Sửa tủ",
+    "remove": "Xoá tủ",
+    "removeTitle": "Xoá tủ",
+    "removeDescription": "Xoá tủ {tag} cùng toàn bộ vật tư và chi phí của nó?",
+    "tag": "Ký hiệu tủ",
+    "description": "Mô tả",
+    "quantity": "Số lượng tủ",
+    "quantityOf": "Số lượng tủ {tag}",
+    "unitCost": "Giá vốn 1 tủ",
+    "total": "Thành tiền"
+  },
+  "placeholders": {
+    "tag": "VD: MSB-01"
+  },
+  "bom": {
+    "title": "Vật tư của tủ",
+    "code": "Mã",
+    "name": "Tên vật tư",
+    "brand": "Hãng",
+    "unit": "ĐVT",
+    "quantity": "Số lượng",
+    "unitCost": "Đơn giá vốn",
+    "amount": "Thành tiền",
+    "note": "Ghi chú",
+    "empty": "Chưa có vật tư nào",
+    "addItem": "Chọn vật tư để thêm...",
+    "quantityOf": "Số lượng {code}",
+    "unitCostOf": "Đơn giá {code}",
+    "noteOf": "Ghi chú {code}",
+    "removeTitle": "Xoá vật tư",
+    "removeDescription": "Xoá dòng vật tư {code} khỏi tủ?",
+    "removeLine": "Xoá dòng {code}"
+  },
+  "cost": {
+    "title": "Chi phí khác của tủ",
+    "category": "Loại chi phí",
+    "categoryOf": "Loại chi phí",
+    "description": "Diễn giải",
+    "descriptionOf": "Diễn giải {category}",
+    "amount": "Số tiền / 1 tủ",
+    "amountOf": "Số tiền {category}",
+    "empty": "Chưa có chi phí nào",
+    "add": "Thêm chi phí",
+    "removeTitle": "Xoá chi phí",
+    "removeDescription": "Xoá chi phí {category} khỏi tủ?",
+    "removeLine": "Xoá chi phí {category}",
+    "hint": "Số tiền tính cho một tủ; hệ thống nhân với số lượng tủ."
+  },
+  "summary": {
+    "title": "Tổng hợp",
+    "total": "Tổng giá vốn dự toán",
+    "hint": "Con số hiển thị khi đang nhập chỉ để tham khảo; hệ thống tính và lưu lại khi bạn lưu."
+  },
+  "picker": {
+    "title": "Chọn vật tư",
+    "searchPlaceholder": "Tìm mã hoặc tên vật tư...",
+    "empty": "Không có vật tư nào",
+    "code": "Mã",
+    "name": "Tên vật tư",
+    "brand": "Hãng",
+    "unit": "ĐVT"
+  },
+  "validation": {
+    "tagRequired": "Vui lòng nhập ký hiệu tủ.",
+    "quantityInvalid": "Số lượng phải là số nguyên từ 1 đến {max}."
+  },
+  "toast": {
+    "createSuccess": "Đã tạo dự toán.",
+    "submitSuccess": "Đã gửi dự toán.",
+    "reviseSuccess": "Đã lập bản dự toán mới.",
+    "draftOpen": "Bản nháp đang mở, hãy gửi nó trước khi lập bản mới.",
+    "readOnly": "Bản dự toán đã gửi nên không thể sửa.",
+    "requestState": "Trạng thái hiện tại của yêu cầu không cho phép thao tác này.",
+    "alreadyExists": "Yêu cầu này đã có dự toán.",
+    "tagTaken": "Ký hiệu tủ đã được dùng trong bản này.",
+    "incomplete": "Cần ít nhất một tủ và mỗi tủ cần ít nhất một vật tư.",
+    "itemInvalid": "Vật tư không còn hiệu lực trong danh mục.",
+    "amountTooLarge": "Giá trị vượt quá giới hạn cho phép.",
+    "systemError": "Đã có lỗi xảy ra, vui lòng thử lại sau.",
+    "forbidden": "Bạn không có quyền thực hiện chức năng này."
+  }
+}

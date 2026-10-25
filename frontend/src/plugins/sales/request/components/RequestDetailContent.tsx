@@ -10,6 +10,8 @@ import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
 import { displayDetailValue } from "@/kernel/core/lib/display-detail-value";
 import { formatIsoDate } from "@/kernel/core/lib/formatters";
 
+import { RequestEstimateSection } from "@plugins/sales/estimate/components/RequestEstimateSection";
+
 import { RequestAttachments } from "./RequestAttachments";
 import { RequestStatusBadge } from "./RequestStatusBadge";
 import { RequestTimeline } from "./RequestTimeline";
@@ -140,6 +142,12 @@ export function RequestDetailContent({
             : t("noRequirements")}
         </DetailNoteBox>
       </DetailSection>
+
+      <RequestEstimateSection
+        requestId={request.id}
+        requestStatus={request.status}
+        assignedEngineerId={request.assignedEngineerId}
+      />
 
       <RequestAttachments requestId={request.id} status={request.status} />
 

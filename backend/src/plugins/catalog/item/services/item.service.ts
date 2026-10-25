@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -165,13 +166,27 @@ export class ItemService {
     return this.itemRepo.save(item);
   }
 
-  async remove(id: number, actor: AuthUserPayload) {
-    const item = await this.findOne(id);
-    const referencedBy = await this.referenceChecks.referencingItem(id);
-    if (referencedBy.length > 0) {
-      throw new ConflictException(REFERENCED_MESSAGE);
-    }
-    return softDeleteWithAudit(this.itemRepo, item, actor.userId);
+  /**
+   * Deletes an unreferenced item. The row is locked for the whole check-and-delete, and a
+   * document adding a line for the item takes a shared lock on it, so the two serialise: either
+   * the line is committed before the check runs (and the delete is refused), or the delete
+   * commits first (and the document refuses the gone item).
+   */
+  remove(id: number, actor: AuthUserPayload) {
+    return this.itemRepo.manager.transaction(async (manager) => {
+      const repo = manager.getRepository(Item);
+      const item = await repo.findOne({
+        where: { id, isDeleted: false },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!item) throw new NotFoundException(`${ITEM_LABEL} ${id} not found`);
+
+      const referencedBy = await this.referenceChecks.referencingItem(id);
+      if (referencedBy.length > 0) {
+        throw new ConflictException(REFERENCED_MESSAGE);
+      }
+      return softDeleteWithAudit(repo, item, actor.userId);
+    });
   }
 
   /** Soft-deletes the rows ticked in the list, each through `remove` and its own guards. */

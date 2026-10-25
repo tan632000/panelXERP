@@ -1365,6 +1365,204 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/sales/estimates": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List estimates
+     * @description Paginated list; filter by the status of the latest revision, request or engineer. The keyword matches the estimate code or the code or title of its request. A Sales actor sees the estimates of the requests they own; an Engineer those of requests assigned to them.
+     */
+    get: operations["EstimateController_findAll"];
+    put?: never;
+    /**
+     * Start the estimate of a request
+     * @description Creates the first draft (code DT_YYYY_NNNN) and moves the request from assigned to estimating in the same transaction. Only the assigned engineer or an actor who sees every request may start it.
+     */
+    post: operations["EstimateController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/estimates/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get an estimate with one revision
+     * @description The header, the request it answers, the revision list, and the panels with BOM and cost lines of the revision asked for (the latest by default).
+     */
+    get: operations["EstimateController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/estimates/{id}/submit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Submit the draft revision
+     * @description Freezes the draft, supersedes the previous submitted revision, moves the request to estimated in the same transaction and notifies the sales owner once.
+     */
+    post: operations["EstimateController_submit"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/estimates/{id}/revise": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Open a new draft revision
+     * @description Copies the latest submitted revision (BOM snapshots included) into a new draft. Only while the request is estimating or estimated.
+     */
+    post: operations["EstimateController_revise"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/estimates/{id}/panels": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add a panel to the draft
+     * @description Returns the whole draft revision with recomputed totals.
+     */
+    post: operations["EstimateController_addPanel"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/estimates/{id}/panels/{panelId}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Remove a panel and its lines from the draft */
+    delete: operations["EstimateController_deletePanel"];
+    options?: never;
+    head?: never;
+    /** Update a panel of the draft */
+    patch: operations["EstimateController_updatePanel"];
+    trace?: never;
+  };
+  "/api/v1/sales/estimates/{id}/panels/{panelId}/bom-lines": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add a BOM line to a panel
+     * @description Copies the item code, name, brand and unit onto the line; the unit cost defaults to the item reference price.
+     */
+    post: operations["EstimateController_addBomLine"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/estimates/{id}/bom-lines/{lineId}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Remove a BOM line from the draft */
+    delete: operations["EstimateController_deleteBomLine"];
+    options?: never;
+    head?: never;
+    /** Update the quantity, unit cost or note of a line */
+    patch: operations["EstimateController_updateBomLine"];
+    trace?: never;
+  };
+  "/api/v1/sales/estimates/{id}/panels/{panelId}/cost-lines": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add a cost line to a panel
+     * @description The amount is the cost of ONE panel.
+     */
+    post: operations["EstimateController_addCostLine"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/estimates/{id}/cost-lines/{lineId}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Remove a cost line from the draft */
+    delete: operations["EstimateController_deleteCostLine"];
+    options?: never;
+    head?: never;
+    /** Update a cost line */
+    patch: operations["EstimateController_updateCostLine"];
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1821,6 +2019,62 @@ export interface components {
     RequestReasonDto: {
       /** @description Why the request is closed */
       reason: string;
+    };
+    CreateEstimateDto: {
+      /** @description The assigned request to build the estimate for */
+      requestId: number;
+    };
+    CreatePanelDto: {
+      /**
+       * @description Panel tag, unique within the revision
+       * @example MSB-01
+       */
+      tag: string;
+      /** @description Description */
+      description?: Record<string, never> | null;
+      /** @description How many identical panels are built */
+      quantity: number;
+    };
+    UpdatePanelDto: {
+      /**
+       * @description Panel tag, unique within the revision
+       * @example MSB-01
+       */
+      tag?: string;
+      /** @description Description */
+      description?: Record<string, never> | null;
+      /** @description How many identical panels are built */
+      quantity?: number;
+    };
+    CreateBomLineDto: {
+      /** @description Catalog item */
+      itemId: number;
+      /** @description Quantity, up to 3 decimals */
+      quantity: number;
+      /** @description Cost of one unit in VND, up to 2 decimals; the item reference price (0 when it has none) when omitted */
+      unitCost?: number;
+      note?: Record<string, never> | null;
+    };
+    UpdateBomLineDto: {
+      /** @description Quantity, up to 3 decimals */
+      quantity?: number;
+      /** @description Cost of one unit in VND, up to 2 decimals; the item reference price (0 when it has none) when omitted */
+      unitCost?: number;
+      note?: Record<string, never> | null;
+    };
+    CreateCostLineDto: {
+      /** @enum {string} */
+      category: "design" | "labor" | "installation" | "transport" | "other";
+      description?: Record<string, never> | null;
+      /** @description Cost for ONE panel, VND */
+      amount: number;
+    };
+    UpdateCostLineDto: {
+      /** @enum {string} */
+      category?: "design" | "labor" | "installation" | "transport" | "other";
+      description?: Record<string, never> | null;
+      /** @description Cost for ONE panel, VND */
+      amount?: number;
     };
   };
   responses: never;
@@ -4807,6 +5061,562 @@ export interface operations {
         content?: never;
       };
       /** @description Request no longer accepts changes */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Status of the latest revision */
+        status?: "draft" | "submitted";
+        /** @description Only the estimate of this request */
+        requestId?: number;
+        /** @description Only estimates of requests assigned to this engineer */
+        assignedEngineerId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated estimate list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires estimate:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateEstimateDto"];
+      };
+    };
+    responses: {
+      /** @description Estimate created as a draft */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires estimate:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The request already has an estimate or is not assigned */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_findOne: {
+    parameters: {
+      query?: {
+        /** @description Revision number to read; the latest when omitted */
+        revision?: number;
+      };
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Estimate found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_submit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Revision submitted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No panel, or a panel without a BOM line */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires estimate:submit */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The revision is submitted or superseded and read-only */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_revise: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description New draft revision */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires estimate:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description A draft is already open, or the request is quoted or closed */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_addPanel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePanelDto"];
+      };
+    };
+    responses: {
+      /** @description Panel added */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires estimate:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The revision is submitted or superseded and read-only, or tag in use */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_deletePanel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        panelId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Panel removed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The revision is submitted or superseded and read-only */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_updatePanel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        panelId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdatePanelDto"];
+      };
+    };
+    responses: {
+      /** @description Panel updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The revision is submitted or superseded and read-only, or tag in use */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_addBomLine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        panelId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateBomLineDto"];
+      };
+    };
+    responses: {
+      /** @description Line added */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Item is not an active item */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The revision is submitted or superseded and read-only */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_deleteBomLine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        lineId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Line removed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The revision is submitted or superseded and read-only */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_updateBomLine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        lineId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateBomLineDto"];
+      };
+    };
+    responses: {
+      /** @description Line updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The revision is submitted or superseded and read-only */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_addCostLine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        panelId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateCostLineDto"];
+      };
+    };
+    responses: {
+      /** @description Line added */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The revision is submitted or superseded and read-only */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_deleteCostLine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        lineId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Line removed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The revision is submitted or superseded and read-only */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  EstimateController_updateCostLine: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        lineId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateCostLineDto"];
+      };
+    };
+    responses: {
+      /** @description Line updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The revision is submitted or superseded and read-only */
       409: {
         headers: {
           [name: string]: unknown;

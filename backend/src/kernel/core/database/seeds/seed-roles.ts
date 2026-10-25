@@ -55,6 +55,11 @@ const SALES_CHAIN_ALL = [
   'order:*',
 ];
 
+/** The director reads every estimate but never writes one: that is the engineers' work. */
+const DIRECTOR_GRANTS = SALES_CHAIN_ALL.map((scope) =>
+  scope === 'estimate:*' ? 'estimate:read' : scope,
+);
+
 /**
  * [name, code, description, permissions] in seed order (D-11, D-12). Kernel file routes
  * (`file:read`, `file:write`) sign any stored key, so only the administrator holds them;
@@ -67,8 +72,8 @@ const ROLES: ReadonlyArray<
   [
     'Director',
     'director',
-    'Runs the business: every sales-chain module, quotation approval included',
-    SALES_CHAIN_ALL,
+    'Runs the business: every sales-chain module, quotation approval included; reads estimates but does not write them',
+    DIRECTOR_GRANTS,
   ],
   [
     'Sales Manager',

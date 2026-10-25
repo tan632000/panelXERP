@@ -15,7 +15,7 @@ async function seedSales(dataSource: DataSource): Promise<void> {
 
 export const salesPlugin = {
   name: 'sales',
-  dependsOn: ['crm'],
+  dependsOn: ['crm', 'catalog'],
   module: SalesModule,
   permissions: getFeaturePermissions(SALES_FEATURES),
   seed: seedSales,

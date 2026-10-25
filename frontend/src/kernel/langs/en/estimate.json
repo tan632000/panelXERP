@@ -1,0 +1,141 @@
+{
+  "title": "Estimates",
+  "description": "Build the BOM and cost of each panel and hand it back to Sales for quotation",
+  "detailTitle": "Estimate detail",
+  "detailNotFound": "Estimate not found",
+  "code": "Estimate code",
+  "request": "Quote request",
+  "customer": "Customer",
+  "status": "Status",
+  "revision": "Revision",
+  "revisions": "Revisions",
+  "total": "Total cost",
+  "assignedEngineer": "Estimating engineer",
+  "salesOwner": "Sales owner",
+  "updatedAt": "Updated",
+  "submittedAt": "Submitted at",
+  "infoBasic": "General information",
+  "emptyValue": "-",
+  "searchPlaceholder": "Search estimate code, request code or title...",
+  "noEstimates": "No estimates yet",
+  "noEstimatesFound": "No estimates found",
+  "paginationItem": "estimates",
+  "noneYet": "This request has no estimate yet.",
+  "create": "Create estimate",
+  "submit": "Submit estimate",
+  "revise": "New revision",
+  "confirmSubmitTitle": "Submit estimate {code}",
+  "confirmSubmitDescription": "Once submitted this revision can no longer be edited. The request becomes \"Estimated\" and the sales owner is notified.",
+  "confirmReviseTitle": "New revision of {code}",
+  "confirmReviseDescription": "The new revision is copied from the submitted one. The submitted revision stays current until the new one is submitted.",
+  "submitBlocked": {
+    "incomplete": "At least one panel is needed, and every panel needs at least one BOM line.",
+    "unsaved": "Saving changes, please wait."
+  },
+  "olderRevision": "This is an older revision, view only.",
+  "readOnlyNoRights": "You can only view this estimate.",
+  "readOnlySubmitted": "This revision is submitted and cannot be edited. Use \"New revision\" to change it.",
+  "filters": {
+    "status": "Status",
+    "engineer": "Engineer"
+  },
+  "statuses": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "superseded": "Superseded"
+  },
+  "categories": {
+    "design": "Design",
+    "labor": "Labor",
+    "installation": "Installation",
+    "transport": "Transport",
+    "other": "Other"
+  },
+  "panels": "Panels",
+  "noPanels": "No panels yet, add the first one",
+  "panel": {
+    "add": "Add panel",
+    "addTitle": "Add panel",
+    "editTitle": "Edit panel",
+    "edit": "Edit panel",
+    "remove": "Delete panel",
+    "removeTitle": "Delete panel",
+    "removeDescription": "Delete panel {tag} with all its materials and costs?",
+    "tag": "Panel tag",
+    "description": "Description",
+    "quantity": "Panel quantity",
+    "quantityOf": "Quantity of panel {tag}",
+    "unitCost": "Cost of one panel",
+    "total": "Amount"
+  },
+  "placeholders": {
+    "tag": "e.g. MSB-01"
+  },
+  "bom": {
+    "title": "Panel materials",
+    "code": "Code",
+    "name": "Item",
+    "brand": "Brand",
+    "unit": "Unit",
+    "quantity": "Quantity",
+    "unitCost": "Unit cost",
+    "amount": "Amount",
+    "note": "Note",
+    "empty": "No materials yet",
+    "addItem": "Pick an item to add...",
+    "quantityOf": "Quantity of {code}",
+    "unitCostOf": "Unit cost of {code}",
+    "noteOf": "Note of {code}",
+    "removeTitle": "Delete item",
+    "removeDescription": "Delete the line {code} from the panel?",
+    "removeLine": "Delete line {code}"
+  },
+  "cost": {
+    "title": "Other panel costs",
+    "category": "Cost type",
+    "categoryOf": "Cost type",
+    "description": "Description",
+    "descriptionOf": "Description of {category}",
+    "amount": "Amount per panel",
+    "amountOf": "Amount of {category}",
+    "empty": "No costs yet",
+    "add": "Add cost",
+    "removeTitle": "Delete cost",
+    "removeDescription": "Delete the {category} cost from the panel?",
+    "removeLine": "Delete cost {category}",
+    "hint": "The amount is for one panel; it is multiplied by the panel quantity."
+  },
+  "summary": {
+    "title": "Summary",
+    "total": "Estimate total cost",
+    "hint": "Figures shown while typing are for reference; the system calculates and stores them when you save."
+  },
+  "picker": {
+    "title": "Pick an item",
+    "searchPlaceholder": "Search item code or name...",
+    "empty": "No items",
+    "code": "Code",
+    "name": "Item",
+    "brand": "Brand",
+    "unit": "Unit"
+  },
+  "validation": {
+    "tagRequired": "Enter the panel tag.",
+    "quantityInvalid": "Quantity must be a whole number from 1 to {max}."
+  },
+  "toast": {
+    "createSuccess": "Estimate created.",
+    "submitSuccess": "Estimate submitted.",
+    "reviseSuccess": "New estimate revision created.",
+    "draftOpen": "A draft is already open; submit it before starting a new revision.",
+    "readOnly": "The estimate is submitted and cannot be edited.",
+    "requestState": "The request's current status does not allow this action.",
+    "alreadyExists": "This request already has an estimate.",
+    "tagTaken": "This panel tag is already used in this revision.",
+    "incomplete": "At least one panel is needed, and every panel needs a BOM line.",
+    "itemInvalid": "The item is no longer active in the catalog.",
+    "amountTooLarge": "The value exceeds the allowed limit.",
+    "systemError": "Something went wrong, please try again later.",
+    "forbidden": "You do not have permission to do this."
+  }
+}

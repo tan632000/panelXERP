@@ -3983,6 +3983,715 @@
           "sales/requests"
         ]
       }
+    },
+    "/api/v1/sales/estimates": {
+      "get": {
+        "description": "Paginated list; filter by the status of the latest revision, request or engineer. The keyword matches the estimate code or the code or title of its request. A Sales actor sees the estimates of the requests they own; an Engineer those of requests assigned to them.",
+        "operationId": "EstimateController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Status of the latest revision",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "submitted"
+              ]
+            }
+          },
+          {
+            "name": "requestId",
+            "required": false,
+            "in": "query",
+            "description": "Only the estimate of this request",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "assignedEngineerId",
+            "required": false,
+            "in": "query",
+            "description": "Only estimates of requests assigned to this engineer",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated estimate list"
+          },
+          "403": {
+            "description": "Forbidden — requires estimate:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List estimates",
+        "tags": [
+          "sales/estimates"
+        ]
+      },
+      "post": {
+        "description": "Creates the first draft (code DT_YYYY_NNNN) and moves the request from assigned to estimating in the same transaction. Only the assigned engineer or an actor who sees every request may start it.",
+        "operationId": "EstimateController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEstimateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Estimate created as a draft"
+          },
+          "403": {
+            "description": "Forbidden — requires estimate:create"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "The request already has an estimate or is not assigned"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start the estimate of a request",
+        "tags": [
+          "sales/estimates"
+        ]
+      }
+    },
+    "/api/v1/sales/estimates/{id}": {
+      "get": {
+        "description": "The header, the request it answers, the revision list, and the panels with BOM and cost lines of the revision asked for (the latest by default).",
+        "operationId": "EstimateController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "revision",
+            "required": false,
+            "in": "query",
+            "description": "Revision number to read; the latest when omitted",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estimate found"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get an estimate with one revision",
+        "tags": [
+          "sales/estimates"
+        ]
+      }
+    },
+    "/api/v1/sales/estimates/{id}/submit": {
+      "post": {
+        "description": "Freezes the draft, supersedes the previous submitted revision, moves the request to estimated in the same transaction and notifies the sales owner once.",
+        "operationId": "EstimateController_submit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Revision submitted"
+          },
+          "400": {
+            "description": "No panel, or a panel without a BOM line"
+          },
+          "403": {
+            "description": "Forbidden — requires estimate:submit"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "The revision is submitted or superseded and read-only"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit the draft revision",
+        "tags": [
+          "sales/estimates"
+        ]
+      }
+    },
+    "/api/v1/sales/estimates/{id}/revise": {
+      "post": {
+        "description": "Copies the latest submitted revision (BOM snapshots included) into a new draft. Only while the request is estimating or estimated.",
+        "operationId": "EstimateController_revise",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "New draft revision"
+          },
+          "403": {
+            "description": "Forbidden — requires estimate:create"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "A draft is already open, or the request is quoted or closed"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Open a new draft revision",
+        "tags": [
+          "sales/estimates"
+        ]
+      }
+    },
+    "/api/v1/sales/estimates/{id}/panels": {
+      "post": {
+        "description": "Returns the whole draft revision with recomputed totals.",
+        "operationId": "EstimateController_addPanel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePanelDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Panel added"
+          },
+          "403": {
+            "description": "Forbidden — requires estimate:update"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "The revision is submitted or superseded and read-only, or tag in use"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a panel to the draft",
+        "tags": [
+          "sales/estimates"
+        ]
+      }
+    },
+    "/api/v1/sales/estimates/{id}/panels/{panelId}": {
+      "patch": {
+        "operationId": "EstimateController_updatePanel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "panelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePanelDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Panel updated"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "The revision is submitted or superseded and read-only, or tag in use"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a panel of the draft",
+        "tags": [
+          "sales/estimates"
+        ]
+      },
+      "delete": {
+        "operationId": "EstimateController_deletePanel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "panelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Panel removed"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "The revision is submitted or superseded and read-only"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a panel and its lines from the draft",
+        "tags": [
+          "sales/estimates"
+        ]
+      }
+    },
+    "/api/v1/sales/estimates/{id}/panels/{panelId}/bom-lines": {
+      "post": {
+        "description": "Copies the item code, name, brand and unit onto the line; the unit cost defaults to the item reference price.",
+        "operationId": "EstimateController_addBomLine",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "panelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBomLineDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Line added"
+          },
+          "400": {
+            "description": "Item is not an active item"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "The revision is submitted or superseded and read-only"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a BOM line to a panel",
+        "tags": [
+          "sales/estimates"
+        ]
+      }
+    },
+    "/api/v1/sales/estimates/{id}/bom-lines/{lineId}": {
+      "patch": {
+        "operationId": "EstimateController_updateBomLine",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lineId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBomLineDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Line updated"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "The revision is submitted or superseded and read-only"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update the quantity, unit cost or note of a line",
+        "tags": [
+          "sales/estimates"
+        ]
+      },
+      "delete": {
+        "operationId": "EstimateController_deleteBomLine",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lineId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Line removed"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "The revision is submitted or superseded and read-only"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a BOM line from the draft",
+        "tags": [
+          "sales/estimates"
+        ]
+      }
+    },
+    "/api/v1/sales/estimates/{id}/panels/{panelId}/cost-lines": {
+      "post": {
+        "description": "The amount is the cost of ONE panel.",
+        "operationId": "EstimateController_addCostLine",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "panelId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCostLineDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Line added"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "The revision is submitted or superseded and read-only"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a cost line to a panel",
+        "tags": [
+          "sales/estimates"
+        ]
+      }
+    },
+    "/api/v1/sales/estimates/{id}/cost-lines/{lineId}": {
+      "patch": {
+        "operationId": "EstimateController_updateCostLine",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lineId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCostLineDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Line updated"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "The revision is submitted or superseded and read-only"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a cost line",
+        "tags": [
+          "sales/estimates"
+        ]
+      },
+      "delete": {
+        "operationId": "EstimateController_deleteCostLine",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lineId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Line removed"
+          },
+          "404": {
+            "description": "Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)"
+          },
+          "409": {
+            "description": "The revision is submitted or superseded and read-only"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a cost line from the draft",
+        "tags": [
+          "sales/estimates"
+        ]
+      }
     }
   },
   "info": {
@@ -5007,6 +5716,166 @@
         "required": [
           "reason"
         ]
+      },
+      "CreateEstimateDto": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "number",
+            "description": "The assigned request to build the estimate for"
+          }
+        },
+        "required": [
+          "requestId"
+        ]
+      },
+      "CreatePanelDto": {
+        "type": "object",
+        "properties": {
+          "tag": {
+            "type": "string",
+            "description": "Panel tag, unique within the revision",
+            "example": "MSB-01",
+            "maxLength": 50
+          },
+          "description": {
+            "type": "object",
+            "description": "Description",
+            "maxLength": 500,
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number",
+            "description": "How many identical panels are built",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "tag",
+          "quantity"
+        ]
+      },
+      "UpdatePanelDto": {
+        "type": "object",
+        "properties": {
+          "tag": {
+            "type": "string",
+            "description": "Panel tag, unique within the revision",
+            "example": "MSB-01",
+            "maxLength": 50
+          },
+          "description": {
+            "type": "object",
+            "description": "Description",
+            "maxLength": 500,
+            "nullable": true
+          },
+          "quantity": {
+            "type": "number",
+            "description": "How many identical panels are built",
+            "minimum": 1
+          }
+        }
+      },
+      "CreateBomLineDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "number",
+            "description": "Catalog item"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity, up to 3 decimals",
+            "minimum": 0.001
+          },
+          "unitCost": {
+            "type": "number",
+            "description": "Cost of one unit in VND, up to 2 decimals; the item reference price (0 when it has none) when omitted"
+          },
+          "note": {
+            "type": "object",
+            "maxLength": 500,
+            "nullable": true
+          }
+        },
+        "required": [
+          "itemId",
+          "quantity"
+        ]
+      },
+      "UpdateBomLineDto": {
+        "type": "object",
+        "properties": {
+          "quantity": {
+            "type": "number",
+            "description": "Quantity, up to 3 decimals",
+            "minimum": 0.001
+          },
+          "unitCost": {
+            "type": "number",
+            "description": "Cost of one unit in VND, up to 2 decimals; the item reference price (0 when it has none) when omitted"
+          },
+          "note": {
+            "type": "object",
+            "maxLength": 500,
+            "nullable": true
+          }
+        }
+      },
+      "CreateCostLineDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "design",
+              "labor",
+              "installation",
+              "transport",
+              "other"
+            ]
+          },
+          "description": {
+            "type": "object",
+            "maxLength": 500,
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "description": "Cost for ONE panel, VND",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "category",
+          "amount"
+        ]
+      },
+      "UpdateCostLineDto": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "enum": [
+              "design",
+              "labor",
+              "installation",
+              "transport",
+              "other"
+            ]
+          },
+          "description": {
+            "type": "object",
+            "maxLength": 500,
+            "nullable": true
+          },
+          "amount": {
+            "type": "number",
+            "description": "Cost for ONE panel, VND",
+            "minimum": 0
+          }
+        }
       }
     }
   }

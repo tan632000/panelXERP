@@ -27,7 +27,6 @@ const PANEL_ROLES = [
  * is empty once P1 is built; until then `seedRoles` stores none of these scopes.
  */
 const PENDING_MODULES: Readonly<Record<string, string>> = {
-  estimate: 'task-08',
   quotation: 'task-09',
   order: 'task-11',
 };
@@ -80,6 +79,21 @@ describe('panel-shop role matrix', () => {
     }
     expect(holds(grantsOf('engineer'), 'estimate:submit')).toBe(true);
     expect(holds(grantsOf('engineeringLead'), 'request:assign')).toBe(true);
+  });
+
+  it('lets the engineering lead write estimates, and the director only read them', () => {
+    const lead = grantsOf('engineeringLead');
+    const director = grantsOf('director');
+    for (const action of ['read', 'create', 'update', 'submit']) {
+      expect(holds(lead, `estimate:${action}`)).toBe(true);
+    }
+    expect(holds(director, 'estimate:read')).toBe(true);
+    for (const action of ['create', 'update', 'submit']) {
+      expect(holds(director, `estimate:${action}`)).toBe(false);
+    }
+    // The rest of the director's business grants are unchanged.
+    expect(holds(director, 'quotation:approve')).toBe(true);
+    expect(holds(director, 'order:create')).toBe(true);
   });
 
   it('grants kernel file routes to the administrator alone', () => {

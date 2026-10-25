@@ -118,6 +118,7 @@ export const NOTIFICATION_BADGE_MAX = 99;
 export const NOTIFICATION_EVENT_KEYS = [
   "sp_can_bo_sung_ky_thuat",
   "sales.request.assigned",
+  "sales.estimate.submitted",
   "purchaseRequestAwaitingReceipt",
   "purchaseRequestReceived",
   "purchaseRequestApproved",
@@ -1150,6 +1151,18 @@ export function resolveNotificationMessage(
         kind: "key",
         key: "events.sales_request_assigned",
         values: { code: field(payload.code), title: field(payload.title) },
+      };
+    }
+
+    if (item.eventType === "sales.estimate.submitted") {
+      return {
+        kind: "key",
+        key: "events.sales_estimate_submitted",
+        values: {
+          code: field(payload.code),
+          requestCode: field(payload.requestCode),
+          revision: displayNumber(payload.revision),
+        },
       };
     }
 
