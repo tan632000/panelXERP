@@ -263,6 +263,12 @@ export class QuotationApprovalService implements OnModuleInit {
         actor,
       );
       this.assertStatus(version, QUOTATION_OPEN_STATUSES, 'cancelled');
+      // Losing a won request is the order's cancellation alone.
+      if (request.status === RequestStatus.WON) {
+        throw new ConflictException(
+          'A won request can only be ended by cancelling its order.',
+        );
+      }
 
       await this.cancelVersion(manager, quotation, version, {
         reason,

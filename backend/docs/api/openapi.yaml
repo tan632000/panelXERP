@@ -3277,6 +3277,189 @@ paths:
       security: *ref_27
       summary: Download the customer-facing quotation as PDF
       tags: *ref_28
+  /api/v1/sales/orders:
+    get:
+      description: >-
+        Paginated list; filter by status, code or customer. The keyword matches the order code, the customer name, the
+        contract number or the request code. A Sales actor sees the orders of the requests they own.
+      operationId: OrderController_findAll
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Items per page
+          schema:
+            default: 25
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search keyword
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: status
+          required: false
+          in: query
+          schema:
+            type: string
+            enum:
+              - open
+              - in_production
+              - delivered
+              - completed
+              - cancelled
+        - name: code
+          required: false
+          in: query
+          description: Part of the order code
+          schema:
+            type: string
+        - name: customerId
+          required: false
+          in: query
+          description: Only orders of this customer
+          schema:
+            type: number
+        - name: quotationId
+          required: false
+          in: query
+          description: Only the order of this quotation
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Paginated order list
+        '403':
+          description: Forbidden — requires order:read
+      security: &ref_29
+        - bearer: []
+      summary: List orders
+      tags: &ref_30
+        - sales/orders
+    post:
+      description: >-
+        Snapshots the customer-confirmed version (customer, project, terms, lines, totals) into one order DH_YYYY_NNNN
+        and moves the request to won in the same transaction. Contract number, contract date and delivery date are
+        optional. A quotation whose latest version is not customer_confirmed, or that already has an order (cancelled
+        ones included), answers 409.
+      operationId: OrderController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderDto'
+      responses:
+        '201':
+          description: Order created
+        '403':
+          description: Forbidden — requires order:create
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own)
+        '409':
+          description: Not customer-confirmed, or the quotation already has an order
+      security: *ref_29
+      summary: Convert a confirmed quotation into an order
+      tags: *ref_30
+  /api/v1/sales/orders/{id}:
+    get:
+      description: >-
+        The order with its snapshots, lines (and their BOM) and the chain links to its request, estimate revision and
+        quotation version.
+      operationId: OrderController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Order found
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own)
+      security: *ref_29
+      summary: Get an order
+      tags: *ref_30
+    patch:
+      description: Only while the order is open; lines, prices, totals and snapshots are never editable.
+      operationId: OrderController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrderDto'
+      responses:
+        '200':
+          description: Order updated
+        '403':
+          description: Forbidden — requires order:update
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own)
+        '409':
+          description: The order is not open
+      security: *ref_29
+      summary: Edit the contract number, contract date and delivery date
+      tags: *ref_30
+  /api/v1/sales/orders/{id}/cancel:
+    post:
+      description: >-
+        An open order becomes cancelled and its request lost, with the reason, in one transaction. The quotation stays
+        confirmed and is not converted again. Any other status answers 409.
+      operationId: OrderController_cancel
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestReasonDto'
+      responses:
+        '200':
+          description: Cancelled; the request is lost
+        '403':
+          description: Forbidden — requires order:cancel
+        '404':
+          description: Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own)
+        '409':
+          description: The order is not open
+      security: *ref_29
+      summary: Cancel the order
+      tags: *ref_30
 info:
   title: panelXERP
   description: REST API — ERP Hải Phòng Manufacturing Platform
@@ -3361,7 +3544,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: &ref_29
+          enum: &ref_31
             - sales
             - planning
             - purchasing
@@ -3402,7 +3585,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_29
+          enum: *ref_31
           nullable: true
         title:
           type: object
@@ -3437,7 +3620,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_29
+          enum: *ref_31
           nullable: true
         title:
           type: object
@@ -3872,7 +4055,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: &ref_30
+          enum: &ref_32
             - enclosure
             - breaker
             - contactor
@@ -3922,7 +4105,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: *ref_30
+          enum: *ref_32
         unit:
           type: string
           description: Unit of measure, e.g. pcs, m, set
@@ -4102,7 +4285,7 @@ components:
       properties:
         category:
           type: string
-          enum: &ref_31
+          enum: &ref_33
             - design
             - labor
             - installation
@@ -4124,7 +4307,7 @@ components:
       properties:
         category:
           type: string
-          enum: *ref_31
+          enum: *ref_33
         description:
           type: object
           maxLength: 500
@@ -4213,3 +4396,44 @@ components:
         - feedbackDate
         - channel
         - content
+    CreateOrderDto:
+      type: object
+      properties:
+        quotationId:
+          type: number
+          description: The quotation whose confirmed version becomes the order
+        contractNo:
+          type: object
+          description: Contract number
+          maxLength: 100
+          nullable: true
+        contractDate:
+          type: object
+          description: Contract date (YYYY-MM-DD)
+          example: '2027-01-20'
+          nullable: true
+        deliveryDate:
+          type: object
+          description: Delivery date (YYYY-MM-DD)
+          example: '2027-02-15'
+          nullable: true
+      required:
+        - quotationId
+    UpdateOrderDto:
+      type: object
+      properties:
+        contractNo:
+          type: object
+          description: Contract number
+          maxLength: 100
+          nullable: true
+        contractDate:
+          type: object
+          description: Contract date (YYYY-MM-DD)
+          example: '2027-01-20'
+          nullable: true
+        deliveryDate:
+          type: object
+          description: Delivery date (YYYY-MM-DD)
+          example: '2027-02-15'
+          nullable: true

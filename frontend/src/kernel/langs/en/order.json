@@ -1,0 +1,92 @@
+{
+  "title": "Orders",
+  "description": "Orders made from customer-confirmed quotations: every figure is copied at conversion and does not follow the quotation",
+  "detailTitle": "Order details",
+  "detailNotFound": "Order not found",
+  "code": "Order number",
+  "customer": "Customer",
+  "taxCode": "Tax code",
+  "address": "Address",
+  "project": "Project",
+  "request": "Quote request",
+  "status": "Status",
+  "total": "Total",
+  "createdAt": "Created at",
+  "contractNo": "Contract number",
+  "contractDate": "Contract date",
+  "deliveryDate": "Delivery date",
+  "infoBasic": "General information",
+  "terms": "Payment and delivery terms",
+  "emptyValue": "-",
+  "searchPlaceholder": "Search order number, customer, contract number or request code...",
+  "noOrders": "No orders yet",
+  "noOrdersFound": "No orders found",
+  "paginationItem": "orders",
+  "cancel": "Cancel order",
+  "cancelTitle": "Cancel order {code}",
+  "cancelDescription": "The quote request becomes lost. The quotation stays customer-confirmed and cannot be converted into an order again; if the customer returns, create a new request.",
+  "cancelSubmit": "Confirm cancellation",
+  "cancelledReason": "Cancellation reason:",
+  "reason": {
+    "label": "Cancellation reason",
+    "placeholder": "Enter why the order is cancelled",
+    "required": "Please enter a reason.",
+    "max": "The reason must not exceed {max} characters."
+  },
+  "filters": {
+    "status": "Status",
+    "customer": "Customer"
+  },
+  "statuses": {
+    "open": "Open",
+    "in_production": "In production",
+    "delivered": "Delivered",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "chain": {
+    "title": "Document chain",
+    "request": "Request",
+    "estimate": "Estimate",
+    "quotation": "Quotation",
+    "order": "Order"
+  },
+  "contract": {
+    "title": "Contract and delivery",
+    "save": "Save",
+    "readOnly": "Editable only while the order is open and you may update it."
+  },
+  "lines": {
+    "title": "Panels",
+    "position": "No.",
+    "panel": "Panel",
+    "quantity": "Qty",
+    "unitPrice": "Unit price",
+    "amount": "Amount"
+  },
+  "totals": {
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "taxable": "Taxable amount",
+    "vat": "VAT ({rate}%)",
+    "total": "Total"
+  },
+  "fromQuotation": {
+    "title": "Order",
+    "none": "The customer confirmed this quotation but it has no order yet.",
+    "convert": "Convert to order",
+    "convertTitle": "Convert quotation to order",
+    "convertHint": "The figures of the customer-confirmed version are copied into the order. The contract number and dates may stay empty and be entered later."
+  },
+  "toast": {
+    "createSuccess": "Order created.",
+    "saveSuccess": "Changes saved.",
+    "cancelSuccess": "Order cancelled.",
+    "notConfirmed": "Only a customer-confirmed quotation version can become an order.",
+    "alreadyExists": "This quotation already has an order.",
+    "requestCannotMove": "The current status of the request does not allow this action.",
+    "orderState": "The current status of the order does not allow this action.",
+    "systemError": "Something went wrong, please try again later.",
+    "forbidden": "You do not have permission to do this."
+  }
+}

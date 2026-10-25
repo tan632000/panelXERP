@@ -80,7 +80,7 @@ Strictly sequential (one writer per shared registration file, R-08).
 | 08 | Estimate (BOM + costing) | P1 | AC-09 | `*/src/plugins/sales/estimate` | 07 | done |
 | 09 | Quotation pricing + versions | P1 | AC-10, AC-11 (revise race) | `*/src/plugins/sales/quotation` | 08 | done |
 | 10 | Quotation approval + feedback + PDF | P1 | AC-11 (revise–confirm race), AC-12 | `*/src/plugins/sales/quotation` (approval, feedback, pdf) | 09 | done |
-| 11 | Order + chain e2e | P1 | AC-13 | `*/src/plugins/sales/order`, `backend/test/sales-chain.e2e-spec.ts` | 10 | pending |
+| 11 | Order + chain e2e | P1 | AC-13 | `*/src/plugins/sales/order`, `backend/test/sales-chain.e2e-spec.ts` | 10 | done |
 
 Shared registration files every feature task appends to (owned by the running task only): `backend/src/kernel/platform/plugins/enabled-plugins.ts`, `backend/src/kernel/platform/features/enabled-features.ts`, `frontend/src/kernel/platform/plugins/enabled-plugins.ts`, `frontend/src/kernel/platform/features/enabled-feature-keys.ts`, `backend/src/kernel/core/users/list-preference.constant.ts`, `frontend/src/kernel/langs/load-messages.ts`, `frontend/src/kernel/langs/{vi,en}/*.json`, `frontend/src/kernel/core/api/generated/api.ts` (regenerated via `npm run generate:api`), `backend/src/kernel/core/database/seeds/seed-roles.ts`. Every feature task ends by regenerating `backend/docs/api/openapi.json` (`npm run generate:api-docs`) and `api.ts` (`npm run generate:api`) before its Verification Command.
 

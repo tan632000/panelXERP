@@ -43,7 +43,7 @@ const QUOTATION_SALES = [
   'quotation:cancel',
   'quotation:export',
 ];
-const ORDER_SALES = ['order:read', 'order:create'];
+const ORDER_SALES = ['order:read', 'order:create', 'order:update'];
 
 /** Every sales-chain module, granted whole to the roles that run the business. */
 const SALES_CHAIN_ALL = [

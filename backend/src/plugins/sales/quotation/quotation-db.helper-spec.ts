@@ -332,6 +332,11 @@ export async function openQuotationDb(
     },
     async cleanup() {
       if (requestIds.length === 0) return;
+      // Orders reference their quotation and request, and exist only in the order specs.
+      await dataSource.query(
+        `DELETE FROM sales_orders WHERE request_id = ANY($1)`,
+        [requestIds],
+      );
       await dataSource.query(
         `DELETE FROM sales_quotations WHERE request_id = ANY($1)`,
         [requestIds],

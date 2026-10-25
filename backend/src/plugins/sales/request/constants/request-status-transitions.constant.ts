@@ -1,8 +1,10 @@
 import { RequestStatus } from '@plugins/sales/request/enums/request-status.enum';
 
 /**
- * The only moves a request makes, one step at a time. `won`, `lost` and `cancelled` are
- * final. Cancelling needs the request not yet quoted; losing needs an estimate or a quote.
+ * The only moves a request makes, one step at a time. `lost` and `cancelled` are final, and
+ * `won` ends only when its order is cancelled (`won → lost`): the request's own close and the
+ * quotation's cancel refuse a won request before they reach this table. Cancelling needs the
+ * request not yet quoted; losing needs an estimate or a quote.
  */
 export const REQUEST_STATUS_TRANSITIONS: Readonly<
   Record<RequestStatus, readonly RequestStatus[]>
@@ -19,7 +21,7 @@ export const REQUEST_STATUS_TRANSITIONS: Readonly<
     RequestStatus.CANCELLED,
   ],
   [RequestStatus.QUOTED]: [RequestStatus.WON, RequestStatus.LOST],
-  [RequestStatus.WON]: [],
+  [RequestStatus.WON]: [RequestStatus.LOST],
   [RequestStatus.LOST]: [],
   [RequestStatus.CANCELLED]: [],
 };

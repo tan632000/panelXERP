@@ -122,6 +122,7 @@ export const NOTIFICATION_EVENT_KEYS = [
   "sales.quotation.submitted",
   "sales.quotation.approved",
   "sales.quotation.rejected",
+  "sales.order.created",
   "purchaseRequestAwaitingReceipt",
   "purchaseRequestReceived",
   "purchaseRequestApproved",
@@ -1182,6 +1183,18 @@ export function resolveNotificationMessage(
           requestCode: field(payload.requestCode),
           ver: displayNumber(payload.ver),
           reason: field(payload.reason),
+        },
+      };
+    }
+
+    if (item.eventType === "sales.order.created") {
+      return {
+        kind: "key",
+        key: "events.sales_order_created",
+        values: {
+          code: field(payload.code),
+          quotationCode: field(payload.quotationCode),
+          requestCode: field(payload.requestCode),
         },
       };
     }

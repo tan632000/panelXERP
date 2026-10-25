@@ -3,5 +3,6 @@
   "sidebarSales": "Sales",
   "requests": "Quote requests",
   "estimates": "Estimates",
-  "quotations": "Quotations"
+  "quotations": "Quotations",
+  "orders": "Orders"
 }

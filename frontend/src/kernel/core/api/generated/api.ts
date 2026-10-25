@@ -1815,6 +1815,74 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/sales/orders": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List orders
+     * @description Paginated list; filter by status, code or customer. The keyword matches the order code, the customer name, the contract number or the request code. A Sales actor sees the orders of the requests they own.
+     */
+    get: operations["OrderController_findAll"];
+    put?: never;
+    /**
+     * Convert a confirmed quotation into an order
+     * @description Snapshots the customer-confirmed version (customer, project, terms, lines, totals) into one order DH_YYYY_NNNN and moves the request to won in the same transaction. Contract number, contract date and delivery date are optional. A quotation whose latest version is not customer_confirmed, or that already has an order (cancelled ones included), answers 409.
+     */
+    post: operations["OrderController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/sales/orders/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get an order
+     * @description The order with its snapshots, lines (and their BOM) and the chain links to its request, estimate revision and quotation version.
+     */
+    get: operations["OrderController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Edit the contract number, contract date and delivery date
+     * @description Only while the order is open; lines, prices, totals and snapshots are never editable.
+     */
+    patch: operations["OrderController_update"];
+    trace?: never;
+  };
+  "/api/v1/sales/orders/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel the order
+     * @description An open order becomes cancelled and its request lost, with the reason, in one transaction. The quotation stays confirmed and is not converted again. Any other status answers 409.
+     */
+    post: operations["OrderController_cancel"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2361,6 +2429,36 @@ export interface components {
       channel: "phone" | "email" | "meeting" | "chat" | "other";
       /** @description What the customer said */
       content: string;
+    };
+    CreateOrderDto: {
+      /** @description The quotation whose confirmed version becomes the order */
+      quotationId: number;
+      /** @description Contract number */
+      contractNo?: Record<string, never> | null;
+      /**
+       * @description Contract date (YYYY-MM-DD)
+       * @example 2027-01-20
+       */
+      contractDate?: Record<string, never> | null;
+      /**
+       * @description Delivery date (YYYY-MM-DD)
+       * @example 2027-02-15
+       */
+      deliveryDate?: Record<string, never> | null;
+    };
+    UpdateOrderDto: {
+      /** @description Contract number */
+      contractNo?: Record<string, never> | null;
+      /**
+       * @description Contract date (YYYY-MM-DD)
+       * @example 2027-01-20
+       */
+      contractDate?: Record<string, never> | null;
+      /**
+       * @description Delivery date (YYYY-MM-DD)
+       * @example 2027-02-15
+       */
+      deliveryDate?: Record<string, never> | null;
     };
   };
   responses: never;
@@ -6521,6 +6619,210 @@ export interface operations {
         content?: never;
       };
       /** @description Not approved or confirmed */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrderController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        status?:
+          "open" | "in_production" | "delivered" | "completed" | "cancelled";
+        /** @description Part of the order code */
+        code?: string;
+        /** @description Only orders of this customer */
+        customerId?: number;
+        /** @description Only the order of this quotation */
+        quotationId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated order list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires order:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrderController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateOrderDto"];
+      };
+    };
+    responses: {
+      /** @description Order created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires order:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not customer-confirmed, or the quotation already has an order */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrderController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Order found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrderController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateOrderDto"];
+      };
+    };
+    responses: {
+      /** @description Order updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires order:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The order is not open */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  OrderController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["RequestReasonDto"];
+      };
+    };
+    responses: {
+      /** @description Cancelled; the request is lost */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires order:cancel */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The order is not open */
       409: {
         headers: {
           [name: string]: unknown;

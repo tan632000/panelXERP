@@ -1,5 +1,7 @@
 import { EstimateModule } from '@plugins/sales/estimate/estimate.module';
 import { estimatePermissions } from '@plugins/sales/estimate/permissions/estimate.permissions';
+import { OrderModule } from '@plugins/sales/order/order.module';
+import { orderPermissions } from '@plugins/sales/order/permissions/order.permissions';
 import { quotationPermissions } from '@plugins/sales/quotation/permissions/quotation.permissions';
 import { QuotationModule } from '@plugins/sales/quotation/quotation.module';
 import { requestPermissions } from '@plugins/sales/request/permissions/request.permissions';
@@ -28,5 +30,12 @@ export const SALES_FEATURES: ErpFeature[] = [
     module: QuotationModule,
     permissions: quotationPermissions,
     dependsOn: ['request', 'estimate'],
+  },
+  {
+    key: 'order',
+    plugin: 'sales',
+    module: OrderModule,
+    permissions: orderPermissions,
+    dependsOn: ['request', 'estimate', 'quotation'],
   },
 ];

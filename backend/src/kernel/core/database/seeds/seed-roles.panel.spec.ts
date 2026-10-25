@@ -26,9 +26,7 @@ const PANEL_ROLES = [
  * each. A plugin task removes its modules here when it registers its permissions, so the list
  * is empty once P1 is built; until then `seedRoles` stores none of these scopes.
  */
-const PENDING_MODULES: Readonly<Record<string, string>> = {
-  order: 'task-11',
-};
+const PENDING_MODULES: Readonly<Record<string, string>> = {};
 
 /**
  * Scopes of a module whose plugin is declared but not yet complete, with the task that
@@ -106,6 +104,18 @@ describe('panel-shop role matrix', () => {
     expect(holds(grantsOf('engineeringLead'), 'request:assign')).toBe(true);
   });
 
+  it('lets sales convert and edit its orders but only managers cancel them', () => {
+    const sales = grantsOf('sales');
+    for (const action of ['read', 'create', 'update']) {
+      expect(holds(sales, `order:${action}`)).toBe(true);
+    }
+    expect(holds(sales, 'order:cancel')).toBe(false);
+    const cancellers = PANEL_ROLES.filter((role) =>
+      holds(grantsOf(role), 'order:cancel'),
+    );
+    expect(cancellers).toEqual(['admin', 'director', 'salesManager']);
+  });
+
   it('lets the engineering lead write estimates, and the director only read them', () => {
     const lead = grantsOf('engineeringLead');
     const director = grantsOf('director');
@@ -161,8 +171,9 @@ describe('panel-shop role matrix', () => {
       ['sales', ['order:read', 'quotation:submit']],
     ];
     const pending = { 'quotation:submit': 'a later task' };
+    const pendingModules = { order: 'a later task' };
 
-    expect(strayScopes(fixture, pending)).toEqual([
+    expect(strayScopes(fixture, pending, pendingModules)).toEqual([
       'salesManager: quotation:aprove',
     ]);
   });

@@ -1,0 +1,92 @@
+{
+  "title": "Đơn hàng",
+  "description": "Đơn hàng lập từ báo giá khách đã xác nhận: số liệu được sao chép tại thời điểm chuyển đổi và không đổi theo báo giá",
+  "detailTitle": "Chi tiết đơn hàng",
+  "detailNotFound": "Không tìm thấy đơn hàng",
+  "code": "Số đơn hàng",
+  "customer": "Khách hàng",
+  "taxCode": "Mã số thuế",
+  "address": "Địa chỉ",
+  "project": "Công trình",
+  "request": "Yêu cầu báo giá",
+  "status": "Trạng thái",
+  "total": "Tổng cộng",
+  "createdAt": "Tạo lúc",
+  "contractNo": "Số hợp đồng",
+  "contractDate": "Ngày hợp đồng",
+  "deliveryDate": "Ngày giao hàng",
+  "infoBasic": "Thông tin chung",
+  "terms": "Điều khoản thanh toán và giao hàng",
+  "emptyValue": "-",
+  "searchPlaceholder": "Tìm số đơn hàng, khách hàng, số hợp đồng hoặc mã yêu cầu...",
+  "noOrders": "Chưa có đơn hàng nào",
+  "noOrdersFound": "Không tìm thấy đơn hàng",
+  "paginationItem": "đơn hàng",
+  "cancel": "Hủy đơn hàng",
+  "cancelTitle": "Hủy đơn hàng {code}",
+  "cancelDescription": "Yêu cầu báo giá sẽ chuyển sang \"mất\". Báo giá vẫn ở trạng thái khách đã xác nhận và không thể chuyển lại thành đơn hàng; nếu khách quay lại, hãy tạo yêu cầu mới.",
+  "cancelSubmit": "Xác nhận hủy",
+  "cancelledReason": "Lý do hủy:",
+  "reason": {
+    "label": "Lý do hủy",
+    "placeholder": "Nhập lý do hủy đơn hàng",
+    "required": "Vui lòng nhập lý do.",
+    "max": "Lý do không được vượt quá {max} ký tự."
+  },
+  "filters": {
+    "status": "Trạng thái",
+    "customer": "Khách hàng"
+  },
+  "statuses": {
+    "open": "Đang mở",
+    "in_production": "Đang sản xuất",
+    "delivered": "Đã giao",
+    "completed": "Hoàn thành",
+    "cancelled": "Đã hủy"
+  },
+  "chain": {
+    "title": "Chuỗi chứng từ",
+    "request": "Yêu cầu",
+    "estimate": "Dự toán",
+    "quotation": "Báo giá",
+    "order": "Đơn hàng"
+  },
+  "contract": {
+    "title": "Hợp đồng và giao hàng",
+    "save": "Lưu",
+    "readOnly": "Chỉ sửa được khi đơn hàng đang mở và bạn có quyền cập nhật."
+  },
+  "lines": {
+    "title": "Các tủ",
+    "position": "STT",
+    "panel": "Tủ",
+    "quantity": "SL",
+    "unitPrice": "Đơn giá",
+    "amount": "Thành tiền"
+  },
+  "totals": {
+    "subtotal": "Tiền hàng",
+    "discount": "Chiết khấu",
+    "taxable": "Tiền chịu thuế",
+    "vat": "VAT ({rate}%)",
+    "total": "Tổng cộng"
+  },
+  "fromQuotation": {
+    "title": "Đơn hàng",
+    "none": "Khách đã xác nhận báo giá này nhưng chưa có đơn hàng.",
+    "convert": "Chuyển thành đơn hàng",
+    "convertTitle": "Chuyển báo giá thành đơn hàng",
+    "convertHint": "Số liệu của phiên bản khách đã xác nhận được sao chép vào đơn hàng. Số hợp đồng và các ngày có thể để trống và nhập sau."
+  },
+  "toast": {
+    "createSuccess": "Đã tạo đơn hàng.",
+    "saveSuccess": "Đã lưu thay đổi.",
+    "cancelSuccess": "Đã hủy đơn hàng.",
+    "notConfirmed": "Chỉ phiên bản báo giá khách đã xác nhận mới chuyển được thành đơn hàng.",
+    "alreadyExists": "Báo giá này đã có đơn hàng.",
+    "requestCannotMove": "Trạng thái hiện tại của yêu cầu không cho phép thao tác này.",
+    "orderState": "Trạng thái hiện tại của đơn hàng không cho phép thao tác này.",
+    "systemError": "Đã xảy ra lỗi, vui lòng thử lại sau.",
+    "forbidden": "Bạn không có quyền thực hiện thao tác này."
+  }
+}

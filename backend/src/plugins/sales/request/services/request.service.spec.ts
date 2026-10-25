@@ -811,6 +811,16 @@ describe('RequestService', () => {
       ).rejects.toBeInstanceOf(ConflictException);
     });
 
+    it('refuses to mark a won request lost: only cancelling its order ends it', async () => {
+      const fixture = buildRequestFixture();
+      const request = seedRequest(fixture, RequestStatus.WON);
+
+      await expect(
+        fixture.service.markLost(request.id, { reason: 'x' }, MANAGER),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(fixture.requests.rows[0].status).toBe('won');
+    });
+
     it('answers 404 to a Sales actor closing another sales account’s request', async () => {
       const fixture = buildRequestFixture();
       const created = await createDraft(fixture, SALES_A);

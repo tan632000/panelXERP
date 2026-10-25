@@ -19,6 +19,7 @@ import {
 } from "@/kernel/core/lib/formatters";
 import { Link } from "@/kernel/i18n/navigation";
 
+import { QuotationOrderSection } from "@plugins/sales/order/components/QuotationOrderSection";
 import { quotationPageRoutes } from "@plugins/sales/quotation/constants";
 import {
   useQuotation,
@@ -186,6 +187,12 @@ export function QuotationDetailPage() {
       </DetailSection>
 
       <QuotationApprovalPanel quotation={quotation} />
+
+      <QuotationOrderSection
+        quotationId={quotation.id}
+        versionStatus={version.status}
+        isLatest={isLatest}
+      />
 
       <QuotationPricingEditor
         key={`${quotation.id}-${version.id}`}

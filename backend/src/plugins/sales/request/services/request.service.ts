@@ -519,6 +519,12 @@ export class RequestService implements OnModuleInit {
       const request = await this.lockVisible(manager, id, actor);
       // Closing again is a no-op: the first reason stands.
       if (request.status === to) return request;
+      // A won request has an order; only cancelling that order ends it.
+      if (request.status === RequestStatus.WON) {
+        throw new ConflictException(
+          'A won request can only be ended by cancelling its order.',
+        );
+      }
 
       // Documents hanging off the request close with it, or refuse (409) and keep it open.
       await this.closeHooks.apply(manager, {
