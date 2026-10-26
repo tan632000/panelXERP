@@ -5,6 +5,7 @@ import React, { useState } from "react";
 
 import { useAuth } from "@/kernel/core/auth/AuthContext";
 import { CancelReasonModal } from "@/kernel/core/components/ui/CancelReasonModal";
+import { ConfirmDialog } from "@/kernel/core/components/ui/ConfirmDialog";
 import { DetailPanelActionButton } from "@/kernel/core/components/ui/DetailPanelActionButton";
 import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
 import { formatIsoDateTime } from "@/kernel/core/lib/formatters";
@@ -39,8 +40,11 @@ export function QuotationApprovalPanel({
   quotation,
 }: QuotationApprovalPanelProps) {
   const t = useTranslations("quotation.approval");
+  const tCommon = useTranslations("common");
   const { can, user } = useAuth();
-  const [dialog, setDialog] = useState<"reject" | "cancel" | null>(null);
+  const [dialog, setDialog] = useState<
+    "submit" | "approve" | "reject" | "cancel" | null
+  >(null);
 
   const id = quotation.id;
   const submit = useQuotationAction(id, "submit");
@@ -140,7 +144,7 @@ export function QuotationApprovalPanel({
                 label={t("submit")}
                 disabled={busy || stale}
                 title={stale ? t("submitBlockedStale") : undefined}
-                onClick={() => submit.mutate(undefined)}
+                onClick={() => setDialog("submit")}
               />
             ) : null}
             {canDecide && !isAuthor ? (
@@ -150,7 +154,7 @@ export function QuotationApprovalPanel({
                   icon="circle-check"
                   label={t("approve")}
                   disabled={busy}
-                  onClick={() => approve.mutate(undefined)}
+                  onClick={() => setDialog("approve")}
                 />
                 <DetailPanelActionButton
                   variant="danger"
@@ -207,6 +211,34 @@ export function QuotationApprovalPanel({
         </div>
       </DetailSection>
 
+      <ConfirmDialog
+        open={dialog === "submit"}
+        variant="default"
+        icon="check"
+        title={t("submitTitle", { code: quotation.code })}
+        description={t("submitDescription")}
+        confirmLabel={t("submitConfirm")}
+        cancelLabel={tCommon("cancel")}
+        pending={submit.isPending}
+        onCancel={() => setDialog(null)}
+        onConfirm={() =>
+          submit.mutate(undefined, { onSettled: () => setDialog(null) })
+        }
+      />
+      <ConfirmDialog
+        open={dialog === "approve"}
+        variant="default"
+        icon="circle-check"
+        title={t("approveTitle", { code: quotation.code })}
+        description={t("approveDescription")}
+        confirmLabel={t("approveConfirm")}
+        cancelLabel={tCommon("cancel")}
+        pending={approve.isPending}
+        onCancel={() => setDialog(null)}
+        onConfirm={() =>
+          approve.mutate(undefined, { onSettled: () => setDialog(null) })
+        }
+      />
       <CancelReasonModal
         isOpen={dialog === "reject"}
         title={t("rejectTitle", { code: quotation.code })}

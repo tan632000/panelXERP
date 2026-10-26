@@ -69,15 +69,18 @@ export function QuotationTotals({
       </div>
 
       <div className={ROW}>
-        <span className="text-text-secondary">{t("pricing.discount")}</span>
-        <div className="flex items-center gap-2">
+        <span className="shrink-0 text-text-secondary">
+          {t("pricing.discount")}
+        </span>
+        <div className="flex flex-wrap items-center justify-end gap-2">
           {editable ? (
             <>
               <FormSelect
                 label={t("pricing.discountType")}
                 labelHidden
                 searchable={false}
-                className="w-32"
+                allowClear={false}
+                className="w-40"
                 options={DISCOUNT_TYPES.map((type) => ({
                   value: type,
                   label: t(`pricing.discountTypes.${type}`),
@@ -87,16 +90,22 @@ export function QuotationTotals({
                   onDiscountType(event.target.value as DiscountType)
                 }
               />
-              <NumberInput
-                aria-label={t("pricing.discountValue")}
-                className="w-32 text-right"
-                value={discountValue}
-                decimalScale={
-                  discountType === "percent" ? PERCENT_DECIMALS : MONEY_DECIMALS
-                }
-                allowNegative={false}
-                onChange={(event) => onDiscountValue(event.target.value)}
-              />
+              {/* The input is `w-full` and `cn` does not merge a width over it, so the width lives on
+                  a wrapper; left alone the input takes the whole row and squeezes the select. */}
+              <div className="w-28">
+                <NumberInput
+                  aria-label={t("pricing.discountValue")}
+                  className="text-right"
+                  value={discountValue}
+                  decimalScale={
+                    discountType === "percent"
+                      ? PERCENT_DECIMALS
+                      : MONEY_DECIMALS
+                  }
+                  allowNegative={false}
+                  onChange={(event) => onDiscountValue(event.target.value)}
+                />
+              </div>
             </>
           ) : (
             <span className="text-text-secondary">
@@ -134,6 +143,7 @@ export function QuotationTotals({
               label={t("pricing.vatRate")}
               labelHidden
               searchable={false}
+              allowClear={false}
               className="w-24"
               options={VAT_RATES.map((rate) => ({
                 value: String(rate),

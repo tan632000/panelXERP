@@ -65,6 +65,30 @@ describe("DetailTotalsSummary", () => {
     expect(shipping.className).not.toContain("text-danger-text");
   });
 
+  it("formats every row and the total with a caller's formatter, signs still its own", () => {
+    render(
+      <DetailTotalsSummary
+        currency="VND"
+        formatAmount={(amount) => `${amount} ₫`}
+        rows={[
+          { key: "goods", label: "Tổng tiền hàng", amount: 500 },
+          {
+            key: "discount",
+            label: "Tổng chiết khấu",
+            amount: 20,
+            effect: "subtracted",
+          },
+        ]}
+        total={{ label: "Tổng cộng", amount: 480 }}
+      />,
+    );
+
+    expect(screen.getByText("500 ₫")).toBeInTheDocument();
+    expect(screen.getByText("-20 ₫")).toBeInTheDocument();
+    expect(screen.getByText("480 ₫")).toBeInTheDocument();
+    expect(screen.queryByText(/VND/)).not.toBeInTheDocument();
+  });
+
   it("sets the total apart from the components it is made of", () => {
     renderSummary(120000, 350000);
 

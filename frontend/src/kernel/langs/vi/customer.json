@@ -15,7 +15,7 @@
   "createdDate": "Ngày tạo",
   "infoBasic": "Thông tin khách hàng",
   "detailTitle": "Chi tiết khách hàng",
-  "detailNotFound": "Không tìm thấy khách hàng.",
+  "detailNotFound": "Không tìm thấy khách hàng",
   "addButton": "Thêm khách hàng",
   "searchPlaceholder": "Tìm mã, tên, mã số thuế, điện thoại, email...",
   "confirmDeleteTitle": "Xoá khách hàng",

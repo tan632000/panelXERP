@@ -15,7 +15,7 @@
   "createdDate": "Created date",
   "infoBasic": "Customer information",
   "detailTitle": "Customer detail",
-  "detailNotFound": "Customer not found.",
+  "detailNotFound": "Customer not found",
   "addButton": "Add customer",
   "searchPlaceholder": "Search code, name, tax code, phone, email...",
   "confirmDeleteTitle": "Delete customer",

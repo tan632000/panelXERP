@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -8,7 +8,7 @@ import viCommon from "@/kernel/langs/vi/common.json";
 import viItem from "@/kernel/langs/vi/item.json";
 import viModal from "@/kernel/langs/vi/modal.json";
 
-import { queryExcelAction } from "@/test/helpers/excel-menu";
+import { getExcelAction, queryExcelAction } from "@/test/helpers/excel-menu";
 
 import { ItemListPage } from "@plugins/catalog/item/components/ItemListPage";
 import { ItemPermission } from "@plugins/catalog/item/permissions/item-permission.keys";
@@ -138,6 +138,21 @@ describe("ItemListPage", () => {
     await screen.findByText("LC1D09M7");
     expect(screen.queryByText(viItem.addButton)).not.toBeInTheDocument();
     expect(queryExcelAction(viCommon.importExcel)).not.toBeNull();
+  });
+
+  it("opens the import dialog when the toolbar import button is clicked", async () => {
+    grant(ItemPermission.read, ItemPermission.import);
+    renderPage();
+    await screen.findByText("LC1D09M7");
+    expect(
+      screen.queryByRole("button", { name: viItem.import.submit }),
+    ).not.toBeInTheDocument();
+
+    fireEvent.click(getExcelAction(viCommon.importExcel));
+
+    expect(
+      await screen.findByRole("button", { name: viItem.import.submit }),
+    ).toBeInTheDocument();
   });
 
   it("offers the row edit and delete controls only with item:update and item:delete", async () => {

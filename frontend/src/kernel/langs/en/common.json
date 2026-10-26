@@ -43,6 +43,7 @@
   "selectOrType": "Type or select...",
   "noResults": "No matching results.",
   "importExcel": "Import Excel",
+  "openCalendar": "Open calendar",
   "exportExcel": "Export Excel",
   "excelMenu": "Excel",
   "export": "Export",

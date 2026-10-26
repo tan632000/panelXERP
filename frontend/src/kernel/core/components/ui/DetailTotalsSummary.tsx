@@ -22,6 +22,8 @@ export interface DetailTotalsSummaryProps {
   total: { label: string; amount: number };
   /** Suffix every figure carries, e.g. `VND`. */
   currency?: string;
+  /** Overrides how a figure is written (e.g. `formatCurrency` for the `₫` form); `currency` is then unused. */
+  formatAmount?: (amount: number) => string;
   /** Slot above the separator, for a figure only one screen has. */
   extra?: React.ReactNode;
 }
@@ -41,9 +43,11 @@ export function DetailTotalsSummary({
   rows,
   total,
   currency = "VND",
+  formatAmount,
   extra,
 }: Readonly<DetailTotalsSummaryProps>) {
-  const money = (amount: number) => formatAmountWithCurrency(amount, currency);
+  const money = (amount: number) =>
+    formatAmount?.(amount) ?? formatAmountWithCurrency(amount, currency);
 
   return (
     <div className="flex flex-col gap-1.5 rounded-lg bg-surface-secondary px-3.5 py-2.5">

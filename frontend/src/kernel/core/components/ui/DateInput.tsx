@@ -2,6 +2,7 @@
 
 import { offset } from "@floating-ui/react";
 import { enUS } from "date-fns/locale";
+import { useTranslations } from "next-intl";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import ReactDatePicker, { registerLocale } from "react-datepicker";
 
@@ -39,6 +40,7 @@ const DateInputField = forwardRef<HTMLInputElement, DateInputFieldProps>(
     },
     ref,
   ) {
+    const t = useTranslations("common");
     const isLocked = Boolean(locked || disabled);
 
     return (
@@ -79,7 +81,7 @@ const DateInputField = forwardRef<HTMLInputElement, DateInputFieldProps>(
           type="button"
           tabIndex={-1}
           disabled={isLocked}
-          aria-label="Open calendar"
+          aria-label={t("openCalendar")}
           onMouseDown={(event) => event.preventDefault()}
           onClick={() => {
             if (!isLocked) onOpenCalendar?.();

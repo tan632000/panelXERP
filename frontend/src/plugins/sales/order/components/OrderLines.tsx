@@ -87,6 +87,7 @@ export function OrderLines({ order }: { order: OrderDetail }) {
         </div>
         <div className="ml-auto mt-3 w-full max-w-xl">
           <DetailTotalsSummary
+            formatAmount={formatCurrency}
             rows={[
               {
                 key: "subtotal",

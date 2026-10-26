@@ -134,9 +134,7 @@ export function ItemListPage() {
           <PageToolbarActions
             showExport={false}
             showImport={canImport}
-            onImportClick={
-              canImport && importOpen ? () => setImportOpen(true) : undefined
-            }
+            onImportClick={canImport ? () => setImportOpen(true) : undefined}
             addButtonLabel={canCreate ? t("addButton") : undefined}
             onAddClick={canCreate ? () => setCreateModalOpen(true) : undefined}
           />

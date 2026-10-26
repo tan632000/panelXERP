@@ -167,16 +167,34 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("approval panel: draft", () => {
-  it("submits the draft for approval", async () => {
+  it("submits the draft for approval only after the confirmation", async () => {
     renderPanel(quotation());
 
     fireEvent.click(screen.getByRole("button", { name: labels.submit }));
+    expect(await screen.findByText(/Gửi duyệt báo giá/)).toBeInTheDocument();
+    expect(apiPost).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole("button", { name: labels.submitConfirm }));
 
     await waitFor(() => expect(apiPost).toHaveBeenCalledTimes(1));
     expect(apiPost).toHaveBeenCalledWith(
       "/sales/quotations/9/submit",
       undefined,
     );
+  });
+
+  it("sends nothing when the submit confirmation is cancelled", async () => {
+    renderPanel(quotation());
+
+    fireEvent.click(screen.getByRole("button", { name: labels.submit }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: viCommon.cancel }),
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByText(/Gửi duyệt báo giá/)).not.toBeInTheDocument(),
+    );
+    expect(apiPost).not.toHaveBeenCalled();
   });
 
   it("offers a refresh and blocks the submit while the estimate is stale", async () => {
@@ -256,16 +274,36 @@ describe("approval panel: draft", () => {
 });
 
 describe("approval panel: deciding", () => {
-  it("lets an approver who is not the creator approve in one click", async () => {
+  it("lets an approver who is not the creator approve after confirming", async () => {
     renderPanel(quotation({ status: "pending_approval" }));
 
     fireEvent.click(screen.getByRole("button", { name: labels.approve }));
+    expect(await screen.findByText(/Duyệt báo giá/)).toBeInTheDocument();
+    expect(apiPost).not.toHaveBeenCalled();
+
+    fireEvent.click(
+      screen.getByRole("button", { name: labels.approveConfirm }),
+    );
 
     await waitFor(() => expect(apiPost).toHaveBeenCalledTimes(1));
     expect(apiPost).toHaveBeenCalledWith(
       "/sales/quotations/9/approve",
       undefined,
     );
+  });
+
+  it("sends nothing when the approval confirmation is cancelled", async () => {
+    renderPanel(quotation({ status: "pending_approval" }));
+
+    fireEvent.click(screen.getByRole("button", { name: labels.approve }));
+    fireEvent.click(
+      await screen.findByRole("button", { name: viCommon.cancel }),
+    );
+
+    await waitFor(() =>
+      expect(screen.queryByText(/Duyệt báo giá/)).not.toBeInTheDocument(),
+    );
+    expect(apiPost).not.toHaveBeenCalled();
   });
 
   it("withholds approve and reject from the version's own creator", () => {

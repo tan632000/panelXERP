@@ -86,8 +86,10 @@ export function ModuleShell({
   return (
     <>
       {/* `h-dvh`: a phone's browser bar shrinks the viewport, and `h-screen` would hide the bottom
-        of every page behind it. The two are the same height on a desktop. */}
-      <div className="isolate flex h-dvh w-full overflow-hidden bg-surface-tertiary text-base text-text-primary">
+        of every page behind it. The two are the same height on a desktop.
+        `relative`: an absolutely positioned descendant with no positioned ancestor (the `sr-only`
+        labels of a long form) escapes `overflow-hidden` and makes the whole document scroll. */}
+      <div className="relative isolate flex h-dvh w-full overflow-hidden bg-surface-tertiary text-base text-text-primary">
         <div className="flex h-full w-full overflow-hidden">
           <ResponsiveSidebar sidebar={sidebarProps}>
             <main className="flex min-w-0 flex-1 flex-col overflow-hidden bg-surface-tertiary">
