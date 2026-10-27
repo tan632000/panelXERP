@@ -94,7 +94,7 @@ Strictly sequential (shared registration files, one writer each, as P1 R-08).
 
 | # | Task | Priority | Criteria | Primary ownership | Dependencies | Status |
 |---|---|---|---|---|---|---|
-| 01 | Roles, permissions, `material` scope | P1 | AC-01, AC-03 | `backend/src/kernel/core/database/seeds/`, scope helpers | - | pending |
+| 01 | Roles, permissions, `material` scope | P1 | AC-01, AC-03 | `backend/src/kernel/core/database/seeds/`, scope helpers | - | done |
 | 02 | Suppliers + `inventory` plugin | P1 | AC-04 | `*/src/plugins/inventory/supplier` | 01 | pending |
 | 03 | Locations + item stock settings + resolve + price permissions | P1 | AC-02, AC-04, AC-05 | `*/src/plugins/catalog/{location,item}` | 02 | pending |
 | 04 | Labels + scan lookup | P2 | AC-05, AC-06 | `catalog/item` labels, `ScanInput` | 03 | pending |

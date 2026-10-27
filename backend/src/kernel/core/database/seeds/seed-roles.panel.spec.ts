@@ -19,21 +19,37 @@ const PANEL_ROLES = [
   'engineeringLead',
   'engineer',
   'purchasing',
+  'storekeeper',
 ];
 
 /**
  * Modules the matrix grants before their plugin declares them, with the task that declares
  * each. A plugin task removes its modules here when it registers its permissions, so the list
- * is empty once P1 is built; until then `seedRoles` stores none of these scopes.
+ * is empty once its feature is built; until then `seedRoles` stores none of these scopes.
  */
-const PENDING_MODULES: Readonly<Record<string, string>> = {};
+const PENDING_MODULES: Readonly<Record<string, string>> = {
+  supplier: 'task-02',
+  location: 'task-03',
+  reference_price: 'task-03',
+  purchase_price: 'task-03',
+  stock: 'task-05',
+  purchase_order: 'task-07',
+  material: 'task-09',
+  stock_receipt: 'task-11',
+  stock_issue: 'task-12',
+  stock_return: 'task-12',
+  stocktake: 'task-14',
+  purchase_request: 'task-15',
+};
 
 /**
  * Scopes of a module whose plugin is declared but not yet complete, with the task that
  * declares each. Empty while every declared module is complete; a task that adds a module in
  * stages lists the scopes of the later stages here until it declares them.
  */
-const PENDING_SCOPES: Readonly<Record<string, string>> = {};
+const PENDING_SCOPES: Readonly<Record<string, string>> = {
+  'item:stock_settings': 'task-03',
+};
 
 /**
  * Seeded scopes no plugin declares and nothing excuses: not a pending scope, not on a

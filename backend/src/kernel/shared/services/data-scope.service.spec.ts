@@ -1,7 +1,11 @@
 import { NotFoundException } from '@nestjs/common';
 
 import { RequestContextStore } from '@shared/context/request-context.store';
-import { DataScopeService } from '@shared/services/data-scope.service';
+import {
+  DataScopeService,
+  materialListCondition,
+  NO_OWNER_ID,
+} from '@shared/services/data-scope.service';
 
 describe('DataScopeService', () => {
   const service = new DataScopeService();
@@ -15,7 +19,8 @@ describe('DataScopeService', () => {
     expect(scopeOf('director')).toBe('all');
     expect(scopeOf('salesManager')).toBe('all');
     expect(scopeOf('engineeringLead')).toBe('all');
-    expect(scopeOf('purchasing')).toBe('ownSales');
+    expect(scopeOf('purchasing')).toBe('material');
+    expect(scopeOf('storekeeper')).toBe('material');
     expect(scopeOf('sales')).toBe('ownSales');
     expect(scopeOf('engineer')).toBe('assignedEngineer');
   });
@@ -43,6 +48,51 @@ describe('DataScopeService', () => {
     expect(service.canSee({ ...engineerA, userId: 22 }, record)).toBe(false);
     // Owning a record as sales does not reach it as an engineer.
     expect(service.canSee(engineerA, { salesOwnerId: 21 })).toBe(false);
+  });
+
+  it('hides every sales-chain record from the material scope', () => {
+    for (const role of ['purchasing', 'storekeeper']) {
+      const actor = { userId: 11, role };
+      expect(service.canSee(actor, record)).toBe(false);
+      expect(service.canSee(actor, { salesOwnerId: 11 })).toBe(false);
+      expect(() => service.assertVisible(actor, record, 'Order')).toThrow(
+        NotFoundException,
+      );
+    }
+  });
+
+  it('lets the material scope and full access read the materials of any order', () => {
+    const other = { salesOwnerId: 99 };
+    expect(
+      service.canSeeMaterial({ userId: 1, role: 'storekeeper' }, other),
+    ).toBe(true);
+    expect(
+      service.canSeeMaterial({ userId: 1, role: 'purchasing' }, other),
+    ).toBe(true);
+    expect(service.canSeeMaterial({ userId: 1, role: 'director' }, other)).toBe(
+      true,
+    );
+    expect(
+      service.canSeeMaterial({ userId: 1, permissions: ['*:*'] }, other),
+    ).toBe(true);
+  });
+
+  it('limits the materials of a sales actor to their own orders and shows an engineer none', () => {
+    expect(service.canSeeMaterial(salesA, record)).toBe(true);
+    expect(service.canSeeMaterial({ ...salesA, userId: 12 }, record)).toBe(
+      false,
+    );
+    expect(service.canSeeMaterial(salesA, { salesOwnerId: null })).toBe(false);
+    expect(service.canSeeMaterial(engineerA, record)).toBe(false);
+  });
+
+  it('builds the material list condition per scope', () => {
+    expect(materialListCondition('all', 5)).toEqual({});
+    expect(materialListCondition('material', 5)).toEqual({});
+    expect(materialListCondition('ownSales', 5)).toEqual({ salesOwnerId: 5 });
+    expect(materialListCondition('assignedEngineer', 5)).toEqual({
+      salesOwnerId: NO_OWNER_ID,
+    });
   });
 
   it('answers 404, not 403, for a record outside the scope or missing', () => {

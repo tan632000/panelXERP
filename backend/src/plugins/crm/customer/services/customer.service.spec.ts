@@ -22,6 +22,7 @@ const SALES_A: AuthUserPayload = { userId: 11, role: 'sales' };
 const SALES_B: AuthUserPayload = { userId: 12, role: 'sales' };
 const MANAGER: AuthUserPayload = { userId: 20, role: 'salesManager' };
 const ENGINEER: AuthUserPayload = { userId: 30, role: 'engineer' };
+const STOREKEEPER: AuthUserPayload = { userId: 40, role: 'storekeeper' };
 
 type CustomerRow = Customer & FakeRow;
 
@@ -138,6 +139,7 @@ describe('CustomerService', () => {
       const forA = await service.findAll({}, SALES_A);
       const forManager = await service.findAll({}, MANAGER);
       const forEngineer = await service.findAll({}, ENGINEER);
+      const forMaterial = await service.findAll({}, STOREKEEPER);
 
       expect(forA.data.map((row) => row.code)).toEqual(['KH_0001']);
       expect(forManager.data.map((row) => row.code)).toEqual([
@@ -145,6 +147,7 @@ describe('CustomerService', () => {
         'KH_0002',
       ]);
       expect(forEngineer.data).toEqual([]);
+      expect(forMaterial.data).toEqual([]);
     });
   });
 

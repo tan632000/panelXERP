@@ -8,12 +8,17 @@ import { RequestContextStore } from '@shared/context/request-context.store';
  *   all              — every record (managers, leads, administrators)
  *   ownSales         — records whose `salesOwnerId` is the actor
  *   assignedEngineer — requests (and their estimates) whose `assignedEngineerId` is the actor
+ *   material         — every order's material view (purchasing, storekeeper) and no sales-chain
+ *                      record: customers, requests, estimates, quotations and orders stay hidden
  *
  * Permissions still decide which actions are allowed; the scope only decides which records an
  * allowed action reaches. A record outside the scope answers 404, never 403, so its existence
  * is not disclosed.
  */
-export type DataScope = 'all' | 'ownSales' | 'assignedEngineer';
+export type DataScope = 'all' | 'ownSales' | 'assignedEngineer' | 'material';
+
+/** An owner id no user has, so `owner = NO_OWNER_ID` matches no row. */
+export const NO_OWNER_ID = -1;
 
 export const FULL_ACCESS_PERMISSION = '*:*';
 
@@ -23,9 +28,10 @@ export const ROLE_DATA_SCOPES: Readonly<Record<string, DataScope>> = {
   director: 'all',
   salesManager: 'all',
   engineeringLead: 'all',
-  // Purchasing holds no sales-chain read permission; should one be granted later, it starts
-  // from the narrowest scope rather than every record. The catalog has no owner to filter on.
-  purchasing: 'ownSales',
+  // Purchasing and the storekeeper read every order's materials but hold no sales-chain
+  // permission; should one be granted later, `material` still reaches no sales-chain record.
+  purchasing: 'material',
+  storekeeper: 'material',
   sales: 'ownSales',
   engineer: 'assignedEngineer',
 };
@@ -42,6 +48,25 @@ export interface ScopedActor {
 export interface ScopedRecord {
   salesOwnerId?: number | null;
   assignedEngineerId?: number | null;
+}
+
+/**
+ * The order-owner condition a material list adds for a scope: none for `all` and `material`,
+ * the actor's own orders for `ownSales`, and an owner nobody has (match nothing) otherwise.
+ */
+export function materialListCondition(
+  scope: DataScope,
+  userId: number,
+): { salesOwnerId?: number } {
+  switch (scope) {
+    case 'all':
+    case 'material':
+      return {};
+    case 'ownSales':
+      return { salesOwnerId: userId };
+    case 'assignedEngineer':
+      return { salesOwnerId: NO_OWNER_ID };
+  }
 }
 
 @Injectable()
@@ -61,6 +86,27 @@ export class DataScopeService {
         return record.salesOwnerId === actor.userId;
       case 'assignedEngineer':
         return record.assignedEngineerId === actor.userId;
+      case 'material':
+        return false;
+    }
+  }
+
+  /**
+   * Whether the actor may read the material view of an order: the `material` scope reaches
+   * every order, a sales actor only their own, an engineer none.
+   */
+  canSeeMaterial(
+    actor: ScopedActor,
+    record: Pick<ScopedRecord, 'salesOwnerId'>,
+  ): boolean {
+    switch (this.scopeOf(actor)) {
+      case 'all':
+      case 'material':
+        return true;
+      case 'ownSales':
+        return record.salesOwnerId === actor.userId;
+      case 'assignedEngineer':
+        return false;
     }
   }
 

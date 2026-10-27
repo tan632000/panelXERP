@@ -382,6 +382,8 @@ describe('RequestService', () => {
       expect(await titles(ENGINEER_A)).toEqual(['Mine']);
       expect(await titles(ENGINEER_B)).toEqual([]);
       expect((await titles(MANAGER)).sort()).toEqual(['Mine', 'Theirs']);
+      expect(await titles({ userId: 50, role: 'storekeeper' })).toEqual([]);
+      expect(await titles({ userId: 51, role: 'purchasing' })).toEqual([]);
     });
 
     it('shows customer and engineer names on each list row', async () => {

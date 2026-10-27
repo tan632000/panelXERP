@@ -1,6 +1,6 @@
 # Task 01 — Storekeeper role, P2 permission matrix and `material` data scope
 
-Status: pending
+Status: done
 
 ## Outcome
 The seed creates the `storekeeper` role and a demo `storekeeper` account, grants every P2 permission per D-08, and the data-scope helpers know the `material` scope (D-09): it reaches every order's material view and no sales-chain record.
@@ -51,3 +51,43 @@ The seed creates the `storekeeper` role and a demo `storekeeper` account, grants
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/kernel/core/database/seeds/seed-roles.inventory.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/kernel/core/database/seeds src/kernel/shared/services/data-scope.service.spec.ts src/plugins/crm src/plugins/sales/request" && docker compose exec -T postgres sh -c "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -tAc \"SELECT count(*) || ':' || coalesce(string_agg(code, ','), '') FROM roles WHERE updated_by IS NOT NULL\""
+Exit: 0
+Base: 2951b4a25dc6637c229392539e20f5c6aa827e6e
+Head: 6f2ede122fb52286e9262fdc19447974aa0f1f7e18060ee23055afbdf955cc03
+```text
+$ docker compose exec -T backend sh -c "test -f src/kernel/core/database/seeds/seed-roles.inventory.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/kernel/core/database/seeds src/kernel/shared/services/data-scope.service.spec.ts src/plugins/crm src/plugins/sales/request" && docker compose exec -T postgres sh -c "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -tAc \"SELECT count(*) || ':' || coalesce(string_agg(code, ','), '') FROM roles WHERE updated_by IS NOT NULL\""
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+> panelxerp-backend@0.0.1 migration:run
+No migrations are pending
+> panelxerp-backend@0.0.1 seed
+  - storekeeper: item:stock_settings, location:read, location:create, location:update, location:delete, stock:availability, stock:read, stock:ledger, material:read, supplier:read, purchase_order:read, purchase_request:read, purchase_request:create, stock_receipt:read, stock_receipt:create, stock_issue:read, stock_issue:create, stock_return:read, stock_return:create, stocktake:read, stocktake:create, stocktake:update, stocktake:submit, stocktake:cancel
+[seed:users] 0 users created, 10 already existed and were left untouched (domain: example.com)
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts (9.69 s)
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts (9.796 s)
+PASS src/plugins/crm/project/project.controller.spec.ts
+PASS src/plugins/crm/contact/contact.controller.spec.ts
+PASS src/plugins/sales/request/services/request-owner-race.spec.ts
+PASS src/plugins/crm/customer/customer.controller.spec.ts
+PASS src/plugins/sales/request/services/request.service.spec.ts
+PASS src/plugins/crm/customer/services/customer.service.spec.ts
+PASS src/plugins/sales/request/services/request-attachment.service.spec.ts
+PASS src/plugins/crm/contact/services/contact.service.spec.ts
+PASS src/plugins/sales/request/request.controller.spec.ts (17.733 s)
+PASS src/plugins/crm/project/services/project.service.spec.ts
+PASS src/plugins/crm/_shared/gateways/crm-gateway.spec.ts
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/kernel/shared/services/data-scope.service.spec.ts
+PASS src/plugins/crm/_shared/gateways/reference-check-registry.spec.ts
+PASS src/plugins/crm/_shared/gateways/customer-owner-change-registry.spec.ts
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+Test Suites: 19 passed, 19 total
+Tests:       331 passed, 331 total
+0:
+Exit: 0
+```
+No test in the run above was skipped (the real-Postgres request-owner race ran). The seed's storekeeper line is its warning that these scopes are still pending (no plugin declares them yet, PENDING mapping per Scope); they are stored once tasks 02–15 declare them. The last line `0:` matches the Oracle: no administrator-edited role. Pre-change run: the Command exited 1 at the missing probe `seed-roles.inventory.spec.ts`. Extra evidence (same Head, not the canonical command): full backend jest 96 suites / 1289 passed; implementer's read-only SQL after the first seed: role `storekeeper` exists and one user `storekeeper` is linked to it (demo user created with the shared seed password env, nothing printed). Negative controls by the controller on a disposable copy under the backend container's `/tmp` (outside the bind-mounted repo, deleted afterwards): `ownerCondition` returning `{}` for `material` only → `customer.service.spec.ts` 1 failed ("lists only the caller's customers for Sales and every customer for a manager"); `requestScopeCondition` returning `{}` for `material` → `request.service.spec.ts` 1 failed ("lists only what the actor's scope reaches"). Review (code-auditor): PASS, Low only — traced every consumer of `canSee`/`assertVisible`/`ownerCondition`/`requestScopeCondition`/`scopeOf` (customer, contact, project, request, estimate, quotation, order incl. query-builder `:ownerId` params) and found no path where `material` widens access. Known limitations: `requestScopeCondition` uses the impossible owner id `-1` (`NO_OWNER_ID`) because order and quotation lists bind a scalar parameter, relying on user ids being positive serials (no CHECK constraint); `canSeeMaterial` and `materialListCondition` have no runtime caller until task-09; the "off every sales-chain scope" spec enumerates today's actions, so a future explicitly granted new action is caught only by the no-wildcard spec; no frontend change (no role-label map exists).

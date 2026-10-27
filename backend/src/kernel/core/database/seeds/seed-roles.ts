@@ -55,10 +55,32 @@ const SALES_CHAIN_ALL = [
   'order:*',
 ];
 
+/** What every role that sees stock may read: availability, the on-hand figures and the ledger. */
+const STOCK_VIEW = ['stock:availability', 'stock:read', 'stock:ledger'];
+const PURCHASE_REQUEST_RAISE = [
+  'purchase_request:read',
+  'purchase_request:create',
+];
+
 /** The director reads every estimate but never writes one: that is the engineers' work. */
-const DIRECTOR_GRANTS = SALES_CHAIN_ALL.map((scope) =>
-  scope === 'estimate:*' ? 'estimate:read' : scope,
-);
+const DIRECTOR_GRANTS = [
+  ...SALES_CHAIN_ALL.map((scope) =>
+    scope === 'estimate:*' ? 'estimate:read' : scope,
+  ),
+  'reference_price:read',
+  'purchase_price:read',
+  'supplier:*',
+  'location:read',
+  'purchase_request:read',
+  'purchase_order:*',
+  ...STOCK_VIEW,
+  'material:read',
+  'stock_receipt:read',
+  'stock_issue:read',
+  'stock_return:read',
+  'stocktake:read',
+  'stocktake:approve',
+];
 
 /**
  * [name, code, description, permissions] in seed order (D-11, D-12). Kernel file routes
@@ -86,6 +108,10 @@ const ROLES: ReadonlyArray<
       'estimate:read',
       'quotation:*',
       'order:*',
+      'reference_price:read',
+      'purchase_price:read',
+      ...STOCK_VIEW,
+      'material:read',
     ],
   ],
   [
@@ -99,6 +125,9 @@ const ROLES: ReadonlyArray<
       'estimate:read',
       ...QUOTATION_SALES,
       ...ORDER_SALES,
+      'reference_price:read',
+      'stock:availability',
+      'material:read',
     ],
   ],
   [
@@ -111,6 +140,10 @@ const ROLES: ReadonlyArray<
       'request:read',
       'request:assign',
       'estimate:*',
+      'reference_price:read',
+      'stock:availability',
+      'material:read',
+      ...PURCHASE_REQUEST_RAISE,
     ],
   ],
   [
@@ -119,13 +152,68 @@ const ROLES: ReadonlyArray<
     'Builds the BOM and estimate of the requests assigned to them',
     // No direct customer/project read: the engineer's scope is the requests assigned to
     // them, and a request shows its customer and project summary itself.
-    ['item:read', 'request:read', ...ESTIMATE_WRITE],
+    [
+      'item:read',
+      'request:read',
+      ...ESTIMATE_WRITE,
+      'reference_price:read',
+      'stock:availability',
+      ...PURCHASE_REQUEST_RAISE,
+    ],
   ],
   [
     'Purchasing',
     'purchasing',
-    'Maintains the item catalog and its reference purchase prices',
-    ITEM_ALL,
+    'Maintains the item catalog and suppliers, raises purchase requests and orders, reads stock and the stock documents',
+    [
+      ...ITEM_ALL,
+      'reference_price:read',
+      'purchase_price:read',
+      'location:read',
+      'supplier:*',
+      'purchase_request:*',
+      'purchase_order:read',
+      'purchase_order:create',
+      'purchase_order:update',
+      'purchase_order:submit',
+      'purchase_order:cancel',
+      'purchase_order:close',
+      ...STOCK_VIEW,
+      'material:read',
+      'stock_receipt:read',
+      'stock_issue:read',
+      'stock_return:read',
+      'stocktake:read',
+    ],
+  ],
+  [
+    'Storekeeper',
+    'storekeeper',
+    'Runs the warehouse: locations, receipts, issues, returns and stocktakes; sees no price',
+    [
+      'item:read',
+      'item:stock_settings',
+      'location:read',
+      'location:create',
+      'location:update',
+      'location:delete',
+      ...STOCK_VIEW,
+      'material:read',
+      'supplier:read',
+      'purchase_order:read',
+      ...PURCHASE_REQUEST_RAISE,
+      'stock_receipt:read',
+      'stock_receipt:create',
+      'stock_issue:read',
+      'stock_issue:create',
+      'stock_return:read',
+      'stock_return:create',
+      'stocktake:read',
+      'stocktake:create',
+      'stocktake:update',
+      'stocktake:submit',
+      'stocktake:cancel',
+    ],
   ],
 ];
 
