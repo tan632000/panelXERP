@@ -11,6 +11,7 @@ export const LIST_PREFERENCE_MODULE_KEYS = [
   'project_list_v2',
   'item_list_v2',
   'request_list_v2',
+  'supplier_list_v2',
   // Not a list: the functions the account pinned to the top of the sidebar, stored as their
   // routes in `visible_columns` so a pin follows the account to every device.
   'sidebar_pins',

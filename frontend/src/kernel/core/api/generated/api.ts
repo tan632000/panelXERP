@@ -1883,6 +1883,92 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/inventory/suppliers": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List suppliers
+     * @description Paginated supplier list with search and column filters.
+     */
+    get: operations["SupplierController_findAll"];
+    put?: never;
+    /**
+     * Create supplier
+     * @description Code must be unique among active suppliers, in any case.
+     */
+    post: operations["SupplierController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/suppliers/column-values": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List distinct values of one filterable supplier column
+     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+     */
+    get: operations["SupplierController_findColumnValues"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/suppliers/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get supplier by ID */
+    get: operations["SupplierController_findOne"];
+    put?: never;
+    post?: never;
+    /**
+     * Soft-delete supplier
+     * @description Refused with 409 while any purchasing document references the supplier.
+     */
+    delete: operations["SupplierController_remove"];
+    options?: never;
+    head?: never;
+    /** Update supplier */
+    patch: operations["SupplierController_update"];
+    trace?: never;
+  };
+  "/api/v1/inventory/suppliers/bulk-delete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Soft-delete selected suppliers
+     * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
+     */
+    post: operations["SupplierController_bulkRemove"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2459,6 +2545,52 @@ export interface components {
        * @example 2027-02-15
        */
       deliveryDate?: Record<string, never> | null;
+    };
+    CreateSupplierDto: {
+      /**
+       * @description Supplier code, unique among active suppliers (any case)
+       * @example NCC_0001
+       */
+      code: string;
+      /** @description Supplier name */
+      name: string;
+      /** @description Tax code */
+      taxCode?: string;
+      /** @description Address */
+      address?: string;
+      /** @description Phone number */
+      phone?: string;
+      /** @description Email address */
+      email?: string;
+      /** @description Contact person */
+      contactName?: string;
+      /** @description Note */
+      note?: string;
+      /** @description Whether the supplier is in use. Defaults to true. */
+      isActive?: boolean;
+    };
+    UpdateSupplierDto: {
+      /**
+       * @description Supplier code, unique among active suppliers (any case)
+       * @example NCC_0001
+       */
+      code?: string;
+      /** @description Supplier name */
+      name?: string;
+      /** @description Tax code */
+      taxCode?: string;
+      /** @description Address */
+      address?: string;
+      /** @description Phone number */
+      phone?: string;
+      /** @description Email address */
+      email?: string;
+      /** @description Contact person */
+      contactName?: string;
+      /** @description Note */
+      note?: string;
+      /** @description Whether the supplier is in use. Defaults to true. */
+      isActive?: boolean;
     };
   };
   responses: never;
@@ -6824,6 +6956,299 @@ export interface operations {
       };
       /** @description The order is not open */
       409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupplierController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+        sortBy?: string;
+        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+        sortOrder?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated supplier list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires supplier:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupplierController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSupplierDto"];
+      };
+    };
+    responses: {
+      /** @description Supplier created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires supplier:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Duplicate supplier code */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupplierController_findColumnValues: {
+    parameters: {
+      query: {
+        /** @description Column key: code, name, taxCode, contactName, phone, email */
+        column: string;
+        /** @description Search within the values */
+        search?: string;
+        /** @description Page number */
+        page?: number;
+        /** @description Values per page */
+        limit?: number;
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Keyword search of the list itself */
+        listSearch?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated distinct column values */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Column is not filterable */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires supplier:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupplierController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Supplier found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found or soft-deleted */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupplierController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Supplier soft-deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires supplier:delete */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Supplier not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Supplier is referenced by a document */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupplierController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateSupplierDto"];
+      };
+    };
+    responses: {
+      /** @description Supplier updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires supplier:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Supplier not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Duplicate supplier code */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupplierController_bulkRemove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkDeleteDto"];
+      };
+    };
+    responses: {
+      /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Empty or invalid id list */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires supplier:delete */
+      403: {
         headers: {
           [name: string]: unknown;
         };

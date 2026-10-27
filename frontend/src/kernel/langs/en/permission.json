@@ -321,7 +321,7 @@
     "subcontract_order:price:read": "View subcontract order prices",
     "supplier:contact:delete": "Delete supplier contact",
     "supplier:contact:write": "Add / edit supplier contact",
-    "supplier:delete": "Delete suppliers and contacts",
+    "supplier:delete": "Delete supplier",
     "supplier:write": "Create and edit suppliers and contacts",
     "surface_treatment_order:cancel": "Cancel and restore XLBM orders",
     "test_lab_result:write": "Enter, close and reopen test results",

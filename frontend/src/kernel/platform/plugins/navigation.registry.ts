@@ -59,7 +59,12 @@ export const navigationConfig: Record<string, ModuleNavigation> = (() => {
  * Section order the sidebar renders. Feature tasks add their section title here when they
  * register a plugin; a section not listed is appended after these, in module-registration order.
  */
-const SECTION_ORDER: string[] = ["sidebarCrm", "sidebarCatalog", "sidebarSales"];
+const SECTION_ORDER: string[] = [
+  "sidebarCrm",
+  "sidebarCatalog",
+  "sidebarSales",
+  "sidebarInventory",
+];
 
 /**
  * Every module's sections in one list, each tagged with the namespace its labels live in.

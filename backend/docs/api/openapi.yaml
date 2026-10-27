@@ -3460,6 +3460,246 @@ paths:
       security: *ref_29
       summary: Cancel the order
       tags: *ref_30
+  /api/v1/inventory/suppliers:
+    get:
+      description: Paginated supplier list with search and column filters.
+      operationId: SupplierController_findAll
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Items per page
+          schema:
+            default: 25
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search keyword
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: sortBy
+          required: false
+          in: query
+          description: Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.
+          schema:
+            default: createdAt
+            type: string
+        - name: sortOrder
+          required: false
+          in: query
+          description: Sort order. Defaults to DESC for createdAt, ASC otherwise.
+          schema:
+            default: DESC
+            type: string
+      responses:
+        '200':
+          description: Paginated supplier list
+        '403':
+          description: Forbidden — requires supplier:read
+      security: &ref_31
+        - bearer: []
+      summary: List suppliers
+      tags: &ref_32
+        - inventory/suppliers
+    post:
+      description: Code must be unique among active suppliers, in any case.
+      operationId: SupplierController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSupplierDto'
+      responses:
+        '201':
+          description: Supplier created
+        '400':
+          description: Validation error
+        '403':
+          description: Forbidden — requires supplier:create
+        '409':
+          description: Duplicate supplier code
+      security: *ref_31
+      summary: Create supplier
+      tags: *ref_32
+  /api/v1/inventory/suppliers/column-values:
+    get:
+      description: >-
+        Paginated, searchable distinct values of a filterable list column, for the column filter of the list table.
+        Values come from the whole table, not one page.
+      operationId: SupplierController_findColumnValues
+      parameters:
+        - name: column
+          required: true
+          in: query
+          description: 'Column key: code, name, taxCode, contactName, phone, email'
+          schema:
+            example: classification
+            type: string
+        - name: search
+          required: false
+          in: query
+          description: Search within the values
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Values per page
+          schema:
+            default: 50
+            type: number
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: listSearch
+          required: false
+          in: query
+          description: Keyword search of the list itself
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Paginated distinct column values
+        '400':
+          description: Column is not filterable
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — requires supplier:read
+      security: *ref_31
+      summary: List distinct values of one filterable supplier column
+      tags: *ref_32
+  /api/v1/inventory/suppliers/{id}:
+    get:
+      operationId: SupplierController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Supplier found
+        '404':
+          description: Not found or soft-deleted
+      security: *ref_31
+      summary: Get supplier by ID
+      tags: *ref_32
+    patch:
+      operationId: SupplierController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSupplierDto'
+      responses:
+        '200':
+          description: Supplier updated
+        '403':
+          description: Forbidden — requires supplier:update
+        '404':
+          description: Supplier not found
+        '409':
+          description: Duplicate supplier code
+      security: *ref_31
+      summary: Update supplier
+      tags: *ref_32
+    delete:
+      description: Refused with 409 while any purchasing document references the supplier.
+      operationId: SupplierController_remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Supplier soft-deleted
+        '403':
+          description: Forbidden — requires supplier:delete
+        '404':
+          description: Supplier not found
+        '409':
+          description: Supplier is referenced by a document
+      security: *ref_31
+      summary: Soft-delete supplier
+      tags: *ref_32
+  /api/v1/inventory/suppliers/bulk-delete:
+    post:
+      description: >-
+        Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard
+        refuses is reported in `failed` and leaves the rest of the batch deleted.
+      operationId: SupplierController_bulkRemove
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteDto'
+      responses:
+        '201':
+          description: 'Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }`'
+        '400':
+          description: Empty or invalid id list
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — requires supplier:delete
+      security: *ref_31
+      summary: Soft-delete selected suppliers
+      tags: *ref_32
 info:
   title: panelXERP
   description: REST API — ERP Hải Phòng Manufacturing Platform
@@ -3544,7 +3784,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: &ref_31
+          enum: &ref_33
             - sales
             - planning
             - purchasing
@@ -3585,7 +3825,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_31
+          enum: *ref_33
           nullable: true
         title:
           type: object
@@ -3620,7 +3860,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_31
+          enum: *ref_33
           nullable: true
         title:
           type: object
@@ -4055,7 +4295,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: &ref_32
+          enum: &ref_34
             - enclosure
             - breaker
             - contactor
@@ -4105,7 +4345,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: *ref_32
+          enum: *ref_34
         unit:
           type: string
           description: Unit of measure, e.g. pcs, m, set
@@ -4285,7 +4525,7 @@ components:
       properties:
         category:
           type: string
-          enum: &ref_33
+          enum: &ref_35
             - design
             - labor
             - installation
@@ -4307,7 +4547,7 @@ components:
       properties:
         category:
           type: string
-          enum: *ref_33
+          enum: *ref_35
         description:
           type: object
           maxLength: 500
@@ -4437,3 +4677,84 @@ components:
           description: Delivery date (YYYY-MM-DD)
           example: '2027-02-15'
           nullable: true
+    CreateSupplierDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Supplier code, unique among active suppliers (any case)
+          maxLength: 64
+          example: NCC_0001
+        name:
+          type: string
+          description: Supplier name
+          maxLength: 255
+        taxCode:
+          type: string
+          description: Tax code
+          maxLength: 20
+        address:
+          type: string
+          description: Address
+          maxLength: 500
+        phone:
+          type: string
+          description: Phone number
+          maxLength: 20
+        email:
+          type: string
+          description: Email address
+          maxLength: 255
+        contactName:
+          type: string
+          description: Contact person
+          maxLength: 255
+        note:
+          type: string
+          description: Note
+          maxLength: 2000
+        isActive:
+          type: boolean
+          description: Whether the supplier is in use. Defaults to true.
+      required:
+        - code
+        - name
+    UpdateSupplierDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Supplier code, unique among active suppliers (any case)
+          maxLength: 64
+          example: NCC_0001
+        name:
+          type: string
+          description: Supplier name
+          maxLength: 255
+        taxCode:
+          type: string
+          description: Tax code
+          maxLength: 20
+        address:
+          type: string
+          description: Address
+          maxLength: 500
+        phone:
+          type: string
+          description: Phone number
+          maxLength: 20
+        email:
+          type: string
+          description: Email address
+          maxLength: 255
+        contactName:
+          type: string
+          description: Contact person
+          maxLength: 255
+        note:
+          type: string
+          description: Note
+          maxLength: 2000
+        isActive:
+          type: boolean
+          description: Whether the supplier is in use. Defaults to true.

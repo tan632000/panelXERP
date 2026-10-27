@@ -12,6 +12,7 @@ export const SIDEBAR_EXCLUDED_SECTIONS: readonly string[] = ["sidebarSystem"];
 export const SECTION_ICONS: Readonly<Record<string, string>> = {
   sectionMasterData: "database",
   sidebarSales: "shopping-cart",
+  sidebarInventory: "building-warehouse",
   sidebarOtherRevenue: "currency-dollar",
   sidebarProcurement: "clipboard-list",
   sidebarWarehouse: "building-warehouse",

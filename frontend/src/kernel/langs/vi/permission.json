@@ -321,7 +321,7 @@
     "subcontract_order:price:read": "Xem thông tin giá đơn gia công",
     "supplier:contact:delete": "Xoá liên hệ nhà cung cấp",
     "supplier:contact:write": "Thêm / sửa liên hệ nhà cung cấp",
-    "supplier:delete": "Xoá nhà cung cấp và người liên hệ",
+    "supplier:delete": "Xoá nhà cung cấp",
     "supplier:write": "Thêm mới và sửa nhà cung cấp, người liên hệ",
     "surface_treatment_order:cancel": "Huỷ lệnh XLBM và bỏ huỷ",
     "test_lab_result:write": "Nhập kết quả, đóng / mở kết quả test",
