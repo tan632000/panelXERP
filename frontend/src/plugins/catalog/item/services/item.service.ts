@@ -1,3 +1,5 @@
+import { isAxiosError } from "axios";
+
 import api from "@/kernel/core/api/api";
 import { requestBulkDelete } from "@/kernel/core/api/bulk-delete";
 import { multipartRequestConfig } from "@/kernel/core/lib/multipart";
@@ -11,6 +13,7 @@ import type {
   Item,
   ItemImportResult,
   ItemListParams,
+  ResolvedItem,
   UpdateItemDto,
   UpdateItemStockSettingsDto,
 } from "@plugins/catalog/item/types";
@@ -22,6 +25,44 @@ export async function getItems(
     params,
   });
   return data;
+}
+
+export async function getItem(id: number): Promise<Item> {
+  const { data } = await api.get<Item>(itemApiRoutes.detail(id));
+  return data;
+}
+
+export async function resolveItemCode(code: string): Promise<ResolvedItem> {
+  const { data } = await api.get<ResolvedItem>(itemApiRoutes.resolve, {
+    params: { code },
+  });
+  return data;
+}
+
+/**
+ * A blob request reads an error body as a blob too; it is parsed back to JSON so the caller
+ * can tell a missing item from a code that cannot be printed.
+ */
+export async function fetchItemLabels(
+  ids: number[],
+  copies: number,
+): Promise<Blob> {
+  try {
+    const { data } = await api.get<Blob>(itemApiRoutes.labels, {
+      params: { ids: ids.join(","), copies },
+      responseType: "blob",
+    });
+    return data;
+  } catch (error: unknown) {
+    if (isAxiosError(error) && error.response?.data instanceof Blob) {
+      try {
+        error.response.data = JSON.parse(await error.response.data.text());
+      } catch {
+        // Not JSON: leave the body as it came, the caller falls back to the generic message.
+      }
+    }
+    throw error;
+  }
 }
 
 export async function createItem(payload: CreateItemDto): Promise<Item> {

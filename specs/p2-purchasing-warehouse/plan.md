@@ -97,7 +97,7 @@ Strictly sequential (shared registration files, one writer each, as P1 R-08).
 | 01 | Roles, permissions, `material` scope | P1 | AC-01, AC-03 | `backend/src/kernel/core/database/seeds/`, scope helpers | - | done |
 | 02 | Suppliers + `inventory` plugin | P1 | AC-04 | `*/src/plugins/inventory/supplier` | 01 | done |
 | 03 | Locations + item stock settings + resolve + price permissions | P1 | AC-02, AC-04, AC-05 | `*/src/plugins/catalog/{location,item}` | 02 | done |
-| 04 | Labels + scan lookup | P2 | AC-05, AC-06 | `catalog/item` labels, `ScanInput` | 03 | pending |
+| 04 | Labels + scan lookup | P2 | AC-05, AC-06 | `catalog/item` labels, `ScanInput` | 03 | done |
 | 05 | Ledger, balances, low-stock alert, stock view | P1 | AC-02, AC-07, AC-08, AC-09, AC-25 | `*/src/plugins/inventory/stock` | 04 | pending |
 | 06 | Estimate stock columns | P2 | AC-02, AC-22 | availability endpoint, `EstimateBomGrid.tsx` | 05 | pending |
 | 07 | Purchase orders + approval | P1 | AC-02, AC-04, AC-10, AC-11 | `*/src/plugins/inventory/purchase-order` | 06 | pending |
@@ -189,3 +189,4 @@ Fresh closure pass by the controller (2026-10-27): 21 PASS, 1 FAIL (R-11), 0 UNK
 - Packet consistency (round-2 reviewer): one `Status:` per task, empty Receipts, dependencies 01←…←17 acyclic with real basenames, AC-01…26 each mapped to a task and proof, CP-01…17 present, plan table matches files, no stale task numbers or old supplier-return formula outside this log.
 - GATE-REVIEW closed (2026-10-27): round 1 R-01…R-15 + Low pack accepted and closed PASS (R-11 after round 2); round-2 contradictions closed PASS; paper-review budget (2 rounds) used — further findings require runtime evidence. All tasks promoted `blocked` → `pending`; implementation starts only with a new explicit `/cf:develop` invocation.
 - Amendment (2026-10-27, user decision during task-03 develop, after code-auditor finding): item endpoints stay on the existing P1 item routes `/items/...` (not `/catalog/items/...`); D-12, task-03 (Scope, Step 6), task-04 (labels PDF and `useResolveItem`) and task-17 (money-key list) now read `/items/resolve`, `/items/:id/stock-settings`, `/items/labels.pdf`, `/items`. Locations stay at `/catalog/locations`.
+- Amendment (2026-10-28, user decision during task-04 develop, after code-auditor Medium): D-13 labels snap the Code 128 module width to whole 203-dpi dots; an item code too long to print with a module of at least one dot on the 50×30 mm label is refused with 422 instead of printing an unscannable label.

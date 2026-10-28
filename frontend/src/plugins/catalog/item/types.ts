@@ -20,6 +20,17 @@ export interface Item {
   updatedAt?: string;
 }
 
+/** What the scan lookup answers: identity and where the item is kept, no price. */
+export interface ResolvedItem {
+  id: number;
+  code: string;
+  name: string;
+  unit: string;
+  brand: string | null;
+  barcode: string | null;
+  defaultLocationCode: string | null;
+}
+
 export interface ItemListParams {
   page?: number;
   limit?: number;

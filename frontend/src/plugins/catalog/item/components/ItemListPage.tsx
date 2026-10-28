@@ -14,6 +14,7 @@ import {
 import { ListQueryBody } from "@/kernel/core/components/ui/ListQueryBody";
 import { PageHeader } from "@/kernel/core/components/ui/PageHeader";
 import { PageToolbarActions } from "@/kernel/core/components/ui/PageToolbarActions";
+import { ScanInput } from "@/kernel/core/components/ui/ScanInput";
 import { SearchInput } from "@/kernel/core/components/ui/SearchInput";
 import { TableMobileCards } from "@/kernel/core/components/ui/table-mobile-cards-context";
 import { DEFAULT_LIST_PAGE_SIZE } from "@/kernel/core/constants/list-ui";
@@ -26,6 +27,7 @@ import { useQueryErrorToast } from "@/kernel/core/hooks/useQueryErrorToast";
 import { useRowLabels } from "@/kernel/core/hooks/useRowLabels";
 import { useTableColumnFilters } from "@/kernel/core/hooks/useTableColumnFilters";
 import { useTableSort } from "@/kernel/core/hooks/useTableSort";
+import { isNotFoundError } from "@/kernel/core/lib/api-error-mapping";
 import {
   omitEmptySearch,
   resolveListEmptyMessage,
@@ -39,6 +41,7 @@ import {
   useDeleteItem,
   useItemList,
 } from "@plugins/catalog/item/hooks/api/useItem";
+import { useResolveItem } from "@plugins/catalog/item/hooks/useResolveItem";
 import { itemFeature } from "@plugins/catalog/item/item.feature";
 import { ItemPermission } from "@plugins/catalog/item/permissions/item-permission.keys";
 import { ITEM_DELETE } from "@plugins/catalog/item/permissions/item.permissions";
@@ -46,6 +49,7 @@ import { resolveItemDeleteToastKey } from "@plugins/catalog/item/utils/map-item-
 
 import { ItemFormModal } from "./ItemFormModal";
 import { ItemImportDialog } from "./ItemImportDialog";
+import { ItemLabelPrint } from "./ItemLabelPrint";
 import { ItemTable } from "./ItemTable";
 
 import type { Item } from "@plugins/catalog/item/types";
@@ -57,13 +61,22 @@ export function ItemListPage() {
   const { can } = useAuth();
   const canCreate = can(ItemPermission.create);
   const canImport = can(ItemPermission.import);
+  // The form also carries the warehouse settings, which have a scope of their own.
+  const canEdit =
+    can(ItemPermission.update) || can(ItemPermission.stockSettings);
 
   const [currentPage, setCurrentPage] = useListViewState("page", 1);
-  const { searchQuery, setSearchQuery, committedSearch, handleSearchKeyDown } =
-    useCommittedSearch({
-      persistKey: "search",
-      onCommit: () => setCurrentPage(1),
-    });
+  const {
+    searchQuery,
+    setSearchQuery,
+    committedSearch,
+    setCommittedSearch,
+    handleSearchKeyDown,
+  } = useCommittedSearch({
+    persistKey: "search",
+    onCommit: () => setCurrentPage(1),
+  });
+  const resolveItem = useResolveItem();
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Item | null>(null);
@@ -115,6 +128,17 @@ export function ItemListPage() {
     committedSearch || columnFilters.activeCount > 0,
   );
 
+  /** A scan opens the item's form; a reader who cannot edit gets it filtered in the list. */
+  const handleScanned = (item: Item) => {
+    if (canEdit) {
+      setEditTarget(item);
+      return;
+    }
+    setSearchQuery(item.code);
+    setCommittedSearch(item.code);
+    setCurrentPage(1);
+  };
+
   const deleteConfirmation = useDeleteConfirmation<Item>((target, close) =>
     deleteItem.mutate(target.id, { onSettled: close }),
   );
@@ -130,6 +154,16 @@ export function ItemListPage() {
             value={searchQuery}
             onChangeValue={setSearchQuery}
             onKeyDown={handleSearchKeyDown}
+          />
+          <ScanInput
+            resolve={resolveItem}
+            onResult={handleScanned}
+            errorMessage={(error) =>
+              isNotFoundError(error) ? t("scan.notFound") : t("scan.failed")
+            }
+            placeholder={t("scan.placeholder")}
+            // The form owns the keyboard while it is open; the field is taken back when it closes.
+            disabled={createModalOpen || editTarget !== null}
           />
           <PageToolbarActions
             showExport={false}
@@ -167,19 +201,22 @@ export function ItemListPage() {
               data={items}
               {...selection.tableProps}
               selectionActions={
-                <PermissionGate permission={ITEM_DELETE}>
-                  <BulkDeleteAction
-                    count={selection.count}
-                    pending={bulkDelete.isPending}
-                    labelOf={rowLabels}
-                    resolveFailureReason={failureReason}
-                    onConfirm={(close) =>
-                      bulkDelete.mutate(selection.selectedIds, {
-                        onSettled: close,
-                      })
-                    }
-                  />
-                </PermissionGate>
+                <>
+                  <ItemLabelPrint ids={selection.selectedIds} />
+                  <PermissionGate permission={ITEM_DELETE}>
+                    <BulkDeleteAction
+                      count={selection.count}
+                      pending={bulkDelete.isPending}
+                      labelOf={rowLabels}
+                      resolveFailureReason={failureReason}
+                      onConfirm={(close) =>
+                        bulkDelete.mutate(selection.selectedIds, {
+                          onSettled: close,
+                        })
+                      }
+                    />
+                  </PermissionGate>
+                </>
               }
               onEdit={setEditTarget}
               onDelete={deleteConfirmation.request}

@@ -17,6 +17,9 @@ export type ItemGroup = (typeof ITEM_GROUPS)[number];
 export const ITEM_CODE_MAX = 64;
 export const ITEM_UNIT_MAX = 20;
 export const ITEM_BARCODE_MAX = 64;
+/** Most labels one print request carries (ids x copies); the server enforces the same limit. */
+export const ITEM_LABELS_MAX = 500;
+export const ITEM_LABELS_FILE_NAME = "item-labels.pdf";
 /** Largest import the dialog accepts; the server enforces the same limit. */
 export const ITEM_IMPORT_MAX_BYTES = 5 * 1024 * 1024;
 
@@ -30,6 +33,8 @@ export const itemApiRoutes = {
   columnValues: "/items/column-values",
   import: "/items/import",
   importTemplate: "/items/import-template",
+  resolve: "/items/resolve",
+  labels: "/items/labels.pdf",
   detail: (id: number | string) => `/items/${id}`,
   stockSettings: (id: number | string) => `/items/${id}/stock-settings`,
 } as const;

@@ -1866,6 +1866,45 @@ paths:
       security: *ref_19
       summary: Resolve a scanned value to an item
       tags: *ref_20
+  /api/v1/items/labels.pdf:
+    get:
+      description: >-
+        One 50 x 30 mm page per item and copy: the item code as Code 128, the code in text and the name. Carries no
+        price. ids x copies is at most 500.
+      operationId: ItemController_labelsPdf
+      parameters:
+        - name: ids
+          required: true
+          in: query
+          description: Comma-separated item ids, one label per id and copy
+          schema:
+            type: array
+            items:
+              type: string
+        - name: copies
+          required: false
+          in: query
+          description: Copies of each label (at least 1); ids x copies must not exceed 500
+          schema:
+            minimum: 1
+            default: 1
+            type: number
+      responses:
+        '200':
+          description: The PDF
+        '400':
+          description: Missing or invalid ids, copies below 1, or more than 500 labels
+        '403':
+          description: Forbidden — requires item:read
+        '404':
+          description: An item is unknown or deleted
+        '422':
+          description: >-
+            An item code holds characters Code 128 cannot print, or is longer than 28 characters and cannot be printed
+            scannably on a 50 x 30 mm label
+      security: *ref_19
+      summary: Download item labels as PDF
+      tags: *ref_20
   /api/v1/items/{id}:
     get:
       operationId: ItemController_findOne

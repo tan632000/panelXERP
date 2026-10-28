@@ -50,7 +50,11 @@
     "deleteItemSuccess": "Item deleted.",
     "deleteInUseDocument": "Cannot delete the item: it is used by estimates.",
     "systemError": "Something went wrong. Please try again.",
-    "forbidden": "You do not have permission to perform this action."
+    "forbidden": "You do not have permission to perform this action.",
+    "labelsUnprintable": "Labels were not printed: an item code has characters the barcode cannot carry (ASCII only).",
+    "labelsTooMany": "At most 500 labels per print (items × copies).",
+    "labelsTooLong": "Labels were not printed: an item code is too long (28 characters at most) to print a scannable barcode on a 50 × 30 mm label.",
+    "labelsMissing": "Labels were not printed: an item was deleted or no longer exists."
   },
   "validation": {
     "codeRequired": "Item code is required.",
@@ -102,5 +106,16 @@
   "stockSection": "Warehouse",
   "defaultLocation": "Default location",
   "minStock": "Minimum stock",
-  "locationColumn": "Location"
+  "locationColumn": "Location",
+  "scan": {
+    "placeholder": "Scan a barcode or item code",
+    "notFound": "No item found for this code.",
+    "failed": "The code could not be looked up. Please try again."
+  },
+  "labels": {
+    "copies": "Copies",
+    "button": "Print labels",
+    "buttonCount": "Print labels ({count})",
+    "buttonTitle": "Download the 50 × 30 mm barcode label PDF"
+  }
 }

@@ -39,12 +39,14 @@ import { BulkDeleteEndpoint } from '@shared/decorators/bulk-delete-endpoint.deco
 import { ColumnValuesEndpoint } from '@shared/decorators/column-values-endpoint.decorator';
 import { BulkDeleteDto } from '@shared/dto/bulk-delete.dto';
 import { columnFilterKeys } from '@shared/utils/column-filter.util';
+import { buildAttachmentContentDisposition } from '@shared/utils/content-disposition.util';
 
 import { CreateItemDto } from '@plugins/catalog/item/dto/create-item.dto';
 import {
   ItemColumnValuesQueryDto,
   ItemFilterDto,
 } from '@plugins/catalog/item/dto/item-filter.dto';
+import { ItemLabelsQueryDto } from '@plugins/catalog/item/dto/item-labels-query.dto';
 import { ResolveItemQueryDto } from '@plugins/catalog/item/dto/resolve-item.dto';
 import { UpdateItemStockSettingsDto } from '@plugins/catalog/item/dto/update-item-stock-settings.dto';
 import { UpdateItemDto } from '@plugins/catalog/item/dto/update-item.dto';
@@ -57,6 +59,7 @@ import {
   ITEM_UPDATE,
 } from '@plugins/catalog/item/permissions/item.permissions';
 import { ItemImportService } from '@plugins/catalog/item/services/item-import.service';
+import { ItemLabelService } from '@plugins/catalog/item/services/item-label.service';
 import { ItemStockSettingsService } from '@plugins/catalog/item/services/item-stock-settings.service';
 import {
   ITEM_COLUMN_FILTERS,
@@ -77,6 +80,7 @@ export class ItemController {
     private readonly service: ItemService,
     private readonly importService: ItemImportService,
     private readonly stockSettings: ItemStockSettingsService,
+    private readonly labels: ItemLabelService,
   ) {}
 
   @Get()
@@ -176,6 +180,35 @@ export class ItemController {
   @ApiResponse({ status: 404, description: 'No item for the value' })
   resolve(@Query() query: ResolveItemQueryDto) {
     return this.stockSettings.resolve(query.code);
+  }
+
+  @Get('labels.pdf')
+  @RequirePermission(ITEM_READ)
+  @ApiOperation({
+    summary: 'Download item labels as PDF',
+    description:
+      'One 50 x 30 mm page per item and copy: the item code as Code 128, the code in text and the name. Carries no price. ids x copies is at most 500.',
+  })
+  @ApiResponse({ status: 200, description: 'The PDF' })
+  @ApiResponse({
+    status: 400,
+    description:
+      'Missing or invalid ids, copies below 1, or more than 500 labels',
+  })
+  @ApiResponse({ status: 403, description: 'Forbidden — requires item:read' })
+  @ApiResponse({ status: 404, description: 'An item is unknown or deleted' })
+  @ApiResponse({
+    status: 422,
+    description:
+      'An item code holds characters Code 128 cannot print, or is longer than 28 characters and cannot be printed scannably on a 50 x 30 mm label',
+  })
+  async labelsPdf(@Query() query: ItemLabelsQueryDto): Promise<StreamableFile> {
+    const file = await this.labels.render(query.ids, query.copies);
+    return new StreamableFile(file.body, {
+      type: 'application/pdf',
+      disposition: buildAttachmentContentDisposition(file.fileName),
+      length: file.body.length,
+    });
   }
 
   @Get(':id')

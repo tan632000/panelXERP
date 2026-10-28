@@ -1130,6 +1130,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/items/labels.pdf": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Download item labels as PDF
+     * @description One 50 x 30 mm page per item and copy: the item code as Code 128, the code in text and the name. Carries no price. ids x copies is at most 500.
+     */
+    get: operations["ItemController_labelsPdf"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/items/{id}": {
     parameters: {
       query?: never;
@@ -5030,6 +5050,57 @@ export interface operations {
       };
       /** @description No item for the value */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ItemController_labelsPdf: {
+    parameters: {
+      query: {
+        /** @description Comma-separated item ids, one label per id and copy */
+        ids: string[];
+        /** @description Copies of each label (at least 1); ids x copies must not exceed 500 */
+        copies?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The PDF */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing or invalid ids, copies below 1, or more than 500 labels */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires item:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description An item is unknown or deleted */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description An item code holds characters Code 128 cannot print, or is longer than 28 characters and cannot be printed scannably on a 50 x 30 mm label */
+      422: {
         headers: {
           [name: string]: unknown;
         };

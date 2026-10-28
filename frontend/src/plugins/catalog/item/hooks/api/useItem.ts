@@ -10,12 +10,21 @@ import {
 } from "@/kernel/core/hooks/api/useBulkDeleteMutation";
 import { useMutationFeedback } from "@/kernel/core/hooks/useMutationFeedback";
 import { useToastMutationFeedback } from "@/kernel/core/hooks/useToastMutationFeedback";
+import {
+  getApiErrorMessageLower,
+  getApiErrorStatus,
+} from "@/kernel/core/lib/api-error-mapping";
+import { downloadBlob } from "@/kernel/core/lib/download-blob";
 
-import { itemQueryKeys } from "@plugins/catalog/item/constants";
+import {
+  ITEM_LABELS_FILE_NAME,
+  itemQueryKeys,
+} from "@plugins/catalog/item/constants";
 import {
   bulkDeleteItems,
   createItem,
   deleteItem,
+  fetchItemLabels,
   getItems,
   importItems,
   updateItem,
@@ -131,5 +140,32 @@ export function useImportItems() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: itemQueryKeys.all });
     },
+  });
+}
+
+/** Downloads the Code 128 label sheet; a code the barcode cannot carry is told apart from a fault. */
+export function useDownloadItemLabels() {
+  const t = useTranslations("item.toast");
+  const feedback = useToastMutationFeedback("item.toast", {
+    resolveMutationError: (error) => {
+      const status = getApiErrorStatus(error);
+      const message = getApiErrorMessageLower(error) ?? "";
+      if (status === 404) return t("labelsMissing");
+      if (status === 422) {
+        return t(
+          message.includes("too long") ? "labelsTooLong" : "labelsUnprintable",
+        );
+      }
+      if (status === 400 && message.includes("at most")) {
+        return t("labelsTooMany");
+      }
+      return undefined;
+    },
+  });
+  return useMutationFeedback({
+    mutationFn: async ({ ids, copies }: { ids: number[]; copies: number }) => {
+      downloadBlob(await fetchItemLabels(ids, copies), ITEM_LABELS_FILE_NAME);
+    },
+    ...feedback,
   });
 }

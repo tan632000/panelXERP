@@ -50,7 +50,11 @@
     "deleteItemSuccess": "Xoá vật tư thành công.",
     "deleteInUseDocument": "Không thể xoá vật tư vì đang được sử dụng trong dự toán.",
     "systemError": "Đã có lỗi xảy ra, vui lòng thử lại sau.",
-    "forbidden": "Bạn không có quyền thực hiện chức năng này."
+    "forbidden": "Bạn không có quyền thực hiện chức năng này.",
+    "labelsUnprintable": "Không in được nhãn: mã hàng có ký tự mã vạch không hỗ trợ (chỉ chấp nhận ký tự ASCII).",
+    "labelsTooMany": "Tối đa 500 nhãn mỗi lần in (số vật tư × số bản).",
+    "labelsTooLong": "Không in được nhãn: có mã hàng quá dài (tối đa 28 ký tự) để in mã vạch quét được trên nhãn 50 × 30 mm.",
+    "labelsMissing": "Không in được nhãn: có vật tư đã bị xoá hoặc không còn tồn tại."
   },
   "validation": {
     "codeRequired": "Vui lòng nhập Mã hàng.",
@@ -102,5 +106,16 @@
   "stockSection": "Kho",
   "defaultLocation": "Vị trí mặc định",
   "minStock": "Tồn tối thiểu",
-  "locationColumn": "Vị trí"
+  "locationColumn": "Vị trí",
+  "scan": {
+    "placeholder": "Quét mã vạch hoặc mã hàng",
+    "notFound": "Không tìm thấy vật tư với mã này.",
+    "failed": "Không tra cứu được mã. Vui lòng thử lại."
+  },
+  "labels": {
+    "copies": "Số bản",
+    "button": "In nhãn",
+    "buttonCount": "In nhãn ({count})",
+    "buttonTitle": "Tải tệp PDF nhãn mã vạch 50 × 30 mm"
+  }
 }

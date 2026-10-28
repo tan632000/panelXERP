@@ -20,6 +20,7 @@ import { ReferenceCheckRegistry } from '@plugins/catalog/_shared/gateways/refere
 import { Item } from '@plugins/catalog/item/entities/item.entity';
 import { ItemController } from '@plugins/catalog/item/item.controller';
 import { ItemImportService } from '@plugins/catalog/item/services/item-import.service';
+import { ItemLabelService } from '@plugins/catalog/item/services/item-label.service';
 import { ItemStockSettingsService } from '@plugins/catalog/item/services/item-stock-settings.service';
 import { ItemService } from '@plugins/catalog/item/services/item.service';
 import { Location } from '@plugins/catalog/location/entities/location.entity';
@@ -130,6 +131,7 @@ describe('ItemController', () => {
         ItemService,
         ItemImportService,
         ItemStockSettingsService,
+        ItemLabelService,
         ReferenceCheckRegistry,
         { provide: getRepositoryToken(Location), useValue: locations },
         {
@@ -175,6 +177,7 @@ describe('ItemController', () => {
       ['import', 'item:import'],
       ['importTemplate', 'item:import'],
       ['updateStockSettings', 'item:stock_settings'],
+      ['labelsPdf', 'item:read'],
     ])('guards %s with %s', (handler, permission) => {
       const method = Object.getOwnPropertyDescriptor(
         ItemController.prototype,
@@ -583,6 +586,69 @@ describe('ItemController', () => {
       expect(
         (await settings(STOREKEEPER, first.id, { minStock: -1 })).status,
       ).toBe(400);
+    });
+  });
+
+  describe('labels.pdf', () => {
+    const labels = (token: string, query: object) =>
+      request(app.getHttpServer())
+        .get('/items/labels.pdf')
+        .query(query)
+        .set(as(token))
+        .buffer(true)
+        .parse((res, done) => {
+          const chunks: Buffer[] = [];
+          res.on('data', (chunk: Buffer) => chunks.push(chunk));
+          res.on('end', () => done(null, Buffer.concat(chunks)));
+        });
+    const seedItem = async (code: string) =>
+      bodyOf(
+        await create(PURCHASING, {
+          ...NEW_ITEM,
+          code,
+          referencePrice: 450000,
+        }),
+      ).id;
+
+    it('serves the PDF to a storekeeper from /items/labels.pdf, not as an item id', async () => {
+      const id = await seedItem('A-01');
+
+      const res = await labels(STOREKEEPER, { ids: String(id), copies: 2 });
+
+      expect(res.status).toBe(200);
+      expect(res.headers['content-type']).toContain('application/pdf');
+      expect(res.headers['content-disposition']).toContain('item-labels.pdf');
+      expect((res.body as Buffer).subarray(0, 5).toString()).toBe('%PDF-');
+    });
+
+    it('defaults copies to 1 and answers 404 to an unknown id', async () => {
+      const id = await seedItem('A-01');
+
+      expect((await labels(STOREKEEPER, { ids: String(id) })).status).toBe(200);
+      expect((await labels(STOREKEEPER, { ids: `${id},999` })).status).toBe(
+        404,
+      );
+    });
+
+    it.each([
+      ['no ids', {}],
+      ['an empty ids', { ids: '' }],
+      ['a non-numeric id', { ids: '1,x' }],
+      ['copies of 0', { ids: '1', copies: 0 }],
+      ['copies that are not a number', { ids: '1', copies: 'x' }],
+      ['more than 500 labels', { ids: '1,2,3', copies: 167 }],
+      ['an id above the integer range', { ids: '99999999999' }],
+      ['a hex id', { ids: '0x10' }],
+      ['an exponent id', { ids: '1e2' }],
+      ['hex copies', { ids: '1', copies: '0x2' }],
+    ])('answers 400 to %s', async (_label, query) => {
+      expect((await labels(STOREKEEPER, query)).status).toBe(400);
+    });
+
+    it('answers 422 for an item code Code 128 cannot print', async () => {
+      const id = await seedItem('Bộ-01');
+
+      expect((await labels(STOREKEEPER, { ids: String(id) })).status).toBe(422);
     });
   });
 });

@@ -27,6 +27,7 @@ import {
 import { mapItemApiErrorsToForm } from "@plugins/catalog/item/utils/map-item-api-errors";
 
 import { ItemFormFields } from "./ItemFormFields";
+import { ItemLabelPrint } from "./ItemLabelPrint";
 
 import type {
   ItemFormInput,
@@ -144,6 +145,11 @@ export function ItemFormModal({
         showStockSettings={canEditStock}
         showReferencePrice={canSeePrice}
       />
+      {item ? (
+        <div className="mt-4 border-t border-border-secondary pt-3">
+          <ItemLabelPrint ids={[item.id]} withCopies />
+        </div>
+      ) : null}
     </Modal>
   );
 }
