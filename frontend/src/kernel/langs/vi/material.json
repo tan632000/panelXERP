@@ -1,0 +1,40 @@
+{
+  "title": "Vật tư đơn hàng",
+  "description": "Nhu cầu, đã giữ, đã xuất và còn thiếu của từng vật tư theo đơn hàng",
+  "detailTitle": "Vật tư đơn hàng",
+  "notFound": "Không tìm thấy đơn hàng.",
+  "loadError": "Không tải được vật tư của đơn hàng.",
+  "searchPlaceholder": "Tìm theo mã đơn, khách hàng, dự án...",
+  "allStatuses": "Tất cả trạng thái",
+  "noOrders": "Chưa có đơn hàng nào",
+  "noOrdersFound": "Không có đơn hàng phù hợp",
+  "paginationItem": "đơn hàng",
+  "emptyValue": "-",
+  "infoBasic": "Thông tin đơn",
+  "orderCode": "Mã đơn",
+  "customer": "Khách hàng",
+  "project": "Dự án",
+  "status": "Trạng thái",
+  "deliveryDate": "Ngày giao",
+  "salesOwner": "Sales phụ trách",
+  "shortLineCount": "Vật tư thiếu",
+  "noDemand": "Đơn hàng không còn cần vật tư: nhu cầu bằng 0.",
+  "itemsTitle": "Vật tư theo đơn",
+  "item": {
+    "code": "Mã",
+    "name": "Tên vật tư",
+    "unit": "ĐVT",
+    "demand": "Nhu cầu",
+    "reserved": "Đã giữ",
+    "issued": "Đã xuất",
+    "returned": "Đã trả lại",
+    "short": "Còn thiếu"
+  },
+  "panel": {
+    "title": "Tủ {tag} × {quantity}",
+    "tag": "Tủ",
+    "perPanel": "SL / 1 tủ"
+  },
+  "unlinkedTitle": "Vật tư chưa liên kết",
+  "unlinkedWarning": "Các dòng này không gắn được với vật tư trong danh mục nên không được tính vào nhu cầu. Hãy kiểm tra lại BOM."
+}

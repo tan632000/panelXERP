@@ -11,6 +11,7 @@ import { DetailPageLayout } from "@/kernel/core/components/ui/DetailPageLayout";
 import { DetailPanelActionButton } from "@/kernel/core/components/ui/DetailPanelActionButton";
 import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
 import { EmptyState } from "@/kernel/core/components/ui/EmptyState";
+import { Icon } from "@/kernel/core/components/ui/Icon";
 import { LoadingState } from "@/kernel/core/components/ui/LoadingState";
 import { useEntityIdParam } from "@/kernel/core/hooks/useEntityIdParam";
 import { isNotFoundError } from "@/kernel/core/lib/api-error-mapping";
@@ -20,7 +21,10 @@ import {
   formatIsoDate,
   formatIsoDateTime,
 } from "@/kernel/core/lib/formatters";
+import { Link } from "@/kernel/i18n/navigation";
 
+import { materialPageRoutes } from "@plugins/inventory/material/constants";
+import { MaterialPermission } from "@plugins/inventory/material/permissions/material-permission.keys";
 import { REASON_MAX, orderPageRoutes } from "@plugins/sales/order/constants";
 import {
   useCancelOrder,
@@ -98,6 +102,17 @@ export function OrderDetailPage() {
       breadcrumbs={[listCrumb, { label: order.code }]}
       title={order.code}
       subtitle={order.chain.request.title}
+      actions={
+        can(MaterialPermission.read) ? (
+          <Link
+            href={materialPageRoutes.order(order.id)}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border-secondary bg-surface-primary px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-surface-secondary"
+          >
+            <Icon name="package" size={15} />
+            {t("materials")}
+          </Link>
+        ) : null
+      }
     >
       <DetailSection title={t("chain.title")}>
         <OrderChain chain={order.chain} orderCode={order.code} />

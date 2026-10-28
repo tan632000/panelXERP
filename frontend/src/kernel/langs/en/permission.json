@@ -262,6 +262,7 @@
     "iqc_xlbm_material:write": "Create, edit and propose edits",
     "item:stock_settings": "Edit item barcode, default location and minimum stock",
     "kke_inventory:approve": "Approve inventory slip change",
+    "material:read": "View the materials of orders (no sales price)",
     "mrp:close": "Close and reopen MRP",
     "mrp:manage_any": "Edit, cancel and delete MRP plans others created",
     "oqc_finished_product:approve": "Approve and direct-edit OQC finished product",

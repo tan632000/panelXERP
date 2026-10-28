@@ -1,0 +1,40 @@
+{
+  "title": "Order materials",
+  "description": "Demand, reserved, issued and short of every item, order by order",
+  "detailTitle": "Order materials",
+  "notFound": "Order not found.",
+  "loadError": "Could not load the order materials.",
+  "searchPlaceholder": "Search by order code, customer, project...",
+  "allStatuses": "All statuses",
+  "noOrders": "No orders yet",
+  "noOrdersFound": "No matching orders",
+  "paginationItem": "orders",
+  "emptyValue": "-",
+  "infoBasic": "Order",
+  "orderCode": "Order",
+  "customer": "Customer",
+  "project": "Project",
+  "status": "Status",
+  "deliveryDate": "Delivery date",
+  "salesOwner": "Sales owner",
+  "shortLineCount": "Items short",
+  "noDemand": "The order no longer needs materials: its demand is 0.",
+  "itemsTitle": "Materials of the order",
+  "item": {
+    "code": "Code",
+    "name": "Item",
+    "unit": "Unit",
+    "demand": "Demand",
+    "reserved": "Reserved",
+    "issued": "Issued",
+    "returned": "Returned",
+    "short": "Short"
+  },
+  "panel": {
+    "title": "Panel {tag} × {quantity}",
+    "tag": "Panel",
+    "perPanel": "Qty / panel"
+  },
+  "unlinkedTitle": "Unlinked materials",
+  "unlinkedWarning": "These lines name no catalog item, so they count towards no demand. Check the BOM."
+}

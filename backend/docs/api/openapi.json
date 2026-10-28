@@ -7218,6 +7218,138 @@
           "inventory/purchase-orders"
         ]
       }
+    },
+    "/api/v1/inventory/materials/orders": {
+      "get": {
+        "description": "Every order the actor may see (a sales account only its own), with the count of items still short. No sales money.",
+        "operationId": "MaterialController_findOrders",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "open",
+                "in_production",
+                "delivered",
+                "completed",
+                "cancelled"
+              ]
+            }
+          },
+          {
+            "name": "salesOwnerId",
+            "required": false,
+            "in": "query",
+            "description": "Only this sales owner’s orders; never widens the actor’s own scope",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated orders"
+          },
+          "403": {
+            "description": "Forbidden — requires material:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List orders with their material shortage",
+        "tags": [
+          "inventory/materials"
+        ]
+      }
+    },
+    "/api/v1/inventory/materials/orders/{orderId}": {
+      "get": {
+        "description": "Per item: demand, reserved, issued, returned and short; per panel its BOM; unlinked BOM lines listed apart. No sales money.",
+        "operationId": "MaterialController_findOrder",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Order material view"
+          },
+          "404": {
+            "description": "Not found or outside the actor’s scope"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Material view of one order",
+        "tags": [
+          "inventory/materials"
+        ]
+      }
     }
   },
   "info": {

@@ -262,6 +262,7 @@
     "iqc_xlbm_material:write": "Thêm mới, sửa và đề xuất sửa",
     "item:stock_settings": "Sửa mã vạch, vị trí mặc định và tồn tối thiểu của vật tư",
     "kke_inventory:approve": "Duyệt thay đổi phiếu kiểm kê",
+    "material:read": "Xem vật tư của đơn hàng (không có giá bán)",
     "mrp:close": "Đóng MRP và mở lại MRP",
     "mrp:manage_any": "Sửa, huỷ, xoá MRP do người khác tạo",
     "oqc_finished_product:approve": "Duyệt và sửa trực tiếp OQC thành phẩm",

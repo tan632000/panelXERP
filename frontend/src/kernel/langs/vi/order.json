@@ -88,5 +88,6 @@
     "orderState": "Trạng thái hiện tại của đơn hàng không cho phép thao tác này.",
     "systemError": "Đã xảy ra lỗi, vui lòng thử lại sau.",
     "forbidden": "Bạn không có quyền thực hiện thao tác này."
-  }
+  },
+  "materials": "Vật tư"
 }

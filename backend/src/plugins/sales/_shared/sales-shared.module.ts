@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '@kernel/core/users/entities/user.entity';
 
 import { EstimateReadPort } from '@plugins/sales/_shared/ports/estimate-read.port';
+import { OrderMaterialReadPort } from '@plugins/sales/_shared/ports/order-material-read.port';
 import { RequestCloseRegistry } from '@plugins/sales/_shared/ports/request-close-registry';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
 import { SalesUserLookup } from '@plugins/sales/_shared/services/sales-user-lookup.service';
@@ -17,12 +18,14 @@ import { SalesUserLookup } from '@plugins/sales/_shared/services/sales-user-look
   providers: [
     RequestStatusPort,
     EstimateReadPort,
+    OrderMaterialReadPort,
     RequestCloseRegistry,
     SalesUserLookup,
   ],
   exports: [
     RequestStatusPort,
     EstimateReadPort,
+    OrderMaterialReadPort,
     RequestCloseRegistry,
     SalesUserLookup,
   ],

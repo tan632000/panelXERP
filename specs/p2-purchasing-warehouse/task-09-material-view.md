@@ -1,6 +1,6 @@
 # Task 09 — Order material view without sales money
 
-Status: pending
+Status: done
 
 ## Outcome
 Purchasing, storekeepers, managers and engineering leads see every order's material demand per panel and item (sales see only their own orders), with no sales price, total, discount, VAT or margin anywhere in the response.
@@ -44,3 +44,52 @@ Purchasing, storekeepers, managers and engineering leads see every order's mater
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/inventory/material/services/material.service.spec.ts && test -f src/plugins/sales/_shared/ports/order-material-read.port.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/inventory/material src/plugins/sales/_shared src/plugins/sales/order src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/material/tests/order-material.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory/material src/plugins/sales/order" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+Exit: 0
+Base: 414a0edea89ddeedf920cc88a1384aa8e0ce212b
+Head: 37b485ef47b56b5eb2a97ebcc860ed18a46a5d87c909b40d71db95d0cdf4a18d
+```text
+$ docker compose exec -T backend sh -c "test -f src/plugins/inventory/material/services/material.service.spec.ts && test -f src/plugins/sales/_shared/ports/order-material-read.port.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/inventory/material src/plugins/sales/_shared src/plugins/sales/order src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/material/tests/order-material.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory/material src/plugins/sales/order" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+> panelxerp-backend@0.0.1 migration:run
+> panelxerp-backend@0.0.1 typeorm
+No migrations are pending
+> panelxerp-backend@0.0.1 seed
+[seed-runner] All seeds completed.
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts
+PASS src/plugins/inventory/material/material.controller.spec.ts
+PASS src/plugins/sales/order/services/order-convert.service.spec.ts
+PASS src/plugins/sales/_shared/ports/order-material-read.port.spec.ts
+PASS src/plugins/inventory/material/services/material.service.spec.ts
+PASS src/plugins/sales/order/database/bom-item-link.migration.spec.ts
+PASS src/plugins/sales/_shared/utils/sales-document-code.util.spec.ts
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+PASS src/plugins/sales/_shared/ports/request-status.port.spec.ts
+PASS src/plugins/sales/_shared/ports/request-close-registry.spec.ts
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/plugins/sales/order/order.controller.spec.ts
+PASS src/kernel/core/database/soft-delete-unique-index.spec.ts
+Test Suites: 15 passed, 15 total
+Tests:       199 passed, 199 total
+> panelxerp-frontend@0.1.0 lint
+> panelxerp-frontend@0.1.0 lint:i18n
+ ✓ src/kernel/core/tests/i18n-enum-conformance.test.ts (7 tests)
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+ ✓ src/plugins/sales/order/tests/order-notification.test.ts (3 tests)
+ ✓ src/plugins/sales/order/tests/quotation-order-section.test.tsx (7 tests)
+ ✓ src/plugins/inventory/material/tests/order-material.test.tsx (4 tests)
+ ✓ src/plugins/sales/order/tests/order-detail.test.tsx (9 tests)
+ Test Files  4 passed (4)
+      Tests  23 passed (23)
+ ✓ src/kernel/langs/tests/permission-labels.test.ts (6 tests)
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+```
+Counterexamples (controller runs, reverted): spreading the raw `sales_orders` row into the detail made the whitelist spec fail for storekeeper, purchasing, director and sales (`$.order.subtotal`, `$.order.total`); passing no scope condition to the list made `keeps another owner’s orders out of a sales list, filter or not` fail. Reachability: after a backend restart, live `GET /api/v1/inventory/materials/orders` answered storekeeper, purchasing and sales_a 200 and engineer_a 403, with no money key in any body; the compose database held no order, so the detail was proven by the real-Postgres specs (fixture orders carry real sales money). Review: code-auditor PASS (0 Critical/High/Medium, 5 Low). Scope note: `order-detail.test.tsx` gained the material-link case; a shared order fixture `order-material-fixture.helper-spec.ts` sits beside the port.

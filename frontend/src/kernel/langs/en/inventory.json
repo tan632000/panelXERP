@@ -3,5 +3,6 @@
   "sidebarInventory": "Purchasing & Warehouse",
   "suppliers": "Suppliers",
   "stock": "Stock",
-  "purchaseOrders": "Purchase orders"
+  "purchaseOrders": "Purchase orders",
+  "materials": "Order materials"
 }

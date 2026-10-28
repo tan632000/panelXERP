@@ -88,5 +88,6 @@
     "orderState": "The current status of the order does not allow this action.",
     "systemError": "Something went wrong, please try again later.",
     "forbidden": "You do not have permission to do this."
-  }
+  },
+  "materials": "Materials"
 }

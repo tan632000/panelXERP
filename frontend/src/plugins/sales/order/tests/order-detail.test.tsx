@@ -173,6 +173,21 @@ describe("OrderDetailPage", () => {
     expect(nav).toHaveTextContent("DH_2026_0001");
   });
 
+  it("links to the order's materials only for a holder of material:read", async () => {
+    grant(...EVERYTHING, "material:read");
+    renderPage();
+    const link = await screen.findByRole("link", { name: viOrder.materials });
+    expect(link).toHaveAttribute("href", "/inventory/materials/4");
+    cleanup();
+
+    grant(...EVERYTHING);
+    renderPage();
+    await screen.findByText("MSB-01");
+    expect(
+      screen.queryByRole("link", { name: viOrder.materials }),
+    ).not.toBeInTheDocument();
+  });
+
   it("shows the copied lines, BOM, totals and terms, none of them editable", async () => {
     renderPage();
 

@@ -8,6 +8,7 @@ import estimateEn from "@kernel/langs/en/estimate.json";
 import inventoryEn from "@kernel/langs/en/inventory.json";
 import itemEn from "@kernel/langs/en/item.json";
 import locationEn from "@kernel/langs/en/location.json";
+import materialEn from "@kernel/langs/en/material.json";
 import metadataEn from "@kernel/langs/en/metadata.json";
 import modalEn from "@kernel/langs/en/modal.json";
 import orderEn from "@kernel/langs/en/order.json";
@@ -31,6 +32,7 @@ import estimateVi from "@kernel/langs/vi/estimate.json";
 import inventoryVi from "@kernel/langs/vi/inventory.json";
 import itemVi from "@kernel/langs/vi/item.json";
 import locationVi from "@kernel/langs/vi/location.json";
+import materialVi from "@kernel/langs/vi/material.json";
 import metadataVi from "@kernel/langs/vi/metadata.json";
 import modalVi from "@kernel/langs/vi/modal.json";
 import orderVi from "@kernel/langs/vi/order.json";
@@ -62,6 +64,7 @@ export const enMessages = {
   supplier: supplierEn,
   stock: stockEn,
   purchaseOrder: purchaseOrderEn,
+  material: materialEn,
   location: locationEn,
   system: systemEn,
   permission: permissionEn,
@@ -88,6 +91,7 @@ export const viMessages = {
   supplier: supplierVi,
   stock: stockVi,
   purchaseOrder: purchaseOrderVi,
+  material: materialVi,
   location: locationVi,
   system: systemVi,
   permission: permissionVi,
