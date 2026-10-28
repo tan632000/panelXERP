@@ -372,7 +372,10 @@
       "lenh_rut_day_dong_som": "Wire drawing order {code} was closed with only {materialReceivedKg}/{targetWeightKg} kg received ({percent}%). The warehouse takes no more issue/receipt notes for it unless it is reopened.",
       "lenh_rut_day_mo_lai": "Wire drawing order {code} was reopened — it accepts raw-material issue and receipt notes again.",
       "lenh_rut_day_bo_huy": "Wire drawing order {code} was un-cancelled and is Open again.",
-      "btp_receipt_pending_qc": "{actorName} created goods receipt {receiptNo} with {pendingCount} lot(s) awaiting incoming quality inspection."
+      "btp_receipt_pending_qc": "{actorName} created goods receipt {receiptNo} with {pendingCount} lot(s) awaiting incoming quality inspection.",
+      "inventory_purchase_order_submitted": "Purchase order {code} is waiting for your approval.",
+      "inventory_purchase_order_approved": "Purchase order {code} was approved.",
+      "inventory_purchase_order_rejected": "Purchase order {code} was rejected: {reason}"
     }
   },
   "english": "English",

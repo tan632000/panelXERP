@@ -6808,6 +6808,416 @@
           "inventory/stock"
         ]
       }
+    },
+    "/api/v1/inventory/purchase-orders": {
+      "get": {
+        "description": "VAT rate, unit prices, amounts and totals only with purchase_price:read.",
+        "operationId": "PurchaseOrderController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "pending_approval",
+                "approved",
+                "partially_received",
+                "received",
+                "closed",
+                "cancelled"
+              ]
+            }
+          },
+          {
+            "name": "supplierId",
+            "required": false,
+            "in": "query",
+            "description": "Only the orders to this supplier",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated purchase orders"
+          },
+          "403": {
+            "description": "Forbidden — requires purchase_order:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List purchase orders",
+        "tags": [
+          "inventory/purchase-orders"
+        ]
+      },
+      "post": {
+        "operationId": "PurchaseOrderController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePurchaseOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Draft created"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "404": {
+            "description": "Supplier or item not found"
+          },
+          "409": {
+            "description": "Supplier inactive or item deleted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a draft purchase order",
+        "tags": [
+          "inventory/purchase-orders"
+        ]
+      }
+    },
+    "/api/v1/inventory/purchase-orders/{id}": {
+      "get": {
+        "description": "VAT rate, unit prices, amounts and totals only with purchase_price:read.",
+        "operationId": "PurchaseOrderController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Purchase order"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a purchase order with its lines and history",
+        "tags": [
+          "inventory/purchase-orders"
+        ]
+      },
+      "patch": {
+        "description": "Lines, when given, replace every line. The editor can no longer approve the order.",
+        "operationId": "PurchaseOrderController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePurchaseOrderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Draft updated"
+          },
+          "409": {
+            "description": "Not a draft, or supplier/item unusable"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Edit a draft",
+        "tags": [
+          "inventory/purchase-orders"
+        ]
+      }
+    },
+    "/api/v1/inventory/purchase-orders/{id}/submit": {
+      "post": {
+        "operationId": "PurchaseOrderController_submit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pending approval"
+          },
+          "409": {
+            "description": "Not a draft, or no lines"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit a draft for approval",
+        "tags": [
+          "inventory/purchase-orders"
+        ]
+      }
+    },
+    "/api/v1/inventory/purchase-orders/{id}/approve": {
+      "post": {
+        "description": "Refused to its creator, its submitter and anyone who edited it.",
+        "operationId": "PurchaseOrderController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Approved"
+          },
+          "403": {
+            "description": "The actor took part in the order"
+          },
+          "409": {
+            "description": "Not pending approval"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve a submitted order",
+        "tags": [
+          "inventory/purchase-orders"
+        ]
+      }
+    },
+    "/api/v1/inventory/purchase-orders/{id}/reject": {
+      "post": {
+        "description": "The reason is kept in the order history.",
+        "operationId": "PurchaseOrderController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Back to draft"
+          },
+          "403": {
+            "description": "The actor took part in the order"
+          },
+          "409": {
+            "description": "Not pending approval"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reject a submitted order back to draft",
+        "tags": [
+          "inventory/purchase-orders"
+        ]
+      }
+    },
+    "/api/v1/inventory/purchase-orders/{id}/cancel": {
+      "post": {
+        "operationId": "PurchaseOrderController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cancelled"
+          },
+          "409": {
+            "description": "Wrong status or goods received"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel an order nothing was received on",
+        "tags": [
+          "inventory/purchase-orders"
+        ]
+      }
+    },
+    "/api/v1/inventory/purchase-orders/{id}/close": {
+      "post": {
+        "operationId": "PurchaseOrderController_close",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseOrderReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Closed"
+          },
+          "409": {
+            "description": "Wrong status"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Short-close an approved or partly received order",
+        "tags": [
+          "inventory/purchase-orders"
+        ]
+      }
     }
   },
   "info": {
@@ -8330,6 +8740,116 @@
             "description": "Whether the supplier is in use. Defaults to true."
           }
         }
+      },
+      "PurchaseOrderLineDto": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "number",
+            "description": "Catalog item"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity, up to 3 decimals",
+            "minimum": 0.001
+          },
+          "unitPrice": {
+            "type": "number",
+            "description": "Price of one unit excluding VAT, whole VND"
+          }
+        },
+        "required": [
+          "itemId",
+          "quantity",
+          "unitPrice"
+        ]
+      },
+      "CreatePurchaseOrderDto": {
+        "type": "object",
+        "properties": {
+          "supplierId": {
+            "type": "number",
+            "description": "Active supplier"
+          },
+          "expectedDate": {
+            "type": "object",
+            "description": "Date the goods are expected (YYYY-MM-DD)",
+            "example": "2027-02-15",
+            "nullable": true
+          },
+          "vatRate": {
+            "type": "number",
+            "description": "VAT rate in percent",
+            "enum": [
+              0,
+              5,
+              8,
+              10
+            ]
+          },
+          "note": {
+            "type": "object",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderLineDto"
+            }
+          }
+        },
+        "required": [
+          "supplierId",
+          "vatRate",
+          "lines"
+        ]
+      },
+      "UpdatePurchaseOrderDto": {
+        "type": "object",
+        "properties": {
+          "supplierId": {
+            "type": "number",
+            "description": "Active supplier"
+          },
+          "expectedDate": {
+            "type": "object",
+            "description": "Date the goods are expected (YYYY-MM-DD); null clears it",
+            "nullable": true
+          },
+          "vatRate": {
+            "type": "number",
+            "enum": [
+              0,
+              5,
+              8,
+              10
+            ]
+          },
+          "note": {
+            "type": "object",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PurchaseOrderLineDto"
+            }
+          }
+        }
+      },
+      "PurchaseOrderReasonDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 1000
+          }
+        },
+        "required": [
+          "reason"
+        ]
       }
     }
   }

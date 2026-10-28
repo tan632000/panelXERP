@@ -5,6 +5,9 @@ import { DataSource } from 'typeorm';
 
 import { Notification } from '@kernel/core/audit/notification.entity';
 
+import { PurchaseOrderEvent } from '@plugins/inventory/purchase-order/entities/purchase-order-event.entity';
+import { PurchaseOrderLine } from '@plugins/inventory/purchase-order/entities/purchase-order-line.entity';
+import { PurchaseOrder } from '@plugins/inventory/purchase-order/entities/purchase-order.entity';
 import { StockBalance } from '@plugins/inventory/stock/entities/stock-balance.entity';
 import { StockMovement } from '@plugins/inventory/stock/entities/stock-movement.entity';
 import { StockReservation } from '@plugins/inventory/stock/entities/stock-reservation.entity';
@@ -13,6 +16,7 @@ import {
   type StockPostingRequest,
   type StockPostingResult,
 } from '@plugins/inventory/stock/services/stock-posting.service';
+import { Supplier } from '@plugins/inventory/supplier/entities/supplier.entity';
 
 /**
  * Wiring shared by the inventory specs that run against the real Postgres of the compose
@@ -60,7 +64,16 @@ export async function openInventoryDb(): Promise<InventoryDb> {
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    entities: [StockBalance, StockMovement, StockReservation, Notification],
+    entities: [
+      StockBalance,
+      StockMovement,
+      StockReservation,
+      Notification,
+      Supplier,
+      PurchaseOrder,
+      PurchaseOrderLine,
+      PurchaseOrderEvent,
+    ],
     // Race specs run many transactions at once; the default pool of 10 would queue them.
     extra: { max: 25 },
   });

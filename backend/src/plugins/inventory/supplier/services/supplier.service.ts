@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -173,17 +177,32 @@ export class SupplierService {
     }
   }
 
-  async remove(id: number, actor: AuthUserPayload) {
-    const supplier = await this.findOne(id);
+  /**
+   * Deletes an unreferenced supplier. The row is locked for the whole check-and-delete, and a
+   * purchase order naming the supplier takes a shared lock on it, so the two serialise: either
+   * the order is committed before the check runs (and the delete is refused), or the delete
+   * commits first (and the order refuses the gone supplier).
+   */
+  remove(id: number, actor: AuthUserPayload) {
+    return this.supplierRepo.manager.transaction(async (manager) => {
+      const repo = manager.getRepository(Supplier);
+      const supplier = await repo.findOne({
+        where: { id, isDeleted: false },
+        lock: { mode: 'pessimistic_write' },
+      });
+      if (!supplier) {
+        throw new NotFoundException(`${SUPPLIER_LABEL} ${id} not found`);
+      }
 
-    const referencedBy = await this.referenceChecks.referencing(id);
-    if (referencedBy.length > 0) {
-      throw new ConflictException(
-        'Cannot delete supplier because it is referenced by purchasing documents.',
-      );
-    }
+      const referencedBy = await this.referenceChecks.referencing(id);
+      if (referencedBy.length > 0) {
+        throw new ConflictException(
+          'Cannot delete supplier because it is referenced by purchasing documents.',
+        );
+      }
 
-    return softDeleteWithAudit(this.supplierRepo, supplier, actor.userId);
+      return softDeleteWithAudit(repo, supplier, actor.userId);
+    });
   }
 
   /** Soft-deletes the rows ticked in the list, each through `remove` and its own guards. */

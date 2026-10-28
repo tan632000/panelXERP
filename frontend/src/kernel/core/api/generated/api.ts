@@ -2175,6 +2175,142 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/inventory/purchase-orders": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List purchase orders
+     * @description VAT rate, unit prices, amounts and totals only with purchase_price:read.
+     */
+    get: operations["PurchaseOrderController_findAll"];
+    put?: never;
+    /** Create a draft purchase order */
+    post: operations["PurchaseOrderController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/purchase-orders/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a purchase order with its lines and history
+     * @description VAT rate, unit prices, amounts and totals only with purchase_price:read.
+     */
+    get: operations["PurchaseOrderController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Edit a draft
+     * @description Lines, when given, replace every line. The editor can no longer approve the order.
+     */
+    patch: operations["PurchaseOrderController_update"];
+    trace?: never;
+  };
+  "/api/v1/inventory/purchase-orders/{id}/submit": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Submit a draft for approval */
+    post: operations["PurchaseOrderController_submit"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/purchase-orders/{id}/approve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a submitted order
+     * @description Refused to its creator, its submitter and anyone who edited it.
+     */
+    post: operations["PurchaseOrderController_approve"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/purchase-orders/{id}/reject": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a submitted order back to draft
+     * @description The reason is kept in the order history.
+     */
+    post: operations["PurchaseOrderController_reject"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/purchase-orders/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Cancel an order nothing was received on */
+    post: operations["PurchaseOrderController_cancel"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/purchase-orders/{id}/close": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Short-close an approved or partly received order */
+    post: operations["PurchaseOrderController_close"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2831,6 +2967,43 @@ export interface components {
       note?: string;
       /** @description Whether the supplier is in use. Defaults to true. */
       isActive?: boolean;
+    };
+    PurchaseOrderLineDto: {
+      /** @description Catalog item */
+      itemId: number;
+      /** @description Quantity, up to 3 decimals */
+      quantity: number;
+      /** @description Price of one unit excluding VAT, whole VND */
+      unitPrice: number;
+    };
+    CreatePurchaseOrderDto: {
+      /** @description Active supplier */
+      supplierId: number;
+      /**
+       * @description Date the goods are expected (YYYY-MM-DD)
+       * @example 2027-02-15
+       */
+      expectedDate?: Record<string, never> | null;
+      /**
+       * @description VAT rate in percent
+       * @enum {number}
+       */
+      vatRate: 0 | 5 | 8 | 10;
+      note?: Record<string, never> | null;
+      lines: Array<components["schemas"]["PurchaseOrderLineDto"]>;
+    };
+    UpdatePurchaseOrderDto: {
+      /** @description Active supplier */
+      supplierId?: number;
+      /** @description Date the goods are expected (YYYY-MM-DD); null clears it */
+      expectedDate?: Record<string, never> | null;
+      /** @enum {number} */
+      vatRate?: 0 | 5 | 8 | 10;
+      note?: Record<string, never> | null;
+      lines?: Array<components["schemas"]["PurchaseOrderLineDto"]>;
+    };
+    PurchaseOrderReasonDto: {
+      reason: string;
     };
   };
   responses: never;
@@ -8045,6 +8218,314 @@ export interface operations {
       };
       /** @description Item not found or deleted */
       404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseOrderController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        status?:
+          | "draft"
+          | "pending_approval"
+          | "approved"
+          | "partially_received"
+          | "received"
+          | "closed"
+          | "cancelled";
+        /** @description Only the orders to this supplier */
+        supplierId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated purchase orders */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires purchase_order:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseOrderController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePurchaseOrderDto"];
+      };
+    };
+    responses: {
+      /** @description Draft created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Supplier or item not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Supplier inactive or item deleted */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseOrderController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Purchase order */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseOrderController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdatePurchaseOrderDto"];
+      };
+    };
+    responses: {
+      /** @description Draft updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not a draft, or supplier/item unusable */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseOrderController_submit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Pending approval */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not a draft, or no lines */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseOrderController_approve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Approved */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The actor took part in the order */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not pending approval */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseOrderController_reject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PurchaseOrderReasonDto"];
+      };
+    };
+    responses: {
+      /** @description Back to draft */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The actor took part in the order */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not pending approval */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseOrderController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PurchaseOrderReasonDto"];
+      };
+    };
+    responses: {
+      /** @description Cancelled */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Wrong status or goods received */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseOrderController_close: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PurchaseOrderReasonDto"];
+      };
+    };
+    responses: {
+      /** @description Closed */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Wrong status */
+      409: {
         headers: {
           [name: string]: unknown;
         };

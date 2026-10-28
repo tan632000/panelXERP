@@ -2,5 +2,6 @@
   "moduleName": "Mua hàng & Kho",
   "sidebarInventory": "Mua hàng & Kho",
   "suppliers": "Nhà cung cấp",
-  "stock": "Tồn kho"
+  "stock": "Tồn kho",
+  "purchaseOrders": "Đơn mua hàng"
 }

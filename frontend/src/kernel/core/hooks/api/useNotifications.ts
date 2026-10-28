@@ -107,7 +107,21 @@ export const NOTIFICATION_REQUIRED_SCOPES = [
   "request:read",
   // The low-stock record goes to purchasing, stamped with the stock list scope.
   "stock:read",
+  // A purchase order waiting goes to the directors (approve scope); its decision goes back
+  // to the creator (read scope).
+  "purchase_order:approve",
+  "purchase_order:read",
 ] as const;
+
+/** The purchase order decisions the bell phrases, each with its message key. */
+const PURCHASE_ORDER_EVENT_MESSAGE_KEYS: Readonly<Record<string, string>> = {
+  "inventory.purchase_order.submitted":
+    "events.inventory_purchase_order_submitted",
+  "inventory.purchase_order.approved":
+    "events.inventory_purchase_order_approved",
+  "inventory.purchase_order.rejected":
+    "events.inventory_purchase_order_rejected",
+};
 
 /** Badge stops counting past this and renders the overflow marker instead. */
 export const NOTIFICATION_BADGE_MAX = 99;
@@ -126,6 +140,9 @@ export const NOTIFICATION_EVENT_KEYS = [
   "sales.quotation.rejected",
   "sales.order.created",
   "inventory.stock.low",
+  "inventory.purchase_order.submitted",
+  "inventory.purchase_order.approved",
+  "inventory.purchase_order.rejected",
   "purchaseRequestAwaitingReceipt",
   "purchaseRequestReceived",
   "purchaseRequestApproved",
@@ -1212,6 +1229,18 @@ export function resolveNotificationMessage(
           unit: field(payload.unit),
           available: displayNumber(payload.available),
           minStock: displayNumber(payload.minStock),
+        },
+      };
+    }
+
+    const purchaseOrderKey = PURCHASE_ORDER_EVENT_MESSAGE_KEYS[item.eventType];
+    if (purchaseOrderKey) {
+      return {
+        kind: "key",
+        key: purchaseOrderKey,
+        values: {
+          code: field(payload.code),
+          reason: field(payload.reason),
         },
       };
     }

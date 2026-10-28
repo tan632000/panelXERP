@@ -2,5 +2,6 @@
   "moduleName": "Purchasing & Warehouse",
   "sidebarInventory": "Purchasing & Warehouse",
   "suppliers": "Suppliers",
-  "stock": "Stock"
+  "stock": "Stock",
+  "purchaseOrders": "Purchase orders"
 }

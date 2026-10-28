@@ -1,3 +1,5 @@
+import { purchaseOrderPermissions } from '@plugins/inventory/purchase-order/permissions/purchase-order.permissions';
+import { PurchaseOrderModule } from '@plugins/inventory/purchase-order/purchase-order.module';
 import { stockPermissions } from '@plugins/inventory/stock/permissions/stock.permissions';
 import { StockModule } from '@plugins/inventory/stock/stock.module';
 import { supplierPermissions } from '@plugins/inventory/supplier/permissions/supplier.permissions';
@@ -18,5 +20,11 @@ export const INVENTORY_FEATURES: ErpFeature[] = [
     plugin: 'inventory',
     module: StockModule,
     permissions: stockPermissions,
+  },
+  {
+    key: 'purchase-order',
+    plugin: 'inventory',
+    module: PurchaseOrderModule,
+    permissions: purchaseOrderPermissions,
   },
 ];

@@ -372,7 +372,10 @@
       "lenh_rut_day_dong_som": "Lệnh rút dây {code} đã được đóng khi mới thu về {materialReceivedKg}/{targetWeightKg} kg ({percent}%). Kho sẽ không nhận thêm phiếu xuất/nhập cho lệnh này trừ khi mở lại.",
       "lenh_rut_day_mo_lai": "Lệnh rút dây {code} đã được mở lại — tiếp tục nhận phiếu xuất NVL trước rút và phiếu nhập NVL sau rút.",
       "lenh_rut_day_bo_huy": "Lệnh rút dây {code} đã được bỏ huỷ, quay lại trạng thái Mở.",
-      "btp_receipt_pending_qc": "{actorName} vừa tạo phiếu nhập kho {receiptNo} có {pendingCount} lô chờ kiểm chất lượng đầu vào."
+      "btp_receipt_pending_qc": "{actorName} vừa tạo phiếu nhập kho {receiptNo} có {pendingCount} lô chờ kiểm chất lượng đầu vào.",
+      "inventory_purchase_order_submitted": "Đơn mua hàng {code} đang chờ bạn duyệt.",
+      "inventory_purchase_order_approved": "Đơn mua hàng {code} đã được duyệt.",
+      "inventory_purchase_order_rejected": "Đơn mua hàng {code} bị từ chối: {reason}"
     }
   },
   "english": "Tiếng Anh",
