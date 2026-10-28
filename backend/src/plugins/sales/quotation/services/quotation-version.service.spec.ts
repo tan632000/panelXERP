@@ -80,6 +80,18 @@ describeWithDatabase('Quotation versions against Postgres', () => {
     itemUnit,
     quantity,
   });
+  /** The item each BOM copy line of a version points at, in line order. */
+  const bomItemIds = async (quotationId: number, ver: number) =>
+    (
+      await db.dataSource.query<Array<{ item_id: number | null }>>(
+        `SELECT b.item_id FROM sales_quotation_bom_lines b
+           JOIN sales_quotation_lines l ON l.id = b.line_id
+           JOIN sales_quotation_versions v ON v.id = l.version_id
+          WHERE v.quotation_id = $1 AND v.ver = $2
+          ORDER BY l.id, b.id`,
+        [quotationId, ver],
+      )
+    ).map((row) => row.item_id);
   const marginsOf = (detail: QuotationDetail, margins: number[]) =>
     detail.current.lines.map((line, index) => ({
       lineId: line.id,
@@ -536,6 +548,38 @@ describeWithDatabase('Quotation versions against Postgres', () => {
         { ver: 1, status: 'closed' },
         { ver: 2, status: 'draft' },
       ]);
+    });
+
+    it('links every BOM copy to the estimate line’s item, through a revise, after the item is renamed and deleted', async () => {
+      const estimated = await db.estimatedRequest(WORKED_PANELS);
+      // The catalog moves on after the estimate froze the code: renamed, then deleted.
+      await db.dataSource.query(
+        `UPDATE items SET code = code || '-OLD', is_deleted = true WHERE id = $1`,
+        [db.itemId],
+      );
+      try {
+        const quotation = await db.quotations.create(
+          { requestId: estimated.requestId },
+          db.salesA,
+        );
+        expect(await bomItemIds(quotation.id, 1)).toEqual([
+          db.itemId,
+          db.itemId,
+        ]);
+
+        await setVersionStatus(quotation.id, 1, 'approved');
+        await db.versions.revise(quotation.id, db.salesA);
+        expect(await bomItemIds(quotation.id, 2)).toEqual([
+          db.itemId,
+          db.itemId,
+        ]);
+      } finally {
+        await db.dataSource.query(
+          `UPDATE items SET code = regexp_replace(code, '-OLD$', ''), is_deleted = false
+            WHERE id = $1`,
+          [db.itemId],
+        );
+      }
     });
 
     it('keeps the BOM copy as it was when the estimate changes later, and carries it to the revision', async () => {

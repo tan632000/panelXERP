@@ -382,6 +382,37 @@ describeWithDatabase('Order conversion against Postgres', () => {
   });
 
   describe('the order is a snapshot', () => {
+    it('links each BOM line to the quotation line’s item, also after the item is renamed and deleted', async () => {
+      const made = await confirmed();
+      await db.dataSource.query(
+        `UPDATE items SET code = code || '-OLD', is_deleted = true WHERE id = $1`,
+        [db.itemId],
+      );
+      try {
+        const order = await convert.convert(
+          { quotationId: made.id },
+          db.salesA,
+        );
+        const linked: Array<{ item_id: number | null }> =
+          await db.dataSource.query(
+            `SELECT b.item_id FROM sales_order_bom_lines b
+               JOIN sales_order_lines l ON l.id = b.line_id
+              WHERE l.order_id = $1 ORDER BY l.id, b.id`,
+            [order.id],
+          );
+        expect(linked.map((row) => row.item_id)).toEqual([
+          db.itemId,
+          db.itemId,
+        ]);
+      } finally {
+        await db.dataSource.query(
+          `UPDATE items SET code = regexp_replace(code, '-OLD$', ''), is_deleted = false
+            WHERE id = $1`,
+          [db.itemId],
+        );
+      }
+    });
+
     it('does not follow a later edit of the quotation lines, the terms or the customer', async () => {
       const made = await confirmed();
       const order = await convert.convert({ quotationId: made.id }, db.salesA);

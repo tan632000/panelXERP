@@ -220,6 +220,7 @@ export async function snapshotEstimatePanels(
       panel.bomLines.map((bom) =>
         bomRepo.create({
           lineId: line.id,
+          itemId: bom.itemId,
           itemCode: bom.itemCode,
           itemName: bom.itemName,
           itemBrand: bom.itemBrand,
@@ -269,6 +270,7 @@ export async function copyVersionTree(
       bomLines.map((bom) =>
         bomRepo.create({
           lineId: copy.id,
+          itemId: bom.itemId,
           itemCode: bom.itemCode,
           itemName: bom.itemName,
           itemBrand: bom.itemBrand ?? null,

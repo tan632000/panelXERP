@@ -15,6 +15,13 @@ export class QuotationBomLine {
   @Column({ type: 'int', name: 'line_id' })
   lineId: number;
 
+  /**
+   * The catalog item the line was taken from. Null only on a legacy row the backfill could not
+   * link; demand never joins by code, because a code can be reused after its item is deleted.
+   */
+  @Column({ type: 'int', name: 'item_id', nullable: true })
+  itemId: number | null;
+
   @Column({ type: 'varchar', length: 64, name: 'item_code' })
   itemCode: string;
 

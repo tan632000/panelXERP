@@ -199,6 +199,7 @@ export class OrderConvertService {
       await manager.getRepository(SalesOrderBomLine).insert(
         bomLines.map((bom) => ({
           lineId: copy.id,
+          itemId: bom.itemId,
           itemCode: bom.itemCode,
           itemName: bom.itemName,
           itemBrand: bom.itemBrand ?? null,

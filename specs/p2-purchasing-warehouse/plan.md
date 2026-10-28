@@ -101,7 +101,7 @@ Strictly sequential (shared registration files, one writer each, as P1 R-08).
 | 05 | Ledger, balances, low-stock alert, stock view | P1 | AC-02, AC-07, AC-08, AC-09, AC-25 | `*/src/plugins/inventory/stock` | 04 | done |
 | 06 | Estimate stock columns | P2 | AC-02, AC-22 | availability endpoint, `EstimateBomGrid.tsx` | 05 | done |
 | 07 | Purchase orders + approval | P1 | AC-02, AC-04, AC-10, AC-11 | `*/src/plugins/inventory/purchase-order` | 06 | done |
-| 08 | BOM item link + backfill | P1 | AC-12 | sales BOM writers + migration | 07 | pending |
+| 08 | BOM item link + backfill | P1 | AC-12 | sales BOM writers + migration | 07 | done |
 | 09 | Order material view | P1 | AC-02, AC-03, AC-13 | `*/src/plugins/inventory/material` | 08 | pending |
 | 10 | Reservation + allocation + shortage alert | P1 | AC-14, AC-15, AC-25 | `sales/_shared/ports`, `inventory/material` | 09 | pending |
 | 11 | Receipt from PO by scan | P1 | AC-02, AC-08, AC-16, AC-25, AC-26 | `*/src/plugins/inventory/receipt` | 10 | pending |
