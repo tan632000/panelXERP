@@ -45,19 +45,27 @@ import {
   ItemColumnValuesQueryDto,
   ItemFilterDto,
 } from '@plugins/catalog/item/dto/item-filter.dto';
+import { ResolveItemQueryDto } from '@plugins/catalog/item/dto/resolve-item.dto';
+import { UpdateItemStockSettingsDto } from '@plugins/catalog/item/dto/update-item-stock-settings.dto';
 import { UpdateItemDto } from '@plugins/catalog/item/dto/update-item.dto';
 import {
   ITEM_CREATE,
   ITEM_DELETE,
   ITEM_IMPORT,
   ITEM_READ,
+  ITEM_STOCK_SETTINGS,
   ITEM_UPDATE,
 } from '@plugins/catalog/item/permissions/item.permissions';
 import { ItemImportService } from '@plugins/catalog/item/services/item-import.service';
+import { ItemStockSettingsService } from '@plugins/catalog/item/services/item-stock-settings.service';
 import {
   ITEM_COLUMN_FILTERS,
   ItemService,
 } from '@plugins/catalog/item/services/item.service';
+import {
+  presentItem,
+  presentItemPage,
+} from '@plugins/catalog/item/utils/item-price-visibility.util';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 
@@ -68,18 +76,25 @@ export class ItemController {
   constructor(
     private readonly service: ItemService,
     private readonly importService: ItemImportService,
+    private readonly stockSettings: ItemStockSettingsService,
   ) {}
 
   @Get()
   @RequirePermission(ITEM_READ)
   @ApiOperation({
     summary: 'List items',
-    description: 'Paginated item list with search and column filters.',
+    description:
+      'Paginated item list with search and column filters. referencePrice is omitted unless the actor holds reference_price:read.',
   })
   @ApiResponse({ status: 200, description: 'Paginated item list' })
   @ApiResponse({ status: 403, description: 'Forbidden — requires item:read' })
-  findAll(@Query() query: ItemFilterDto) {
-    return this.service.findAll(query);
+  async findAll(
+    @Query() query: ItemFilterDto,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    const page = await this.service.findAll(query);
+    const data = await this.stockSettings.withDefaultLocations(page.data);
+    return presentItemPage({ ...page, data }, user);
   }
 
   @ColumnValuesEndpoint({
@@ -148,14 +163,32 @@ export class ItemController {
     return this.importService.import(file, user);
   }
 
+  @Get('resolve')
+  @RequirePermission(ITEM_READ)
+  @ApiOperation({
+    summary: 'Resolve a scanned value to an item',
+    description:
+      'The active item whose barcode equals the trimmed value, else the one whose code does (any case). Carries no price.',
+  })
+  @ApiResponse({ status: 200, description: 'The item the value stands for' })
+  @ApiResponse({ status: 400, description: 'Missing code' })
+  @ApiResponse({ status: 403, description: 'Forbidden — requires item:read' })
+  @ApiResponse({ status: 404, description: 'No item for the value' })
+  resolve(@Query() query: ResolveItemQueryDto) {
+    return this.stockSettings.resolve(query.code);
+  }
+
   @Get(':id')
   @RequirePermission(ITEM_READ)
   @ApiOperation({ summary: 'Get item by ID' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Item found' })
   @ApiResponse({ status: 404, description: 'Not found or soft-deleted' })
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne(id);
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return presentItem(await this.service.findOne(id), user);
   }
 
   @Post()
@@ -169,8 +202,11 @@ export class ItemController {
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 403, description: 'Forbidden — requires item:create' })
   @ApiResponse({ status: 409, description: 'Duplicate item code' })
-  create(@Body() dto: CreateItemDto, @CurrentUser() user: AuthUserPayload) {
-    return this.service.create(dto, user);
+  async create(
+    @Body() dto: CreateItemDto,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return presentItem(await this.service.create(dto, user), user);
   }
 
   @Patch(':id')
@@ -188,12 +224,37 @@ export class ItemController {
   })
   @ApiResponse({ status: 403, description: 'Forbidden — requires item:update' })
   @ApiResponse({ status: 404, description: 'Item not found' })
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateItemDto,
     @CurrentUser() user: AuthUserPayload,
   ) {
-    return this.service.update(id, dto, user);
+    return presentItem(await this.service.update(id, dto, user), user);
+  }
+
+  @Patch(':id/stock-settings')
+  @RequirePermission(ITEM_STOCK_SETTINGS)
+  @ApiOperation({
+    summary: 'Update the warehouse settings of an item',
+    description:
+      'Edits only barcode, default location and minimum stock. A barcode must be neither another active item barcode nor another active item code.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiBody({ type: UpdateItemStockSettingsDto })
+  @ApiResponse({ status: 200, description: 'Stock settings updated' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden — requires item:stock_settings',
+  })
+  @ApiResponse({ status: 404, description: 'Item not found' })
+  @ApiResponse({ status: 409, description: 'Barcode already in use' })
+  async updateStockSettings(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateItemStockSettingsDto,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return presentItem(await this.stockSettings.update(id, dto, user), user);
   }
 
   @Delete(':id')

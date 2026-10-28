@@ -17,6 +17,7 @@ import {
   readItemSheet,
   type ItemImportRawRow,
 } from '@plugins/catalog/item/services/item-import.parser';
+import { lockItemIdentifiers } from '@plugins/catalog/item/utils/item-identifier.util';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 
@@ -231,7 +232,10 @@ export class ItemImportService {
     return { candidates, errors };
   }
 
-  /** A code already used by an active item is a row error (the unique index is case-insensitive). */
+  /**
+   * A code already used by an active item, as its code or as its barcode, is a row error (both
+   * unique indexes are case-insensitive, and a scan must resolve to one item).
+   */
   private async rejectActiveCodes(
     candidates: ImportCandidate[],
     errors: ItemImportRowError[],
@@ -239,19 +243,32 @@ export class ItemImportService {
     if (candidates.length === 0) return;
     const taken = await this.itemRepo
       .createQueryBuilder('item')
-      .select('item.code')
-      .where('LOWER(item.code) IN (:...codes)', {
-        codes: candidates.map((candidate) => candidate.code.toLowerCase()),
-      })
+      .select(['item.code', 'item.barcode'])
+      .where(
+        '(LOWER(item.code) IN (:...codes) OR LOWER(item.barcode) IN (:...codes))',
+        { codes: candidates.map((candidate) => candidate.code.toLowerCase()) },
+      )
       .andWhere('item.isDeleted = false')
       .getMany();
     const takenCodes = new Set(taken.map((item) => item.code.toLowerCase()));
+    const takenBarcodes = new Set(
+      taken.flatMap((item) =>
+        item.barcode ? [item.barcode.toLowerCase()] : [],
+      ),
+    );
     for (const candidate of candidates) {
-      if (takenCodes.has(candidate.code.toLowerCase())) {
+      const key = candidate.code.toLowerCase();
+      if (takenCodes.has(key)) {
         errors.push({
           row: candidate.row,
           field: 'code',
           reason: 'code already exists',
+        });
+      } else if (takenBarcodes.has(key)) {
+        errors.push({
+          row: candidate.row,
+          field: 'code',
+          reason: 'code is already the barcode of another item',
         });
       }
     }
@@ -265,6 +282,20 @@ export class ItemImportService {
     if (valid.length === 0) return 0;
     try {
       await this.dataSource.transaction(async (manager) => {
+        // A barcode set to one of these codes by a concurrent request is only visible once it
+        // commits, so queue behind its writer and look again before inserting.
+        const codes = valid.map(({ code }) => code);
+        await lockItemIdentifiers(manager, codes);
+        const clash: unknown[] = await manager.query(
+          `SELECT 1 FROM items
+            WHERE is_deleted = false AND LOWER(barcode) = ANY($1::text[]) LIMIT 1`,
+          [codes.map((code) => code.toLowerCase())],
+        );
+        if (clash.length > 0) {
+          throw new ConflictException(
+            'An item code was set as a barcode by someone else during the import; nothing was imported.',
+          );
+        }
         await manager.insert(
           Item,
           valid.map(({ row: _row, ...item }) => ({

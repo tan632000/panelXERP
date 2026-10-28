@@ -1,0 +1,42 @@
+{
+  "title": "Vị trí kho",
+  "description": "Quản lý các vị trí lưu trữ vật tư trong kho",
+  "code": "Mã vị trí",
+  "name": "Tên vị trí",
+  "note": "Ghi chú",
+  "isActive": "Đang sử dụng",
+  "status": "Trạng thái",
+  "statusActive": "Đang sử dụng",
+  "statusInactive": "Ngừng sử dụng",
+  "addButton": "Thêm vị trí",
+  "addModalTitle": "Thêm vị trí mới",
+  "editModalTitle": "Sửa vị trí: {code}",
+  "searchPlaceholder": "Tìm mã, tên, ghi chú...",
+  "confirmDeleteTitle": "Xoá vị trí",
+  "confirmDeleteDescription": "Bạn có chắc muốn xoá vị trí \"{code} — {name}\"?",
+  "noItems": "Chưa có vị trí kho nào",
+  "noItemsFound": "Không tìm thấy vị trí kho nào",
+  "paginationItem": "vị trí",
+  "emptyValue": "-",
+  "placeholders": {
+    "code": "VD: A-01-02",
+    "name": "VD: Kệ A, tầng 1, ô 2",
+    "note": "Ghi chú..."
+  },
+  "toast": {
+    "createLocationSuccess": "Tạo vị trí thành công.",
+    "updateLocationSuccess": "Cập nhật vị trí thành công.",
+    "deleteLocationSuccess": "Xoá vị trí thành công.",
+    "deleteInUseItem": "Không thể xoá vị trí vì đang là vị trí mặc định của vật tư.",
+    "systemError": "Đã có lỗi xảy ra, vui lòng thử lại sau.",
+    "forbidden": "Bạn không có quyền thực hiện chức năng này."
+  },
+  "validation": {
+    "codeRequired": "Vui lòng nhập Mã vị trí.",
+    "codeMax": "Mã vị trí không được vượt quá 32 ký tự.",
+    "codeExists": "Mã vị trí đã tồn tại trong hệ thống.",
+    "nameRequired": "Vui lòng nhập Tên vị trí.",
+    "nameMax": "Tên vị trí không được vượt quá 255 ký tự.",
+    "noteMax": "Ghi chú không được vượt quá 2000 ký tự."
+  }
+}

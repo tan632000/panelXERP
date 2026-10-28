@@ -30,7 +30,16 @@ interface InsertedRow {
  * Stands in for the database: `insert` stages rows and only a transaction callback that
  * resolves commits them, so a failing insert leaves `persisted` empty like a rollback does.
  */
-function build(options: { activeCodes?: string[]; failInsert?: Error } = {}) {
+function build(
+  options: {
+    /** Rows the clash check inside the transaction finds (a barcode set concurrently). */
+    clashRows?: unknown[];
+    activeCodes?: string[];
+    /** Barcodes of active items whose own codes are unrelated to the sheet. */
+    activeBarcodes?: string[];
+    failInsert?: Error;
+  } = {},
+) {
   const persisted: InsertedRow[] = [];
   const insert = jest.fn(
     (_target: unknown, rows: InsertedRow[]): Promise<void> => {
@@ -40,13 +49,17 @@ function build(options: { activeCodes?: string[]; failInsert?: Error } = {}) {
     },
   );
   let staged: InsertedRow[] = [];
+  const managerQuery = jest.fn(() => Promise.resolve(options.clashRows ?? []));
   const dataSource = {
     transaction: jest.fn(
       async (
-        callback: (manager: { insert: typeof insert }) => Promise<void>,
+        callback: (manager: {
+          insert: typeof insert;
+          query: typeof managerQuery;
+        }) => Promise<void>,
       ) => {
         staged = [];
-        await callback({ insert });
+        await callback({ insert, query: managerQuery });
         persisted.push(...staged);
       },
     ),
@@ -55,13 +68,17 @@ function build(options: { activeCodes?: string[]; failInsert?: Error } = {}) {
     select: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
-    getMany: jest
-      .fn()
-      .mockResolvedValue((options.activeCodes ?? []).map((code) => ({ code }))),
+    getMany: jest.fn().mockResolvedValue([
+      ...(options.activeCodes ?? []).map((code) => ({ code })),
+      ...(options.activeBarcodes ?? []).map((barcode) => ({
+        code: 'OTHER-ITEM',
+        barcode,
+      })),
+    ]),
   };
   const itemRepo = { createQueryBuilder: jest.fn().mockReturnValue(query) };
   const service = new ItemImportService(dataSource as never, itemRepo as never);
-  return { service, insert, persisted, dataSource, query };
+  return { service, insert, persisted, dataSource, query, managerQuery };
 }
 
 async function workbookFile(
@@ -187,6 +204,48 @@ describe('ItemImportService', () => {
       });
       expect(persisted.map((row) => row.code)).not.toContain('LC1D09M7');
       expect(query.andWhere).toHaveBeenCalledWith('item.isDeleted = false');
+    });
+
+    it('reports a code that is another active item barcode, case-insensitively', async () => {
+      const { service, persisted } = build({ activeBarcodes: ['lc1d09m7'] });
+
+      const result = await service.import(
+        fixture('items-import-sample.xlsx'),
+        ACTOR,
+      );
+
+      expect(result.created).toBe(2);
+      expect(result.errors).toContainEqual({
+        row: 2,
+        field: 'code',
+        reason: 'code is already the barcode of another item',
+      });
+      expect(persisted.map((row) => row.code)).not.toContain('LC1D09M7');
+    });
+
+    it('locks every code in lower case, sorted, and looks for a barcode clash before it inserts', async () => {
+      const { service, managerQuery, insert } = build();
+
+      await service.import(fixture('items-import-sample.xlsx'), ACTOR);
+
+      const [lockSql, lockArgs] = managerQuery.mock.calls[0] as unknown as [
+        string,
+        string[][],
+      ];
+      expect(lockSql).toContain('pg_advisory_xact_lock');
+      expect(lockArgs[0]).toEqual([...lockArgs[0]].sort());
+      expect(lockArgs[0].every((key) => key === key.toLowerCase())).toBe(true);
+      expect(managerQuery.mock.calls[1][0]).toContain('LOWER(barcode)');
+      expect(insert).toHaveBeenCalledTimes(1);
+    });
+
+    it('creates nothing and answers 409 when a barcode took one of the codes during the import', async () => {
+      const { service, persisted } = build({ clashRows: [{ '?column?': 1 }] });
+
+      await expect(
+        service.import(fixture('items-import-sample.xlsx'), ACTOR),
+      ).rejects.toBeInstanceOf(ConflictException);
+      expect(persisted).toHaveLength(0);
     });
 
     it('rejects a bad group and a negative or non-numeric price on their own rows', async () => {

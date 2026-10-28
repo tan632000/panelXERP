@@ -16,6 +16,7 @@ export type ItemGroup = (typeof ITEM_GROUPS)[number];
 
 export const ITEM_CODE_MAX = 64;
 export const ITEM_UNIT_MAX = 20;
+export const ITEM_BARCODE_MAX = 64;
 /** Largest import the dialog accepts; the server enforces the same limit. */
 export const ITEM_IMPORT_MAX_BYTES = 5 * 1024 * 1024;
 
@@ -30,6 +31,7 @@ export const itemApiRoutes = {
   import: "/items/import",
   importTemplate: "/items/import-template",
   detail: (id: number | string) => `/items/${id}`,
+  stockSettings: (id: number | string) => `/items/${id}/stock-settings`,
 } as const;
 
 /** Module key the list-preference endpoint stores the item list column choice under. */

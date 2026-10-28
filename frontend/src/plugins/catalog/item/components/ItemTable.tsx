@@ -55,7 +55,10 @@ export function ItemTable({
   const { can } = useAuth();
   const canUpdate = can(ItemPermission.update);
   const canDelete = can(ItemPermission.delete);
-  const showActions = canUpdate || canDelete;
+  // The edit form also carries the warehouse settings, which have a scope of their own.
+  const canEdit = canUpdate || can(ItemPermission.stockSettings);
+  const canSeePrice = can(ItemPermission.referencePriceRead);
+  const showActions = canEdit || canDelete;
   const empty = t("emptyValue");
 
   const columns = useMemo(() => {
@@ -98,18 +101,44 @@ export function ItemTable({
       { key: "brand", header: t("brand"), render: text },
       { key: "unit", header: t("unit"), render: text },
       {
-        key: "referencePrice",
-        header: t("referencePrice"),
-        // Not a text column the API can enumerate or order by.
+        key: "barcode",
+        header: t("barcode"),
+        filterable: false,
+        sortable: false,
+        render: (_, item) => text(item.barcode),
+      },
+      {
+        key: "defaultLocation",
+        header: t("locationColumn"),
+        filterable: false,
+        sortable: false,
+        render: (_, item) => text(item.defaultLocation?.code),
+      },
+      {
+        key: "minStock",
+        header: t("minStock"),
         filterable: false,
         sortable: false,
         render: (_, item) =>
-          text(
-            item.referencePrice == null
-              ? null
-              : formatNumber(item.referencePrice),
-          ),
+          text(item.minStock == null ? null : formatNumber(item.minStock)),
       },
+      ...(canSeePrice
+        ? [
+            {
+              key: "referencePrice",
+              header: t("referencePrice"),
+              // Not a text column the API can enumerate or order by.
+              filterable: false,
+              sortable: false,
+              render: (_: unknown, item: Item) =>
+                text(
+                  item.referencePrice == null
+                    ? null
+                    : formatNumber(item.referencePrice),
+                ),
+            },
+          ]
+        : []),
     ];
 
     if (!showActions) return baseColumns;
@@ -121,7 +150,7 @@ export function ItemTable({
         header: "",
         render: (_, item) => (
           <div className="flex gap-[3px]" onClick={(e) => e.stopPropagation()}>
-            {canUpdate && (
+            {canEdit && (
               <button
                 type="button"
                 className={`${ACTION_BUTTON} text-text-secondary hover:text-text-primary`}
@@ -145,7 +174,17 @@ export function ItemTable({
         ),
       },
     ];
-  }, [canDelete, canUpdate, empty, onDelete, onEdit, showActions, t, tCommon]);
+  }, [
+    canDelete,
+    canEdit,
+    canSeePrice,
+    empty,
+    onDelete,
+    onEdit,
+    showActions,
+    t,
+    tCommon,
+  ]);
 
   return (
     <Table
@@ -156,7 +195,7 @@ export function ItemTable({
       onSelectionChange={onSelectionChange}
       selectionActions={selectionActions}
       rowKey={(item) => String(item.id)}
-      onRowClick={canUpdate ? (item) => onEdit(item) : undefined}
+      onRowClick={canEdit ? (item) => onEdit(item) : undefined}
       emptyText={emptyText}
       columnFilterEndpoint={itemApiRoutes.columnValues}
       columnPreferenceKey={ITEM_LIST_PREFERENCE_KEY}

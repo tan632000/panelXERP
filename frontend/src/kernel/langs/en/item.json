@@ -39,7 +39,10 @@
     "unit": "e.g. pcs, m, set",
     "referencePrice": "0",
     "specification": "Technical specification...",
-    "note": "Note..."
+    "note": "Note...",
+    "barcode": "Scan or type the barcode",
+    "defaultLocation": "Select a location",
+    "minStock": "Leave empty for no alert"
   },
   "toast": {
     "createItemSuccess": "Item created.",
@@ -61,7 +64,12 @@
     "unitRequired": "Unit is required.",
     "unitMax": "Unit must not exceed 20 characters.",
     "referencePriceInvalid": "Reference price must be a number of 0 or more.",
-    "noteMax": "Note must not exceed 2000 characters."
+    "noteMax": "Note must not exceed 2000 characters.",
+    "barcodeMax": "Barcode must not exceed 64 characters.",
+    "barcodeTaken": "This barcode matches the barcode or code of another item.",
+    "codeIsBarcode": "This item code matches the barcode of another item.",
+    "minStockInvalid": "Minimum stock must be a number greater than or equal to 0.",
+    "locationInvalid": "The default location must be a location in use."
   },
   "import": {
     "title": "Import items from Excel",
@@ -86,7 +94,13 @@
       "codeExists": "Item code already exists.",
       "codeRepeated": "Item code is repeated in the file with different data.",
       "groupInvalid": "Unknown group.",
-      "priceInvalid": "Reference price must be a number of 0 or more."
+      "priceInvalid": "Reference price must be a number of 0 or more.",
+      "codeIsBarcode": "The item code is already the barcode of another item."
     }
-  }
+  },
+  "barcode": "Barcode",
+  "stockSection": "Warehouse",
+  "defaultLocation": "Default location",
+  "minStock": "Minimum stock",
+  "locationColumn": "Location"
 }

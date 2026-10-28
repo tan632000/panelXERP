@@ -125,14 +125,23 @@ export class FakeRepo<T extends FakeRow> {
     return Promise.resolve(this.visible(options)[0] ?? null);
   });
 
+  /** Statements a service ran through `manager.query` (advisory locks); answers no rows. */
+  query = jest.fn((): Promise<unknown[]> => Promise.resolve([]));
+
   /** Mirrors `repo.manager.transaction`: work on this repo that rolls back when it throws. */
   manager = {
     transaction: async <R>(
-      work: (manager: { getRepository: () => FakeRepo<T> }) => Promise<R>,
+      work: (manager: {
+        getRepository: (target?: unknown) => FakeRepo<T>;
+        query: FakeRepo<T>['query'];
+      }) => Promise<R>,
     ): Promise<R> => {
       const snapshot = this.rows.map((row) => ({ ...row }));
       try {
-        return await work({ getRepository: () => this });
+        return await work({
+          getRepository: () => this,
+          query: this.query,
+        });
       } catch (error) {
         this.rows = snapshot;
         throw error;

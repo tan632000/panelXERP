@@ -1644,7 +1644,9 @@ paths:
       tags: *ref_18
   /api/v1/items:
     get:
-      description: Paginated item list with search and column filters.
+      description: >-
+        Paginated item list with search and column filters. referencePrice is omitted unless the actor holds
+        reference_price:read.
       operationId: ItemController_findAll
       parameters:
         - name: page
@@ -1838,6 +1840,32 @@ paths:
       security: *ref_19
       summary: Import items from an Excel quotation sheet
       tags: *ref_20
+  /api/v1/items/resolve:
+    get:
+      description: >-
+        The active item whose barcode equals the trimmed value, else the one whose code does (any case). Carries no
+        price.
+      operationId: ItemController_resolve
+      parameters:
+        - name: code
+          required: true
+          in: query
+          description: 'Scanned value: an item barcode, else an item code (any case)'
+          schema:
+            maxLength: 255
+            type: string
+      responses:
+        '200':
+          description: The item the value stands for
+        '400':
+          description: Missing code
+        '403':
+          description: Forbidden — requires item:read
+        '404':
+          description: No item for the value
+      security: *ref_19
+      summary: Resolve a scanned value to an item
+      tags: *ref_20
   /api/v1/items/{id}:
     get:
       operationId: ItemController_findOne
@@ -1903,6 +1931,38 @@ paths:
       security: *ref_19
       summary: Soft-delete item
       tags: *ref_20
+  /api/v1/items/{id}/stock-settings:
+    patch:
+      description: >-
+        Edits only barcode, default location and minimum stock. A barcode must be neither another active item barcode
+        nor another active item code.
+      operationId: ItemController_updateStockSettings
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateItemStockSettingsDto'
+      responses:
+        '200':
+          description: Stock settings updated
+        '400':
+          description: Validation error
+        '403':
+          description: Forbidden — requires item:stock_settings
+        '404':
+          description: Item not found
+        '409':
+          description: Barcode already in use
+      security: *ref_19
+      summary: Update the warehouse settings of an item
+      tags: *ref_20
   /api/v1/items/bulk-delete:
     post:
       description: >-
@@ -1928,6 +1988,246 @@ paths:
       security: *ref_19
       summary: Soft-delete selected items
       tags: *ref_20
+  /api/v1/catalog/locations:
+    get:
+      description: Paginated location list with search and column filters.
+      operationId: LocationController_findAll
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Items per page
+          schema:
+            default: 25
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search keyword
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: sortBy
+          required: false
+          in: query
+          description: Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.
+          schema:
+            default: createdAt
+            type: string
+        - name: sortOrder
+          required: false
+          in: query
+          description: Sort order. Defaults to DESC for createdAt, ASC otherwise.
+          schema:
+            default: DESC
+            type: string
+      responses:
+        '200':
+          description: Paginated location list
+        '403':
+          description: Forbidden — requires location:read
+      security: &ref_21
+        - bearer: []
+      summary: List locations
+      tags: &ref_22
+        - catalog/locations
+    post:
+      description: Code must be unique among active locations, in any case.
+      operationId: LocationController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLocationDto'
+      responses:
+        '201':
+          description: Location created
+        '400':
+          description: Validation error
+        '403':
+          description: Forbidden — requires location:create
+        '409':
+          description: Duplicate location code
+      security: *ref_21
+      summary: Create location
+      tags: *ref_22
+  /api/v1/catalog/locations/column-values:
+    get:
+      description: >-
+        Paginated, searchable distinct values of a filterable list column, for the column filter of the list table.
+        Values come from the whole table, not one page.
+      operationId: LocationController_findColumnValues
+      parameters:
+        - name: column
+          required: true
+          in: query
+          description: 'Column key: code, name'
+          schema:
+            example: classification
+            type: string
+        - name: search
+          required: false
+          in: query
+          description: Search within the values
+          schema:
+            type: string
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Values per page
+          schema:
+            default: 50
+            type: number
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: listSearch
+          required: false
+          in: query
+          description: Keyword search of the list itself
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Paginated distinct column values
+        '400':
+          description: Column is not filterable
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — requires location:read
+      security: *ref_21
+      summary: List distinct values of one filterable location column
+      tags: *ref_22
+  /api/v1/catalog/locations/{id}:
+    get:
+      operationId: LocationController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Location found
+        '404':
+          description: Not found or soft-deleted
+      security: *ref_21
+      summary: Get location by ID
+      tags: *ref_22
+    patch:
+      operationId: LocationController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLocationDto'
+      responses:
+        '200':
+          description: Location updated
+        '403':
+          description: Forbidden — requires location:update
+        '404':
+          description: Location not found
+        '409':
+          description: Duplicate location code
+      security: *ref_21
+      summary: Update location
+      tags: *ref_22
+    delete:
+      description: Refused with 409 while an active item has the location as its default.
+      operationId: LocationController_remove
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Location soft-deleted
+        '403':
+          description: Forbidden — requires location:delete
+        '404':
+          description: Location not found
+        '409':
+          description: Location is the default location of an item
+      security: *ref_21
+      summary: Soft-delete location
+      tags: *ref_22
+  /api/v1/catalog/locations/bulk-delete:
+    post:
+      description: >-
+        Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard
+        refuses is reported in `failed` and leaves the rest of the batch deleted.
+      operationId: LocationController_bulkRemove
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteDto'
+      responses:
+        '201':
+          description: 'Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }`'
+        '400':
+          description: Empty or invalid id list
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden — requires location:delete
+      security: *ref_21
+      summary: Soft-delete selected locations
+      tags: *ref_22
   /api/v1/sales/requests:
     get:
       description: >-
@@ -2021,10 +2321,10 @@ paths:
           description: Paginated request list
         '403':
           description: Forbidden — requires request:read
-      security: &ref_21
+      security: &ref_23
         - bearer: []
       summary: List quote requests
-      tags: &ref_22
+      tags: &ref_24
         - sales/requests
     post:
       description: >-
@@ -2048,9 +2348,9 @@ paths:
           description: Forbidden — requires request:create
         '404':
           description: Customer not found
-      security: *ref_21
+      security: *ref_23
       summary: Create quote request
-      tags: *ref_22
+      tags: *ref_24
   /api/v1/sales/requests/column-values:
     get:
       description: >-
@@ -2147,9 +2447,9 @@ paths:
           description: Unauthorized
         '403':
           description: Forbidden — requires request:read
-      security: *ref_21
+      security: *ref_23
       summary: List distinct values of one filterable request column
-      tags: *ref_22
+      tags: *ref_24
   /api/v1/sales/requests/engineer-options:
     get:
       description: Active engineers and engineering leads.
@@ -2160,9 +2460,9 @@ paths:
           description: Engineer options
         '403':
           description: Forbidden — requires request:assign
-      security: *ref_21
+      security: *ref_23
       summary: List the accounts a request may be assigned to
-      tags: *ref_22
+      tags: *ref_24
   /api/v1/sales/requests/{id}:
     get:
       description: >-
@@ -2180,9 +2480,9 @@ paths:
           description: Request found
         '404':
           description: Not found, or outside the caller’s data scope
-      security: *ref_21
+      security: *ref_23
       summary: Get quote request by ID
-      tags: *ref_22
+      tags: *ref_24
     patch:
       description: Only while the request is a draft or assigned. Code and customer are immutable.
       operationId: RequestController_update
@@ -2207,9 +2507,9 @@ paths:
           description: Request not found
         '409':
           description: Request can no longer be edited
-      security: *ref_21
+      security: *ref_23
       summary: Update quote request
-      tags: *ref_22
+      tags: *ref_24
   /api/v1/sales/requests/{id}/activities:
     get:
       operationId: RequestController_listActivities
@@ -2224,9 +2524,9 @@ paths:
           description: Timeline, oldest first
         '404':
           description: Request not found
-      security: *ref_21
+      security: *ref_23
       summary: Timeline of a quote request
-      tags: *ref_22
+      tags: *ref_24
   /api/v1/sales/requests/{id}/assign:
     post:
       description: The first assignment moves a draft to assigned. The engineer is notified once, after the change is saved.
@@ -2254,9 +2554,9 @@ paths:
           description: Request not found
         '409':
           description: Request can no longer be assigned
-      security: *ref_21
+      security: *ref_23
       summary: Assign or reassign the engineer
-      tags: *ref_22
+      tags: *ref_24
   /api/v1/sales/requests/{id}/cancel:
     post:
       description: Needs a reason. Possible until the request has been quoted.
@@ -2282,9 +2582,9 @@ paths:
           description: Request not found
         '409':
           description: Request can no longer be cancelled
-      security: *ref_21
+      security: *ref_23
       summary: Cancel a quote request
-      tags: *ref_22
+      tags: *ref_24
   /api/v1/sales/requests/{id}/lost:
     post:
       description: Needs a reason. Possible once the request is estimated or quoted.
@@ -2310,9 +2610,9 @@ paths:
           description: Request not found
         '409':
           description: Request cannot be lost from here
-      security: *ref_21
+      security: *ref_23
       summary: Mark a quote request lost
-      tags: *ref_22
+      tags: *ref_24
   /api/v1/sales/requests/{id}/attachments:
     get:
       operationId: RequestAttachmentController_list
@@ -2327,10 +2627,10 @@ paths:
           description: Attachments, oldest first
         '404':
           description: Request not found
-      security: &ref_23
+      security: &ref_25
         - bearer: []
       summary: List the files of a quote request
-      tags: &ref_24
+      tags: &ref_26
         - sales/requests
     post:
       description: >-
@@ -2368,9 +2668,9 @@ paths:
           description: Request no longer accepts files
         '413':
           description: File larger than 20 MB
-      security: *ref_23
+      security: *ref_25
       summary: Attach a file to a quote request
-      tags: *ref_24
+      tags: *ref_26
   /api/v1/sales/requests/{id}/attachments/{attachmentId}:
     get:
       description: Served as an attachment, never inline. Requires access to the request.
@@ -2391,9 +2691,9 @@ paths:
           description: File content
         '404':
           description: Request or file not found, or outside the caller’s data scope
-      security: *ref_23
+      security: *ref_25
       summary: Download a file of a quote request
-      tags: *ref_24
+      tags: *ref_26
     delete:
       description: Only while the request is a draft, assigned or being estimated.
       operationId: RequestAttachmentController_remove
@@ -2417,9 +2717,9 @@ paths:
           description: Request or file not found
         '409':
           description: Request no longer accepts changes
-      security: *ref_23
+      security: *ref_25
       summary: Remove a file of a quote request
-      tags: *ref_24
+      tags: *ref_26
   /api/v1/sales/estimates:
     get:
       description: >-
@@ -2488,10 +2788,10 @@ paths:
           description: Paginated estimate list
         '403':
           description: Forbidden — requires estimate:read
-      security: &ref_25
+      security: &ref_27
         - bearer: []
       summary: List estimates
-      tags: &ref_26
+      tags: &ref_28
         - sales/estimates
     post:
       description: >-
@@ -2514,9 +2814,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: The request already has an estimate or is not assigned
-      security: *ref_25
+      security: *ref_27
       summary: Start the estimate of a request
-      tags: *ref_26
+      tags: *ref_28
   /api/v1/sales/estimates/{id}:
     get:
       description: >-
@@ -2540,9 +2840,9 @@ paths:
           description: Estimate found
         '404':
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
-      security: *ref_25
+      security: *ref_27
       summary: Get an estimate with one revision
-      tags: *ref_26
+      tags: *ref_28
   /api/v1/sales/estimates/{id}/submit:
     post:
       description: >-
@@ -2566,9 +2866,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: The revision is submitted or superseded and read-only
-      security: *ref_25
+      security: *ref_27
       summary: Submit the draft revision
-      tags: *ref_26
+      tags: *ref_28
   /api/v1/sales/estimates/{id}/revise:
     post:
       description: >-
@@ -2590,9 +2890,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: A draft is already open, or the request is quoted or closed
-      security: *ref_25
+      security: *ref_27
       summary: Open a new draft revision
-      tags: *ref_26
+      tags: *ref_28
   /api/v1/sales/estimates/{id}/panels:
     post:
       description: Returns the whole draft revision with recomputed totals.
@@ -2618,9 +2918,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: The revision is submitted or superseded and read-only, or tag in use
-      security: *ref_25
+      security: *ref_27
       summary: Add a panel to the draft
-      tags: *ref_26
+      tags: *ref_28
   /api/v1/sales/estimates/{id}/panels/{panelId}:
     patch:
       operationId: EstimateController_updatePanel
@@ -2648,9 +2948,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: The revision is submitted or superseded and read-only, or tag in use
-      security: *ref_25
+      security: *ref_27
       summary: Update a panel of the draft
-      tags: *ref_26
+      tags: *ref_28
     delete:
       operationId: EstimateController_deletePanel
       parameters:
@@ -2671,9 +2971,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: The revision is submitted or superseded and read-only
-      security: *ref_25
+      security: *ref_27
       summary: Remove a panel and its lines from the draft
-      tags: *ref_26
+      tags: *ref_28
   /api/v1/sales/estimates/{id}/panels/{panelId}/bom-lines:
     post:
       description: Copies the item code, name, brand and unit onto the line; the unit cost defaults to the item reference price.
@@ -2704,9 +3004,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: The revision is submitted or superseded and read-only
-      security: *ref_25
+      security: *ref_27
       summary: Add a BOM line to a panel
-      tags: *ref_26
+      tags: *ref_28
   /api/v1/sales/estimates/{id}/bom-lines/{lineId}:
     patch:
       operationId: EstimateController_updateBomLine
@@ -2734,9 +3034,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: The revision is submitted or superseded and read-only
-      security: *ref_25
+      security: *ref_27
       summary: Update the quantity, unit cost or note of a line
-      tags: *ref_26
+      tags: *ref_28
     delete:
       operationId: EstimateController_deleteBomLine
       parameters:
@@ -2757,9 +3057,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: The revision is submitted or superseded and read-only
-      security: *ref_25
+      security: *ref_27
       summary: Remove a BOM line from the draft
-      tags: *ref_26
+      tags: *ref_28
   /api/v1/sales/estimates/{id}/panels/{panelId}/cost-lines:
     post:
       description: The amount is the cost of ONE panel.
@@ -2788,9 +3088,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: The revision is submitted or superseded and read-only
-      security: *ref_25
+      security: *ref_27
       summary: Add a cost line to a panel
-      tags: *ref_26
+      tags: *ref_28
   /api/v1/sales/estimates/{id}/cost-lines/{lineId}:
     patch:
       operationId: EstimateController_updateCostLine
@@ -2818,9 +3118,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: The revision is submitted or superseded and read-only
-      security: *ref_25
+      security: *ref_27
       summary: Update a cost line
-      tags: *ref_26
+      tags: *ref_28
     delete:
       operationId: EstimateController_deleteCostLine
       parameters:
@@ -2841,9 +3141,9 @@ paths:
           description: Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)
         '409':
           description: The revision is submitted or superseded and read-only
-      security: *ref_25
+      security: *ref_27
       summary: Remove a cost line from the draft
-      tags: *ref_26
+      tags: *ref_28
   /api/v1/sales/quotations:
     get:
       description: >-
@@ -2923,10 +3223,10 @@ paths:
           description: Paginated quotation list
         '403':
           description: Forbidden — requires quotation:read
-      security: &ref_27
+      security: &ref_29
         - bearer: []
       summary: List quotations
-      tags: &ref_28
+      tags: &ref_30
         - sales/quotations
     post:
       description: >-
@@ -2950,9 +3250,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
         '409':
           description: No submitted estimate, not the latest revision, request not estimated, or a quotation exists
-      security: *ref_27
+      security: *ref_29
       summary: Quote an estimated request
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/quotations/{id}:
     get:
       description: >-
@@ -2976,9 +3276,9 @@ paths:
           description: Quotation found
         '404':
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
-      security: *ref_27
+      security: *ref_29
       summary: Get a quotation with one version
-      tags: *ref_28
+      tags: *ref_30
     patch:
       description: >-
         Only what the body names changes; margins are per line (0–1000%), the discount a percent (0–100) or an amount
@@ -3008,9 +3308,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
         '409':
           description: The latest version is not a draft
-      security: *ref_27
+      security: *ref_29
       summary: Set margins, discount, VAT and terms of the draft version
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/quotations/{id}/revise:
     post:
       description: >-
@@ -3032,9 +3332,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
         '409':
           description: The latest version is a draft, confirmed, cancelled or closed, or changed meanwhile
-      security: *ref_27
+      security: *ref_29
       summary: Revise the quotation
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/quotations/{id}/refresh-estimate:
     post:
       description: >-
@@ -3057,9 +3357,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
         '409':
           description: The latest version is not a draft, or no estimate is submitted
-      security: *ref_27
+      security: *ref_29
       summary: Update the draft from the latest submitted estimate
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/quotations/{id}/submit:
     post:
       description: >-
@@ -3081,9 +3381,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
         '409':
           description: Not a draft, or the estimate was revised since
-      security: *ref_27
+      security: *ref_29
       summary: Submit the draft for approval
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/quotations/{id}/approve:
     post:
       description: >-
@@ -3105,9 +3405,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
         '409':
           description: Not pending approval
-      security: *ref_27
+      security: *ref_29
       summary: Approve the version
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/quotations/{id}/reject:
     post:
       description: >-
@@ -3135,9 +3435,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
         '409':
           description: Not pending approval
-      security: *ref_27
+      security: *ref_29
       summary: Reject the version
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/quotations/{id}/confirm:
     post:
       description: approved → customer_confirmed; any other status answers 409.
@@ -3157,9 +3457,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
         '409':
           description: Not approved
-      security: *ref_27
+      security: *ref_29
       summary: Record that the customer accepted
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/quotations/{id}/cancel:
     post:
       description: >-
@@ -3187,9 +3487,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
         '409':
           description: Confirmed, cancelled or closed, or the request cannot be lost
-      security: *ref_27
+      security: *ref_29
       summary: Cancel the quotation
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/quotations/{id}/feedback:
     get:
       description: 'Newest first: date, channel, content and who recorded it.'
@@ -3205,9 +3505,9 @@ paths:
           description: The feedback log
         '404':
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
-      security: *ref_27
+      security: *ref_29
       summary: List the customer feedback of a quotation
-      tags: *ref_28
+      tags: *ref_30
     post:
       description: Appends one entry to the feedback log of the quotation.
       operationId: QuotationController_addFeedback
@@ -3230,9 +3530,9 @@ paths:
           description: Forbidden — requires quotation:update
         '404':
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
-      security: *ref_27
+      security: *ref_29
       summary: Record what the customer answered
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/quotations/{id}/export.xlsx:
     get:
       description: The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.
@@ -3252,9 +3552,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
         '409':
           description: Not approved or confirmed
-      security: *ref_27
+      security: *ref_29
       summary: Download the customer-facing quotation as .xlsx
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/quotations/{id}/export.pdf:
     get:
       description: The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.
@@ -3274,9 +3574,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own)
         '409':
           description: Not approved or confirmed
-      security: *ref_27
+      security: *ref_29
       summary: Download the customer-facing quotation as PDF
-      tags: *ref_28
+      tags: *ref_30
   /api/v1/sales/orders:
     get:
       description: >-
@@ -3352,10 +3652,10 @@ paths:
           description: Paginated order list
         '403':
           description: Forbidden — requires order:read
-      security: &ref_29
+      security: &ref_31
         - bearer: []
       summary: List orders
-      tags: &ref_30
+      tags: &ref_32
         - sales/orders
     post:
       description: >-
@@ -3380,9 +3680,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own)
         '409':
           description: Not customer-confirmed, or the quotation already has an order
-      security: *ref_29
+      security: *ref_31
       summary: Convert a confirmed quotation into an order
-      tags: *ref_30
+      tags: *ref_32
   /api/v1/sales/orders/{id}:
     get:
       description: >-
@@ -3400,9 +3700,9 @@ paths:
           description: Order found
         '404':
           description: Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own)
-      security: *ref_29
+      security: *ref_31
       summary: Get an order
-      tags: *ref_30
+      tags: *ref_32
     patch:
       description: Only while the order is open; lines, prices, totals and snapshots are never editable.
       operationId: OrderController_update
@@ -3427,9 +3727,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own)
         '409':
           description: The order is not open
-      security: *ref_29
+      security: *ref_31
       summary: Edit the contract number, contract date and delivery date
-      tags: *ref_30
+      tags: *ref_32
   /api/v1/sales/orders/{id}/cancel:
     post:
       description: >-
@@ -3457,9 +3757,9 @@ paths:
           description: Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own)
         '409':
           description: The order is not open
-      security: *ref_29
+      security: *ref_31
       summary: Cancel the order
-      tags: *ref_30
+      tags: *ref_32
   /api/v1/inventory/suppliers:
     get:
       description: Paginated supplier list with search and column filters.
@@ -3518,10 +3818,10 @@ paths:
           description: Paginated supplier list
         '403':
           description: Forbidden — requires supplier:read
-      security: &ref_31
+      security: &ref_33
         - bearer: []
       summary: List suppliers
-      tags: &ref_32
+      tags: &ref_34
         - inventory/suppliers
     post:
       description: Code must be unique among active suppliers, in any case.
@@ -3542,9 +3842,9 @@ paths:
           description: Forbidden — requires supplier:create
         '409':
           description: Duplicate supplier code
-      security: *ref_31
+      security: *ref_33
       summary: Create supplier
-      tags: *ref_32
+      tags: *ref_34
   /api/v1/inventory/suppliers/column-values:
     get:
       description: >-
@@ -3608,9 +3908,9 @@ paths:
           description: Unauthorized
         '403':
           description: Forbidden — requires supplier:read
-      security: *ref_31
+      security: *ref_33
       summary: List distinct values of one filterable supplier column
-      tags: *ref_32
+      tags: *ref_34
   /api/v1/inventory/suppliers/{id}:
     get:
       operationId: SupplierController_findOne
@@ -3625,9 +3925,9 @@ paths:
           description: Supplier found
         '404':
           description: Not found or soft-deleted
-      security: *ref_31
+      security: *ref_33
       summary: Get supplier by ID
-      tags: *ref_32
+      tags: *ref_34
     patch:
       operationId: SupplierController_update
       parameters:
@@ -3651,9 +3951,9 @@ paths:
           description: Supplier not found
         '409':
           description: Duplicate supplier code
-      security: *ref_31
+      security: *ref_33
       summary: Update supplier
-      tags: *ref_32
+      tags: *ref_34
     delete:
       description: Refused with 409 while any purchasing document references the supplier.
       operationId: SupplierController_remove
@@ -3672,9 +3972,9 @@ paths:
           description: Supplier not found
         '409':
           description: Supplier is referenced by a document
-      security: *ref_31
+      security: *ref_33
       summary: Soft-delete supplier
-      tags: *ref_32
+      tags: *ref_34
   /api/v1/inventory/suppliers/bulk-delete:
     post:
       description: >-
@@ -3697,9 +3997,9 @@ paths:
           description: Unauthorized
         '403':
           description: Forbidden — requires supplier:delete
-      security: *ref_31
+      security: *ref_33
       summary: Soft-delete selected suppliers
-      tags: *ref_32
+      tags: *ref_34
 info:
   title: panelXERP
   description: REST API — ERP Hải Phòng Manufacturing Platform
@@ -3784,7 +4084,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: &ref_33
+          enum: &ref_35
             - sales
             - planning
             - purchasing
@@ -3825,7 +4125,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_33
+          enum: *ref_35
           nullable: true
         title:
           type: object
@@ -3860,7 +4160,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_33
+          enum: *ref_35
           nullable: true
         title:
           type: object
@@ -4295,7 +4595,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: &ref_34
+          enum: &ref_36
             - enclosure
             - breaker
             - contactor
@@ -4345,7 +4645,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: *ref_34
+          enum: *ref_36
         unit:
           type: string
           description: Unit of measure, e.g. pcs, m, set
@@ -4358,6 +4658,63 @@ components:
           type: string
           description: Note
           maxLength: 2000
+    UpdateItemStockSettingsDto:
+      type: object
+      properties:
+        barcode:
+          type: object
+          description: Barcode, unique among active items and never another item code (any case)
+          maxLength: 64
+          nullable: true
+        defaultLocationId:
+          type: number
+          description: Default warehouse location id
+          nullable: true
+        minStock:
+          type: number
+          description: Minimum stock (>= 0); blank means no low-stock alert
+          nullable: true
+    CreateLocationDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Location code, unique among active locations (any case)
+          maxLength: 32
+          example: A-01-02
+        name:
+          type: string
+          description: Location name
+          maxLength: 255
+        note:
+          type: string
+          description: Note
+          maxLength: 2000
+        isActive:
+          type: boolean
+          description: Whether the location is in use. Defaults to true.
+      required:
+        - code
+        - name
+    UpdateLocationDto:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Location code, unique among active locations (any case)
+          maxLength: 32
+          example: A-01-02
+        name:
+          type: string
+          description: Location name
+          maxLength: 255
+        note:
+          type: string
+          description: Note
+          maxLength: 2000
+        isActive:
+          type: boolean
+          description: Whether the location is in use. Defaults to true.
     CreateRequestDto:
       type: object
       properties:
@@ -4525,7 +4882,7 @@ components:
       properties:
         category:
           type: string
-          enum: &ref_35
+          enum: &ref_37
             - design
             - labor
             - installation
@@ -4547,7 +4904,7 @@ components:
       properties:
         category:
           type: string
-          enum: *ref_35
+          enum: *ref_37
         description:
           type: object
           maxLength: 500

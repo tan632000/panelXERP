@@ -40,4 +40,22 @@ export class Item extends BaseEntity {
 
   @Column({ type: 'text', nullable: true })
   note?: string | null;
+
+  /** What a scanner reads off the item; unique among active rows (any case) and never another item's code. */
+  @Column({ type: 'varchar', length: 64, nullable: true })
+  barcode?: string | null;
+
+  @Column({ type: 'int', name: 'default_location_id', nullable: true })
+  defaultLocationId?: number | null;
+
+  /** Available stock below this raises a shortage alert; `null` means no alert. */
+  @Column({
+    type: 'numeric',
+    precision: 18,
+    scale: 3,
+    name: 'min_stock',
+    nullable: true,
+    transformer: numericColumnTransformer,
+  })
+  minStock?: number | null;
 }

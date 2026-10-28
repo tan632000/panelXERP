@@ -1,0 +1,42 @@
+{
+  "title": "Warehouse locations",
+  "description": "Manage the places where items are stored in the warehouse",
+  "code": "Location code",
+  "name": "Location name",
+  "note": "Note",
+  "isActive": "In use",
+  "status": "Status",
+  "statusActive": "In use",
+  "statusInactive": "Not in use",
+  "addButton": "Add location",
+  "addModalTitle": "Add new location",
+  "editModalTitle": "Edit location: {code}",
+  "searchPlaceholder": "Search code, name, note...",
+  "confirmDeleteTitle": "Delete location",
+  "confirmDeleteDescription": "Are you sure you want to delete location \"{code} — {name}\"?",
+  "noItems": "No warehouse locations yet",
+  "noItemsFound": "No warehouse locations found",
+  "paginationItem": "locations",
+  "emptyValue": "-",
+  "placeholders": {
+    "code": "e.g. A-01-02",
+    "name": "e.g. Rack A, level 1, slot 2",
+    "note": "Notes..."
+  },
+  "toast": {
+    "createLocationSuccess": "Location created successfully.",
+    "updateLocationSuccess": "Location updated successfully.",
+    "deleteLocationSuccess": "Location deleted successfully.",
+    "deleteInUseItem": "Cannot delete the location because it is the default location of an item.",
+    "systemError": "Something went wrong, please try again later.",
+    "forbidden": "You do not have permission to perform this action."
+  },
+  "validation": {
+    "codeRequired": "Please enter the Location code.",
+    "codeMax": "Location code must not exceed 32 characters.",
+    "codeExists": "This location code already exists.",
+    "nameRequired": "Please enter the Location name.",
+    "nameMax": "Location name must not exceed 255 characters.",
+    "noteMax": "Note must not exceed 2000 characters."
+  }
+}

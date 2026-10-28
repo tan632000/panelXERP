@@ -39,6 +39,10 @@ import {
 import { UpdateItemDto } from '@plugins/catalog/item/dto/update-item.dto';
 import { Item } from '@plugins/catalog/item/entities/item.entity';
 import { ITEM_GROUPS } from '@plugins/catalog/item/enums/item-group.enum';
+import {
+  assertCodeNotABarcode,
+  lockItemIdentifiers,
+} from '@plugins/catalog/item/utils/item-identifier.util';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 
@@ -112,7 +116,6 @@ export class ItemService {
 
   async create(dto: CreateItemDto, actor: AuthUserPayload): Promise<Item> {
     const code = requireText(dto.code, 'Item code is required.');
-    await this.assertCodeUnique(code);
     const item = this.itemRepo.create({
       code,
       name: requireText(dto.name, 'Item name is required.'),
@@ -126,7 +129,15 @@ export class ItemService {
       isDeleted: false,
     });
     try {
-      return await this.itemRepo.save(item);
+      return await this.itemRepo.manager.transaction(async (manager) => {
+        const repo = manager.getRepository(Item);
+        // A barcode set to this code in another transaction is invisible to the checks below
+        // until it commits, so writers of one value queue up here first.
+        await lockItemIdentifiers(manager, [code]);
+        await this.assertCodeUnique(code, repo);
+        await assertCodeNotABarcode(repo, code);
+        return repo.save(item);
+      });
     } catch (error: unknown) {
       return rethrowUniqueViolation(error, () => this.assertCodeUnique(code));
     }
@@ -194,9 +205,12 @@ export class ItemService {
     return bulkSoftDelete(ids, (id) => this.remove(id, actor));
   }
 
-  private assertCodeUnique(code: string): Promise<void> {
+  private assertCodeUnique(
+    code: string,
+    repo: Repository<Item> = this.itemRepo,
+  ): Promise<void> {
     // Active rows only: the unique index is partial, so a deleted item's code is reusable.
-    return assertCaseInsensitiveUnique(this.itemRepo, {
+    return assertCaseInsensitiveUnique(repo, {
       field: 'code',
       value: code,
       message: CODE_EXISTS_MESSAGE,

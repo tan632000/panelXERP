@@ -7,6 +7,8 @@ export type ItemDeleteToastKey = "deleteInUseDocument";
 
 interface ItemMessages {
   codeExists: string;
+  codeIsBarcode: string;
+  barcodeTaken: string;
 }
 
 export const mapItemApiErrorsToForm = createApiErrorFormMapper<ItemMessages>({
@@ -24,8 +26,18 @@ export const mapItemApiErrorsToForm = createApiErrorFormMapper<ItemMessages>({
     [["unit must not exceed"], "unit", "unitMax"],
     [["reference price"], "referencePrice", "referencePriceInvalid"],
     [["note must"], "note", "noteMax"],
+    [["barcode must"], "barcode", "barcodeMax"],
+    [["minimum stock"], "minStock", "minStockInvalid"],
+    [["default location"], "defaultLocationId", "locationInvalid"],
   ],
-  resolveDuplicateField: (_lower, messages) => ["code", messages.codeExists],
+  // Both conflicts name the barcode; only the one about the item code belongs on the code.
+  resolveDuplicateField: (lower, messages) => {
+    if (lower.startsWith("barcode")) return ["barcode", messages.barcodeTaken];
+    if (lower.includes("as the barcode")) {
+      return ["code", messages.codeIsBarcode];
+    }
+    return ["code", messages.codeExists];
+  },
 });
 
 export const resolveItemDeleteToastKey =

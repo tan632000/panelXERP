@@ -1,5 +1,6 @@
 {
   "moduleName": "Catalog",
   "sidebarCatalog": "Catalog",
-  "items": "Items"
+  "items": "Items",
+  "locations": "Warehouse locations"
 }

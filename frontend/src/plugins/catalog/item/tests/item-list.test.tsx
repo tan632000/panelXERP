@@ -53,6 +53,9 @@ const ITEM = {
   group: "contactor",
   unit: "Cái",
   referencePrice: 450000,
+  barcode: "8930001",
+  defaultLocation: { id: 2, code: "A-01-02", name: "Shelf A1" },
+  minStock: 5,
   note: null,
   createdAt: "2026-10-01T00:00:00.000Z",
   updatedAt: "2026-10-01T00:00:00.000Z",
@@ -99,7 +102,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   window.sessionStorage.clear();
   searchParams.value = new URLSearchParams();
-  grant(ItemPermission.read);
+  grant(ItemPermission.read, ItemPermission.referencePriceRead);
   respond();
 });
 
@@ -113,6 +116,33 @@ describe("ItemListPage", () => {
     expect(screen.getByText("Contactor 9A")).toBeInTheDocument();
     expect(screen.getByText(viItem.groups.contactor)).toBeInTheDocument();
     expect(screen.getByText("450.000")).toBeInTheDocument();
+  });
+
+  it("shows the barcode, default location and minimum stock columns", async () => {
+    renderPage();
+    await screen.findByText("LC1D09M7");
+
+    expect(screen.getByText("8930001")).toBeInTheDocument();
+    expect(screen.getByText("A-01-02")).toBeInTheDocument();
+    expect(screen.getByText("5")).toBeInTheDocument();
+  });
+
+  it("hides the reference price column from an actor without reference_price:read", async () => {
+    grant(ItemPermission.read);
+    renderPage();
+    await screen.findByText("LC1D09M7");
+
+    expect(screen.queryByText(viItem.referencePrice)).not.toBeInTheDocument();
+    expect(screen.queryByText("450.000")).not.toBeInTheDocument();
+  });
+
+  it("lets a holder of item:stock_settings alone open the edit control", async () => {
+    grant(ItemPermission.read, ItemPermission.stockSettings);
+    renderPage();
+    await screen.findByText("LC1D09M7");
+
+    expect(screen.getByTitle(viCommon.edit)).toBeInTheDocument();
+    expect(screen.queryByTitle(viCommon.delete)).not.toBeInTheDocument();
   });
 
   it("hides create and import from a reader holding only item:read", async () => {

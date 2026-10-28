@@ -1,5 +1,7 @@
 import { ItemModule } from '@plugins/catalog/item/item.module';
 import { itemPermissions } from '@plugins/catalog/item/permissions/item.permissions';
+import { LocationModule } from '@plugins/catalog/location/location.module';
+import { locationPermissions } from '@plugins/catalog/location/permissions/location.permissions';
 
 import type { ErpFeature } from '@kernel/platform/features/feature.contract';
 
@@ -10,5 +12,11 @@ export const CATALOG_FEATURES: ErpFeature[] = [
     plugin: 'catalog',
     module: ItemModule,
     permissions: itemPermissions,
+  },
+  {
+    key: 'location',
+    plugin: 'catalog',
+    module: LocationModule,
+    permissions: locationPermissions,
   },
 ];

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { optionalMaxString } from "@/kernel/core/lib/validators";
 
 import {
+  ITEM_BARCODE_MAX,
   ITEM_CODE_MAX,
   ITEM_GROUPS,
   ITEM_UNIT_MAX,
@@ -20,6 +21,8 @@ export interface ItemValidationMessages {
   unitMax: string;
   referencePriceInvalid: string;
   noteMax: string;
+  barcodeMax: string;
+  minStockInvalid: string;
 }
 
 export function createItemSchema(messages: ItemValidationMessages) {
@@ -58,6 +61,19 @@ export function createItemSchema(messages: ItemValidationMessages) {
         messages.referencePriceInvalid,
       ),
     note: optionalMaxString(2000, messages.noteMax),
+    barcode: optionalMaxString(ITEM_BARCODE_MAX, messages.barcodeMax),
+    /** Id of the default location as the select stores it; empty when none. */
+    defaultLocationId: z.string(),
+    /** Stored form of the masked number input; empty means no low-stock alert. */
+    minStock: z
+      .string()
+      .trim()
+      .refine(
+        (value) =>
+          value === "" ||
+          (Number.isFinite(Number(value)) && Number(value) >= 0),
+        messages.minStockInvalid,
+      ),
   });
 }
 

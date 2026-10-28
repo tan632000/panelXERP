@@ -14,12 +14,15 @@ import request from 'supertest';
 import { PERMISSIONS_KEY } from '@kernel/core/auth/decorators/auth.decorators';
 import { RolesGuard } from '@kernel/core/auth/guards/roles.guard';
 import { seededRolePermissions } from '@kernel/core/database/seeds/seed-roles';
+import { expectNoMoneyKeys } from '@kernel/shared/testing/money-keys.helper-spec';
 
 import { ReferenceCheckRegistry } from '@plugins/catalog/_shared/gateways/reference-check-registry';
 import { Item } from '@plugins/catalog/item/entities/item.entity';
 import { ItemController } from '@plugins/catalog/item/item.controller';
 import { ItemImportService } from '@plugins/catalog/item/services/item-import.service';
+import { ItemStockSettingsService } from '@plugins/catalog/item/services/item-stock-settings.service';
 import { ItemService } from '@plugins/catalog/item/services/item.service';
+import { Location } from '@plugins/catalog/location/entities/location.entity';
 import {
   FakeRepo,
   type FakeRow,
@@ -48,6 +51,7 @@ function actor(userId: number, role: string): string {
 const PURCHASING = actor(40, 'purchasing');
 const SALES = actor(11, 'sales');
 const ENGINEER = actor(30, 'engineer');
+const STOREKEEPER = actor(41, 'storekeeper');
 
 interface ResponseBody {
   id: number;
@@ -72,17 +76,31 @@ describe('ItemController', () => {
   let app: INestApplication<App>;
   let registry: ReferenceCheckRegistry;
   let items: FakeRepo<Item & FakeRow>;
+  let locations: FakeRepo<Location & FakeRow>;
   let inserted: unknown[];
 
   beforeEach(async () => {
+    locations = new FakeRepo<Location & FakeRow>();
     items = new FakeRepo<Item & FakeRow>({
       unique: [
         {
           constraint: 'uq_items_code_active',
           collides: (a, b) => a.code.toLowerCase() === b.code.toLowerCase(),
         },
+        {
+          constraint: 'uq_items_barcode_active',
+          collides: (a, b) =>
+            !!a.barcode && a.barcode.toLowerCase() === b.barcode?.toLowerCase(),
+        },
       ],
     });
+    // Writes read both tables through the transaction manager, one repo per entity.
+    items.manager.transaction = ((work: (manager: unknown) => unknown) =>
+      work({
+        getRepository: (target: unknown) =>
+          target === Location ? locations : items,
+        query: items.query,
+      })) as never;
     inserted = [];
     const query = {
       select: jest.fn().mockReturnThis(),
@@ -94,6 +112,7 @@ describe('ItemController', () => {
       transaction: (
         callback: (manager: {
           insert: (target: unknown, rows: unknown[]) => Promise<void>;
+          query: () => Promise<unknown[]>;
         }) => Promise<void>,
       ) =>
         callback({
@@ -101,6 +120,7 @@ describe('ItemController', () => {
             inserted.push(...rows);
             return Promise.resolve();
           },
+          query: () => Promise.resolve([]),
         }),
     };
 
@@ -109,7 +129,9 @@ describe('ItemController', () => {
       providers: [
         ItemService,
         ItemImportService,
+        ItemStockSettingsService,
         ReferenceCheckRegistry,
+        { provide: getRepositoryToken(Location), useValue: locations },
         {
           provide: getRepositoryToken(Item),
           useValue: Object.assign(items, {
@@ -152,6 +174,7 @@ describe('ItemController', () => {
       ['findOne', 'item:read'],
       ['import', 'item:import'],
       ['importTemplate', 'item:import'],
+      ['updateStockSettings', 'item:stock_settings'],
     ])('guards %s with %s', (handler, permission) => {
       const method = Object.getOwnPropertyDescriptor(
         ItemController.prototype,
@@ -360,6 +383,206 @@ describe('ItemController', () => {
         expect(res.status).toBe(400);
       }
       expect(items.rows).toHaveLength(0);
+    });
+  });
+
+  describe('stock settings, scan resolve and price visibility', () => {
+    const settings = (token: string, id: number, body: object) =>
+      request(app.getHttpServer())
+        .patch(`/items/${id}/stock-settings`)
+        .set(as(token))
+        .send(body);
+    const resolve = (token: string, code: string) =>
+      request(app.getHttpServer())
+        .get('/items/resolve')
+        .query({ code })
+        .set(as(token));
+    const createPriced = (code: string, extra: object = {}) =>
+      create(PURCHASING, {
+        ...NEW_ITEM,
+        code,
+        referencePrice: 450000,
+        ...extra,
+      });
+
+    it('hides every money key from the storekeeper on list, detail, resolve and stock settings', async () => {
+      const created = bodyOf(await createPriced('LC1D09M7'));
+      await settings(STOREKEEPER, created.id, { barcode: '8930001' });
+
+      const list = await request(app.getHttpServer())
+        .get('/items')
+        .set(as(STOREKEEPER));
+      const detail = await request(app.getHttpServer())
+        .get(`/items/${created.id}`)
+        .set(as(STOREKEEPER));
+      const scanned = await resolve(STOREKEEPER, '8930001');
+      const saved = await settings(STOREKEEPER, created.id, { minStock: 5 });
+
+      for (const res of [list, detail, scanned, saved]) {
+        expect(res.status).toBe(200);
+        expectNoMoneyKeys(res.body);
+      }
+      expect(bodyOf(list).data).toHaveLength(1);
+      // The row still holds the price: only the response drops it.
+      expect(items.rows[0].referencePrice).toBe(450000);
+    });
+
+    it('still shows the reference price to sales, engineers and purchasing', async () => {
+      const created = bodyOf(await createPriced('LC1D09M7'));
+
+      for (const token of [SALES, ENGINEER, PURCHASING]) {
+        const detail = await request(app.getHttpServer())
+          .get(`/items/${created.id}`)
+          .set(as(token));
+        expect(detail.body).toMatchObject({ referencePrice: 450000 });
+
+        const list = await request(app.getHttpServer())
+          .get('/items')
+          .set(as(token));
+        expect(bodyOf(list).data[0]).toMatchObject({ referencePrice: 450000 });
+      }
+    });
+
+    it('lets the storekeeper edit stock settings but not the item itself', async () => {
+      const created = bodyOf(await createPriced('LC1D09M7'));
+
+      const patch = await request(app.getHttpServer())
+        .patch(`/items/${created.id}`)
+        .set(as(STOREKEEPER))
+        .send({ name: 'Renamed' });
+      expect(patch.status).toBe(403);
+      expect(items.rows[0].name).toBe('Contactor 9A');
+
+      expect(
+        (await settings(STOREKEEPER, created.id, { minStock: 2.5 })).status,
+      ).toBe(200);
+      expect(items.rows[0].minStock).toBe(2.5);
+      expect((await settings(SALES, created.id, { minStock: 9 })).status).toBe(
+        403,
+      );
+    });
+
+    it('does not let item create or update carry the stock settings', async () => {
+      const created = bodyOf(await createPriced('LC1D09M7'));
+
+      expect((await createPriced('X-1', { barcode: 'B-1' })).status).toBe(400);
+      const patch = await request(app.getHttpServer())
+        .patch(`/items/${created.id}`)
+        .set(as(PURCHASING))
+        .send({ minStock: 3 });
+      expect(patch.status).toBe(400);
+    });
+
+    it('answers 409 to a barcode already used as a barcode or as another item code', async () => {
+      const first = bodyOf(await createPriced('LC1D09M7'));
+      const second = bodyOf(await createPriced('LC1D12M7'));
+      await settings(PURCHASING, first.id, { barcode: 'ABC-1' });
+
+      expect(
+        (await settings(PURCHASING, second.id, { barcode: 'abc-1' })).status,
+      ).toBe(409);
+      expect(
+        (await settings(PURCHASING, second.id, { barcode: 'lc1d09m7' })).status,
+      ).toBe(409);
+      expect(items.rows[1].barcode ?? null).toBeNull();
+    });
+
+    it('answers 409 to a new item whose code is another item barcode', async () => {
+      const first = bodyOf(await createPriced('LC1D09M7'));
+      await settings(PURCHASING, first.id, { barcode: '8930001' });
+
+      expect((await createPriced('8930001')).status).toBe(409);
+      expect(items.rows).toHaveLength(1);
+    });
+
+    it('resolves by barcode, by code in any case, and answers 404 to an unknown value', async () => {
+      const first = bodyOf(await createPriced('LC1D09M7'));
+      await settings(PURCHASING, first.id, { barcode: '8930001' });
+
+      const byBarcode = await resolve(STOREKEEPER, '  8930001 ');
+      expect(byBarcode.status).toBe(200);
+      expect(byBarcode.body).toEqual({
+        id: first.id,
+        code: 'LC1D09M7',
+        name: 'Contactor 9A',
+        unit: 'Cái',
+        brand: null,
+        barcode: '8930001',
+        defaultLocationCode: null,
+      });
+
+      const byCode = await resolve(STOREKEEPER, 'lc1d09m7');
+      expect(byCode.status).toBe(200);
+      expect(byCode.body).toMatchObject({ id: first.id });
+
+      const unknown = await resolve(STOREKEEPER, 'NOPE');
+      expect(unknown.status).toBe(404);
+      expect(unknown.body).toMatchObject({ message: 'No item for NOPE' });
+
+      expect((await resolve(STOREKEEPER, '   ')).status).toBe(400);
+    });
+
+    it('stops resolving the barcode of a deleted item', async () => {
+      const first = bodyOf(await createPriced('LC1D09M7'));
+      await settings(PURCHASING, first.id, { barcode: '8930001' });
+      await request(app.getHttpServer())
+        .delete(`/items/${first.id}`)
+        .set(as(PURCHASING));
+
+      expect((await resolve(STOREKEEPER, '8930001')).status).toBe(404);
+      expect((await resolve(STOREKEEPER, 'LC1D09M7')).status).toBe(404);
+    });
+
+    it('names the default location code on resolve and refuses an unknown or inactive location', async () => {
+      const first = bodyOf(await createPriced('LC1D09M7'));
+      const shelf = locations.seed({
+        code: 'A-01-02',
+        name: 'Shelf',
+        isActive: true,
+      } as never);
+      const closed = locations.seed({
+        code: 'Z-9',
+        name: 'Closed',
+        isActive: false,
+      } as never);
+
+      for (const defaultLocationId of [999, closed.id]) {
+        expect(
+          (await settings(STOREKEEPER, first.id, { defaultLocationId })).status,
+        ).toBe(400);
+      }
+      expect(
+        (await settings(STOREKEEPER, first.id, { defaultLocationId: shelf.id }))
+          .status,
+      ).toBe(200);
+
+      const scanned = await resolve(STOREKEEPER, 'LC1D09M7');
+      expect(scanned.body).toMatchObject({ defaultLocationCode: 'A-01-02' });
+
+      const list = await request(app.getHttpServer())
+        .get('/items')
+        .set(as(STOREKEEPER));
+      expect(bodyOf(list).data[0]).toMatchObject({
+        defaultLocationId: shelf.id,
+        defaultLocation: { id: shelf.id, code: 'A-01-02', name: 'Shelf' },
+      });
+    });
+
+    it('clears the settings sent as null and refuses a negative minimum', async () => {
+      const first = bodyOf(await createPriced('LC1D09M7'));
+      await settings(STOREKEEPER, first.id, { barcode: 'B-1', minStock: 4 });
+
+      const cleared = await settings(STOREKEEPER, first.id, {
+        barcode: null,
+        minStock: null,
+      });
+      expect(cleared.status).toBe(200);
+      expect(items.rows[0].barcode).toBeNull();
+      expect(items.rows[0].minStock).toBeNull();
+
+      expect(
+        (await settings(STOREKEEPER, first.id, { minStock: -1 })).status,
+      ).toBe(400);
     });
   });
 });

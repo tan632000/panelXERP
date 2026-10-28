@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -90,6 +91,7 @@ const SIGNED_OUT_STATE: AuthState = {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const t = useTranslations("auth");
   const { showError } = useNotification();
   const [state, setState] = useState<AuthState>(INITIAL_AUTH_STATE);
@@ -260,12 +262,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // A new session opens every list clean, however the previous one ended (sign-out,
       // expiry, another tab) — list filters otherwise live for the whole browser tab.
       clearAllListViewState();
+      // Query results belong to the account that fetched them: another account signing in
+      // (a storekeeper after an engineer) must not be handed the earlier one's cached
+      // responses, which may carry fields this account is not entitled to.
+      queryClient.clear();
       setState(applySession(data));
       router.replace(
         resolvePostLoginPath(window.location.search, window.location.pathname),
       );
     },
-    [router],
+    [router, queryClient],
   );
 
   const applySessionUpdate = useCallback((data: MeResponse) => {
@@ -288,9 +294,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     clearTokens();
     clearAllListViewState();
+    queryClient.clear();
     setState(SIGNED_OUT_STATE);
     router.push("/login");
-  }, [router]);
+  }, [router, queryClient]);
 
   const can = useCallback(
     (permission: string) => hasPermission(state.permissions, permission),

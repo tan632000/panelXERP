@@ -12,6 +12,7 @@ import type {
   ItemImportResult,
   ItemListParams,
   UpdateItemDto,
+  UpdateItemStockSettingsDto,
 } from "@plugins/catalog/item/types";
 
 export async function getItems(
@@ -33,6 +34,17 @@ export async function updateItem(
   payload: UpdateItemDto,
 ): Promise<Item> {
   const { data } = await api.patch<Item>(itemApiRoutes.detail(id), payload);
+  return data;
+}
+
+export async function updateItemStockSettings(
+  id: number,
+  payload: UpdateItemStockSettingsDto,
+): Promise<Item> {
+  const { data } = await api.patch<Item>(
+    itemApiRoutes.stockSettings(id),
+    payload,
+  );
   return data;
 }
 

@@ -8,8 +8,14 @@ export interface Item {
   brand?: string | null;
   group: ItemGroup;
   unit: string;
+  /** Absent from the response unless the actor holds `reference_price:read`. */
   referencePrice?: number | null;
   note?: string | null;
+  barcode?: string | null;
+  defaultLocationId?: number | null;
+  /** Sent by the list only; the detail and write responses carry just the id. */
+  defaultLocation?: { id: number; code: string; name: string } | null;
+  minStock?: number | null;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -39,6 +45,13 @@ export interface CreateItemDto {
 export type UpdateItemDto = Partial<
   Omit<CreateItemDto, "code" | "referencePrice">
 > & { referencePrice?: number | null };
+
+/** A field left out stays as it is; `null` (or an empty barcode) clears it. */
+export interface UpdateItemStockSettingsDto {
+  barcode?: string | null;
+  defaultLocationId?: number | null;
+  minStock?: number | null;
+}
 
 /** One rejected sheet row; `row` is the 1-based sheet row including the header. */
 export interface ItemImportRowError {

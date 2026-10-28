@@ -39,7 +39,10 @@
     "unit": "VD: Cái, m, Bộ",
     "referencePrice": "0",
     "specification": "Thông số kỹ thuật...",
-    "note": "Ghi chú..."
+    "note": "Ghi chú...",
+    "barcode": "Quét hoặc nhập mã vạch",
+    "defaultLocation": "Chọn vị trí",
+    "minStock": "Để trống nếu không cần cảnh báo"
   },
   "toast": {
     "createItemSuccess": "Tạo vật tư thành công.",
@@ -61,7 +64,12 @@
     "unitRequired": "Vui lòng nhập Đơn vị tính.",
     "unitMax": "Đơn vị tính không được vượt quá 20 ký tự.",
     "referencePriceInvalid": "Giá tham khảo phải là số lớn hơn hoặc bằng 0.",
-    "noteMax": "Ghi chú không được vượt quá 2000 ký tự."
+    "noteMax": "Ghi chú không được vượt quá 2000 ký tự.",
+    "barcodeMax": "Mã vạch không được vượt quá 64 ký tự.",
+    "barcodeTaken": "Mã vạch đã trùng với mã vạch hoặc mã hàng của vật tư khác.",
+    "codeIsBarcode": "Mã hàng đã trùng với mã vạch của vật tư khác.",
+    "minStockInvalid": "Tồn tối thiểu phải là số lớn hơn hoặc bằng 0.",
+    "locationInvalid": "Vị trí mặc định phải là vị trí đang sử dụng."
   },
   "import": {
     "title": "Nhập vật tư từ Excel",
@@ -86,7 +94,13 @@
       "codeExists": "Mã hàng đã tồn tại trong hệ thống.",
       "codeRepeated": "Mã hàng lặp lại trong tệp với dữ liệu khác.",
       "groupInvalid": "Nhóm không hợp lệ.",
-      "priceInvalid": "Giá tham khảo phải là số lớn hơn hoặc bằng 0."
+      "priceInvalid": "Giá tham khảo phải là số lớn hơn hoặc bằng 0.",
+      "codeIsBarcode": "Mã hàng đã là mã vạch của vật tư khác."
     }
-  }
+  },
+  "barcode": "Mã vạch",
+  "stockSection": "Kho",
+  "defaultLocation": "Vị trí mặc định",
+  "minStock": "Tồn tối thiểu",
+  "locationColumn": "Vị trí"
 }

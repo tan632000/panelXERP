@@ -33,6 +33,7 @@ const REASON_RULES: ReadonlyArray<readonly [prefix: string, key: string]> = [
   ["missing code", "missingCode"],
   ["missing unit", "missingUnit"],
   ["code already exists", "codeExists"],
+  ["code is already the barcode", "codeIsBarcode"],
   ["code repeated with different data", "codeRepeated"],
   ["group must be one of", "groupInvalid"],
   ["reference price", "priceInvalid"],

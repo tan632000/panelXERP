@@ -151,6 +151,34 @@ describe('ItemService', () => {
     ).toBeUndefined();
   });
 
+  it('answers 409 to a new code equal to another active item barcode, and frees it once that item is deleted', async () => {
+    const { service, items } = buildService();
+    const first = await service.create(dto({ code: 'LC1D09M7' }), PURCHASING);
+    items.rows[0].barcode = '8930001';
+
+    await expect(
+      service.create(dto({ code: '8930001' }), PURCHASING),
+    ).rejects.toBeInstanceOf(ConflictException);
+
+    await service.remove(first.id, PURCHASING);
+    await expect(
+      service.create(dto({ code: '8930001' }), PURCHASING),
+    ).resolves.toMatchObject({ code: '8930001' });
+  });
+
+  it('takes the identifier lock for the new code inside the create transaction', async () => {
+    const { service, items } = buildService();
+
+    await service.create(dto({ code: 'LC1D09M7' }), PURCHASING);
+
+    const [sql, args] = items.query.mock.calls[0] as unknown as [
+      string,
+      string[][],
+    ];
+    expect(sql).toContain('pg_advisory_xact_lock');
+    expect(args[0]).toEqual(['lc1d09m7']);
+  });
+
   it('answers 404 for a missing item', async () => {
     const { service } = buildService();
 

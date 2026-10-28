@@ -22,6 +22,8 @@ export function useItemFormSchema() {
         unitMax: t("unitMax"),
         referencePriceInvalid: t("referencePriceInvalid"),
         noteMax: t("noteMax"),
+        barcodeMax: t("barcodeMax"),
+        minStockInvalid: t("minStockInvalid"),
       }),
     [t],
   );

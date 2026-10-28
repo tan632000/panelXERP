@@ -2736,7 +2736,7 @@
     },
     "/api/v1/items": {
       "get": {
-        "description": "Paginated item list with search and column filters.",
+        "description": "Paginated item list with search and column filters. referencePrice is omitted unless the actor holds reference_price:read.",
         "operationId": "ItemController_findAll",
         "parameters": [
           {
@@ -3037,6 +3037,47 @@
         ]
       }
     },
+    "/api/v1/items/resolve": {
+      "get": {
+        "description": "The active item whose barcode equals the trimmed value, else the one whose code does (any case). Carries no price.",
+        "operationId": "ItemController_resolve",
+        "parameters": [
+          {
+            "name": "code",
+            "required": true,
+            "in": "query",
+            "description": "Scanned value: an item barcode, else an item code (any case)",
+            "schema": {
+              "maxLength": 255,
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The item the value stands for"
+          },
+          "400": {
+            "description": "Missing code"
+          },
+          "403": {
+            "description": "Forbidden — requires item:read"
+          },
+          "404": {
+            "description": "No item for the value"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resolve a scanned value to an item",
+        "tags": [
+          "catalog/items"
+        ]
+      }
+    },
     "/api/v1/items/{id}": {
       "get": {
         "operationId": "ItemController_findOne",
@@ -3153,6 +3194,58 @@
         ]
       }
     },
+    "/api/v1/items/{id}/stock-settings": {
+      "patch": {
+        "description": "Edits only barcode, default location and minimum stock. A barcode must be neither another active item barcode nor another active item code.",
+        "operationId": "ItemController_updateStockSettings",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateItemStockSettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stock settings updated"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Forbidden — requires item:stock_settings"
+          },
+          "404": {
+            "description": "Item not found"
+          },
+          "409": {
+            "description": "Barcode already in use"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update the warehouse settings of an item",
+        "tags": [
+          "catalog/items"
+        ]
+      }
+    },
     "/api/v1/items/bulk-delete": {
       "post": {
         "description": "Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.",
@@ -3190,6 +3283,394 @@
         "summary": "Soft-delete selected items",
         "tags": [
           "catalog/items"
+        ]
+      }
+    },
+    "/api/v1/catalog/locations": {
+      "get": {
+        "description": "Paginated location list with search and column filters.",
+        "operationId": "LocationController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortBy",
+            "required": false,
+            "in": "query",
+            "description": "Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.",
+            "schema": {
+              "default": "createdAt",
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortOrder",
+            "required": false,
+            "in": "query",
+            "description": "Sort order. Defaults to DESC for createdAt, ASC otherwise.",
+            "schema": {
+              "default": "DESC",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated location list"
+          },
+          "403": {
+            "description": "Forbidden — requires location:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List locations",
+        "tags": [
+          "catalog/locations"
+        ]
+      },
+      "post": {
+        "description": "Code must be unique among active locations, in any case.",
+        "operationId": "LocationController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLocationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Location created"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "403": {
+            "description": "Forbidden — requires location:create"
+          },
+          "409": {
+            "description": "Duplicate location code"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create location",
+        "tags": [
+          "catalog/locations"
+        ]
+      }
+    },
+    "/api/v1/catalog/locations/column-values": {
+      "get": {
+        "description": "Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.",
+        "operationId": "LocationController_findColumnValues",
+        "parameters": [
+          {
+            "name": "column",
+            "required": true,
+            "in": "query",
+            "description": "Column key: code, name",
+            "schema": {
+              "example": "classification",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search within the values",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Values per page",
+            "schema": {
+              "default": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "listSearch",
+            "required": false,
+            "in": "query",
+            "description": "Keyword search of the list itself",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated distinct column values"
+          },
+          "400": {
+            "description": "Column is not filterable"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — requires location:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List distinct values of one filterable location column",
+        "tags": [
+          "catalog/locations"
+        ]
+      }
+    },
+    "/api/v1/catalog/locations/{id}": {
+      "get": {
+        "operationId": "LocationController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location found"
+          },
+          "404": {
+            "description": "Not found or soft-deleted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get location by ID",
+        "tags": [
+          "catalog/locations"
+        ]
+      },
+      "patch": {
+        "operationId": "LocationController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLocationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Location updated"
+          },
+          "403": {
+            "description": "Forbidden — requires location:update"
+          },
+          "404": {
+            "description": "Location not found"
+          },
+          "409": {
+            "description": "Duplicate location code"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update location",
+        "tags": [
+          "catalog/locations"
+        ]
+      },
+      "delete": {
+        "description": "Refused with 409 while an active item has the location as its default.",
+        "operationId": "LocationController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Location soft-deleted"
+          },
+          "403": {
+            "description": "Forbidden — requires location:delete"
+          },
+          "404": {
+            "description": "Location not found"
+          },
+          "409": {
+            "description": "Location is the default location of an item"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete location",
+        "tags": [
+          "catalog/locations"
+        ]
+      }
+    },
+    "/api/v1/catalog/locations/bulk-delete": {
+      "post": {
+        "description": "Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.",
+        "operationId": "LocationController_bulkRemove",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkDeleteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }`"
+          },
+          "400": {
+            "description": "Empty or invalid id list"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden — requires location:delete"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Soft-delete selected locations",
+        "tags": [
+          "catalog/locations"
         ]
       }
     },
@@ -6975,6 +7456,81 @@
             "type": "string",
             "description": "Note",
             "maxLength": 2000
+          }
+        }
+      },
+      "UpdateItemStockSettingsDto": {
+        "type": "object",
+        "properties": {
+          "barcode": {
+            "type": "object",
+            "description": "Barcode, unique among active items and never another item code (any case)",
+            "maxLength": 64,
+            "nullable": true
+          },
+          "defaultLocationId": {
+            "type": "number",
+            "description": "Default warehouse location id",
+            "nullable": true
+          },
+          "minStock": {
+            "type": "number",
+            "description": "Minimum stock (>= 0); blank means no low-stock alert",
+            "nullable": true
+          }
+        }
+      },
+      "CreateLocationDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Location code, unique among active locations (any case)",
+            "maxLength": 32,
+            "example": "A-01-02"
+          },
+          "name": {
+            "type": "string",
+            "description": "Location name",
+            "maxLength": 255
+          },
+          "note": {
+            "type": "string",
+            "description": "Note",
+            "maxLength": 2000
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the location is in use. Defaults to true."
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
+      "UpdateLocationDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Location code, unique among active locations (any case)",
+            "maxLength": 32,
+            "example": "A-01-02"
+          },
+          "name": {
+            "type": "string",
+            "description": "Location name",
+            "maxLength": 255
+          },
+          "note": {
+            "type": "string",
+            "description": "Note",
+            "maxLength": 2000
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the location is in use. Defaults to true."
           }
         }
       },

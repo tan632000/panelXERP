@@ -28,9 +28,6 @@ const PANEL_ROLES = [
  * is empty once its feature is built; until then `seedRoles` stores none of these scopes.
  */
 const PENDING_MODULES: Readonly<Record<string, string>> = {
-  location: 'task-03',
-  reference_price: 'task-03',
-  purchase_price: 'task-03',
   stock: 'task-05',
   purchase_order: 'task-07',
   material: 'task-09',
@@ -46,9 +43,7 @@ const PENDING_MODULES: Readonly<Record<string, string>> = {
  * declares each. Empty while every declared module is complete; a task that adds a module in
  * stages lists the scopes of the later stages here until it declares them.
  */
-const PENDING_SCOPES: Readonly<Record<string, string>> = {
-  'item:stock_settings': 'task-03',
-};
+const PENDING_SCOPES: Readonly<Record<string, string>> = {};
 
 /**
  * Seeded scopes no plugin declares and nothing excuses: not a pending scope, not on a

@@ -10,6 +10,9 @@ export const ItemPermission = {
   update: "item:update",
   delete: "item:delete",
   import: "item:import",
+  stockSettings: "item:stock_settings",
+  /** Not an item scope: it gates the `referencePrice` the API returns. */
+  referencePriceRead: "reference_price:read",
 } as const;
 
 export type ItemPermissionKey =

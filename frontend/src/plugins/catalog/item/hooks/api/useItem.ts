@@ -19,6 +19,7 @@ import {
   getItems,
   importItems,
   updateItem,
+  updateItemStockSettings,
 } from "@plugins/catalog/item/services/item.service";
 import { resolveItemDeleteToastKey } from "@plugins/catalog/item/utils/map-item-api-errors";
 
@@ -26,6 +27,7 @@ import type {
   CreateItemDto,
   ItemListParams,
   UpdateItemDto,
+  UpdateItemStockSettingsDto,
 } from "@plugins/catalog/item/types";
 
 export function useItemList(params: ItemListParams = {}) {
@@ -58,6 +60,32 @@ export function useUpdateItem() {
     mutationFn: ({ id, data }: { id: number; data: UpdateItemDto }) =>
       updateItem(id, data),
     successMessage: t("updateItemSuccess"),
+    ...feedback,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: itemQueryKeys.all });
+    },
+  });
+}
+
+/**
+ * Saves barcode, default location and minimum stock. `announce` is off when the same save
+ * already updated the item itself, so the user hears one success rather than two.
+ */
+export function useUpdateItemStockSettings({
+  announce = true,
+}: { announce?: boolean } = {}) {
+  const t = useTranslations("item.toast");
+  const qc = useQueryClient();
+  const feedback = useToastMutationFeedback("item.toast");
+  return useMutationFeedback({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: number;
+      data: UpdateItemStockSettingsDto;
+    }) => updateItemStockSettings(id, data),
+    successMessage: announce ? t("updateItemSuccess") : undefined,
     ...feedback,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: itemQueryKeys.all });

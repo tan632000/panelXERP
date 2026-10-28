@@ -1035,7 +1035,7 @@ export interface paths {
     };
     /**
      * List items
-     * @description Paginated item list with search and column filters.
+     * @description Paginated item list with search and column filters. referencePrice is omitted unless the actor holds reference_price:read.
      */
     get: operations["ItemController_findAll"];
     put?: never;
@@ -1110,6 +1110,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/items/resolve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Resolve a scanned value to an item
+     * @description The active item whose barcode equals the trimmed value, else the one whose code does (any case). Carries no price.
+     */
+    get: operations["ItemController_resolve"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/items/{id}": {
     parameters: {
       query?: never;
@@ -1135,6 +1155,26 @@ export interface paths {
     patch: operations["ItemController_update"];
     trace?: never;
   };
+  "/api/v1/items/{id}/stock-settings": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Update the warehouse settings of an item
+     * @description Edits only barcode, default location and minimum stock. A barcode must be neither another active item barcode nor another active item code.
+     */
+    patch: operations["ItemController_updateStockSettings"];
+    trace?: never;
+  };
   "/api/v1/items/bulk-delete": {
     parameters: {
       query?: never;
@@ -1149,6 +1189,92 @@ export interface paths {
      * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
      */
     post: operations["ItemController_bulkRemove"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalog/locations": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List locations
+     * @description Paginated location list with search and column filters.
+     */
+    get: operations["LocationController_findAll"];
+    put?: never;
+    /**
+     * Create location
+     * @description Code must be unique among active locations, in any case.
+     */
+    post: operations["LocationController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalog/locations/column-values": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List distinct values of one filterable location column
+     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+     */
+    get: operations["LocationController_findColumnValues"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/catalog/locations/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get location by ID */
+    get: operations["LocationController_findOne"];
+    put?: never;
+    post?: never;
+    /**
+     * Soft-delete location
+     * @description Refused with 409 while an active item has the location as its default.
+     */
+    delete: operations["LocationController_remove"];
+    options?: never;
+    head?: never;
+    /** Update location */
+    patch: operations["LocationController_update"];
+    trace?: never;
+  };
+  "/api/v1/catalog/locations/bulk-delete": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Soft-delete selected locations
+     * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
+     */
+    post: operations["LocationController_bulkRemove"];
     delete?: never;
     options?: never;
     head?: never;
@@ -2375,6 +2501,40 @@ export interface components {
       referencePrice?: number | null;
       /** @description Note */
       note?: string;
+    };
+    UpdateItemStockSettingsDto: {
+      /** @description Barcode, unique among active items and never another item code (any case) */
+      barcode?: Record<string, never> | null;
+      /** @description Default warehouse location id */
+      defaultLocationId?: number | null;
+      /** @description Minimum stock (>= 0); blank means no low-stock alert */
+      minStock?: number | null;
+    };
+    CreateLocationDto: {
+      /**
+       * @description Location code, unique among active locations (any case)
+       * @example A-01-02
+       */
+      code: string;
+      /** @description Location name */
+      name: string;
+      /** @description Note */
+      note?: string;
+      /** @description Whether the location is in use. Defaults to true. */
+      isActive?: boolean;
+    };
+    UpdateLocationDto: {
+      /**
+       * @description Location code, unique among active locations (any case)
+       * @example A-01-02
+       */
+      code?: string;
+      /** @description Location name */
+      name?: string;
+      /** @description Note */
+      note?: string;
+      /** @description Whether the location is in use. Defaults to true. */
+      isActive?: boolean;
     };
     CreateRequestDto: {
       /** @description Customer the request is for */
@@ -4835,6 +4995,48 @@ export interface operations {
       };
     };
   };
+  ItemController_resolve: {
+    parameters: {
+      query: {
+        /** @description Scanned value: an item barcode, else an item code (any case) */
+        code: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The item the value stands for */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Missing code */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires item:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description No item for the value */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   ItemController_findOne: {
     parameters: {
       query?: never;
@@ -4948,6 +5150,58 @@ export interface operations {
       };
     };
   };
+  ItemController_updateStockSettings: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateItemStockSettingsDto"];
+      };
+    };
+    responses: {
+      /** @description Stock settings updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires item:stock_settings */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Item not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Barcode already in use */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   ItemController_bulkRemove: {
     parameters: {
       query?: never;
@@ -4983,6 +5237,299 @@ export interface operations {
         content?: never;
       };
       /** @description Forbidden — requires item:delete */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LocationController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+        sortBy?: string;
+        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+        sortOrder?: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated location list */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires location:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LocationController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateLocationDto"];
+      };
+    };
+    responses: {
+      /** @description Location created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires location:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Duplicate location code */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LocationController_findColumnValues: {
+    parameters: {
+      query: {
+        /** @description Column key: code, name */
+        column: string;
+        /** @description Search within the values */
+        search?: string;
+        /** @description Page number */
+        page?: number;
+        /** @description Values per page */
+        limit?: number;
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Keyword search of the list itself */
+        listSearch?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated distinct column values */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Column is not filterable */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires location:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LocationController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Location found */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found or soft-deleted */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LocationController_remove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Location soft-deleted */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires location:delete */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Location not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Location is the default location of an item */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LocationController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateLocationDto"];
+      };
+    };
+    responses: {
+      /** @description Location updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires location:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Location not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Duplicate location code */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  LocationController_bulkRemove: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["BulkDeleteDto"];
+      };
+    };
+    responses: {
+      /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Empty or invalid id list */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires location:delete */
       403: {
         headers: {
           [name: string]: unknown;
