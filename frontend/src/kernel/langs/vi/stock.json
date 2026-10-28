@@ -1,0 +1,42 @@
+{
+  "title": "Tồn kho",
+  "description": "Tồn thực tế, đang giữ và khả dụng của từng vật tư",
+  "code": "Mã vật tư",
+  "name": "Tên vật tư",
+  "unit": "ĐVT",
+  "location": "Vị trí mặc định",
+  "onHand": "Tồn thực tế",
+  "reserved": "Đang giữ",
+  "available": "Khả dụng",
+  "minStock": "Tồn tối thiểu",
+  "lowBadge": "Dưới tối thiểu",
+  "avgCost": "Giá vốn BQ",
+  "value": "Giá trị tồn",
+  "lowOnly": "Chỉ vật tư dưới tồn tối thiểu",
+  "searchPlaceholder": "Tìm mã, tên vật tư...",
+  "openLedger": "Xem sổ kho",
+  "emptyValue": "—",
+  "noItems": "Chưa có vật tư nào",
+  "noItemsFound": "Không tìm thấy vật tư phù hợp",
+  "paginationItem": "vật tư",
+  "loadError": "Không tải được tồn kho. Vui lòng thử lại.",
+  "ledger": {
+    "title": "Sổ kho: {code}",
+    "date": "Thời gian",
+    "type": "Loại",
+    "quantity": "Số lượng",
+    "onHandAfter": "Tồn sau",
+    "unitCost": "Đơn giá",
+    "value": "Giá trị",
+    "createdBy": "Người thực hiện",
+    "empty": "Vật tư chưa có phát sinh nhập xuất",
+    "paginationItem": "dòng"
+  },
+  "movementType": {
+    "receipt": "Nhập kho",
+    "issue": "Xuất kho",
+    "workshop_return": "Xưởng trả lại",
+    "supplier_return": "Trả nhà cung cấp",
+    "count_adjustment": "Điều chỉnh kiểm kê"
+  }
+}

@@ -1,6 +1,6 @@
 # Task 05 — Stock ledger, balances, low-stock alert and stock view
 
-Status: pending
+Status: done
 
 ## Outcome
 Every stock change goes through one posting service that keeps per-item balances (on hand, reserved, available, value) and an append-only ledger, never goes negative, never deadlocks; storekeepers, purchasing and managers see stock and its movements, and purchasing is warned once when an item drops below its minimum.
@@ -59,3 +59,55 @@ Every stock change goes through one posting service that keeps per-item balances
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/inventory/stock/services/stock-posting.service.spec.ts && test -f src/plugins/inventory/stock/services/stock-posting-race.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/inventory/stock src/plugins/catalog/item src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/stock/tests/stock-list.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory/stock src/kernel/core/hooks" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+Exit: 0
+Base: 1ef1939acdb771a153ed0f4c70ef34c00b66b72b
+Head: a7fd117bcce3af3de9192809e84d78c58d2e070c34cc58ffd4dcf1c6621aa277
+```text
+$ docker compose exec -T backend sh -c "test -f src/plugins/inventory/stock/services/stock-posting.service.spec.ts && test -f src/plugins/inventory/stock/services/stock-posting-race.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/inventory/stock src/plugins/catalog/item src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/stock/tests/stock-list.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory/stock src/kernel/core/hooks" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+> panelxerp-backend@0.0.1 migration:run
+> panelxerp-backend@0.0.1 typeorm
+No migrations are pending
+> panelxerp-backend@0.0.1 seed
+[seed-runner] All seeds completed.
+PASS src/kernel/core/database/soft-delete-unique-index.spec.ts
+PASS src/plugins/inventory/stock/stock.controller.spec.ts
+PASS src/plugins/catalog/item/item.controller.spec.ts
+PASS src/plugins/catalog/item/services/item.service.spec.ts
+PASS src/plugins/inventory/stock/services/stock-posting-race.spec.ts
+PASS src/plugins/inventory/stock/services/stock-alert.service.spec.ts
+PASS src/plugins/catalog/item/services/item-label.service.spec.ts
+PASS src/plugins/catalog/item/services/item-stock-settings.service.spec.ts
+PASS src/plugins/catalog/item/utils/item-identifier-lock.spec.ts
+PASS src/plugins/catalog/item/services/item-import.service.spec.ts
+PASS src/plugins/inventory/stock/services/stock-posting.service.spec.ts
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+PASS src/plugins/catalog/item/utils/code128.util.spec.ts
+PASS src/plugins/inventory/stock/utils/stock-cost.util.spec.ts
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts
+Test Suites: 18 passed, 18 total
+Tests:       245 passed, 245 total
+> panelxerp-backend@0.0.1 validate:migrations
+Migration filename check passed (31 files).
+> panelxerp-frontend@0.1.0 lint
+> panelxerp-frontend@0.1.0 lint:i18n
+ ✓ src/kernel/core/tests/i18n-enum-conformance.test.ts (7 tests)
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+ ✓ src/plugins/inventory/stock/tests/stock-notification.test.ts (4 tests)
+ ✓ src/plugins/inventory/stock/tests/stock-list.test.tsx (6 tests)
+ Test Files  2 passed (2)
+      Tests  10 passed (10)
+ ✓ src/kernel/langs/tests/permission-labels.test.ts (6 tests)
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+```
+Counterexample (controller run, reverted): locking balances one row at a time in input order made race (b) fail with `deadlocked(results)` = true; the ascending lock passes. Review: code-auditor PASS (0 Critical/High/Medium, 6 Low).

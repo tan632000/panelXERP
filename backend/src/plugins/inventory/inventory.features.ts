@@ -1,3 +1,5 @@
+import { stockPermissions } from '@plugins/inventory/stock/permissions/stock.permissions';
+import { StockModule } from '@plugins/inventory/stock/stock.module';
 import { supplierPermissions } from '@plugins/inventory/supplier/permissions/supplier.permissions';
 import { SupplierModule } from '@plugins/inventory/supplier/supplier.module';
 
@@ -10,5 +12,11 @@ export const INVENTORY_FEATURES: ErpFeature[] = [
     plugin: 'inventory',
     module: SupplierModule,
     permissions: supplierPermissions,
+  },
+  {
+    key: 'stock',
+    plugin: 'inventory',
+    module: StockModule,
+    permissions: stockPermissions,
   },
 ];

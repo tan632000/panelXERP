@@ -6600,6 +6600,176 @@
           "inventory/suppliers"
         ]
       }
+    },
+    "/api/v1/inventory/stock": {
+      "get": {
+        "description": "Every active item with on hand, reserved, available and minimum stock. Average cost and value only with purchase_price:read.",
+        "operationId": "StockController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "locationId",
+            "required": false,
+            "in": "query",
+            "description": "Only items whose default location is this one",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "lowOnly",
+            "required": false,
+            "in": "query",
+            "description": "Only items whose available stock is below their minimum",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated stock list"
+          },
+          "403": {
+            "description": "Forbidden — requires stock:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List stock",
+        "tags": [
+          "inventory/stock"
+        ]
+      }
+    },
+    "/api/v1/inventory/stock/{itemId}/movements": {
+      "get": {
+        "description": "Newest first. Unit cost, value, reference value and average cost only with purchase_price:read.",
+        "operationId": "StockController_findMovements",
+        "parameters": [
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated movements"
+          },
+          "403": {
+            "description": "Forbidden — requires stock:ledger"
+          },
+          "404": {
+            "description": "Item not found or deleted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List the stock movements of an item",
+        "tags": [
+          "inventory/stock"
+        ]
+      }
     }
   },
   "info": {

@@ -1,3 +1,4 @@
+import { stockFeature } from "@plugins/inventory/stock/stock.feature";
 import { supplierFeature } from "@plugins/inventory/supplier/supplier.feature";
 
 import type { ErpFrontendFeature } from "@/kernel/platform/features/feature.contract";
@@ -5,4 +6,5 @@ import type { ErpFrontendFeature } from "@/kernel/platform/features/feature.cont
 /** Inventory feature catalog. */
 export const INVENTORY_FRONTEND_FEATURES: ErpFrontendFeature[] = [
   supplierFeature,
+  stockFeature,
 ];

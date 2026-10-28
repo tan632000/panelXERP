@@ -1,0 +1,42 @@
+{
+  "title": "Stock",
+  "description": "On hand, reserved and available stock of every item",
+  "code": "Item code",
+  "name": "Item name",
+  "unit": "Unit",
+  "location": "Default location",
+  "onHand": "On hand",
+  "reserved": "Reserved",
+  "available": "Available",
+  "minStock": "Minimum stock",
+  "lowBadge": "Below minimum",
+  "avgCost": "Average cost",
+  "value": "Stock value",
+  "lowOnly": "Only items below minimum stock",
+  "searchPlaceholder": "Search item code, name...",
+  "openLedger": "View ledger",
+  "emptyValue": "—",
+  "noItems": "No items yet",
+  "noItemsFound": "No matching items",
+  "paginationItem": "items",
+  "loadError": "Could not load the stock. Please try again.",
+  "ledger": {
+    "title": "Ledger: {code}",
+    "date": "Time",
+    "type": "Type",
+    "quantity": "Quantity",
+    "onHandAfter": "On hand after",
+    "unitCost": "Unit cost",
+    "value": "Value",
+    "createdBy": "By",
+    "empty": "No stock movements for this item yet",
+    "paginationItem": "rows"
+  },
+  "movementType": {
+    "receipt": "Receipt",
+    "issue": "Issue",
+    "workshop_return": "Workshop return",
+    "supplier_return": "Supplier return",
+    "count_adjustment": "Count adjustment"
+  }
+}

@@ -105,6 +105,8 @@ export const NOTIFICATION_REQUIRED_SCOPES = [
   // The sales request assignment record names the engineer it is for; engineers hold this
   // scope and none of the above.
   "request:read",
+  // The low-stock record goes to purchasing, stamped with the stock list scope.
+  "stock:read",
 ] as const;
 
 /** Badge stops counting past this and renders the overflow marker instead. */
@@ -123,6 +125,7 @@ export const NOTIFICATION_EVENT_KEYS = [
   "sales.quotation.approved",
   "sales.quotation.rejected",
   "sales.order.created",
+  "inventory.stock.low",
   "purchaseRequestAwaitingReceipt",
   "purchaseRequestReceived",
   "purchaseRequestApproved",
@@ -1195,6 +1198,20 @@ export function resolveNotificationMessage(
           code: field(payload.code),
           quotationCode: field(payload.quotationCode),
           requestCode: field(payload.requestCode),
+        },
+      };
+    }
+
+    if (item.eventType === "inventory.stock.low") {
+      return {
+        kind: "key",
+        key: "events.inventory_stock_low",
+        values: {
+          code: field(payload.code),
+          name: field(payload.name),
+          unit: field(payload.unit),
+          available: displayNumber(payload.available),
+          minStock: displayNumber(payload.minStock),
         },
       };
     }

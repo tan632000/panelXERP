@@ -17,6 +17,7 @@ import quotationEn from "@kernel/langs/en/quotation.json";
 import requestEn from "@kernel/langs/en/request.json";
 import salesEn from "@kernel/langs/en/sales.json";
 import statusEn from "@kernel/langs/en/status.json";
+import stockEn from "@kernel/langs/en/stock.json";
 import supplierEn from "@kernel/langs/en/supplier.json";
 import systemEn from "@kernel/langs/en/system.json";
 import authVi from "@kernel/langs/vi/auth.json";
@@ -38,6 +39,7 @@ import quotationVi from "@kernel/langs/vi/quotation.json";
 import requestVi from "@kernel/langs/vi/request.json";
 import salesVi from "@kernel/langs/vi/sales.json";
 import statusVi from "@kernel/langs/vi/status.json";
+import stockVi from "@kernel/langs/vi/stock.json";
 import supplierVi from "@kernel/langs/vi/supplier.json";
 import systemVi from "@kernel/langs/vi/system.json";
 
@@ -56,6 +58,7 @@ export const enMessages = {
   order: orderEn,
   inventory: inventoryEn,
   supplier: supplierEn,
+  stock: stockEn,
   location: locationEn,
   system: systemEn,
   permission: permissionEn,
@@ -80,6 +83,7 @@ export const viMessages = {
   order: orderVi,
   inventory: inventoryVi,
   supplier: supplierVi,
+  stock: stockVi,
   location: locationVi,
   system: systemVi,
   permission: permissionVi,

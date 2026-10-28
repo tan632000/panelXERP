@@ -1,5 +1,6 @@
 {
   "moduleName": "Mua hàng & Kho",
   "sidebarInventory": "Mua hàng & Kho",
-  "suppliers": "Nhà cung cấp"
+  "suppliers": "Nhà cung cấp",
+  "stock": "Tồn kho"
 }

@@ -1,5 +1,6 @@
 {
   "moduleName": "Purchasing & Warehouse",
   "sidebarInventory": "Purchasing & Warehouse",
-  "suppliers": "Suppliers"
+  "suppliers": "Suppliers",
+  "stock": "Stock"
 }
