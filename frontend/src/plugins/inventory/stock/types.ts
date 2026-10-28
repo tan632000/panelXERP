@@ -19,6 +19,14 @@ export interface StockRow {
   value?: number;
 }
 
+/** Quantities of one item for the estimate grid; the API never sends a cost here. */
+export interface StockAvailability {
+  itemId: number;
+  onHand: number;
+  reserved: number;
+  available: number;
+}
+
 export type StockMovementType =
   | "receipt"
   | "issue"

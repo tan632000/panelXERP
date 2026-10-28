@@ -88,7 +88,11 @@
     "noteOf": "Note of {code}",
     "removeTitle": "Delete item",
     "removeDescription": "Delete the line {code} from the panel?",
-    "removeLine": "Delete line {code}"
+    "removeLine": "Delete line {code}",
+    "onHand": "On hand",
+    "available": "Available",
+    "short": "Short",
+    "stockLoading": "Loading stock"
   },
   "cost": {
     "title": "Other panel costs",

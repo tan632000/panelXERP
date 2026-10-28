@@ -88,7 +88,11 @@
     "noteOf": "Ghi chú {code}",
     "removeTitle": "Xoá vật tư",
     "removeDescription": "Xoá dòng vật tư {code} khỏi tủ?",
-    "removeLine": "Xoá dòng {code}"
+    "removeLine": "Xoá dòng {code}",
+    "onHand": "Tồn kho",
+    "available": "Khả dụng",
+    "short": "Thiếu",
+    "stockLoading": "Đang tải tồn kho"
   },
   "cost": {
     "title": "Chi phí khác của tủ",

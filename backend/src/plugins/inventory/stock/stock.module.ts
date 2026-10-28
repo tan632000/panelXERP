@@ -8,6 +8,7 @@ import { StockBalance } from '@plugins/inventory/stock/entities/stock-balance.en
 import { StockMovement } from '@plugins/inventory/stock/entities/stock-movement.entity';
 import { StockReservation } from '@plugins/inventory/stock/entities/stock-reservation.entity';
 import { StockAlertService } from '@plugins/inventory/stock/services/stock-alert.service';
+import { StockAvailabilityService } from '@plugins/inventory/stock/services/stock-availability.service';
 import { StockItemReferenceService } from '@plugins/inventory/stock/services/stock-item-reference.service';
 import { StockPostingService } from '@plugins/inventory/stock/services/stock-posting.service';
 import { StockQueryService } from '@plugins/inventory/stock/services/stock-query.service';
@@ -23,6 +24,7 @@ import { StockController } from '@plugins/inventory/stock/stock.controller';
   providers: [
     StockPostingService,
     StockAlertService,
+    StockAvailabilityService,
     StockQueryService,
     StockItemReferenceService,
   ],

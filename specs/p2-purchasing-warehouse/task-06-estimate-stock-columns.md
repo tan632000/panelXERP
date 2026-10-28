@@ -1,6 +1,6 @@
 # Task 06 — Stock availability in the estimate BOM grid
 
-Status: pending
+Status: done
 
 ## Outcome
 While building or reading an estimate, engineers and sales see for each BOM line the item's on hand, available and short quantity (D-16), read-only and without any money.
@@ -41,3 +41,46 @@ While building or reading an estimate, engineers and sales see for each BOM line
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/inventory/stock/services/stock-availability.service.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npx jest --ci src/plugins/inventory/stock src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts" && docker compose exec -T frontend sh -c "test -f src/plugins/sales/estimate/tests/estimate-stock-columns.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory/stock src/plugins/sales/estimate"
+Exit: 0
+Base: 6b156c3c1030e283d443dc5c77a74d441fc60b85
+Head: f919a9a4d315fb9ffcf2f0fd60fa3bd3ff16eeb698d8eae3d719f7b3eb1ab850
+```text
+$ docker compose exec -T backend sh -c "test -f src/plugins/inventory/stock/services/stock-availability.service.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npx jest --ci src/plugins/inventory/stock src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts" && docker compose exec -T frontend sh -c "test -f src/plugins/sales/estimate/tests/estimate-stock-columns.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory/stock src/plugins/sales/estimate"
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+> panelxerp-backend@0.0.1 migration:run
+> panelxerp-backend@0.0.1 typeorm
+No migrations are pending
+PASS src/kernel/core/database/soft-delete-unique-index.spec.ts
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts
+PASS src/plugins/inventory/stock/services/stock-alert.service.spec.ts
+PASS src/plugins/inventory/stock/services/stock-posting.service.spec.ts
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+PASS src/plugins/inventory/stock/utils/stock-cost.util.spec.ts
+PASS src/plugins/inventory/stock/services/stock-posting-race.spec.ts
+PASS src/plugins/inventory/stock/stock.controller.spec.ts
+PASS src/plugins/inventory/stock/services/stock-availability.service.spec.ts
+Test Suites: 12 passed, 12 total
+Tests:       117 passed, 117 total
+> panelxerp-frontend@0.1.0 lint
+> panelxerp-frontend@0.1.0 lint:i18n
+ ✓ src/kernel/core/tests/i18n-enum-conformance.test.ts (7 tests)
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+ ✓ src/plugins/inventory/stock/tests/stock-notification.test.ts (4 tests)
+ ✓ src/plugins/sales/estimate/tests/estimate-totals.test.ts (4 tests)
+ ✓ src/plugins/sales/estimate/tests/request-estimate-section.test.tsx (6 tests)
+ ✓ src/plugins/inventory/stock/tests/stock-list.test.tsx (6 tests)
+ ✓ src/plugins/sales/estimate/tests/estimate-stock-columns.test.tsx (5 tests)
+ ✓ src/plugins/sales/estimate/tests/estimate-editor.test.tsx (18 tests)
+ Test Files  6 passed (6)
+      Tests  43 passed (43)
+```
+Counterexample (controller run, reverted): computing short per BOM line instead of per item across the revision made `counts an item across every panel of the revision, not per line` fail with `expected '0' to be '3'`; the revision-wide sum passes. Reachability: after a backend restart, live `GET /api/v1/inventory/stock/availability` answered engineer_a and sales_a 200 (both 403 on `/inventory/stock`), 501 ids 400. Review: code-auditor PASS (0 Critical/High/Medium, 5 Low; the `itemIds` OpenAPI type was fixed before this run). Scope note: `EstimateEditor.tsx` gained one prop (`revisionPanels`) so the grid can sum the whole revision, and `stock.controller.spec.ts` gained the new provider.

@@ -182,6 +182,7 @@ export function EstimateEditor({
               </h5>
               <EstimateBomGrid
                 panel={panel}
+                revisionPanels={panels}
                 editor={editor}
                 editable={editable}
               />

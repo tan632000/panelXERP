@@ -99,7 +99,7 @@ Strictly sequential (shared registration files, one writer each, as P1 R-08).
 | 03 | Locations + item stock settings + resolve + price permissions | P1 | AC-02, AC-04, AC-05 | `*/src/plugins/catalog/{location,item}` | 02 | done |
 | 04 | Labels + scan lookup | P2 | AC-05, AC-06 | `catalog/item` labels, `ScanInput` | 03 | done |
 | 05 | Ledger, balances, low-stock alert, stock view | P1 | AC-02, AC-07, AC-08, AC-09, AC-25 | `*/src/plugins/inventory/stock` | 04 | done |
-| 06 | Estimate stock columns | P2 | AC-02, AC-22 | availability endpoint, `EstimateBomGrid.tsx` | 05 | pending |
+| 06 | Estimate stock columns | P2 | AC-02, AC-22 | availability endpoint, `EstimateBomGrid.tsx` | 05 | done |
 | 07 | Purchase orders + approval | P1 | AC-02, AC-04, AC-10, AC-11 | `*/src/plugins/inventory/purchase-order` | 06 | pending |
 | 08 | BOM item link + backfill | P1 | AC-12 | sales BOM writers + migration | 07 | pending |
 | 09 | Order material view | P1 | AC-02, AC-03, AC-13 | `*/src/plugins/inventory/material` | 08 | pending |

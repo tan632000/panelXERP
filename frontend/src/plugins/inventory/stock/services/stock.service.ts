@@ -4,6 +4,7 @@ import { stockApiRoutes } from "@plugins/inventory/stock/constants";
 
 import type { PaginatedResponse } from "@/kernel/core/types/common";
 import type {
+  StockAvailability,
   StockListParams,
   StockMovement,
   StockRow,
@@ -26,6 +27,17 @@ export async function getStockMovements(
   const { data } = await api.get<PaginatedResponse<StockMovement>>(
     stockApiRoutes.movements(itemId),
     { params },
+  );
+  return data;
+}
+
+/** Deleted or unknown ids are simply missing from the answer. */
+export async function getStockAvailability(
+  itemIds: readonly number[],
+): Promise<StockAvailability[]> {
+  const { data } = await api.get<StockAvailability[]>(
+    stockApiRoutes.availability,
+    { params: { itemIds: itemIds.join(",") } },
   );
   return data;
 }

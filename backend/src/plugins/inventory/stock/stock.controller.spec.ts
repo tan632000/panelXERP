@@ -23,6 +23,7 @@ import {
   type InventoryDb,
 } from '@plugins/inventory/_shared/inventory-db.helper-spec';
 import { StockMovementType } from '@plugins/inventory/stock/enums/stock-movement-type.enum';
+import { StockAvailabilityService } from '@plugins/inventory/stock/services/stock-availability.service';
 import { StockQueryService } from '@plugins/inventory/stock/services/stock-query.service';
 import { StockController } from '@plugins/inventory/stock/stock.controller';
 
@@ -116,6 +117,7 @@ describeWithDatabase('StockController (real Postgres)', () => {
       controllers: [StockController],
       providers: [
         StockQueryService,
+        StockAvailabilityService,
         { provide: DataSource, useValue: db.dataSource },
         { provide: APP_GUARD, useClass: HeaderAuthGuard },
         { provide: APP_GUARD, useClass: RolesGuard },

@@ -4102,6 +4102,30 @@ paths:
       summary: List stock
       tags: &ref_36
         - inventory/stock
+  /api/v1/inventory/stock/availability:
+    get:
+      description: >-
+        On hand, reserved and available per item, never any cost. Items without stock answer zeros; deleted or unknown
+        ids are left out.
+      operationId: StockController_findAvailability
+      parameters:
+        - name: itemIds
+          required: true
+          in: query
+          description: Comma-separated item ids (1–500)
+          schema:
+            example: 1,2
+            type: string
+      responses:
+        '200':
+          description: One row per active item
+        '400':
+          description: itemIds missing or over 500
+        '403':
+          description: Forbidden — requires stock:availability
+      security: *ref_35
+      summary: Stock availability of items
+      tags: *ref_36
   /api/v1/inventory/stock/{itemId}/movements:
     get:
       description: Newest first. Unit cost, value, reference value and average cost only with purchase_price:read.

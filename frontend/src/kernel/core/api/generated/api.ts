@@ -2135,6 +2135,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/inventory/stock/availability": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Stock availability of items
+     * @description On hand, reserved and available per item, never any cost. Items without stock answer zeros; deleted or unknown ids are left out.
+     */
+    get: operations["StockController_findAvailability"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/inventory/stock/{itemId}/movements": {
     parameters: {
       query?: never;
@@ -7946,6 +7966,41 @@ export interface operations {
         content?: never;
       };
       /** @description Forbidden — requires stock:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StockController_findAvailability: {
+    parameters: {
+      query: {
+        /** @description Comma-separated item ids (1–500) */
+        itemIds: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description One row per active item */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description itemIds missing or over 500 */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires stock:availability */
       403: {
         headers: {
           [name: string]: unknown;
