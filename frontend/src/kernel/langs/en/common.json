@@ -375,7 +375,9 @@
       "btp_receipt_pending_qc": "{actorName} created goods receipt {receiptNo} with {pendingCount} lot(s) awaiting incoming quality inspection.",
       "inventory_purchase_order_submitted": "Purchase order {code} is waiting for your approval.",
       "inventory_purchase_order_approved": "Purchase order {code} was approved.",
-      "inventory_purchase_order_rejected": "Purchase order {code} was rejected: {reason}"
+      "inventory_purchase_order_rejected": "Purchase order {code} was rejected: {reason}",
+      "inventory_order_short": "Order {code} ({customerName}) is short of {shortItemCount} item(s).",
+      "inventory_order_short_owner": "Your order {code} is short of {shortItemCount} item(s); purchasing has been told."
     }
   },
   "english": "English",

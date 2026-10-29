@@ -10,6 +10,7 @@ import { Item } from '@plugins/catalog/item/entities/item.entity';
 import { Contact } from '@plugins/crm/contact/entities/contact.entity';
 import { Customer } from '@plugins/crm/customer/entities/customer.entity';
 import { Project } from '@plugins/crm/project/entities/project.entity';
+import { OrderLifecycleRegistry } from '@plugins/sales/_shared/ports/order-lifecycle-registry';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
 import { Estimate } from '@plugins/sales/estimate/entities/estimate.entity';
 import { SalesOrderBomLine } from '@plugins/sales/order/entities/order-bom-line.entity';
@@ -42,6 +43,13 @@ describeWithDatabase('Order conversion against Postgres', () => {
   let db: QuotationDb;
   let convert: OrderConvertService;
   let edit: OrderEditService;
+  /**
+   * One hook, idle unless a spec turns it on: `hookWrites` makes it write through the
+   * convert's transaction, `failHook` makes it throw after writing.
+   */
+  let lifecycle: OrderLifecycleRegistry;
+  let hookWrites = false;
+  let failHook = false;
   let orders: OrderService;
 
   beforeAll(async () => {
@@ -89,6 +97,21 @@ describeWithDatabase('Order conversion against Postgres', () => {
       dataScope,
       users as never,
     );
+    lifecycle = new OrderLifecycleRegistry();
+    lifecycle.register('spec', {
+      onCreated: async (manager, event) => {
+        if (!hookWrites) {
+          return { changedOrderIds: [], touchedItemIds: [] };
+        }
+        // Written on the convert's manager, as a reservation would be.
+        await manager.query(
+          `UPDATE sales_orders SET contract_no = 'HOOKED' WHERE id = $1`,
+          [event.orderId],
+        );
+        if (failHook) throw new ConflictException('Stock hook refused.');
+        return { changedOrderIds: [event.orderId], touchedItemIds: [] };
+      },
+    });
     convert = new OrderConvertService(
       db.dataSource,
       dataScope,
@@ -96,8 +119,15 @@ describeWithDatabase('Order conversion against Postgres', () => {
       crm as never,
       statusPort,
       db.notifications as never,
+      lifecycle,
     );
-    edit = new OrderEditService(db.dataSource, dataScope, orders, statusPort);
+    edit = new OrderEditService(
+      db.dataSource,
+      dataScope,
+      orders,
+      statusPort,
+      lifecycle,
+    );
   });
   beforeEach(() => {
     db.notifications.emit.mockClear();
@@ -149,6 +179,30 @@ describeWithDatabase('Order conversion against Postgres', () => {
     );
 
   describe('converting', () => {
+    it('rolls the order and the request ’won’ back when a lifecycle hook fails', async () => {
+      const made = await confirmed();
+      hookWrites = true;
+      try {
+        failHook = true;
+        await expect(
+          convert.convert({ quotationId: made.id }, db.salesA),
+        ).rejects.toBeInstanceOf(ConflictException);
+        failHook = false;
+
+        expect(await orderCount(made.id)).toBe(0);
+        expect((await requestRow(made.requestId)).status).not.toBe('won');
+        // The same hook succeeding commits with the order: it ran in the convert's transaction.
+        const order = await convert.convert(
+          { quotationId: made.id },
+          db.salesA,
+        );
+        expect(order.contractNo).toBe('HOOKED');
+      } finally {
+        hookWrites = false;
+        failHook = false;
+      }
+    });
+
     it('copies the confirmed version into one order and moves the request to won', async () => {
       const made = await confirmed();
       const quotation = await db.quotations.findOne(made.id, db.salesA);

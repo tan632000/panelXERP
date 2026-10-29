@@ -51,6 +51,14 @@ export interface MaterialOrderFilter {
   take: number;
 }
 
+/** What one order needs of one item: Σ linked BOM quantity × panels, as numeric text. */
+export interface OrderItemDemand {
+  orderId: number;
+  deliveryDate: string | null;
+  itemId: number;
+  demand: string;
+}
+
 /** The scope condition from `materialListCondition`: an owner the actor is limited to. */
 export interface MaterialScopeCondition {
   salesOwnerId?: number;
@@ -140,6 +148,63 @@ export class OrderMaterialReadPort {
       [orderId],
     );
     return row ? this.toHeader(row) : null;
+  }
+
+  /**
+   * The demand of every order in `statuses` for the given items (or of one order), summed in
+   * SQL numeric over linked BOM lines. Unlinked lines never count.
+   */
+  async openDemand(
+    manager: EntityManager,
+    filter: { itemIds?: readonly number[]; orderId?: number },
+    statuses: readonly string[],
+  ): Promise<OrderItemDemand[]> {
+    const conditions = [
+      'o.is_deleted = false',
+      'o.status = ANY($1::text[])',
+      'b.item_id IS NOT NULL',
+    ];
+    const params: unknown[] = [[...statuses]];
+    if (filter.itemIds) {
+      params.push([...filter.itemIds]);
+      conditions.push(`b.item_id = ANY($${params.length}::int[])`);
+    }
+    if (filter.orderId !== undefined) {
+      params.push(filter.orderId);
+      conditions.push(`o.id = $${params.length}`);
+    }
+    const rows: RawRow[] = await manager.query(
+      `SELECT o.id AS order_id, o.delivery_date, b.item_id,
+              SUM(b.quantity * l.quantity)::text AS demand
+         FROM sales_orders o
+         JOIN sales_order_lines l ON l.order_id = o.id
+         JOIN sales_order_bom_lines b ON b.line_id = l.id
+        WHERE ${conditions.join(' AND ')}
+        GROUP BY o.id, o.delivery_date, b.item_id`,
+      params,
+    );
+    return rows.map((row) => ({
+      orderId: Number(row.order_id),
+      deliveryDate: dateOnly(row.delivery_date),
+      itemId: Number(row.item_id),
+      demand: String(row.demand),
+    }));
+  }
+
+  /** Every catalog item the order's BOM links to, whatever its status, ascending. */
+  async linkedItemIds(
+    manager: EntityManager,
+    orderId: number,
+  ): Promise<number[]> {
+    const rows: Array<{ item_id: number }> = await manager.query(
+      `SELECT DISTINCT b.item_id
+         FROM sales_order_bom_lines b
+         JOIN sales_order_lines l ON l.id = b.line_id
+        WHERE l.order_id = $1 AND b.item_id IS NOT NULL
+        ORDER BY b.item_id`,
+      [orderId],
+    );
+    return rows.map((row) => Number(row.item_id));
   }
 
   /** The panel lines and their BOM of each order, keyed by order id, in line order. */

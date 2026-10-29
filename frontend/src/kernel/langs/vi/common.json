@@ -375,7 +375,9 @@
       "btp_receipt_pending_qc": "{actorName} vừa tạo phiếu nhập kho {receiptNo} có {pendingCount} lô chờ kiểm chất lượng đầu vào.",
       "inventory_purchase_order_submitted": "Đơn mua hàng {code} đang chờ bạn duyệt.",
       "inventory_purchase_order_approved": "Đơn mua hàng {code} đã được duyệt.",
-      "inventory_purchase_order_rejected": "Đơn mua hàng {code} bị từ chối: {reason}"
+      "inventory_purchase_order_rejected": "Đơn mua hàng {code} bị từ chối: {reason}",
+      "inventory_order_short": "Đơn hàng {code} ({customerName}) còn thiếu {shortItemCount} vật tư.",
+      "inventory_order_short_owner": "Đơn hàng {code} của bạn còn thiếu {shortItemCount} vật tư; bộ phận mua hàng đã được báo."
     }
   },
   "english": "Tiếng Anh",

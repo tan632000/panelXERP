@@ -11,6 +11,7 @@ import { NotificationService } from '@kernel/core/audit/notification.service';
 import { DataScopeService } from '@shared/services/data-scope.service';
 
 import { CrmGateway } from '@plugins/crm/_shared/gateways/crm-gateway';
+import { OrderLifecycleRegistry } from '@plugins/sales/_shared/ports/order-lifecycle-registry';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
 import { recordRequestActivity } from '@plugins/sales/_shared/utils/request-activity.util';
 import { createWithDocumentCode } from '@plugins/sales/_shared/utils/sales-document-code.util';
@@ -65,13 +66,14 @@ export class OrderConvertService {
     private readonly crm: CrmGateway,
     private readonly statusPort: RequestStatusPort,
     private readonly notifications: NotificationService,
+    private readonly lifecycle: OrderLifecycleRegistry,
   ) {}
 
   async convert(
     dto: CreateOrderDto,
     actor: AuthUserPayload,
   ): Promise<OrderDetail> {
-    const { order, locked } = await createWithDocumentCode(
+    const { order, locked, pending } = await createWithDocumentCode(
       this.dataSource,
       {
         table: ORDER_TABLE,
@@ -168,10 +170,17 @@ export class OrderConvertService {
           actorId: actor.userId,
           note: code,
         });
-        return { order: saved, locked: held };
+        // Last, so the stock locks the hooks take come after every sales lock.
+        const pending = await this.lifecycle.created(manager, {
+          orderId: saved.id,
+          actorId: actor.userId,
+        });
+        return { order: saved, locked: held, pending };
       },
     );
 
+    // Outside the retried work: only the attempt that committed has follow-ups.
+    await pending.afterCommit();
     await this.notify(order, locked, actor);
     return this.orders.findOne(order.id, actor);
   }

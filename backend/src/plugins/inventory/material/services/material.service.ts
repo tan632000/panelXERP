@@ -10,6 +10,7 @@ import {
 } from '@shared/services/data-scope.service';
 import { resolvePagination } from '@shared/utils/pagination.util';
 
+import { DEMAND_BEARING_STATUSES } from '@plugins/inventory/material/constants/material.constant';
 import { MaterialOrderFilterDto } from '@plugins/inventory/material/dto/material-filter.dto';
 import {
   OrderMaterialReadPort,
@@ -20,11 +21,7 @@ import {
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 import type { EntityManager } from 'typeorm';
 
-/**
- * The order statuses that still need their materials. P3 adds `in_production` here, and only
- * here: every demand figure follows this one predicate.
- */
-const DEMAND_BEARING_STATUSES: ReadonlySet<string> = new Set(['open']);
+const DEMAND_BEARING: ReadonlySet<string> = new Set(DEMAND_BEARING_STATUSES);
 
 /** One item of an order: what it needs, what is set aside, what went to the workshop. */
 export interface MaterialItemRow {
@@ -161,7 +158,7 @@ export class MaterialService {
 
     return {
       order,
-      demandBearing: DEMAND_BEARING_STATUSES.has(order.status),
+      demandBearing: DEMAND_BEARING.has(order.status),
       items: this.itemRows(order, orderLines, stock),
       panels: orderLines.map((line) => ({
         lineId: line.id,
@@ -218,7 +215,7 @@ export class MaterialService {
       return entry;
     };
 
-    const bearing = DEMAND_BEARING_STATUSES.has(order.status);
+    const bearing = DEMAND_BEARING.has(order.status);
     for (const line of lines) {
       for (const bom of line.bomLines) {
         if (bom.itemId === null) continue;

@@ -1,6 +1,6 @@
 # Task 10 — Reserve on order create, release on cancel, auto-allocation and shortage alerts
 
-Status: pending
+Status: done
 
 ## Outcome
 Creating an order reserves available stock for its BOM demand in the same transaction, cancelling releases it to other short orders, any stock increase is allocated by the D-05 priority, and purchasing plus the sales owner are told once when an order is short — and released when any order's shortage reaches 0, whichever order's change caused it.
@@ -56,3 +56,64 @@ Creating an order reserves available stock for its BOM demand in the same transa
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/inventory/material/services/reservation.service.spec.ts && test -f src/plugins/inventory/material/services/reservation-race.spec.ts && test -f src/plugins/sales/_shared/ports/order-lifecycle-registry.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npx jest --ci src/plugins/inventory src/plugins/sales/order src/plugins/sales/_shared src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run test:e2e -- --ci sales-chain" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/material/tests/shortage-notification.test.ts && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory/material src/kernel/core/hooks"
+Exit: 0
+Base: 483adf86bc341cbbfc784b8f2f54059caefe1d15
+Head: bbff7214dbada762aa3436ccc72f7d88285bb60d1e94e9ffa5b09d6a3ef5a92a
+```text
+$ docker compose exec -T backend sh -c "test -f src/plugins/inventory/material/services/reservation.service.spec.ts && test -f src/plugins/inventory/material/services/reservation-race.spec.ts && test -f src/plugins/sales/_shared/ports/order-lifecycle-registry.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npx jest --ci src/plugins/inventory src/plugins/sales/order src/plugins/sales/_shared src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run test:e2e -- --ci sales-chain" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/material/tests/shortage-notification.test.ts && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory/material src/kernel/core/hooks"
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+> panelxerp-backend@0.0.1 migration:run
+> panelxerp-backend@0.0.1 typeorm
+No migrations are pending
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts
+PASS src/plugins/sales/order/order.controller.spec.ts
+PASS src/plugins/inventory/material/services/reservation.service.spec.ts
+PASS src/plugins/sales/order/services/order-convert.service.spec.ts
+PASS src/plugins/inventory/purchase-order/services/purchase-order-approval.service.spec.ts
+PASS src/plugins/inventory/stock/services/stock-availability.service.spec.ts
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts
+PASS src/plugins/sales/order/database/bom-item-link.migration.spec.ts
+PASS src/kernel/core/database/soft-delete-unique-index.spec.ts
+PASS src/plugins/inventory/material/material.controller.spec.ts
+PASS src/plugins/inventory/stock/stock.controller.spec.ts
+PASS src/plugins/inventory/material/services/reservation-race.spec.ts
+PASS src/plugins/inventory/stock/services/stock-posting-race.spec.ts
+PASS src/plugins/inventory/material/services/shortage-alert.service.spec.ts
+PASS src/plugins/inventory/material/services/material.service.spec.ts
+PASS src/plugins/inventory/supplier/services/supplier.service.spec.ts
+PASS src/plugins/inventory/stock/services/stock-alert.service.spec.ts
+PASS src/plugins/sales/_shared/ports/request-status.port.spec.ts
+PASS src/plugins/inventory/stock/services/stock-posting.service.spec.ts
+PASS src/plugins/sales/_shared/utils/sales-document-code.util.spec.ts
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/plugins/sales/_shared/ports/order-material-read.port.spec.ts
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/plugins/inventory/_shared/gateways/supplier-reference-check-registry.spec.ts
+PASS src/plugins/inventory/purchase-order/utils/purchase-order-pricing.spec.ts
+PASS src/plugins/sales/_shared/ports/order-lifecycle-registry.spec.ts
+PASS src/plugins/sales/_shared/ports/request-close-registry.spec.ts
+PASS src/plugins/inventory/stock/utils/stock-cost.util.spec.ts
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+PASS src/plugins/inventory/supplier/supplier.controller.spec.ts
+Test Suites: 30 passed, 30 total
+Tests:       327 passed, 327 total
+> panelxerp-backend@0.0.1 test:e2e
+PASS test/sales-chain.e2e-spec.ts
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+> panelxerp-frontend@0.1.0 lint
+> panelxerp-frontend@0.1.0 lint:i18n
+ ✓ src/kernel/core/tests/i18n-enum-conformance.test.ts (7 tests)
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+ ✓ src/plugins/inventory/material/tests/shortage-notification.test.ts (4 tests)
+ ✓ src/plugins/inventory/material/tests/order-material.test.tsx (4 tests)
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+```
+Counterexamples (controller runs, reverted): locking only the reserved items in `releaseOrder` failed race (d) (race (b) still passed: it is nondeterministic, (d) is the deterministic proof); returning only the cancelled order id left O3's notices open and failed step 3; running the create hook after the commit left the order in place and failed the rollback spec (`Expected: 0, Received: 1`); float shortage arithmetic failed the added 0.4 − 0.1 issued − 0.3 reserved vector (`Expected: 0, Received: 1`) — the plan's 0.1 × 3 vector does not discriminate, its error lands below 0 and SQL numeric sums absorb it; shrinking a reservation to 0 by UPDATE failed the full-consumption spec with `ck_stock_reservations_quantity`. Reachability: the backend restarted healthy with the lifecycle hook registered at module init; the sales-chain e2e runs the real convert and cancel through the full application. Review: code-auditor FAIL (1 High: a reservation shrunk to 0 by UPDATE violated its CHECK) → fixed with `shrinkReservation` (DELETE when all is taken) and a full-consumption spec → re-review PASS (0 Critical/High/Medium). Repair rounds: 1 (review High), 2 (a convert-spec hook that wrote on every convert broke four other cases; it is now idle unless a spec turns it on). Limitations: races (b)–(d) drive the hooks in their own transactions over fixture orders rather than through OrderConvertService/OrderEditService.

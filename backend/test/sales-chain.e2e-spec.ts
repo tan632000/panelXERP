@@ -212,6 +212,16 @@ describe('Sales chain (e2e)', () => {
         ]);
       }
       if (created.itemId) {
+        // The order's create reserved stock of the run's item: its stock rows go first.
+        for (const table of [
+          'stock_reservations',
+          'stock_movements',
+          'stock_balances',
+        ]) {
+          await dataSource.query(`DELETE FROM ${table} WHERE item_id = $1`, [
+            created.itemId,
+          ]);
+        }
         await dataSource.query(`DELETE FROM items WHERE id = $1`, [
           created.itemId,
         ]);

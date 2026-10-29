@@ -59,6 +59,15 @@ export interface StockPostingResult {
   /** Every item the posting touched, ascending — the input of the after-commit alerts. */
   itemIds: number[];
   movementIds: string[];
+  /** Orders whose reservation an issue consumed — the input of the shortage alerts. */
+  changedOrderIds: number[];
+}
+
+/** One locked balance as another writer of reservations reads it. */
+export interface LockedStock {
+  code: string;
+  onHand: Decimal;
+  reserved: Decimal;
 }
 
 interface LockedBalance {
@@ -102,7 +111,13 @@ export class StockPostingService {
     const itemIds = [...new Set(request.lines.map((line) => line.itemId))].sort(
       (a, b) => a - b,
     );
-    const ledgers = await this.lock(manager, itemIds);
+    const ledgers = await this.lock(manager, itemIds, { requireActive: true });
+    const consumed = await this.consumeReservations(
+      manager,
+      request.lines,
+      quantities,
+      ledgers,
+    );
 
     const costed = request.lines.map((line, index) =>
       this.cost(line, quantities[index], ledgerOf(ledgers, line.itemId)),
@@ -116,14 +131,80 @@ export class StockPostingService {
     }
     for (const itemId of itemIds) {
       const { state } = ledgerOf(ledgers, itemId);
+      // `reserved` is always the sum of the item's reservations, never a separate figure.
       await manager.query(
-        `UPDATE stock_balances SET on_hand = $2, value = $3, updated_at = NOW()
-         WHERE item_id = $1`,
+        `UPDATE stock_balances
+            SET on_hand = $2, value = $3,
+                reserved = COALESCE(
+                  (SELECT SUM(quantity) FROM stock_reservations WHERE item_id = $1), 0),
+                updated_at = NOW()
+          WHERE item_id = $1`,
         [itemId, state.onHand.toFixed(), state.value.toFixed()],
       );
     }
 
-    return { itemIds, movementIds };
+    return { itemIds, movementIds, changedOrderIds: consumed };
+  }
+
+  /**
+   * Locks the balance rows (and shares the item rows) of the given items the way a posting
+   * does, for another writer of reservations. A deleted item is still locked: its stock and
+   * reservations must still be released.
+   */
+  async lockBalances(
+    manager: EntityManager,
+    itemIds: readonly number[],
+  ): Promise<Map<number, LockedStock>> {
+    const sorted = [...new Set(itemIds)].sort((a, b) => a - b);
+    const ledgers = await this.lock(manager, sorted, { requireActive: false });
+    return new Map(
+      [...ledgers].map(([itemId, ledger]) => [
+        itemId,
+        {
+          code: ledger.code,
+          onHand: ledger.state.onHand,
+          reserved: ledger.reserved,
+        },
+      ]),
+    );
+  }
+
+  /**
+   * An issue for an order first uses what that order holds: its reservation of the item
+   * shrinks by the issued quantity (never below 0), and so does the item's reserved figure.
+   * The balance rows are locked, and every reservation writer locks them first.
+   */
+  private async consumeReservations(
+    manager: EntityManager,
+    lines: readonly StockPostingLine[],
+    quantities: readonly Decimal[],
+    ledgers: Map<number, ItemLedger>,
+  ): Promise<number[]> {
+    const changed = new Set<number>();
+    for (const [index, line] of lines.entries()) {
+      if (line.movementType !== StockMovementType.ISSUE || !line.orderId) {
+        continue;
+      }
+      const [held]: Array<{ quantity: string }> = await manager.query(
+        `SELECT quantity FROM stock_reservations WHERE order_id = $1 AND item_id = $2`,
+        [line.orderId, line.itemId],
+      );
+      if (!held) continue;
+      const reserved = new Decimal(held.quantity);
+      const take = Decimal.min(reserved, quantities[index].abs());
+      if (take.isZero()) continue;
+      await shrinkReservation(
+        manager,
+        line.orderId,
+        line.itemId,
+        reserved,
+        take,
+      );
+      const ledger = ledgerOf(ledgers, line.itemId);
+      ledger.reserved = ledger.reserved.sub(take);
+      changed.add(line.orderId);
+    }
+    return [...changed].sort((a, b) => a - b);
   }
 
   private quantityOf(line: StockPostingLine): Decimal {
@@ -157,6 +238,7 @@ export class StockPostingService {
   private async lock(
     manager: EntityManager,
     itemIds: number[],
+    options: { requireActive: boolean },
   ): Promise<Map<number, ItemLedger>> {
     // Only ids of existing items get a row; an unknown id is reported below. Ascending, so two
     // postings creating the same rows wait on each other in the same order.
@@ -182,7 +264,7 @@ export class StockPostingService {
     for (const itemId of itemIds) {
       const item = itemById.get(itemId);
       if (!item) throw new NotFoundException(`Item ${itemId} not found.`);
-      if (item.is_deleted) {
+      if (options.requireActive && item.is_deleted) {
         throw new ConflictException(`Item ${item.code} has been deleted.`);
       }
       // Every existing item got a row above, and the row is locked now.
@@ -278,6 +360,31 @@ export class StockPostingService {
     );
     return String(row.id);
   }
+}
+
+/**
+ * Takes `take` off one reservation. Taking all of it deletes the row: a reservation is always
+ * positive (`CHECK quantity > 0`, checked on the UPDATE itself), so it can never pass through 0.
+ */
+export async function shrinkReservation(
+  manager: EntityManager,
+  orderId: number,
+  itemId: number,
+  reserved: Decimal,
+  take: Decimal,
+): Promise<void> {
+  if (take.greaterThanOrEqualTo(reserved)) {
+    await manager.query(
+      `DELETE FROM stock_reservations WHERE order_id = $1 AND item_id = $2`,
+      [orderId, itemId],
+    );
+    return;
+  }
+  await manager.query(
+    `UPDATE stock_reservations SET quantity = quantity - $3, updated_at = NOW()
+      WHERE order_id = $1 AND item_id = $2`,
+    [orderId, itemId, take.toFixed()],
+  );
 }
 
 function ledgerOf(

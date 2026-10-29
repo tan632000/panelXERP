@@ -111,16 +111,21 @@ export const NOTIFICATION_REQUIRED_SCOPES = [
   // to the creator (read scope).
   "purchase_order:approve",
   "purchase_order:read",
+  // An order short of materials goes to purchasing and its sales owner, both of whom read
+  // the material view.
+  "material:read",
 ] as const;
 
-/** The purchase order decisions the bell phrases, each with its message key. */
-const PURCHASE_ORDER_EVENT_MESSAGE_KEYS: Readonly<Record<string, string>> = {
+/** The purchase order and order shortage events the bell phrases, with their message keys. */
+const INVENTORY_EVENT_MESSAGE_KEYS: Readonly<Record<string, string>> = {
   "inventory.purchase_order.submitted":
     "events.inventory_purchase_order_submitted",
   "inventory.purchase_order.approved":
     "events.inventory_purchase_order_approved",
   "inventory.purchase_order.rejected":
     "events.inventory_purchase_order_rejected",
+  "inventory.order.short": "events.inventory_order_short",
+  "inventory.order.short.owner": "events.inventory_order_short_owner",
 };
 
 /** Badge stops counting past this and renders the overflow marker instead. */
@@ -143,6 +148,8 @@ export const NOTIFICATION_EVENT_KEYS = [
   "inventory.purchase_order.submitted",
   "inventory.purchase_order.approved",
   "inventory.purchase_order.rejected",
+  "inventory.order.short",
+  "inventory.order.short.owner",
   "purchaseRequestAwaitingReceipt",
   "purchaseRequestReceived",
   "purchaseRequestApproved",
@@ -1233,14 +1240,16 @@ export function resolveNotificationMessage(
       };
     }
 
-    const purchaseOrderKey = PURCHASE_ORDER_EVENT_MESSAGE_KEYS[item.eventType];
-    if (purchaseOrderKey) {
+    const inventoryKey = INVENTORY_EVENT_MESSAGE_KEYS[item.eventType];
+    if (inventoryKey) {
       return {
         kind: "key",
-        key: purchaseOrderKey,
+        key: inventoryKey,
         values: {
           code: field(payload.code),
           reason: field(payload.reason),
+          customerName: field(payload.customerName),
+          shortItemCount: displayNumber(payload.shortItemCount),
         },
       };
     }

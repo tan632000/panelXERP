@@ -3,6 +3,7 @@ import { DataSource, type EntityManager } from 'typeorm';
 
 import { DataScopeService } from '@shared/services/data-scope.service';
 
+import { OrderLifecycleRegistry } from '@plugins/sales/_shared/ports/order-lifecycle-registry';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
 import { recordRequestActivity } from '@plugins/sales/_shared/utils/request-activity.util';
 import {
@@ -36,6 +37,7 @@ export class OrderEditService {
     private readonly dataScope: DataScopeService,
     private readonly orders: OrderService,
     private readonly statusPort: RequestStatusPort,
+    private readonly lifecycle: OrderLifecycleRegistry,
   ) {}
 
   async update(
@@ -89,7 +91,7 @@ export class OrderEditService {
     actor: AuthUserPayload,
   ): Promise<OrderDetail> {
     const reason = requireText(dto.reason, 'Reason is required.');
-    await this.dataSource.transaction(async (manager) => {
+    const pending = await this.dataSource.transaction(async (manager) => {
       const { order, request } = await lockOrder(
         manager,
         this.dataScope,
@@ -120,7 +122,13 @@ export class OrderEditService {
         actorId: actor.userId,
         note: `${order.code}: ${reason}`,
       });
+      // Last, so the stock locks the hooks take come after every sales lock.
+      return this.lifecycle.cancelled(manager, {
+        orderId: order.id,
+        actorId: actor.userId,
+      });
     });
+    await pending.afterCommit();
     return this.orders.findOne(id, actor);
   }
 
