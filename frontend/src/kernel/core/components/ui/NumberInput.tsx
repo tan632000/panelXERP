@@ -175,7 +175,11 @@ export const NumberInput = forwardRef<HTMLInputElement, NumberInputProps>(
       text: string,
       caret: number | null,
     ) => {
-      const raw = replaceLoneZero(display, withTypedDecimal(display, text));
+      const raw = replaceLoneZero(
+        display,
+        withTypedDecimal(display, text),
+        caret,
+      );
       const parts = parseNumberInputValue(raw, optionsRef.current);
       canonicalRef.current = parts.canonical;
       caretRef.current = caretAfterFormat(
@@ -362,11 +366,20 @@ function insertedSlice(
  * caret lands in front of it as often as behind it — so a typed `5` read as `50` a third of
  * the time. The zero carries no information of its own, so digits typed anywhere in such a
  * field replace it outright. A typed comma does not: `0,5` has to stay reachable.
+ *
+ * The caret tells a `2` typed in front of the zero (`20`, caret after the `2`) from a `20`
+ * pasted or typed over the selected zero (`20`, caret at the end): only in the first is the
+ * trailing zero the old one, so only there is it dropped.
  */
-function replaceLoneZero(previous: string, raw: string): string {
+function replaceLoneZero(
+  previous: string,
+  raw: string,
+  caret: number | null,
+): string {
   if (previous !== "0" && previous !== "-0") return raw;
   const slice = insertedSlice(previous, raw);
   if (!slice) return raw;
+  if (slice.end > 0 && caret === raw.length) return raw;
   const inserted = raw.slice(slice.start, raw.length - slice.end);
   if (!/^\d+$/.test(inserted)) return raw;
   return (previous.startsWith("-") ? "-" : "") + inserted;

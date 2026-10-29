@@ -122,6 +122,21 @@ describe("NumberInput", () => {
     expect(input).toHaveValue("5");
   });
 
+  it("keeps a number ending in zero pasted or typed over a lone zero", () => {
+    // Over a selected `0`, `20` arrives whole with the caret at its end: its last zero is the
+    // actor's own, not the placeholder, and dropping it turned a 20% margin into 2%.
+    render(<NumberInput placeholder="12" value={0} />);
+    const input = screen.getByPlaceholderText("12") as HTMLInputElement;
+    fireEvent.change(input, { target: { value: "20", selectionStart: 2 } });
+    expect(input).toHaveValue("20");
+    fireEvent.change(input, { target: { value: "", selectionStart: 0 } });
+    fireEvent.change(input, { target: { value: "0", selectionStart: 1 } });
+    fireEvent.change(input, {
+      target: { value: "1200000", selectionStart: 7 },
+    });
+    expect(input).toHaveValue("1.200.000");
+  });
+
   it("keeps a lone zero when the actor opens its decimal part", () => {
     render(<NumberInput placeholder="12" value={0} />);
     const input = screen.getByPlaceholderText("12") as HTMLInputElement;
