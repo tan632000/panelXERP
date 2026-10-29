@@ -161,6 +161,12 @@ describe("notification bell surface", () => {
         // pending-QC notice is stamped with the semi-finished receipt scope.
         "semi_finished_receipt_ok:read",
         "request:read",
+        // Purchasing and warehouse: low stock to purchasing, a purchase order to the directors
+        // and back to its creator, an order short of materials to purchasing and its owner.
+        "stock:read",
+        "purchase_order:approve",
+        "purchase_order:read",
+        "material:read",
       ]);
     });
   });
