@@ -48,6 +48,12 @@ export const PURCHASE_ORDER_CLOSABLE: readonly PurchaseOrderStatus[] = [
   "partially_received",
 ];
 
+/** Statuses goods may still be received on. */
+export const PURCHASE_ORDER_RECEIVABLE: readonly PurchaseOrderStatus[] = [
+  "approved",
+  "partially_received",
+];
+
 export const PURCHASE_ORDER_REASON_MAX = 1000;
 export const PURCHASE_ORDER_NOTE_MAX = 2000;
 export const PURCHASE_ORDER_QUANTITY_DECIMALS = 3;

@@ -2351,6 +2351,47 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/inventory/receipts": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List stock receipts */
+    get: operations["StockReceiptController_findAll"];
+    put?: never;
+    /**
+     * Receive goods of an approved purchase order into stock
+     * @description Posts at the order line prices and allocates the stock to short orders, the order’s source orders first. A request key already used answers the first receipt with 200 and posts nothing.
+     */
+    post: operations["StockReceiptController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/receipts/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a stock receipt with its lines
+     * @description Unit costs only with purchase_price:read.
+     */
+    get: operations["StockReceiptController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3044,6 +3085,23 @@ export interface components {
     };
     PurchaseOrderReasonDto: {
       reason: string;
+    };
+    StockReceiptLineDto: {
+      /** @description Line of the purchase order being received */
+      poLineId: number;
+      /** @description Quantity received, up to 3 decimals */
+      quantity: number;
+    };
+    CreateStockReceiptDto: {
+      /** @description Approved or partly received purchase order */
+      purchaseOrderId: number;
+      /**
+       * Format: uuid
+       * @description One key per receive screen: posting it again returns the first receipt with 200 and posts nothing.
+       */
+      requestKey?: string;
+      note?: Record<string, never> | null;
+      lines: Array<components["schemas"]["StockReceiptLineDto"]>;
     };
   };
   responses: never;
@@ -8632,6 +8690,121 @@ export interface operations {
         content?: never;
       };
       /** @description Not found or outside the actor’s scope */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StockReceiptController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Only the receipts of this purchase order */
+        purchaseOrderId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated stock receipts */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires stock_receipt:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StockReceiptController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateStockReceiptDto"];
+      };
+    };
+    responses: {
+      /** @description The request key was posted before: the first receipt */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Receipt posted */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error, or a line not on the order */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Purchase order not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Order not approved or partly received, more than remains, or item deleted */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StockReceiptController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Stock receipt */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
       404: {
         headers: {
           [name: string]: unknown;

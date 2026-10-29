@@ -8,10 +8,12 @@ import { CancelReasonModal } from "@/kernel/core/components/ui/CancelReasonModal
 import { ConfirmDialog } from "@/kernel/core/components/ui/ConfirmDialog";
 import { DetailPanelActionButton } from "@/kernel/core/components/ui/DetailPanelActionButton";
 import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
+import { useRouter } from "@/kernel/i18n/navigation";
 
 import { PURCHASE_ORDER_REASON_MAX } from "@plugins/inventory/purchase-order/constants";
 import { usePurchaseOrderAction } from "@plugins/inventory/purchase-order/hooks/api/usePurchaseOrder";
 import { purchaseOrderActions } from "@plugins/inventory/purchase-order/utils/purchase-order-actions";
+import { receiptPageRoutes } from "@plugins/inventory/receipt/constants";
 
 import type { PurchaseOrderDetail } from "@plugins/inventory/purchase-order/types";
 
@@ -29,6 +31,7 @@ export function PurchaseOrderActionPanel({
   const t = useTranslations("purchaseOrder.actions");
   const tCommon = useTranslations("common");
   const { can, user } = useAuth();
+  const router = useRouter();
   const [dialog, setDialog] = useState<Dialog>(null);
 
   const submit = usePurchaseOrderAction(order.id, "submit");
@@ -89,6 +92,15 @@ export function PurchaseOrderActionPanel({
                   onClick={() => setDialog("reject")}
                 />
               </>
+            ) : null}
+            {allowed.receive ? (
+              <DetailPanelActionButton
+                variant="primary"
+                icon="package-import"
+                label={t("receive")}
+                disabled={busy}
+                onClick={() => router.push(receiptPageRoutes.receive(order.id))}
+              />
             ) : null}
             {allowed.close ? (
               <DetailPanelActionButton

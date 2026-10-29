@@ -1,8 +1,10 @@
 import {
   PURCHASE_ORDER_CANCELLABLE,
   PURCHASE_ORDER_CLOSABLE,
+  PURCHASE_ORDER_RECEIVABLE,
 } from "@plugins/inventory/purchase-order/constants";
 import { PurchaseOrderPermission } from "@plugins/inventory/purchase-order/permissions/purchase-order-permission.keys";
+import { ReceiptPermission } from "@plugins/inventory/receipt/permissions/receipt-permission.keys";
 
 import type { PurchaseOrderDetail } from "@plugins/inventory/purchase-order/types";
 
@@ -15,6 +17,8 @@ export interface PurchaseOrderActions {
   decideBarred: boolean;
   cancel: boolean;
   close: boolean;
+  /** Open the receive screen: the order is approved or partly received. */
+  receive: boolean;
 }
 
 /**
@@ -62,5 +66,8 @@ export function purchaseOrderActions(
     close:
       PURCHASE_ORDER_CLOSABLE.includes(order.status) &&
       can(PurchaseOrderPermission.close),
+    receive:
+      PURCHASE_ORDER_RECEIVABLE.includes(order.status) &&
+      can(ReceiptPermission.create),
   };
 }

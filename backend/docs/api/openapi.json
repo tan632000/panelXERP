@@ -7350,6 +7350,163 @@
           "inventory/materials"
         ]
       }
+    },
+    "/api/v1/inventory/receipts": {
+      "get": {
+        "operationId": "StockReceiptController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "purchaseOrderId",
+            "required": false,
+            "in": "query",
+            "description": "Only the receipts of this purchase order",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated stock receipts"
+          },
+          "403": {
+            "description": "Forbidden — requires stock_receipt:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List stock receipts",
+        "tags": [
+          "inventory/receipts"
+        ]
+      },
+      "post": {
+        "description": "Posts at the order line prices and allocates the stock to short orders, the order’s source orders first. A request key already used answers the first receipt with 200 and posts nothing.",
+        "operationId": "StockReceiptController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStockReceiptDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request key was posted before: the first receipt"
+          },
+          "201": {
+            "description": "Receipt posted"
+          },
+          "400": {
+            "description": "Validation error, or a line not on the order"
+          },
+          "404": {
+            "description": "Purchase order not found"
+          },
+          "409": {
+            "description": "Order not approved or partly received, more than remains, or item deleted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Receive goods of an approved purchase order into stock",
+        "tags": [
+          "inventory/receipts"
+        ]
+      }
+    },
+    "/api/v1/inventory/receipts/{id}": {
+      "get": {
+        "description": "Unit costs only with purchase_price:read.",
+        "operationId": "StockReceiptController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stock receipt"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a stock receipt with its lines",
+        "tags": [
+          "inventory/receipts"
+        ]
+      }
     }
   },
   "info": {
@@ -8981,6 +9138,53 @@
         },
         "required": [
           "reason"
+        ]
+      },
+      "StockReceiptLineDto": {
+        "type": "object",
+        "properties": {
+          "poLineId": {
+            "type": "number",
+            "description": "Line of the purchase order being received"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity received, up to 3 decimals",
+            "minimum": 0.001
+          }
+        },
+        "required": [
+          "poLineId",
+          "quantity"
+        ]
+      },
+      "CreateStockReceiptDto": {
+        "type": "object",
+        "properties": {
+          "purchaseOrderId": {
+            "type": "number",
+            "description": "Approved or partly received purchase order"
+          },
+          "requestKey": {
+            "type": "string",
+            "description": "One key per receive screen: posting it again returns the first receipt with 200 and posts nothing.",
+            "format": "uuid"
+          },
+          "note": {
+            "type": "object",
+            "maxLength": 2000,
+            "nullable": true
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StockReceiptLineDto"
+            }
+          }
+        },
+        "required": [
+          "purchaseOrderId",
+          "lines"
         ]
       }
     }

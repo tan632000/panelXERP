@@ -1,0 +1,50 @@
+{
+  "title": "Phiếu nhập kho",
+  "description": "Hàng nhận theo đơn mua hàng đã duyệt, nhập kho theo giá PO",
+  "searchPlaceholder": "Tìm theo mã phiếu, mã PO, nhà cung cấp…",
+  "code": "Mã phiếu",
+  "purchaseOrder": "Đơn mua hàng",
+  "supplier": "Nhà cung cấp",
+  "lineCount": "Số dòng",
+  "createdBy": "Người nhập",
+  "createdAt": "Thời gian nhập",
+  "emptyValue": "—",
+  "noItems": "Chưa có phiếu nhập kho nào",
+  "noItemsFound": "Không tìm thấy phiếu nhập kho phù hợp",
+  "paginationItem": "phiếu",
+  "loadError": "Không tải được danh sách phiếu nhập kho",
+  "receive": {
+    "title": "Nhập kho",
+    "titleOf": "Nhập kho theo {code}",
+    "scanTitle": "Quét hàng nhận",
+    "hint": "Mỗi lần quét cộng 1 vào dòng đầu tiên của mặt hàng còn thiếu. Có thể nhập số lượng trực tiếp cho hàng tính theo mét, kg…",
+    "submit": "Nhập kho",
+    "notReceivable": "{code} không ở trạng thái nhận hàng: chỉ nhận hàng cho PO đã duyệt hoặc đang nhận dở.",
+    "orderNotFound": "Không tìm thấy đơn mua hàng cần nhập kho"
+  },
+  "scan": {
+    "placeholder": "Quét mã vạch hoặc nhập mã hàng…",
+    "notOnOrder": "Mặt hàng này không có trong đơn mua hàng",
+    "beyondRemaining": "Đã nhận đủ số lượng còn lại của mặt hàng này",
+    "notFound": "Không tìm thấy mặt hàng với mã này",
+    "failed": "Không tra được mã vừa quét, vui lòng quét lại"
+  },
+  "lines": {
+    "title": "Hàng trong đơn",
+    "code": "Mã hàng",
+    "name": "Tên hàng",
+    "unit": "ĐVT",
+    "ordered": "Đặt mua",
+    "received": "Đã nhận",
+    "remaining": "Còn lại",
+    "thisReceipt": "Nhận lần này",
+    "thisReceiptOf": "Nhận lần này của {code}",
+    "overRemaining": "Vượt số còn lại ({remaining})"
+  },
+  "toast": {
+    "createSuccess": "Đã nhập kho",
+    "conflict": "Không nhập được: đơn mua hàng đã thay đổi hoặc số lượng vượt phần còn lại. Vui lòng tải lại.",
+    "forbidden": "Bạn không có quyền thực hiện chức năng này.",
+    "systemError": "Đã có lỗi xảy ra, vui lòng thử lại"
+  }
+}

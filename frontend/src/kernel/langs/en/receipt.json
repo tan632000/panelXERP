@@ -1,0 +1,50 @@
+{
+  "title": "Stock receipts",
+  "description": "Goods received against approved purchase orders, posted at the order price",
+  "searchPlaceholder": "Search by receipt code, PO code, supplier…",
+  "code": "Receipt code",
+  "purchaseOrder": "Purchase order",
+  "supplier": "Supplier",
+  "lineCount": "Lines",
+  "createdBy": "Received by",
+  "createdAt": "Received at",
+  "emptyValue": "—",
+  "noItems": "No stock receipts yet",
+  "noItemsFound": "No stock receipts match",
+  "paginationItem": "receipts",
+  "loadError": "Could not load the stock receipts",
+  "receive": {
+    "title": "Receive goods",
+    "titleOf": "Receive goods for {code}",
+    "scanTitle": "Scan received goods",
+    "hint": "Each scan adds 1 to the first line of the item that still has goods to come. Quantities can be typed for goods measured in metres, kilograms…",
+    "submit": "Receive",
+    "notReceivable": "{code} is not open for receiving: only approved or partly received orders take goods.",
+    "orderNotFound": "The purchase order to receive was not found"
+  },
+  "scan": {
+    "placeholder": "Scan a barcode or type an item code…",
+    "notOnOrder": "This item is not on the purchase order",
+    "beyondRemaining": "Everything remaining of this item has been received",
+    "notFound": "No item has this code",
+    "failed": "Could not look the scan up, please scan again"
+  },
+  "lines": {
+    "title": "Goods on the order",
+    "code": "Item code",
+    "name": "Item name",
+    "unit": "Unit",
+    "ordered": "Ordered",
+    "received": "Received",
+    "remaining": "Remaining",
+    "thisReceipt": "This receipt",
+    "thisReceiptOf": "This receipt of {code}",
+    "overRemaining": "More than remains ({remaining})"
+  },
+  "toast": {
+    "createSuccess": "Goods received",
+    "conflict": "Could not receive: the purchase order changed or the quantity exceeds what remains. Please reload.",
+    "forbidden": "You do not have permission to do this.",
+    "systemError": "Something went wrong, please try again"
+  }
+}

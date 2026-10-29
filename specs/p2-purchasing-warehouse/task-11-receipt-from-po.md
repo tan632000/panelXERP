@@ -1,6 +1,6 @@
 # Task 11 — Goods receipt against an approved PO by scanning
 
-Status: pending
+Status: done
 
 ## Outcome
 A storekeeper scans the delivered items of an approved PO into a receipt; partial receipts post to stock at the PO price (weighted average), over-receipt is refused even under concurrency, a double submit posts once, and the new stock is allocated to short orders — the PO's source orders first.
@@ -57,3 +57,75 @@ A storekeeper scans the delivered items of an approved PO into a receipt; partia
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/inventory/receipt/services/receipt.service.spec.ts && test -f src/plugins/inventory/receipt/services/receipt-race.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/inventory src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/receipt/tests/receive-screen.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+Exit: 0
+Base: 967069d3648131ffa65f359399e59e764ee9cde9
+Head: 9d6d9e365945213367f753b8307ac0909038d6c5fb38fa2f5591b20307b00d92
+```text
+$ docker compose exec -T backend sh -c "test -f src/plugins/inventory/receipt/services/receipt.service.spec.ts && test -f src/plugins/inventory/receipt/services/receipt-race.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/inventory src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/receipt/tests/receive-screen.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+> panelxerp-backend@0.0.1 migration:run
+> panelxerp-backend@0.0.1 typeorm
+No migrations are pending
+> panelxerp-backend@0.0.1 seed
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts (15.392 s)
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts (15.467 s)
+PASS src/plugins/inventory/stock/services/stock-availability.service.spec.ts (17.314 s)
+PASS src/plugins/inventory/receipt/services/receipt-race.spec.ts (18.31 s)
+PASS src/plugins/inventory/material/material.controller.spec.ts (5.925 s)
+PASS src/plugins/inventory/supplier/supplier.controller.spec.ts (5.483 s)
+PASS src/plugins/inventory/purchase-order/services/purchase-order-approval.service.spec.ts (8.734 s)
+PASS src/plugins/inventory/stock/services/stock-posting-race.spec.ts
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/kernel/core/database/soft-delete-unique-index.spec.ts (14.758 s)
+PASS src/plugins/inventory/material/services/reservation-race.spec.ts (6.388 s)
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/plugins/inventory/material/services/reservation.service.spec.ts
+PASS src/plugins/inventory/receipt/services/receipt.service.spec.ts (31.69 s)
+PASS src/plugins/inventory/material/services/material.service.spec.ts
+PASS src/plugins/inventory/material/services/shortage-alert.service.spec.ts
+PASS src/plugins/inventory/_shared/gateways/supplier-reference-check-registry.spec.ts
+PASS src/plugins/inventory/purchase-order/utils/purchase-order-pricing.spec.ts
+PASS src/plugins/inventory/stock/utils/stock-cost.util.spec.ts
+PASS src/plugins/inventory/supplier/services/supplier.service.spec.ts
+PASS src/plugins/inventory/stock/stock.controller.spec.ts (9.507 s)
+PASS src/plugins/inventory/stock/services/stock-alert.service.spec.ts
+PASS src/plugins/inventory/stock/services/stock-posting.service.spec.ts
+Test Suites: 24 passed, 24 total
+Tests:       212 passed, 212 total
+> panelxerp-backend@0.0.1 validate:migrations
+Migration filename check passed (34 files).
+> panelxerp-frontend@0.1.0 lint
+> panelxerp-frontend@0.1.0 lint:i18n
+ ✓ src/kernel/core/tests/i18n-enum-conformance.test.ts (7 tests) 4553ms
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+ ✓ src/plugins/inventory/stock/tests/stock-list.test.tsx (6 tests) 376ms
+ ✓ src/plugins/inventory/receipt/tests/receive-screen.test.tsx (5 tests) 1903ms
+ ✓ src/plugins/inventory/material/tests/shortage-notification.test.ts (4 tests) 338ms
+ ✓ src/plugins/inventory/material/tests/order-material.test.tsx (4 tests) 1465ms
+ ✓ src/plugins/inventory/supplier/tests/supplier-list.test.tsx (4 tests) 1751ms
+ ✓ src/plugins/inventory/stock/tests/stock-notification.test.ts (4 tests) 75ms
+ ✓ src/plugins/inventory/purchase-order/tests/purchase-order-detail.test.tsx (12 tests) 596ms
+ Test Files  7 passed (7)
+      Tests  39 passed (39)
+ ✓ src/kernel/langs/tests/permission-labels.test.ts (6 tests) 7202ms
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+EXIT=0
+```
+
+Negative proof (each counterexample applied alone, receipt specs rerun, file restored byte-for-byte):
+- remaining checked before the order lock → race (a) fails (both receipts pass).
+- allocation without the source-order preference → worked example fails (O2 takes the first 4).
+- float comparison of the remaining → the 0.1 then 0.2 on 0.3 spec fails (0.2 refused).
+- request key violation left to surface → race (c) fails (500 instead of 200).
+
+Reachability: backend restarted; `StockReceiptModule dependencies initialized`, `Mapped {/api/v1/inventory/receipts, GET}`, `{/api/v1/inventory/receipts/:id, GET}`, `{/api/v1/inventory/receipts, POST}`, `Nest application successfully started`. Frontend routes `/inventory/receipts` and `/inventory/receipts/new`, sidebar item `receipts`, and the "Nhập kho" action on approved / partly received purchase orders.
+
+Review: code-auditor PASS (0 Critical / 0 High / 0 Medium); Lows recorded for GATE-DONE.

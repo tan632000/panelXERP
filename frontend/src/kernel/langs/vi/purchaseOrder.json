@@ -82,6 +82,7 @@
     "reject": "Từ chối",
     "cancel": "Huỷ đơn",
     "close": "Đóng đơn",
+    "receive": "Nhập kho",
     "involvedCannotDecide": "Bạn đã tạo, gửi duyệt hoặc sửa đơn này nên không thể duyệt hay từ chối.",
     "submitTitle": "Gửi duyệt đơn {code}?",
     "submitDescription": "Đơn sẽ được gửi Giám đốc duyệt và không sửa được nữa, trừ khi bị từ chối.",

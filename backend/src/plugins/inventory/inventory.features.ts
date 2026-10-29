@@ -2,6 +2,8 @@ import { MaterialModule } from '@plugins/inventory/material/material.module';
 import { materialPermissions } from '@plugins/inventory/material/permissions/material.permissions';
 import { purchaseOrderPermissions } from '@plugins/inventory/purchase-order/permissions/purchase-order.permissions';
 import { PurchaseOrderModule } from '@plugins/inventory/purchase-order/purchase-order.module';
+import { stockReceiptPermissions } from '@plugins/inventory/receipt/permissions/receipt.permissions';
+import { StockReceiptModule } from '@plugins/inventory/receipt/receipt.module';
 import { stockPermissions } from '@plugins/inventory/stock/permissions/stock.permissions';
 import { StockModule } from '@plugins/inventory/stock/stock.module';
 import { supplierPermissions } from '@plugins/inventory/supplier/permissions/supplier.permissions';
@@ -34,5 +36,11 @@ export const INVENTORY_FEATURES: ErpFeature[] = [
     plugin: 'inventory',
     module: MaterialModule,
     permissions: materialPermissions,
+  },
+  {
+    key: 'receipt',
+    plugin: 'inventory',
+    module: StockReceiptModule,
+    permissions: stockReceiptPermissions,
   },
 ];
