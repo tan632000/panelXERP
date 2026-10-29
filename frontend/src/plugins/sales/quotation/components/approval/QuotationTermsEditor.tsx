@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { DetailPanelActionButton } from "@/kernel/core/components/ui/DetailPanelActionButton";
 import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
@@ -17,6 +17,8 @@ interface QuotationTermsEditorProps {
   editable: boolean;
   saving: boolean;
   onSave: (terms: string[]) => void;
+  /** Told whether the typed terms differ from the stored ones. */
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
 /**
@@ -28,6 +30,7 @@ export function QuotationTermsEditor({
   editable,
   saving,
   onSave,
+  onDirtyChange,
 }: QuotationTermsEditorProps) {
   const t = useTranslations("quotation.terms");
   const [terms, setTerms] = useState<string[]>(version.terms);
@@ -38,6 +41,11 @@ export function QuotationTermsEditor({
   const dirty =
     trimmed.length !== version.terms.length ||
     trimmed.some((term, index) => term !== version.terms[index]);
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+  useEffect(() => () => onDirtyChange?.(false), [onDirtyChange]);
 
   const change = (index: number, value: string) =>
     setTerms((previous) =>

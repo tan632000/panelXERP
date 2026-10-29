@@ -27,6 +27,11 @@ import type { QuotationDetail } from "@plugins/sales/quotation/types";
 
 interface QuotationApprovalPanelProps {
   quotation: QuotationDetail;
+  /**
+   * The draft's prices or terms hold edits not saved yet: submitting now would hand in the
+   * stored figures, not the ones on screen.
+   */
+  unsavedChanges?: boolean;
 }
 
 /**
@@ -38,6 +43,7 @@ interface QuotationApprovalPanelProps {
  */
 export function QuotationApprovalPanel({
   quotation,
+  unsavedChanges = false,
 }: QuotationApprovalPanelProps) {
   const t = useTranslations("quotation.approval");
   const tCommon = useTranslations("common");
@@ -77,6 +83,9 @@ export function QuotationApprovalPanel({
   const busy = [submit, approve, reject, confirm, cancel, revise, refresh].some(
     (mutation) => mutation.isPending,
   );
+  let submitBlockedReason: string | undefined;
+  if (stale) submitBlockedReason = t("submitBlockedStale");
+  else if (unsavedChanges) submitBlockedReason = t("submitBlockedUnsaved");
 
   const canDecide =
     status === "pending_approval" && can(QuotationPermission.approve);
@@ -112,6 +121,14 @@ export function QuotationApprovalPanel({
               {t("stale")}
             </p>
           ) : null}
+          {status === "draft" && canSubmit && unsavedChanges ? (
+            <p
+              role="alert"
+              className="rounded-md border border-warning-bg bg-warning-bg px-3 py-2 text-sm text-warning-text"
+            >
+              {t("unsaved")}
+            </p>
+          ) : null}
           {status === "pending_approval" && canDecide && isAuthor ? (
             <p className="text-sm text-text-secondary">
               {t("creatorCannotDecide")}
@@ -142,8 +159,8 @@ export function QuotationApprovalPanel({
                 variant="primary"
                 icon="check"
                 label={t("submit")}
-                disabled={busy || stale}
-                title={stale ? t("submitBlockedStale") : undefined}
+                disabled={busy || stale || unsavedChanges}
+                title={submitBlockedReason}
                 onClick={() => setDialog("submit")}
               />
             ) : null}

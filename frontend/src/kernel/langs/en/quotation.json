@@ -129,6 +129,8 @@
     },
     "submit": "Submit for approval",
     "submitBlockedStale": "Update from the latest estimate before submitting",
+    "unsaved": "The prices or terms have unsaved changes. Save them before submitting, or the quotation goes in with the stored figures.",
+    "submitBlockedUnsaved": "Save the price and terms changes before submitting",
     "refresh": "Update from the latest estimate",
     "approve": "Approve",
     "reject": "Reject",

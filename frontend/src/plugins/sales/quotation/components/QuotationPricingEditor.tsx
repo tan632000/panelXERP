@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
 import { LINE_TABLE_SCROLL_CLASS } from "@/kernel/core/components/ui/line-table-styles";
@@ -40,6 +40,8 @@ interface QuotationPricingEditorProps {
   editable: boolean;
   saving: boolean;
   onSave: (dto: UpdateQuotationPricingDto) => void;
+  /** Told whether the typed figures differ from the stored ones. */
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
 /**
@@ -53,6 +55,7 @@ export function QuotationPricingEditor({
   editable,
   saving,
   onSave,
+  onDirtyChange,
 }: QuotationPricingEditorProps) {
   const t = useTranslations("quotation");
 
@@ -112,6 +115,12 @@ export function QuotationPricingEditor({
     discountValue !== saved.discountValue ||
     vatRate !== saved.vatRate;
   const valid = marginErrors.size === 0 && discountError === null;
+
+  useEffect(() => {
+    onDirtyChange?.(dirty);
+  }, [dirty, onDirtyChange]);
+  // Leaving the version (another one pinned) leaves nothing unsaved behind.
+  useEffect(() => () => onDirtyChange?.(false), [onDirtyChange]);
 
   const save = () => {
     onSave({

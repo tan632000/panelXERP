@@ -261,6 +261,46 @@ describe("quotation draft editor", () => {
     await waitFor(() => expect(amountOf("quotation-total")).toBe("3.363.511"));
   });
 
+  it("holds the submit while a typed margin is not saved, and frees it once saved", async () => {
+    grant(
+      QuotationPermission.read,
+      QuotationPermission.update,
+      QuotationPermission.submit,
+    );
+    const stored = detail();
+    const own = { ...stored, current: { ...stored.current, createdBy: 11 } };
+    respond(own);
+    const saved = {
+      ...own,
+      current: {
+        ...own.current,
+        lines: own.current.lines.map((line) =>
+          line.id === 1 ? { ...line, marginPercent: 20 } : line,
+        ),
+      },
+    };
+    // Once saved, the server answers the stored margin on every read too.
+    apiPatch.mockImplementation(() => {
+      respond(saved);
+      return Promise.resolve({ data: saved });
+    });
+    renderPage();
+    await screen.findByTestId("quotation-total");
+    const submit = () => screen.getByRole("button", { name: "Gửi duyệt" });
+    expect(submit()).toBeEnabled();
+
+    type("Biên lợi nhuận của tủ MSB-01", "20");
+
+    expect(submit()).toBeDisabled();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      viQuotation.approval.unsaved,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Lưu giá" }));
+    await waitFor(() => expect(submit()).toBeEnabled());
+    expect(screen.queryByText(viQuotation.approval.unsaved)).toBeNull();
+  });
+
   it("offers only the VAT rates 0, 5, 8 and 10 percent", async () => {
     renderPage();
     await screen.findByTestId("quotation-total");

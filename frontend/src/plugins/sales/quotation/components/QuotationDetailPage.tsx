@@ -42,6 +42,8 @@ export function QuotationDetailPage() {
 
   /** `undefined` follows the latest version; a number pins an older one. */
   const [pinnedVer, setPinnedVer] = useState<number | undefined>();
+  const [unsavedPricing, setUnsavedPricing] = useState(false);
+  const [unsavedTerms, setUnsavedTerms] = useState(false);
 
   const quotationQuery = useQuotation(quotationId, pinnedVer);
   const save = useUpdateQuotationPricing(quotationId ?? 0, pinnedVer);
@@ -186,7 +188,10 @@ export function QuotationDetailPage() {
         ) : null}
       </DetailSection>
 
-      <QuotationApprovalPanel quotation={quotation} />
+      <QuotationApprovalPanel
+        quotation={quotation}
+        unsavedChanges={unsavedPricing || unsavedTerms}
+      />
 
       <QuotationOrderSection
         quotationId={quotation.id}
@@ -200,6 +205,7 @@ export function QuotationDetailPage() {
         editable={editable}
         saving={save.isPending}
         onSave={(dto) => save.mutate(dto)}
+        onDirtyChange={setUnsavedPricing}
       />
 
       <QuotationTermsEditor
@@ -208,6 +214,7 @@ export function QuotationDetailPage() {
         editable={editable}
         saving={save.isPending}
         onSave={(terms) => save.mutate({ terms })}
+        onDirtyChange={setUnsavedTerms}
       />
 
       <QuotationFeedbackLog quotationId={quotation.id} />

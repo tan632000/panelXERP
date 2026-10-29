@@ -129,6 +129,8 @@
     },
     "submit": "Gửi duyệt",
     "submitBlockedStale": "Cập nhật từ dự toán mới nhất trước khi gửi duyệt",
+    "unsaved": "Giá hoặc điều khoản đang có thay đổi chưa lưu. Lưu trước khi gửi duyệt, nếu không báo giá sẽ được gửi với số liệu đã lưu.",
+    "submitBlockedUnsaved": "Lưu thay đổi giá và điều khoản trước khi gửi duyệt",
     "refresh": "Cập nhật từ dự toán mới nhất",
     "approve": "Duyệt",
     "reject": "Từ chối",
