@@ -27,9 +27,7 @@ const PANEL_ROLES = [
  * each. A plugin task removes its modules here when it registers its permissions, so the list
  * is empty once its feature is built; until then `seedRoles` stores none of these scopes.
  */
-const PENDING_MODULES: Readonly<Record<string, string>> = {
-  purchase_request: 'task-15',
-};
+const PENDING_MODULES: Readonly<Record<string, string>> = {};
 
 /**
  * Scopes of a module whose plugin is declared but not yet complete, with the task that

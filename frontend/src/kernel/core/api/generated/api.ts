@@ -2220,6 +2220,26 @@ export interface paths {
     patch: operations["PurchaseOrderController_update"];
     trace?: never;
   };
+  "/api/v1/inventory/purchase-orders/from-requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Turn open purchase request lines into a draft order
+     * @description Each line at most what its request line has remaining; prices default to the items’ reference price. Lines remember the request line and the sales order it was raised for.
+     */
+    post: operations["PurchaseOrderController_createFromRequests"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/inventory/purchase-orders/{id}/submit": {
     parameters: {
       query?: never;
@@ -2655,6 +2675,82 @@ export interface paths {
     put?: never;
     /** Cancel an open count */
     post: operations["StocktakeController_cancel"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/purchase-requests": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List purchase requests with what each line has been ordered */
+    get: operations["PurchaseRequestController_findAll"];
+    put?: never;
+    /** Raise a purchase request by hand */
+    post: operations["PurchaseRequestController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/purchase-requests/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get a purchase request */
+    get: operations["PurchaseRequestController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Edit a request nothing has been ordered on
+     * @description Lines, when given, replace every line.
+     */
+    patch: operations["PurchaseRequestController_update"];
+    trace?: never;
+  };
+  "/api/v1/inventory/purchase-requests/from-order/{orderId}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Request what an order is still short of
+     * @description One line per item: the shortage less what open requests for the order still ask and what purchase orders bought for it still bring.
+     */
+    post: operations["PurchaseRequestController_createFromOrder"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/purchase-requests/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** Cancel a request nothing has been ordered on */
+    post: operations["PurchaseRequestController_cancel"];
     delete?: never;
     options?: never;
     head?: never;
@@ -3342,6 +3438,22 @@ export interface components {
       note?: Record<string, never> | null;
       lines: Array<components["schemas"]["PurchaseOrderLineDto"]>;
     };
+    PurchaseOrderFromRequestLineDto: {
+      /** @description Purchase request line ordered */
+      prLineId: number;
+      /** @description Quantity ordered, at most what the line has remaining */
+      quantity: number;
+    };
+    PurchaseOrderFromRequestsDto: {
+      /** @description Active supplier */
+      supplierId: number;
+      /**
+       * @description VAT rate in percent; 10 when left out
+       * @enum {number}
+       */
+      vatRate?: 0 | 5 | 8 | 10;
+      lines: Array<components["schemas"]["PurchaseOrderFromRequestLineDto"]>;
+    };
     UpdatePurchaseOrderDto: {
       /** @description Active supplier */
       supplierId?: number;
@@ -3447,6 +3559,27 @@ export interface components {
       countedQty: number;
     };
     StocktakeReasonDto: {
+      reason: string;
+    };
+    PurchaseRequestLineDto: {
+      /** @description Active catalog item */
+      itemId: number;
+      /** @description Quantity, up to 3 decimals */
+      quantity: number;
+      /** @description Needed by (YYYY-MM-DD) */
+      neededBy?: Record<string, never> | null;
+      note?: Record<string, never> | null;
+    };
+    CreatePurchaseRequestDto: {
+      note?: Record<string, never> | null;
+      lines: Array<components["schemas"]["PurchaseRequestLineDto"]>;
+    };
+    UpdatePurchaseRequestDto: {
+      note?: Record<string, never> | null;
+      /** @description Replaces every line; refused once anything has been ordered */
+      lines?: Array<components["schemas"]["PurchaseRequestLineDto"]>;
+    };
+    PurchaseRequestReasonDto: {
       reason: string;
     };
   };
@@ -8816,6 +8949,42 @@ export interface operations {
       };
     };
   };
+  PurchaseOrderController_createFromRequests: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PurchaseOrderFromRequestsDto"];
+      };
+    };
+    responses: {
+      /** @description Draft created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Request line or supplier not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description More than remains, a cancelled request, or supplier/item unusable */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   PurchaseOrderController_submit: {
     parameters: {
       query?: never;
@@ -9789,6 +9958,196 @@ export interface operations {
         content?: never;
       };
       /** @description Not open */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseRequestController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Only the requests raised for this sales order */
+        sourceOrderId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated purchase requests */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseRequestController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePurchaseRequestDto"];
+      };
+    };
+    responses: {
+      /** @description Request raised */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Item not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Item deleted */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseRequestController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Purchase request */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseRequestController_update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdatePurchaseRequestDto"];
+      };
+    };
+    responses: {
+      /** @description Request updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Cancelled or already ordered */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseRequestController_createFromOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        orderId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Request raised */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Order not found or outside the reader’s scope */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Nothing left to request */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  PurchaseRequestController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["PurchaseRequestReasonDto"];
+      };
+    };
+    responses: {
+      /** @description Cancelled */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Already cancelled or ordered */
       409: {
         headers: {
           [name: string]: unknown;

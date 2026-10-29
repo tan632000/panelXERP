@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
+  ArrayMinSize,
   IsArray,
   IsIn,
   IsInt,
@@ -152,4 +153,54 @@ export class PurchaseOrderReasonDto {
   @MinLength(1, { message: 'Reason is required.' })
   @MaxLength(1000, { message: 'Reason must not exceed 1000 characters.' })
   reason: string;
+}
+
+export class PurchaseOrderFromRequestLineDto {
+  @ApiProperty({ description: 'Purchase request line ordered' })
+  @Type(() => Number)
+  @IsInt({ message: 'Request line is required.' })
+  @Min(1, { message: 'Request line is required.' })
+  @Max(2147483647, { message: 'Request line is required.' })
+  prLineId: number;
+
+  @ApiProperty({
+    description: 'Quantity ordered, at most what the line has remaining',
+    minimum: 0.001,
+  })
+  @Type(() => Number)
+  @IsNumber(
+    { maxDecimalPlaces: 3 },
+    { message: 'Quantity must be a number with at most 3 decimals.' },
+  )
+  @Min(0.001, { message: 'Quantity must be greater than 0.' })
+  @Max(MAX_QUANTITY, { message: 'Quantity is too large.' })
+  quantity: number;
+}
+
+export class PurchaseOrderFromRequestsDto {
+  @ApiProperty({ description: 'Active supplier' })
+  @Type(() => Number)
+  @IsInt({ message: 'Supplier is required.' })
+  @Min(1, { message: 'Supplier is required.' })
+  @Max(2147483647, { message: 'Supplier is required.' })
+  supplierId: number;
+
+  @ApiPropertyOptional({
+    description: 'VAT rate in percent; 10 when left out',
+    enum: PURCHASE_ORDER_VAT_RATES,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsIn([...PURCHASE_ORDER_VAT_RATES], {
+    message: 'VAT rate must be 0, 5, 8 or 10.',
+  })
+  vatRate?: number;
+
+  @ApiProperty({ type: [PurchaseOrderFromRequestLineDto] })
+  @IsArray()
+  @ArrayMinSize(1, { message: 'A purchase order needs at least one line.' })
+  @ArrayMaxSize(PURCHASE_ORDER_MAX_LINES)
+  @ValidateNested({ each: true })
+  @Type(() => PurchaseOrderFromRequestLineDto)
+  lines: PurchaseOrderFromRequestLineDto[];
 }

@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { Decimal } from 'decimal.js';
 import { DataSource } from 'typeorm';
 
 import { DEFAULT_LIST_PAGE_SIZE } from '@shared/constants/pagination';
@@ -289,7 +290,18 @@ export class PurchaseOrderService {
       const vatRate = dto.vatRate ?? order.vatRate;
 
       let totals: PurchaseOrderTotals;
-      if (dto.lines) {
+      const linked = dto.lines
+        ? await this.requestLinkedLines(manager, id)
+        : [];
+      if (dto.lines && linked.length > 0) {
+        totals = await this.repriceLinkedLines(
+          manager,
+          order.code,
+          linked,
+          dto.lines,
+          vatRate,
+        );
+      } else if (dto.lines) {
         const items = await this.lockActiveItems(manager, dto.lines);
         totals = priceOrder(dto.lines, vatRate);
         await manager.query(
@@ -337,6 +349,63 @@ export class PurchaseOrderService {
       }
     });
     return this.findOne(id, actor);
+  }
+
+  /**
+   * The lines of an order made from purchase requests, when it has any. Those lines carry the
+   * request line and the sales order they were bought for (D-11, D-05): replacing them would
+   * drop both, so the request would show the goods as never ordered and the receipt would no
+   * longer go to the order first.
+   */
+  private async requestLinkedLines(
+    manager: EntityManager,
+    orderId: number,
+  ): Promise<Array<{ id: number; item_id: number; quantity: string }>> {
+    const lines: Array<{
+      id: number;
+      item_id: number;
+      quantity: string;
+      pr_line_id: number | null;
+    }> = await manager.query(
+      `SELECT id, item_id, quantity::text AS quantity, pr_line_id
+         FROM purchase_order_lines WHERE purchase_order_id = $1
+        ORDER BY line_no, id`,
+      [orderId],
+    );
+    return lines.some((line) => line.pr_line_id !== null) ? lines : [];
+  }
+
+  /**
+   * On an order made from requests only the prices change: the same items in the same
+   * quantities, line for line, are repriced in place and keep their links (409 otherwise).
+   */
+  private async repriceLinkedLines(
+    manager: EntityManager,
+    code: string,
+    stored: ReadonlyArray<{ id: number; item_id: number; quantity: string }>,
+    lines: readonly PurchaseOrderLineDto[],
+    vatRate: number,
+  ): Promise<PurchaseOrderTotals> {
+    const same =
+      lines.length === stored.length &&
+      lines.every(
+        (line, index) =>
+          line.itemId === Number(stored[index].item_id) &&
+          new Decimal(String(line.quantity)).equals(stored[index].quantity),
+      );
+    if (!same) {
+      throw new ConflictException(
+        `${PURCHASE_ORDER_LABEL} ${code} was made from purchase requests: only its prices can change.`,
+      );
+    }
+    const totals = priceOrder(lines, vatRate);
+    for (const [index, line] of lines.entries()) {
+      await manager.query(
+        `UPDATE purchase_order_lines SET unit_price = $2, amount = $3 WHERE id = $1`,
+        [stored[index].id, String(line.unitPrice), totals.lineAmounts[index]],
+      );
+    }
+    return totals;
   }
 
   /** The supplier `FOR SHARE` (a delete locks it `FOR UPDATE` first, then sees this order); 409 if inactive or gone. */

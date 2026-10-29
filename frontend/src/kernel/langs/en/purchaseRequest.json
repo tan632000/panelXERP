@@ -1,0 +1,56 @@
+{
+  "title": "Purchase requests",
+  "description": "Requests raised by hand or from an order's shortage, turned into purchase orders for a supplier",
+  "loadError": "Could not load the purchase requests",
+  "code": "Request code",
+  "status": "Status",
+  "emptyValue": "—",
+  "noItems": "No purchase requests yet",
+  "paginationItem": "requests",
+  "selectLine": "Select line {code} of {request}",
+  "cancel": "Cancel",
+  "cancelTitle": "Cancel request {code}",
+  "statuses": {
+    "open": "Open",
+    "ordered": "Fully ordered",
+    "cancelled": "Cancelled"
+  },
+  "lines": {
+    "code": "Item code",
+    "name": "Item name",
+    "quantity": "Requested",
+    "ordered": "Ordered",
+    "remaining": "Remaining",
+    "sourceOrder": "For order"
+  },
+  "create": {
+    "title": "Raise a purchase request",
+    "quantityOf": "Quantity of {code}",
+    "submit": "Raise request"
+  },
+  "order": {
+    "title": "Order the selected lines",
+    "supplier": "Supplier",
+    "pickSupplier": "Pick a supplier…",
+    "submit": "Create PO ({count} lines)"
+  },
+  "scan": {
+    "placeholder": "Scan a barcode or type an item code to add…",
+    "notFound": "No item has this code",
+    "failed": "Could not look the code up, please try again"
+  },
+  "reason": {
+    "label": "Reason",
+    "placeholder": "Enter a reason…",
+    "required": "Please enter a reason",
+    "max": "At most {max} characters"
+  },
+  "toast": {
+    "createSuccess": "Purchase request raised",
+    "cancelSuccess": "Purchase request cancelled",
+    "orderSuccess": "Draft purchase order created from the requests",
+    "conflict": "Could not do this: the shortage is already requested, the line is fully ordered, or the request changed.",
+    "forbidden": "You do not have permission to do this.",
+    "systemError": "Something went wrong, please try again"
+  }
+}

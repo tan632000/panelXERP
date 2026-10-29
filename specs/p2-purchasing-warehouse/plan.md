@@ -108,7 +108,7 @@ Strictly sequential (shared registration files, one writer each, as P1 R-08).
 | 12 | Issue + workshop return | P1 | AC-02, AC-08, AC-17, AC-18, AC-26 | `*/src/plugins/inventory/issue` | 11 | done |
 | 13 | Supplier return | P2 | AC-02, AC-08, AC-19, AC-26 | `*/src/plugins/inventory/supplier-return` | 12 | done |
 | 14 | Stock count + approval | P2 | AC-02, AC-04, AC-08, AC-20 | `*/src/plugins/inventory/stocktake` | 13 | done |
-| 15 | Purchase requests | P2 | AC-03, AC-04, AC-21 | `*/src/plugins/inventory/purchase-request` | 14 | pending |
+| 15 | Purchase requests | P2 | AC-03, AC-04, AC-21 | `*/src/plugins/inventory/purchase-request` | 14 | done |
 | 16 | Estimate-vs-actual | P2 | AC-02, AC-23 | `inventory/material` report | 15 | pending |
 | 17 | Chain e2e | P1 | AC-02, AC-24 | `backend/test/inventory-chain.e2e-spec.ts` | 16 | pending |
 

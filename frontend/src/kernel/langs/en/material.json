@@ -40,7 +40,8 @@
   "actions": {
     "title": "Warehouse",
     "issue": "Issue materials",
-    "workshopReturn": "Workshop return"
+    "workshopReturn": "Workshop return",
+    "requestPurchase": "Request purchase"
   },
   "overBom": {
     "title": "Issued beyond the BOM",

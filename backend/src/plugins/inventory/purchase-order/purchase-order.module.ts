@@ -10,6 +10,7 @@ import { PurchaseOrderLine } from '@plugins/inventory/purchase-order/entities/pu
 import { PurchaseOrder } from '@plugins/inventory/purchase-order/entities/purchase-order.entity';
 import { PurchaseOrderController } from '@plugins/inventory/purchase-order/purchase-order.controller';
 import { PurchaseOrderApprovalService } from '@plugins/inventory/purchase-order/services/purchase-order-approval.service';
+import { PurchaseOrderFromRequestsService } from '@plugins/inventory/purchase-order/services/purchase-order-from-requests.service';
 import { PurchaseOrderReferenceService } from '@plugins/inventory/purchase-order/services/purchase-order-reference.service';
 import { PurchaseOrderService } from '@plugins/inventory/purchase-order/services/purchase-order.service';
 
@@ -28,6 +29,7 @@ import { PurchaseOrderService } from '@plugins/inventory/purchase-order/services
   providers: [
     PurchaseOrderService,
     PurchaseOrderApprovalService,
+    PurchaseOrderFromRequestsService,
     PurchaseOrderReferenceService,
   ],
   exports: [PurchaseOrderService],

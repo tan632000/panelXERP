@@ -40,7 +40,8 @@
   "actions": {
     "title": "Kho",
     "issue": "Xuất kho",
-    "workshopReturn": "Nhập trả từ xưởng"
+    "workshopReturn": "Nhập trả từ xưởng",
+    "requestPurchase": "Tạo đề nghị mua"
   },
   "overBom": {
     "title": "Xuất vượt BOM",

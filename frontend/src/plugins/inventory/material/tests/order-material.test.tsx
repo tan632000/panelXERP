@@ -8,6 +8,7 @@ import viCommon from "@/kernel/langs/vi/common.json";
 import viMaterial from "@/kernel/langs/vi/material.json";
 import viModal from "@/kernel/langs/vi/modal.json";
 import viOrder from "@/kernel/langs/vi/order.json";
+import viPurchaseRequest from "@/kernel/langs/vi/purchaseRequest.json";
 import viStatus from "@/kernel/langs/vi/status.json";
 
 import { MaterialOrderListPage } from "@plugins/inventory/material/components/MaterialOrderListPage";
@@ -129,6 +130,7 @@ function renderWith(page: React.ReactNode) {
           modal: viModal,
           material: viMaterial,
           order: viOrder,
+          purchaseRequest: viPurchaseRequest,
           status: viStatus,
         }}
       >

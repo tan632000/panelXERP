@@ -1,6 +1,6 @@
 # Task 15 — Purchase requests (manual and from an order's shortage) converted into POs
 
-Status: pending
+Status: done
 
 ## Outcome
 Staff raise purchase requests by hand or from an order's shortage; purchasing turns open request lines into a draft PO for a supplier, PO lines remember the source order so its receipt goes to that order first, and request quantities stay right when POs are cancelled, closed or returned against — also under concurrent calls.
@@ -56,3 +56,92 @@ Staff raise purchase requests by hand or from an order's shortage; purchasing tu
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/inventory/purchase-request/services/purchase-request.service.spec.ts && test -f src/plugins/inventory/purchase-request/services/purchase-request-race.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/inventory src/plugins/catalog/item src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/purchase-request/tests/purchase-request-list.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+Exit: 0
+Base: 69e05598e97abae4f473b478a3b1b37789f0d77a
+Head: 56932855ef5f565e2a8e49145f7ad9eca764919bd2bb6dc04d254e724a9e365a
+```text
+$ docker compose exec -T backend sh -c "test -f src/plugins/inventory/purchase-request/services/purchase-request.service.spec.ts && test -f src/plugins/inventory/purchase-request/services/purchase-request-race.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/inventory src/plugins/catalog/item src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/purchase-request/tests/purchase-request-list.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+> panelxerp-backend@0.0.1 migration:run
+> panelxerp-backend@0.0.1 typeorm
+No migrations are pending
+> panelxerp-backend@0.0.1 seed
+PASS src/plugins/inventory/purchase-request/services/purchase-request-race.spec.ts (14.157 s)
+PASS src/plugins/inventory/purchase-request/services/purchase-request.service.spec.ts (14.509 s)
+PASS src/plugins/inventory/stocktake/services/stocktake-approval.service.spec.ts (14.823 s)
+PASS src/plugins/inventory/stocktake/services/stocktake-race.spec.ts (15.125 s)
+PASS src/plugins/inventory/issue/services/issue-race.spec.ts (8.237 s)
+PASS src/plugins/catalog/item/item.controller.spec.ts (8.151 s)
+PASS src/plugins/inventory/purchase-order/services/purchase-order-approval.service.spec.ts (9.267 s)
+PASS src/kernel/core/database/soft-delete-unique-index.spec.ts (13.881 s)
+PASS src/plugins/inventory/supplier-return/services/supplier-return.service.spec.ts (28.385 s)
+PASS src/plugins/inventory/receipt/services/receipt.service.spec.ts (5.46 s)
+PASS src/plugins/inventory/receipt/services/receipt-race.spec.ts (5.346 s)
+PASS src/plugins/inventory/material/material.controller.spec.ts (5.864 s)
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts
+PASS src/plugins/inventory/stock/services/stock-availability.service.spec.ts (5.022 s)
+PASS src/plugins/inventory/issue/services/issue.service.spec.ts (6.028 s)
+PASS src/plugins/inventory/issue/services/workshop-return.service.spec.ts (6.228 s)
+PASS src/plugins/inventory/supplier/supplier.controller.spec.ts (5.755 s)
+PASS src/plugins/inventory/material/services/reservation-race.spec.ts
+PASS src/plugins/inventory/stock/services/stock-posting-race.spec.ts
+PASS src/plugins/catalog/item/services/item-import.service.spec.ts
+PASS src/plugins/catalog/item/services/item-label.service.spec.ts
+PASS src/plugins/inventory/material/services/reservation.service.spec.ts
+PASS src/plugins/inventory/stock/stock.controller.spec.ts
+PASS src/plugins/inventory/material/services/shortage-alert.service.spec.ts
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts
+PASS src/plugins/inventory/material/services/material.service.spec.ts
+PASS src/plugins/inventory/supplier/services/supplier.service.spec.ts
+PASS src/plugins/inventory/stock/services/stock-posting.service.spec.ts
+PASS src/plugins/catalog/item/services/item.service.spec.ts
+PASS src/plugins/catalog/item/services/item-stock-settings.service.spec.ts
+PASS src/plugins/inventory/stock/services/stock-alert.service.spec.ts
+PASS src/plugins/catalog/item/utils/code128.util.spec.ts
+PASS src/plugins/catalog/item/utils/item-identifier-lock.spec.ts
+PASS src/plugins/inventory/_shared/gateways/supplier-reference-check-registry.spec.ts
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/plugins/inventory/stock/utils/stock-cost.util.spec.ts
+PASS src/plugins/inventory/purchase-order/utils/purchase-order-pricing.spec.ts
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+Test Suites: 39 passed, 39 total
+Tests:       383 passed, 383 total
+> panelxerp-backend@0.0.1 validate:migrations
+Migration filename check passed (38 files).
+> panelxerp-frontend@0.1.0 lint
+> panelxerp-frontend@0.1.0 lint:i18n
+ ✓ src/kernel/core/tests/i18n-enum-conformance.test.ts (7 tests) 5343ms
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+ ✓ src/plugins/inventory/stock/tests/stock-list.test.tsx (6 tests) 829ms
+ ✓ src/plugins/inventory/supplier-return/tests/supplier-return-form.test.tsx (3 tests) 1614ms
+ ✓ src/plugins/inventory/stocktake/tests/stocktake-counting.test.tsx (7 tests) 2040ms
+ ✓ src/plugins/inventory/receipt/tests/receive-screen.test.tsx (5 tests) 2263ms
+ ✓ src/plugins/inventory/issue/tests/issue-screen.test.tsx (6 tests) 2956ms
+ ✓ src/plugins/inventory/material/tests/shortage-notification.test.ts (4 tests) 83ms
+ ✓ src/plugins/inventory/purchase-request/tests/purchase-request-list.test.tsx (3 tests) 1645ms
+ ✓ src/plugins/inventory/stock/tests/stock-notification.test.ts (4 tests) 97ms
+ ✓ src/plugins/inventory/material/tests/order-material.test.tsx (4 tests) 860ms
+ ✓ src/plugins/inventory/supplier/tests/supplier-list.test.tsx (4 tests) 845ms
+ ✓ src/plugins/inventory/purchase-order/tests/purchase-order-detail.test.tsx (12 tests) 1047ms
+ Test Files  11 passed (11)
+      Tests  58 passed (58)
+ ✓ src/kernel/langs/tests/permission-labels.test.ts (6 tests) 8474ms
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+EXIT=0
+```
+
+Negative proof (each counterexample applied alone, the named spec rerun, file restored byte-for-byte):
+- a closed purchase order line counted in full as committed → step 5 fails (remaining 4 instead of 8).
+- the per-order advisory lock removed → race (a) fails (the two calls no longer queue on the order's lock).
+
+Reachability: backend restarted; `PurchaseRequestModule dependencies initialized`, `Mapped {/api/v1/inventory/purchase-requests, GET}`, `{…, POST}`, `{/:id, GET}`, `{/:id, PATCH}`, `{/:id/cancel, POST}`, `{/from-order/:orderId, POST}`, `{/api/v1/inventory/purchase-orders/from-requests, POST}`, `Nest application successfully started`; item veto registered as `inventory-purchase-request`. Frontend route `/inventory/purchase-requests`, sidebar item `purchaseRequests`, the "Tạo đề nghị mua" action on the order material page.
+
+Review: code-auditor FAIL (1 High: editing a draft made from requests dropped its request and source-order links; 2 Medium: source orders shown outside the material scope, the request edit untested) → fixed → re-review PASS (0 Critical / 0 High / 0 Medium); Lows recorded for GATE-DONE. The i18n static scan's timeout was raised to 20 s with the user's consent (it passed at 4.2–5.3 s; no assertion changed).

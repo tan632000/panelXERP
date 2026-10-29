@@ -1,0 +1,56 @@
+{
+  "title": "Đề nghị mua hàng",
+  "description": "Đề nghị mua lập tay hoặc từ phần thiếu của đơn hàng, chuyển thành PO cho nhà cung cấp",
+  "loadError": "Không tải được danh sách đề nghị mua",
+  "code": "Mã đề nghị",
+  "status": "Trạng thái",
+  "emptyValue": "—",
+  "noItems": "Chưa có đề nghị mua nào",
+  "paginationItem": "đề nghị",
+  "selectLine": "Chọn dòng {code} của {request}",
+  "cancel": "Huỷ",
+  "cancelTitle": "Huỷ đề nghị {code}",
+  "statuses": {
+    "open": "Đang mở",
+    "ordered": "Đã đặt đủ",
+    "cancelled": "Đã huỷ"
+  },
+  "lines": {
+    "code": "Mã hàng",
+    "name": "Tên hàng",
+    "quantity": "SL đề nghị",
+    "ordered": "Đã đặt",
+    "remaining": "Còn lại",
+    "sourceOrder": "Cho đơn hàng"
+  },
+  "create": {
+    "title": "Lập đề nghị mua",
+    "quantityOf": "Số lượng của {code}",
+    "submit": "Lập đề nghị"
+  },
+  "order": {
+    "title": "Tạo PO từ các dòng đã chọn",
+    "supplier": "Nhà cung cấp",
+    "pickSupplier": "Chọn nhà cung cấp…",
+    "submit": "Tạo PO ({count} dòng)"
+  },
+  "scan": {
+    "placeholder": "Quét mã vạch hoặc nhập mã hàng để thêm…",
+    "notFound": "Không tìm thấy mặt hàng với mã này",
+    "failed": "Không tra được mã vừa nhập, vui lòng thử lại"
+  },
+  "reason": {
+    "label": "Lý do",
+    "placeholder": "Nhập lý do…",
+    "required": "Vui lòng nhập lý do",
+    "max": "Tối đa {max} ký tự"
+  },
+  "toast": {
+    "createSuccess": "Đã lập đề nghị mua",
+    "cancelSuccess": "Đã huỷ đề nghị mua",
+    "orderSuccess": "Đã tạo PO nháp từ đề nghị",
+    "conflict": "Không thực hiện được: phần thiếu đã được đề nghị, dòng đã đặt hết hoặc đề nghị đã đổi trạng thái.",
+    "forbidden": "Bạn không có quyền thực hiện chức năng này.",
+    "systemError": "Đã có lỗi xảy ra, vui lòng thử lại"
+  }
+}

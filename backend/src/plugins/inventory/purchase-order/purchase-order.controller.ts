@@ -26,6 +26,7 @@ import {
 import { PurchaseOrderFilterDto } from '@plugins/inventory/purchase-order/dto/purchase-order-filter.dto';
 import {
   CreatePurchaseOrderDto,
+  PurchaseOrderFromRequestsDto,
   PurchaseOrderReasonDto,
   UpdatePurchaseOrderDto,
 } from '@plugins/inventory/purchase-order/dto/purchase-order.dto';
@@ -39,6 +40,7 @@ import {
   PURCHASE_ORDER_UPDATE,
 } from '@plugins/inventory/purchase-order/permissions/purchase-order.permissions';
 import { PurchaseOrderApprovalService } from '@plugins/inventory/purchase-order/services/purchase-order-approval.service';
+import { PurchaseOrderFromRequestsService } from '@plugins/inventory/purchase-order/services/purchase-order-from-requests.service';
 import { PurchaseOrderService } from '@plugins/inventory/purchase-order/services/purchase-order.service';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
@@ -53,6 +55,7 @@ export class PurchaseOrderController {
   constructor(
     private readonly service: PurchaseOrderService,
     private readonly approval: PurchaseOrderApprovalService,
+    private readonly fromRequests: PurchaseOrderFromRequestsService,
   ) {}
 
   @Get()
@@ -102,6 +105,31 @@ export class PurchaseOrderController {
     @CurrentUser() user: AuthUserPayload,
   ) {
     return this.service.create(dto, user);
+  }
+
+  @Post('from-requests')
+  @RequirePermission(PURCHASE_ORDER_CREATE)
+  @ApiOperation({
+    summary: 'Turn open purchase request lines into a draft order',
+    description:
+      'Each line at most what its request line has remaining; prices default to the items’ reference price. Lines remember the request line and the sales order it was raised for.',
+  })
+  @ApiBody({ type: PurchaseOrderFromRequestsDto })
+  @ApiResponse({ status: 201, description: 'Draft created' })
+  @ApiResponse({
+    status: 404,
+    description: 'Request line or supplier not found',
+  })
+  @ApiResponse({
+    status: 409,
+    description:
+      'More than remains, a cancelled request, or supplier/item unusable',
+  })
+  createFromRequests(
+    @Body() dto: PurchaseOrderFromRequestsDto,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.fromRequests.create(dto, user);
   }
 
   @Patch(':id')

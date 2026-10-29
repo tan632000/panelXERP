@@ -26,6 +26,9 @@ import { IssuePermission } from "@plugins/inventory/issue/permissions/issue-perm
 import { materialPageRoutes } from "@plugins/inventory/material/constants";
 import { useOrderMaterial } from "@plugins/inventory/material/hooks/api/useMaterial";
 import { materialFeature } from "@plugins/inventory/material/material.feature";
+import { purchaseRequestPageRoutes } from "@plugins/inventory/purchase-request/constants";
+import { useRequestFromOrder } from "@plugins/inventory/purchase-request/hooks/api/usePurchaseRequest";
+import { PurchaseRequestPermission } from "@plugins/inventory/purchase-request/permissions/purchase-request-permission.keys";
 import { OrderStatusBadge } from "@plugins/sales/order/components/OrderStatusBadge";
 
 import type {
@@ -51,6 +54,7 @@ export function OrderMaterialPage() {
   const { can } = useAuth();
   const router = useRouter();
   const orderId = useEntityIdParam();
+  const requestPurchase = useRequestFromOrder();
   const query = useOrderMaterial(orderId);
   const detail = query.data;
   const icon = materialFeature.items[0]?.icon ?? "package";
@@ -173,6 +177,10 @@ export function OrderMaterialPage() {
   const canIssue = order.status === "open" && can(IssuePermission.create);
   const canReturn =
     RETURNABLE.includes(order.status) && can(IssuePermission.returnCreate);
+  const canRequest =
+    order.status === "open" &&
+    detail.items.some((item) => item.short > 0) &&
+    can(PurchaseRequestPermission.create);
   const overBomColumns: Array<TableColumn<OverBomIssue>> = [
     {
       key: "itemCode",
@@ -225,7 +233,7 @@ export function OrderMaterialPage() {
         ) : null}
       </DetailSection>
 
-      {canIssue || canReturn ? (
+      {canIssue || canReturn || canRequest ? (
         <DetailSection title={t("actions.title")}>
           <div className="flex flex-wrap items-center gap-2">
             {canIssue ? (
@@ -234,6 +242,18 @@ export function OrderMaterialPage() {
                 icon="package-export"
                 label={t("actions.issue")}
                 onClick={() => router.push(issuePageRoutes.issue(order.id))}
+              />
+            ) : null}
+            {canRequest ? (
+              <DetailPanelActionButton
+                icon="clipboard-list"
+                label={t("actions.requestPurchase")}
+                disabled={requestPurchase.isPending}
+                onClick={() =>
+                  requestPurchase.mutate(order.id, {
+                    onSuccess: () => router.push(purchaseRequestPageRoutes.list),
+                  })
+                }
               />
             ) : null}
             {canReturn ? (

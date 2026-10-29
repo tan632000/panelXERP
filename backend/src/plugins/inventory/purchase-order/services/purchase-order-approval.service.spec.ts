@@ -30,6 +30,7 @@ import {
 import { PURCHASE_ORDER_REFERENCE_CHECK } from '@plugins/inventory/purchase-order/constants/purchase-order.constant';
 import { PurchaseOrderController } from '@plugins/inventory/purchase-order/purchase-order.controller';
 import { PurchaseOrderApprovalService } from '@plugins/inventory/purchase-order/services/purchase-order-approval.service';
+import { PurchaseOrderFromRequestsService } from '@plugins/inventory/purchase-order/services/purchase-order-from-requests.service';
 import { PurchaseOrderReferenceService } from '@plugins/inventory/purchase-order/services/purchase-order-reference.service';
 import { PurchaseOrderService } from '@plugins/inventory/purchase-order/services/purchase-order.service';
 import { Supplier } from '@plugins/inventory/supplier/entities/supplier.entity';
@@ -122,6 +123,7 @@ describeWithDatabase('PurchaseOrderApprovalService (real Postgres)', () => {
       providers: [
         PurchaseOrderService,
         PurchaseOrderApprovalService,
+        PurchaseOrderFromRequestsService,
         PurchaseOrderReferenceService,
         ReferenceCheckRegistry,
         SupplierReferenceCheckRegistry,

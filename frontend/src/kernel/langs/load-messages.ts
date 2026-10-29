@@ -16,6 +16,7 @@ import orderEn from "@kernel/langs/en/order.json";
 import permissionEn from "@kernel/langs/en/permission.json";
 import projectEn from "@kernel/langs/en/project.json";
 import purchaseOrderEn from "@kernel/langs/en/purchaseOrder.json";
+import purchaseRequestEn from "@kernel/langs/en/purchaseRequest.json";
 import quotationEn from "@kernel/langs/en/quotation.json";
 import receiptEn from "@kernel/langs/en/receipt.json";
 import requestEn from "@kernel/langs/en/request.json";
@@ -44,6 +45,7 @@ import orderVi from "@kernel/langs/vi/order.json";
 import permissionVi from "@kernel/langs/vi/permission.json";
 import projectVi from "@kernel/langs/vi/project.json";
 import purchaseOrderVi from "@kernel/langs/vi/purchaseOrder.json";
+import purchaseRequestVi from "@kernel/langs/vi/purchaseRequest.json";
 import quotationVi from "@kernel/langs/vi/quotation.json";
 import receiptVi from "@kernel/langs/vi/receipt.json";
 import requestVi from "@kernel/langs/vi/request.json";
@@ -76,6 +78,7 @@ export const enMessages = {
   issue: issueEn,
   supplierReturn: supplierReturnEn,
   stocktake: stocktakeEn,
+  purchaseRequest: purchaseRequestEn,
   material: materialEn,
   location: locationEn,
   system: systemEn,
@@ -107,6 +110,7 @@ export const viMessages = {
   issue: issueVi,
   supplierReturn: supplierReturnVi,
   stocktake: stocktakeVi,
+  purchaseRequest: purchaseRequestVi,
   material: materialVi,
   location: locationVi,
   system: systemVi,

@@ -132,5 +132,7 @@ describe("plugin constants/utils static scan (lint:i18n gate)", () => {
     }
 
     expect(violations).toEqual([]);
-  });
+    // Reads every plugin constants/utils file: its time grows with the plugins and passes the
+    // 5 s default on a loaded machine without anything being wrong.
+  }, 20_000);
 });
