@@ -36,5 +36,16 @@
     "perPanel": "SL / 1 tủ"
   },
   "unlinkedTitle": "Vật tư chưa liên kết",
-  "unlinkedWarning": "Các dòng này không gắn được với vật tư trong danh mục nên không được tính vào nhu cầu. Hãy kiểm tra lại BOM."
+  "unlinkedWarning": "Các dòng này không gắn được với vật tư trong danh mục nên không được tính vào nhu cầu. Hãy kiểm tra lại BOM.",
+  "actions": {
+    "title": "Kho",
+    "issue": "Xuất kho",
+    "workshopReturn": "Nhập trả từ xưởng"
+  },
+  "overBom": {
+    "title": "Xuất vượt BOM",
+    "quantity": "SL xuất",
+    "reason": "Lý do",
+    "issuedAt": "Thời gian"
+  }
 }

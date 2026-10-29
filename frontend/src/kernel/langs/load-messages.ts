@@ -6,6 +6,7 @@ import crmEn from "@kernel/langs/en/crm.json";
 import customerEn from "@kernel/langs/en/customer.json";
 import estimateEn from "@kernel/langs/en/estimate.json";
 import inventoryEn from "@kernel/langs/en/inventory.json";
+import issueEn from "@kernel/langs/en/issue.json";
 import itemEn from "@kernel/langs/en/item.json";
 import locationEn from "@kernel/langs/en/location.json";
 import materialEn from "@kernel/langs/en/material.json";
@@ -31,6 +32,7 @@ import crmVi from "@kernel/langs/vi/crm.json";
 import customerVi from "@kernel/langs/vi/customer.json";
 import estimateVi from "@kernel/langs/vi/estimate.json";
 import inventoryVi from "@kernel/langs/vi/inventory.json";
+import issueVi from "@kernel/langs/vi/issue.json";
 import itemVi from "@kernel/langs/vi/item.json";
 import locationVi from "@kernel/langs/vi/location.json";
 import materialVi from "@kernel/langs/vi/material.json";
@@ -67,6 +69,7 @@ export const enMessages = {
   stock: stockEn,
   purchaseOrder: purchaseOrderEn,
   receipt: receiptEn,
+  issue: issueEn,
   material: materialEn,
   location: locationEn,
   system: systemEn,
@@ -95,6 +98,7 @@ export const viMessages = {
   stock: stockVi,
   purchaseOrder: purchaseOrderVi,
   receipt: receiptVi,
+  issue: issueVi,
   material: materialVi,
   location: locationVi,
   system: systemVi,

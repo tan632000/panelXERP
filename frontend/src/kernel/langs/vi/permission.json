@@ -125,6 +125,8 @@
     "special_packaging": "Đóng gói đặc biệt",
     "stock": "Tồn kho",
     "stock_receipt": "Phiếu nhập kho",
+    "stock_issue": "Phiếu xuất kho",
+    "stock_return": "Nhập trả từ xưởng",
     "subcontract_order": "Đơn hàng gia công",
     "supplier": "Nhà cung cấp",
     "supplier:contact": "Liên hệ nhà cung cấp",

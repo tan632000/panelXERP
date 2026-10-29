@@ -125,6 +125,8 @@
     "special_packaging": "Special packaging",
     "stock": "Stock",
     "stock_receipt": "Stock receipt",
+    "stock_issue": "Stock issue",
+    "stock_return": "Workshop return",
     "subcontract_order": "Subcontract order",
     "supplier": "Supplier",
     "supplier:contact": "Supplier contacts",

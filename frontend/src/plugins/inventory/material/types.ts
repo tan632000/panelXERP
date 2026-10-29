@@ -57,12 +57,25 @@ export interface UnlinkedBomLine {
   perPanelQuantity: number;
 }
 
+/** An issue line beyond the BOM and the reason given for it. */
+export interface OverBomIssue {
+  movementId: string;
+  itemId: number;
+  itemCode: string;
+  itemName: string;
+  itemUnit: string;
+  quantity: number;
+  reason: string;
+  issuedAt: string;
+}
+
 export interface OrderMaterialDetail {
   order: MaterialOrderHeader;
   demandBearing: boolean;
   items: MaterialItemRow[];
   panels: MaterialPanel[];
   unlinked: UnlinkedBomLine[];
+  overBomIssues: OverBomIssue[];
 }
 
 export interface MaterialOrderListParams {

@@ -1,6 +1,6 @@
 # Task 12 — Issue to an order/panel by scanning, and workshop returns
 
-Status: pending
+Status: done
 
 ## Outcome
 A storekeeper scans materials out to an open order (optionally a panel), using that order's reservation first; issuing beyond the BOM needs a reason, also when two issues race; leftovers come back from the workshop at the cost they left with and are re-reserved for that order while it is open and still short.
@@ -59,3 +59,83 @@ A storekeeper scans materials out to an open order (optionally a panel), using t
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/inventory/issue/services/issue.service.spec.ts && test -f src/plugins/inventory/issue/services/workshop-return.service.spec.ts && test -f src/plugins/inventory/issue/services/issue-race.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/inventory src/plugins/sales/_shared src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/issue/tests/issue-screen.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+Exit: 0
+Base: 1b4fe8964fc3de7e316808b7f237540f0f4841ae
+Head: 05bb02ae5164a9c6c0f410d6582b63faf4bbf1f45a46803fa91423e942906f06
+```text
+$ docker compose exec -T backend sh -c "test -f src/plugins/inventory/issue/services/issue.service.spec.ts && test -f src/plugins/inventory/issue/services/workshop-return.service.spec.ts && test -f src/plugins/inventory/issue/services/issue-race.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/inventory src/plugins/sales/_shared src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/issue/tests/issue-screen.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+> panelxerp-backend@0.0.1 migration:run
+> panelxerp-backend@0.0.1 typeorm
+No migrations are pending
+> panelxerp-backend@0.0.1 seed
+PASS src/plugins/inventory/stock/services/stock-availability.service.spec.ts (20.214 s)
+PASS src/plugins/inventory/receipt/services/receipt-race.spec.ts (20.969 s)
+PASS src/plugins/inventory/issue/services/workshop-return.service.spec.ts (23.051 s)
+PASS src/plugins/inventory/issue/services/issue-race.spec.ts (23.331 s)
+PASS src/plugins/inventory/material/material.controller.spec.ts (6.2 s)
+PASS src/plugins/sales/_shared/ports/request-status.port.spec.ts
+PASS src/plugins/inventory/issue/services/issue.service.spec.ts (6.76 s)
+PASS src/plugins/inventory/receipt/services/receipt.service.spec.ts (29.318 s)
+PASS src/plugins/inventory/purchase-order/services/purchase-order-approval.service.spec.ts (9.268 s)
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts (5.956 s)
+PASS src/plugins/inventory/supplier/supplier.controller.spec.ts (6.131 s)
+PASS src/plugins/sales/_shared/ports/order-material-read.port.spec.ts
+PASS src/kernel/core/database/soft-delete-unique-index.spec.ts (12.59 s)
+PASS src/plugins/inventory/stock/stock.controller.spec.ts (6.603 s)
+PASS src/plugins/inventory/stock/services/stock-posting-race.spec.ts
+PASS src/plugins/inventory/material/services/reservation-race.spec.ts
+PASS src/plugins/inventory/material/services/shortage-alert.service.spec.ts
+PASS src/plugins/inventory/stock/services/stock-posting.service.spec.ts
+PASS src/plugins/inventory/material/services/reservation.service.spec.ts
+PASS src/plugins/inventory/supplier/services/supplier.service.spec.ts
+PASS src/plugins/sales/_shared/utils/sales-document-code.util.spec.ts
+PASS src/plugins/inventory/stock/services/stock-alert.service.spec.ts
+PASS src/plugins/sales/_shared/ports/order-lifecycle-registry.spec.ts
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts (6.198 s)
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/plugins/inventory/material/services/material.service.spec.ts
+PASS src/plugins/inventory/_shared/gateways/supplier-reference-check-registry.spec.ts
+PASS src/plugins/sales/_shared/ports/request-close-registry.spec.ts
+PASS src/plugins/inventory/stock/utils/stock-cost.util.spec.ts
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+PASS src/plugins/inventory/purchase-order/utils/purchase-order-pricing.spec.ts
+Test Suites: 32 passed, 32 total
+Tests:       311 passed, 311 total
+> panelxerp-backend@0.0.1 validate:migrations
+Migration filename check passed (35 files).
+> panelxerp-frontend@0.1.0 lint
+> panelxerp-frontend@0.1.0 lint:i18n
+ ✓ src/kernel/core/tests/i18n-enum-conformance.test.ts (7 tests) 4503ms
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+ ✓ src/plugins/inventory/receipt/tests/receive-screen.test.tsx (5 tests) 957ms
+ ✓ src/plugins/inventory/material/tests/order-material.test.tsx (4 tests) 1315ms
+ ✓ src/plugins/inventory/issue/tests/issue-screen.test.tsx (6 tests) 3373ms
+ ✓ src/plugins/inventory/supplier/tests/supplier-list.test.tsx (4 tests) 2268ms
+ ✓ src/plugins/inventory/material/tests/shortage-notification.test.ts (4 tests) 109ms
+ ✓ src/plugins/inventory/stock/tests/stock-notification.test.ts (4 tests) 85ms
+ ✓ src/plugins/inventory/purchase-order/tests/purchase-order-detail.test.tsx (12 tests) 1031ms
+ ✓ src/plugins/inventory/stock/tests/stock-list.test.tsx (6 tests) 677ms
+ Test Files  8 passed (8)
+      Tests  45 passed (45)
+ ✓ src/kernel/langs/tests/permission-labels.test.ts (6 tests) 7623ms
+ Test Files  1 passed (1)
+      Tests  6 passed (6)
+EXIT=0
+```
+
+Negative proof (each counterexample applied alone, issue specs rerun, files restored byte-for-byte):
+- stock taken from the item's total without the per-order split → worked example step 2 fails (the issue of 3 succeeds).
+- order read without its `FOR SHARE` lock → race (b) fails (an issue movement on the cancelled order).
+- net issued read before the balance lock → race (d) fails (both issues pass); for the return, race (c) fails likewise.
+
+Reachability: backend restarted; `StockIssueModule dependencies initialized`, `Mapped {/api/v1/inventory/issues, GET}`, `{/api/v1/inventory/issues/:id, GET}`, `{/api/v1/inventory/issues, POST}`, `{/api/v1/inventory/workshop-returns, GET}`, `{/api/v1/inventory/workshop-returns/:id, GET}`, `{/api/v1/inventory/workshop-returns, POST}`, `Nest application successfully started`. Frontend routes `/inventory/issues`, `/inventory/issues/new`, `/inventory/issues/return`, sidebar item `issues`, and the issue / workshop return actions on the order material page.
+
+Review: code-auditor FAIL (1 High: lists not scoped per D-09; 3 Medium) → fixed → re-review PASS (0 Critical / 0 High / 0 Medium); Lows recorded for GATE-DONE.

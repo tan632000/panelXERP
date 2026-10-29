@@ -1,3 +1,5 @@
+import { StockIssueModule } from '@plugins/inventory/issue/issue.module';
+import { stockIssuePermissions } from '@plugins/inventory/issue/permissions/issue.permissions';
 import { MaterialModule } from '@plugins/inventory/material/material.module';
 import { materialPermissions } from '@plugins/inventory/material/permissions/material.permissions';
 import { purchaseOrderPermissions } from '@plugins/inventory/purchase-order/permissions/purchase-order.permissions';
@@ -42,5 +44,11 @@ export const INVENTORY_FEATURES: ErpFeature[] = [
     plugin: 'inventory',
     module: StockReceiptModule,
     permissions: stockReceiptPermissions,
+  },
+  {
+    key: 'issue',
+    plugin: 'inventory',
+    module: StockIssueModule,
+    permissions: stockIssuePermissions,
   },
 ];

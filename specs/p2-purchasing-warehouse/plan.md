@@ -105,7 +105,7 @@ Strictly sequential (shared registration files, one writer each, as P1 R-08).
 | 09 | Order material view | P1 | AC-02, AC-03, AC-13 | `*/src/plugins/inventory/material` | 08 | done |
 | 10 | Reservation + allocation + shortage alert | P1 | AC-14, AC-15, AC-25 | `sales/_shared/ports`, `inventory/material` | 09 | done |
 | 11 | Receipt from PO by scan | P1 | AC-02, AC-08, AC-16, AC-25, AC-26 | `*/src/plugins/inventory/receipt` | 10 | done |
-| 12 | Issue + workshop return | P1 | AC-02, AC-08, AC-17, AC-18, AC-26 | `*/src/plugins/inventory/issue` | 11 | pending |
+| 12 | Issue + workshop return | P1 | AC-02, AC-08, AC-17, AC-18, AC-26 | `*/src/plugins/inventory/issue` | 11 | done |
 | 13 | Supplier return | P2 | AC-02, AC-08, AC-19, AC-26 | `*/src/plugins/inventory/supplier-return` | 12 | pending |
 | 14 | Stock count + approval | P2 | AC-02, AC-04, AC-08, AC-20 | `*/src/plugins/inventory/stocktake` | 13 | pending |
 | 15 | Purchase requests | P2 | AC-03, AC-04, AC-21 | `*/src/plugins/inventory/purchase-request` | 14 | pending |

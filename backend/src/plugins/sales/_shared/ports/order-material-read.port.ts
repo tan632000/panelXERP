@@ -150,6 +150,65 @@ export class OrderMaterialReadPort {
     return row ? this.toHeader(row) : null;
   }
 
+  /** The headers of the given orders, keyed by id; a missing order is simply absent. */
+  async getOrders(
+    manager: EntityManager,
+    orderIds: readonly number[],
+  ): Promise<Map<number, MaterialOrderHeader>> {
+    if (orderIds.length === 0) return new Map();
+    const rows: RawRow[] = await manager.query(
+      `${HEADER_SELECT} ${HEADER_FROM}
+        WHERE o.id = ANY($1::int[]) AND o.is_deleted = false`,
+      [[...orderIds]],
+    );
+    return new Map(
+      rows.map((row) => {
+        const header = this.toHeader(row);
+        return [header.id, header];
+      }),
+    );
+  }
+
+  /**
+   * A SQL condition keeping an order id column of another table to the orders the scope
+   * reaches, so a list of documents written for orders applies the material scope in SQL.
+   * `column` is the caller's own column reference (`alias.order_id`), never user input.
+   */
+  scopedOrderCondition(
+    column: string,
+    scope: MaterialScopeCondition,
+    nextParameter: number,
+  ): { sql: string; params: unknown[] } {
+    if (!/^[a-z_][a-z0-9_]*(\.[a-z_][a-z0-9_]*)?$/.test(column)) {
+      throw new Error(`Invalid order column: ${column}`);
+    }
+    if (scope.salesOwnerId === undefined) return { sql: 'TRUE', params: [] };
+    return {
+      sql: `${column} IN (SELECT o.id ${HEADER_FROM}
+              WHERE o.is_deleted = false AND r.sales_owner_id = $${nextParameter})`,
+      params: [scope.salesOwnerId],
+    };
+  }
+
+  /**
+   * The order's header with its row held `FOR SHARE` for the rest of the transaction, or null
+   * when it does not exist. The first lock of an inventory document that moves stock for an
+   * order (D-04): a cancel, which writes the row, waits for the document, and the document sees
+   * the status a cancel committed before it. The caller decides visibility.
+   */
+  async lockOrderForMaterial(
+    manager: EntityManager,
+    orderId: number,
+  ): Promise<MaterialOrderHeader | null> {
+    const [row]: RawRow[] = await manager.query(
+      `${HEADER_SELECT} ${HEADER_FROM}
+        WHERE o.id = $1 AND o.is_deleted = false
+        FOR SHARE OF o`,
+      [orderId],
+    );
+    return row ? this.toHeader(row) : null;
+  }
+
   /**
    * The demand of every order in `statuses` for the given items (or of one order), summed in
    * SQL numeric over linked BOM lines. Unlinked lines never count.

@@ -2392,6 +2392,88 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/inventory/issues": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List stock issues */
+    get: operations["StockIssueController_findAll"];
+    put?: never;
+    /**
+     * Issue materials to an open order
+     * @description Uses the order’s reservation first, then free stock, never another order’s reservation. Beyond the BOM every line of the item needs a reason. A request key already used answers the first issue with 200 and posts nothing.
+     */
+    post: operations["StockIssueController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/issues/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a stock issue with its lines
+     * @description Line unit costs and values only with purchase_price:read.
+     */
+    get: operations["StockIssueController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/workshop-returns": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List workshop returns */
+    get: operations["WorkshopReturnController_findAll"];
+    put?: never;
+    /**
+     * Take back what the workshop did not use
+     * @description At most what the order still has out, at its net issued average cost; the stock goes back to the order first while it is open and short. A request key already used answers the first return with 200.
+     */
+    post: operations["WorkshopReturnController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/workshop-returns/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a workshop return with its lines
+     * @description Line unit costs and values only with purchase_price:read.
+     */
+    get: operations["WorkshopReturnController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3102,6 +3184,47 @@ export interface components {
       requestKey?: string;
       note?: Record<string, never> | null;
       lines: Array<components["schemas"]["StockReceiptLineDto"]>;
+    };
+    StockIssueLineDto: {
+      /** @description Catalog item */
+      itemId: number;
+      /** @description Panel line of the order the material is for */
+      orderLineId?: Record<string, never> | null;
+      /** @description Quantity, up to 3 decimals */
+      quantity: number;
+      /** @description Why more than the BOM is issued; required on every line of an item once the order’s issues exceed its demand */
+      reason?: Record<string, never> | null;
+    };
+    CreateStockIssueDto: {
+      /** @description Sales order */
+      orderId: number;
+      /**
+       * Format: uuid
+       * @description One key per screen: posting it again returns the first document with 200 and posts nothing.
+       */
+      requestKey?: string;
+      note?: Record<string, never> | null;
+      lines: Array<components["schemas"]["StockIssueLineDto"]>;
+    };
+    WorkshopReturnLineDto: {
+      /** @description Catalog item */
+      itemId: number;
+      /** @description Panel line of the order the material is for */
+      orderLineId?: Record<string, never> | null;
+      /** @description Quantity, up to 3 decimals */
+      quantity: number;
+      note?: Record<string, never> | null;
+    };
+    CreateWorkshopReturnDto: {
+      /** @description Sales order */
+      orderId: number;
+      /**
+       * Format: uuid
+       * @description One key per screen: posting it again returns the first document with 200 and posts nothing.
+       */
+      requestKey?: string;
+      note?: Record<string, never> | null;
+      lines: Array<components["schemas"]["WorkshopReturnLineDto"]>;
     };
   };
   responses: never;
@@ -8798,6 +8921,236 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Stock receipt */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StockIssueController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Only the documents of this order */
+        orderId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated stock issues */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires stock_issue:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StockIssueController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateStockIssueDto"];
+      };
+    };
+    responses: {
+      /** @description The request key was posted before: the first issue */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Issue posted */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error, a panel of another order, or a reason missing beyond the BOM */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Order or item not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Order not open, not enough stock outside other orders’ reservations, or item deleted */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  StockIssueController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Stock issue */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  WorkshopReturnController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Only the documents of this order */
+        orderId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated workshop returns */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires stock_return:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  WorkshopReturnController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateWorkshopReturnDto"];
+      };
+    };
+    responses: {
+      /** @description The request key was posted before: the first return */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Return posted */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Order or item not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Order neither open nor cancelled, or more than is out at the workshop */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  WorkshopReturnController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Workshop return */
       200: {
         headers: {
           [name: string]: unknown;

@@ -28,8 +28,6 @@ const PANEL_ROLES = [
  * is empty once its feature is built; until then `seedRoles` stores none of these scopes.
  */
 const PENDING_MODULES: Readonly<Record<string, string>> = {
-  stock_issue: 'task-12',
-  stock_return: 'task-12',
   stocktake: 'task-14',
   purchase_request: 'task-15',
 };

@@ -112,6 +112,7 @@ const DETAIL: OrderMaterialDetail = {
       perPanelQuantity: 5,
     },
   ],
+  overBomIssues: [],
 };
 
 function renderWith(page: React.ReactNode) {

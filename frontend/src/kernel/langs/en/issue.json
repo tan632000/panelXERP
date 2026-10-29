@@ -1,0 +1,75 @@
+{
+  "title": "Stock issues",
+  "description": "Materials issued to orders and what the workshop brings back",
+  "searchPlaceholder": "Search by document code…",
+  "code": "Document code",
+  "order": "Order",
+  "customer": "Customer",
+  "lineCount": "Lines",
+  "createdBy": "Created by",
+  "createdAt": "Created at",
+  "emptyValue": "—",
+  "noItems": "No stock issues yet",
+  "noItemsFound": "No stock issues match",
+  "paginationItem": "documents",
+  "loadError": "Could not load the stock issues",
+  "orderNotFound": "The order was not found",
+  "orderCode": {
+    "placeholder": "Scan or type an order code to issue…",
+    "notFound": "No order has this code"
+  },
+  "issueScreen": {
+    "title": "Issue materials",
+    "titleOf": "Issue materials to {code}",
+    "notOpen": "{code} is not open: only open orders take materials.",
+    "itemsTitle": "Materials of the order",
+    "scanTitle": "Scan materials out",
+    "panel": "Panel receiving the materials",
+    "noPanel": "Whole order",
+    "hint": "Each scan adds 1 to the selected panel's line; an item not on that panel's BOM goes to a line outside the BOM. Beyond the BOM a reason is required.",
+    "linesTitle": "Lines to issue",
+    "noLines": "No lines yet: scan an item to add one.",
+    "outsideBom": "Outside the BOM",
+    "submit": "Issue"
+  },
+  "returnScreen": {
+    "title": "Workshop return",
+    "titleOf": "Workshop return for {code}",
+    "notReturnable": "{code} takes no returns: only open or cancelled orders do.",
+    "itemsTitle": "Materials out at the workshop",
+    "nothingOut": "The workshop holds nothing of this order.",
+    "submit": "Return"
+  },
+  "scan": {
+    "placeholder": "Scan a barcode or type an item code…",
+    "notFound": "No item has this code",
+    "failed": "Could not look the scan up, please scan again"
+  },
+  "lines": {
+    "code": "Code",
+    "name": "Item",
+    "unit": "Unit",
+    "demand": "Demand",
+    "reserved": "Reserved",
+    "out": "Issued (net)",
+    "short": "Short",
+    "panel": "Panel",
+    "quantity": "Quantity",
+    "quantityOf": "Quantity of {code}",
+    "reason": "Reason beyond the BOM",
+    "reasonOf": "Reason beyond the BOM for {code}",
+    "reasonRequired": "Beyond the BOM: a reason is required",
+    "returning": "Returning",
+    "overOut": "More than the workshop holds",
+    "perPanel": "Per panel",
+    "panelDemand": "Panel demand"
+  },
+  "toast": {
+    "issueSuccess": "Materials issued",
+    "returnSuccess": "Workshop return posted",
+    "conflict": "Could not post: not enough stock outside other orders' reservations, the order changed, or more than is out.",
+    "reasonRequired": "Beyond the BOM: every line of that item needs a reason.",
+    "forbidden": "You do not have permission to do this.",
+    "systemError": "Something went wrong, please try again"
+  }
+}

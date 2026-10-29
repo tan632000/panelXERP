@@ -69,6 +69,19 @@ export interface UnlinkedBomLine {
   perPanelQuantity: number;
 }
 
+/** An issue line beyond the BOM and the reason the storekeeper gave for it. */
+export interface OverBomIssue {
+  movementId: string;
+  itemId: number;
+  itemCode: string;
+  itemName: string;
+  itemUnit: string;
+  /** Quantity issued on that line, positive. */
+  quantity: number;
+  reason: string;
+  issuedAt: Date;
+}
+
 export interface OrderMaterialDetail {
   order: MaterialOrderHeader;
   /** False once the order no longer needs materials (delivered, cancelled…): demand is 0. */
@@ -76,6 +89,8 @@ export interface OrderMaterialDetail {
   items: MaterialItemRow[];
   panels: MaterialPanel[];
   unlinked: UnlinkedBomLine[];
+  /** Issue lines that carried an over-BOM reason, oldest first. */
+  overBomIssues: OverBomIssue[];
 }
 
 export interface OrderMaterialRow extends MaterialOrderHeader {
@@ -184,7 +199,33 @@ export class MaterialService {
         ),
       })),
       unlinked: this.unlinkedOf(orderLines),
+      overBomIssues: await this.overBomIssues(manager, orderId),
     };
+  }
+
+  private async overBomIssues(
+    manager: EntityManager,
+    orderId: number,
+  ): Promise<OverBomIssue[]> {
+    const rows: RawRow[] = await manager.query(
+      `SELECT m.id, m.item_id, i.code, i.name, i.unit,
+              (-m.quantity)::text AS quantity, m.reason, m.created_at
+         FROM stock_movements m
+         JOIN items i ON i.id = m.item_id
+        WHERE m.order_id = $1 AND m.movement_type = 'issue' AND m.reason IS NOT NULL
+        ORDER BY m.id`,
+      [orderId],
+    );
+    return rows.map((row) => ({
+      movementId: String(row.id),
+      itemId: Number(row.item_id),
+      itemCode: String(row.code),
+      itemName: String(row.name),
+      itemUnit: String(row.unit),
+      quantity: Number(row.quantity),
+      reason: String(row.reason),
+      issuedAt: row.created_at as Date,
+    }));
   }
 
   /**

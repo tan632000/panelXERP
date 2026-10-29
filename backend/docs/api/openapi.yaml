@@ -4599,6 +4599,202 @@ paths:
       security: *ref_41
       summary: Get a stock receipt with its lines
       tags: *ref_42
+  /api/v1/inventory/issues:
+    get:
+      operationId: StockIssueController_findAll
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Items per page
+          schema:
+            default: 25
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search keyword
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: orderId
+          required: false
+          in: query
+          description: Only the documents of this order
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Paginated stock issues
+        '403':
+          description: Forbidden — requires stock_issue:read
+      security: &ref_43
+        - bearer: []
+      summary: List stock issues
+      tags: &ref_44
+        - inventory/issues
+    post:
+      description: >-
+        Uses the order’s reservation first, then free stock, never another order’s reservation. Beyond the BOM every
+        line of the item needs a reason. A request key already used answers the first issue with 200 and posts nothing.
+      operationId: StockIssueController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStockIssueDto'
+      responses:
+        '200':
+          description: 'The request key was posted before: the first issue'
+        '201':
+          description: Issue posted
+        '400':
+          description: Validation error, a panel of another order, or a reason missing beyond the BOM
+        '404':
+          description: Order or item not found
+        '409':
+          description: Order not open, not enough stock outside other orders’ reservations, or item deleted
+      security: *ref_43
+      summary: Issue materials to an open order
+      tags: *ref_44
+  /api/v1/inventory/issues/{id}:
+    get:
+      description: Line unit costs and values only with purchase_price:read.
+      operationId: StockIssueController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Stock issue
+        '404':
+          description: Not found
+      security: *ref_43
+      summary: Get a stock issue with its lines
+      tags: *ref_44
+  /api/v1/inventory/workshop-returns:
+    get:
+      operationId: WorkshopReturnController_findAll
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Items per page
+          schema:
+            default: 25
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search keyword
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: orderId
+          required: false
+          in: query
+          description: Only the documents of this order
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Paginated workshop returns
+        '403':
+          description: Forbidden — requires stock_return:read
+      security: &ref_45
+        - bearer: []
+      summary: List workshop returns
+      tags: &ref_46
+        - inventory/workshop-returns
+    post:
+      description: >-
+        At most what the order still has out, at its net issued average cost; the stock goes back to the order first
+        while it is open and short. A request key already used answers the first return with 200.
+      operationId: WorkshopReturnController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkshopReturnDto'
+      responses:
+        '200':
+          description: 'The request key was posted before: the first return'
+        '201':
+          description: Return posted
+        '400':
+          description: Validation error
+        '404':
+          description: Order or item not found
+        '409':
+          description: Order neither open nor cancelled, or more than is out at the workshop
+      security: *ref_45
+      summary: Take back what the workshop did not use
+      tags: *ref_46
+  /api/v1/inventory/workshop-returns/{id}:
+    get:
+      description: Line unit costs and values only with purchase_price:read.
+      operationId: WorkshopReturnController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Workshop return
+        '404':
+          description: Not found
+      security: *ref_45
+      summary: Get a workshop return with its lines
+      tags: *ref_46
 info:
   title: panelXERP
   description: REST API — ERP Hải Phòng Manufacturing Platform
@@ -4683,7 +4879,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: &ref_43
+          enum: &ref_47
             - sales
             - planning
             - purchasing
@@ -4724,7 +4920,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_43
+          enum: *ref_47
           nullable: true
         title:
           type: object
@@ -4759,7 +4955,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_43
+          enum: *ref_47
           nullable: true
         title:
           type: object
@@ -5194,7 +5390,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: &ref_44
+          enum: &ref_48
             - enclosure
             - breaker
             - contactor
@@ -5244,7 +5440,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: *ref_44
+          enum: *ref_48
         unit:
           type: string
           description: Unit of measure, e.g. pcs, m, set
@@ -5481,7 +5677,7 @@ components:
       properties:
         category:
           type: string
-          enum: &ref_45
+          enum: &ref_49
             - design
             - labor
             - installation
@@ -5503,7 +5699,7 @@ components:
       properties:
         category:
           type: string
-          enum: *ref_45
+          enum: *ref_49
         description:
           type: object
           maxLength: 500
@@ -5745,7 +5941,7 @@ components:
         vatRate:
           type: number
           description: VAT rate in percent
-          enum: &ref_46
+          enum: &ref_50
             - 0
             - 5
             - 8
@@ -5774,7 +5970,7 @@ components:
           nullable: true
         vatRate:
           type: number
-          enum: *ref_46
+          enum: *ref_50
         note:
           type: object
           maxLength: 2000
@@ -5824,4 +6020,89 @@ components:
             $ref: '#/components/schemas/StockReceiptLineDto'
       required:
         - purchaseOrderId
+        - lines
+    StockIssueLineDto:
+      type: object
+      properties:
+        itemId:
+          type: number
+          description: Catalog item
+        orderLineId:
+          type: object
+          description: Panel line of the order the material is for
+          nullable: true
+        quantity:
+          type: number
+          description: Quantity, up to 3 decimals
+          minimum: 0.001
+        reason:
+          type: object
+          description: Why more than the BOM is issued; required on every line of an item once the order’s issues exceed its demand
+          maxLength: 2000
+          nullable: true
+      required:
+        - itemId
+        - quantity
+    CreateStockIssueDto:
+      type: object
+      properties:
+        orderId:
+          type: number
+          description: Sales order
+        requestKey:
+          type: string
+          description: 'One key per screen: posting it again returns the first document with 200 and posts nothing.'
+          format: uuid
+        note:
+          type: object
+          maxLength: 2000
+          nullable: true
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/StockIssueLineDto'
+      required:
+        - orderId
+        - lines
+    WorkshopReturnLineDto:
+      type: object
+      properties:
+        itemId:
+          type: number
+          description: Catalog item
+        orderLineId:
+          type: object
+          description: Panel line of the order the material is for
+          nullable: true
+        quantity:
+          type: number
+          description: Quantity, up to 3 decimals
+          minimum: 0.001
+        note:
+          type: object
+          maxLength: 2000
+          nullable: true
+      required:
+        - itemId
+        - quantity
+    CreateWorkshopReturnDto:
+      type: object
+      properties:
+        orderId:
+          type: number
+          description: Sales order
+        requestKey:
+          type: string
+          description: 'One key per screen: posting it again returns the first document with 200 and posts nothing.'
+          format: uuid
+        note:
+          type: object
+          maxLength: 2000
+          nullable: true
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkshopReturnLineDto'
+      required:
+        - orderId
         - lines

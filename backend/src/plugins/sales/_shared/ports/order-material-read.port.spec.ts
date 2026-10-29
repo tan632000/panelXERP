@@ -124,4 +124,40 @@ describeWithDatabase('OrderMaterialReadPort (real Postgres)', () => {
   it('answers null for an unknown order', async () => {
     expect(await port.getOrder(dataSource.manager, 2147483000)).toBeNull();
   });
+
+  it('holds the order row FOR SHARE: a writer of the row waits, another reader does not', async () => {
+    const holder = dataSource.createQueryRunner();
+    const other = dataSource.createQueryRunner();
+    await holder.connect();
+    await other.connect();
+    try {
+      await holder.startTransaction();
+      const header = await port.lockOrderForMaterial(holder.manager, ownOrder);
+      expect(header?.id).toBe(ownOrder);
+      expect(
+        await port.lockOrderForMaterial(holder.manager, 2147483000),
+      ).toBeNull();
+
+      await other.startTransaction();
+      // A second document shares the lock.
+      expect(
+        (await port.lockOrderForMaterial(other.manager, ownOrder))?.id,
+      ).toBe(ownOrder);
+      await other.rollbackTransaction();
+
+      // A cancel writes the row: it cannot take it while the document holds it.
+      await other.startTransaction();
+      await expect(
+        other.query(
+          `SELECT id FROM sales_orders WHERE id = $1 FOR UPDATE NOWAIT`,
+          [ownOrder],
+        ),
+      ).rejects.toThrow(/could not obtain lock/);
+    } finally {
+      if (other.isTransactionActive) await other.rollbackTransaction();
+      if (holder.isTransactionActive) await holder.rollbackTransaction();
+      await other.release();
+      await holder.release();
+    }
+  });
 });

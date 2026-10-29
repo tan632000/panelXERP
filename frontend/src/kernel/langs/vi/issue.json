@@ -1,0 +1,75 @@
+{
+  "title": "Phiếu xuất kho",
+  "description": "Xuất vật tư cho đơn hàng và nhập lại phần xưởng dùng không hết",
+  "searchPlaceholder": "Tìm theo mã phiếu…",
+  "code": "Mã phiếu",
+  "order": "Đơn hàng",
+  "customer": "Khách hàng",
+  "lineCount": "Số dòng",
+  "createdBy": "Người lập",
+  "createdAt": "Thời gian",
+  "emptyValue": "—",
+  "noItems": "Chưa có phiếu xuất kho nào",
+  "noItemsFound": "Không tìm thấy phiếu xuất kho phù hợp",
+  "paginationItem": "phiếu",
+  "loadError": "Không tải được danh sách phiếu xuất kho",
+  "orderNotFound": "Không tìm thấy đơn hàng",
+  "orderCode": {
+    "placeholder": "Quét hoặc nhập mã đơn hàng để xuất kho…",
+    "notFound": "Không có đơn hàng với mã này"
+  },
+  "issueScreen": {
+    "title": "Xuất kho",
+    "titleOf": "Xuất kho cho {code}",
+    "notOpen": "{code} không còn mở: chỉ xuất vật tư cho đơn đang mở.",
+    "itemsTitle": "Vật tư của đơn",
+    "scanTitle": "Quét vật tư xuất",
+    "panel": "Tủ nhận vật tư",
+    "noPanel": "Cả đơn",
+    "hint": "Mỗi lần quét cộng 1 vào dòng của tủ đang chọn; vật tư không có trong BOM của tủ vào dòng ngoài BOM. Vượt BOM thì phải ghi lý do.",
+    "linesTitle": "Dòng xuất",
+    "noLines": "Chưa có dòng nào: quét vật tư để thêm.",
+    "outsideBom": "Ngoài BOM",
+    "submit": "Xuất kho"
+  },
+  "returnScreen": {
+    "title": "Nhập trả từ xưởng",
+    "titleOf": "Nhập trả từ xưởng cho {code}",
+    "notReturnable": "{code} không nhận hàng trả: chỉ đơn đang mở hoặc đã huỷ.",
+    "itemsTitle": "Vật tư xưởng đang giữ",
+    "nothingOut": "Xưởng không còn giữ vật tư nào của đơn này.",
+    "submit": "Nhập trả"
+  },
+  "scan": {
+    "placeholder": "Quét mã vạch hoặc nhập mã vật tư…",
+    "notFound": "Không tìm thấy vật tư với mã này",
+    "failed": "Không tra được mã vừa quét, vui lòng quét lại"
+  },
+  "lines": {
+    "code": "Mã",
+    "name": "Tên vật tư",
+    "unit": "ĐVT",
+    "demand": "Nhu cầu",
+    "reserved": "Đã giữ",
+    "out": "Đã xuất (ròng)",
+    "short": "Còn thiếu",
+    "panel": "Tủ",
+    "quantity": "SL xuất",
+    "quantityOf": "Số lượng của {code}",
+    "reason": "Lý do vượt BOM",
+    "reasonOf": "Lý do vượt BOM của {code}",
+    "reasonRequired": "Vượt BOM: cần ghi lý do",
+    "returning": "SL trả",
+    "overOut": "Vượt số xưởng đang giữ",
+    "perPanel": "SL / 1 tủ",
+    "panelDemand": "Nhu cầu của tủ"
+  },
+  "toast": {
+    "issueSuccess": "Đã xuất kho",
+    "returnSuccess": "Đã nhập trả từ xưởng",
+    "conflict": "Không thực hiện được: không đủ tồn ngoài phần đã giữ cho đơn khác, đơn đã đổi trạng thái hoặc vượt số xưởng đang giữ.",
+    "reasonRequired": "Vượt BOM: mỗi dòng của vật tư đó cần lý do.",
+    "forbidden": "Bạn không có quyền thực hiện chức năng này.",
+    "systemError": "Đã có lỗi xảy ra, vui lòng thử lại"
+  }
+}

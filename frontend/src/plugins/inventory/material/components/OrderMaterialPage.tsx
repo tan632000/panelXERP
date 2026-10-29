@@ -3,17 +3,26 @@
 import { useTranslations } from "next-intl";
 import React from "react";
 
+import { useAuth } from "@/kernel/core/auth/AuthContext";
 import { DetailField } from "@/kernel/core/components/ui/DetailField";
 import { DetailFieldGrid } from "@/kernel/core/components/ui/DetailFieldGrid";
 import { DetailPageLayout } from "@/kernel/core/components/ui/DetailPageLayout";
+import { DetailPanelActionButton } from "@/kernel/core/components/ui/DetailPanelActionButton";
 import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
 import { EmptyState } from "@/kernel/core/components/ui/EmptyState";
 import { LoadingState } from "@/kernel/core/components/ui/LoadingState";
 import { Table, type TableColumn } from "@/kernel/core/components/ui/Table";
 import { useEntityIdParam } from "@/kernel/core/hooks/useEntityIdParam";
 import { isNotFoundError } from "@/kernel/core/lib/api-error-mapping";
-import { formatIsoDate, formatNumber } from "@/kernel/core/lib/formatters";
+import {
+  formatIsoDate,
+  formatIsoDateTime,
+  formatNumber,
+} from "@/kernel/core/lib/formatters";
+import { useRouter } from "@/kernel/i18n/navigation";
 
+import { issuePageRoutes } from "@plugins/inventory/issue/constants";
+import { IssuePermission } from "@plugins/inventory/issue/permissions/issue-permission.keys";
 import { materialPageRoutes } from "@plugins/inventory/material/constants";
 import { useOrderMaterial } from "@plugins/inventory/material/hooks/api/useMaterial";
 import { materialFeature } from "@plugins/inventory/material/material.feature";
@@ -22,8 +31,12 @@ import { OrderStatusBadge } from "@plugins/sales/order/components/OrderStatusBad
 import type {
   MaterialItemRow,
   MaterialPanel,
+  OverBomIssue,
   UnlinkedBomLine,
 } from "@plugins/inventory/material/types";
+
+/** Orders the workshop may return materials from (user, Q7). */
+const RETURNABLE = ["open", "cancelled"];
 
 const PLAIN = { filterable: false, sortable: false } as const;
 const QUANTITY = { maximumFractionDigits: 3 };
@@ -35,6 +48,8 @@ const quantity = (value: number) => (
 /** One order's materials: per item what is needed, set aside, issued and still short. */
 export function OrderMaterialPage() {
   const t = useTranslations("material");
+  const { can } = useAuth();
+  const router = useRouter();
   const orderId = useEntityIdParam();
   const query = useOrderMaterial(orderId);
   const detail = query.data;
@@ -155,6 +170,32 @@ export function OrderMaterialPage() {
     },
   ];
 
+  const canIssue = order.status === "open" && can(IssuePermission.create);
+  const canReturn =
+    RETURNABLE.includes(order.status) && can(IssuePermission.returnCreate);
+  const overBomColumns: Array<TableColumn<OverBomIssue>> = [
+    {
+      key: "itemCode",
+      ...PLAIN,
+      header: t("item.code"),
+      render: (_, row) => <span className="font-mono">{row.itemCode}</span>,
+    },
+    { key: "itemName", ...PLAIN, header: t("item.name") },
+    {
+      key: "quantity",
+      ...PLAIN,
+      header: t("overBom.quantity"),
+      render: (_, row) => quantity(row.quantity),
+    },
+    { key: "reason", ...PLAIN, header: t("overBom.reason") },
+    {
+      key: "issuedAt",
+      ...PLAIN,
+      header: t("overBom.issuedAt"),
+      render: (_, row) => formatIsoDateTime(row.issuedAt),
+    },
+  ];
+
   return (
     <DetailPageLayout
       {...header}
@@ -184,6 +225,30 @@ export function OrderMaterialPage() {
         ) : null}
       </DetailSection>
 
+      {canIssue || canReturn ? (
+        <DetailSection title={t("actions.title")}>
+          <div className="flex flex-wrap items-center gap-2">
+            {canIssue ? (
+              <DetailPanelActionButton
+                variant="primary"
+                icon="package-export"
+                label={t("actions.issue")}
+                onClick={() => router.push(issuePageRoutes.issue(order.id))}
+              />
+            ) : null}
+            {canReturn ? (
+              <DetailPanelActionButton
+                icon="package-import"
+                label={t("actions.workshopReturn")}
+                onClick={() =>
+                  router.push(issuePageRoutes.workshopReturn(order.id))
+                }
+              />
+            ) : null}
+          </div>
+        </DetailSection>
+      ) : null}
+
       <DetailSection title={t("itemsTitle")}>
         <Table
           columns={itemColumns}
@@ -204,6 +269,16 @@ export function OrderMaterialPage() {
             columns={unlinkedColumns}
             data={detail.unlinked}
             rowKey={(row) => String(row.bomLineId)}
+          />
+        </DetailSection>
+      ) : null}
+
+      {detail.overBomIssues.length > 0 ? (
+        <DetailSection title={t("overBom.title")}>
+          <Table
+            columns={overBomColumns}
+            data={detail.overBomIssues}
+            rowKey={(row) => row.movementId}
           />
         </DetailSection>
       ) : null}

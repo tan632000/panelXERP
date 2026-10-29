@@ -36,5 +36,16 @@
     "perPanel": "Qty / panel"
   },
   "unlinkedTitle": "Unlinked materials",
-  "unlinkedWarning": "These lines name no catalog item, so they count towards no demand. Check the BOM."
+  "unlinkedWarning": "These lines name no catalog item, so they count towards no demand. Check the BOM.",
+  "actions": {
+    "title": "Warehouse",
+    "issue": "Issue materials",
+    "workshopReturn": "Workshop return"
+  },
+  "overBom": {
+    "title": "Issued beyond the BOM",
+    "quantity": "Quantity",
+    "reason": "Reason",
+    "issuedAt": "Issued at"
+  }
 }
