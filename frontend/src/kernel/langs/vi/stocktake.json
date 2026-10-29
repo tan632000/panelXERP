@@ -1,0 +1,85 @@
+{
+  "title": "Kiểm kê kho",
+  "description": "Đếm toàn kho hoặc một vị trí bằng máy quét; chênh lệch chỉ ghi sổ khi giám đốc duyệt",
+  "detailTitle": "Phiếu kiểm kê",
+  "notFound": "Không tìm thấy phiếu kiểm kê",
+  "loadError": "Không tải được danh sách phiếu kiểm kê",
+  "searchPlaceholder": "Tìm theo mã phiếu…",
+  "code": "Mã phiếu",
+  "scope": "Phạm vi",
+  "scopeAll": "Toàn kho",
+  "scopeLocation": "Vị trí {code}",
+  "status": "Trạng thái",
+  "progress": "Đã đếm",
+  "progressValue": "{counted}/{total} dòng",
+  "createdBy": "Người lập",
+  "createdAt": "Thời gian lập",
+  "rejectReason": "Lý do trả lại",
+  "infoBasic": "Thông tin phiếu",
+  "emptyValue": "—",
+  "notCounted": "Chưa đếm",
+  "noItems": "Chưa có phiếu kiểm kê nào",
+  "noItemsFound": "Không tìm thấy phiếu kiểm kê phù hợp",
+  "paginationItem": "phiếu",
+  "involvedCannotDecide": "Bạn đã tham gia phiếu này (lập, gửi duyệt hoặc đếm) nên không thể duyệt hay trả lại.",
+  "scanTitle": "Quét hàng đếm",
+  "statuses": {
+    "counting": "Đang đếm",
+    "submitted": "Chờ duyệt",
+    "approved": "Đã duyệt",
+    "cancelled": "Đã huỷ"
+  },
+  "create": {
+    "title": "Mở phiếu kiểm kê",
+    "oneLocation": "Một vị trí",
+    "location": "Vị trí kiểm kê",
+    "pickLocation": "Chọn vị trí…",
+    "submit": "Mở phiếu"
+  },
+  "scan": {
+    "placeholder": "Quét mã vạch hoặc nhập mã hàng…",
+    "notFound": "Không tìm thấy mặt hàng với mã này",
+    "closed": "Phiếu không còn ở trạng thái đang đếm",
+    "failed": "Không ghi được lần quét, vui lòng quét lại"
+  },
+  "lines": {
+    "title": "Hàng kiểm kê",
+    "code": "Mã hàng",
+    "name": "Tên hàng",
+    "unit": "ĐVT",
+    "book": "Sổ sách",
+    "counted": "Thực đếm",
+    "countedOf": "Thực đếm của {code}",
+    "diff": "Chênh lệch",
+    "value": "Giá trị ghi sổ"
+  },
+  "actions": {
+    "title": "Xử lý",
+    "submit": "Gửi duyệt",
+    "submitTitle": "Gửi duyệt phiếu {code}?",
+    "submitDescription": "Sau khi gửi, phiếu không đếm thêm được trừ khi bị trả lại.",
+    "approve": "Duyệt",
+    "approveTitle": "Duyệt phiếu {code}?",
+    "approveDescription": "Chênh lệch của các dòng đã đếm sẽ được ghi vào sổ kho.",
+    "reject": "Trả lại",
+    "rejectTitle": "Trả lại phiếu {code} để đếm lại",
+    "cancel": "Huỷ phiếu",
+    "cancelTitle": "Huỷ phiếu {code}"
+  },
+  "reason": {
+    "label": "Lý do",
+    "placeholder": "Nhập lý do…",
+    "required": "Vui lòng nhập lý do",
+    "max": "Tối đa {max} ký tự"
+  },
+  "toast": {
+    "createSuccess": "Đã mở phiếu kiểm kê",
+    "submitSuccess": "Đã gửi duyệt phiếu kiểm kê",
+    "approveSuccess": "Đã duyệt và ghi sổ chênh lệch",
+    "rejectSuccess": "Đã trả lại phiếu để đếm lại",
+    "cancelSuccess": "Đã huỷ phiếu kiểm kê",
+    "conflict": "Không thực hiện được: đang có phiếu khác mở, phiếu đã đổi trạng thái, hoặc chênh lệch làm tồn âm.",
+    "forbidden": "Bạn không có quyền thực hiện chức năng này.",
+    "systemError": "Đã có lỗi xảy ra, vui lòng thử lại"
+  }
+}

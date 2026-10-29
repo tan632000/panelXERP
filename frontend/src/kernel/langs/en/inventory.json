@@ -3,6 +3,7 @@
   "sidebarInventory": "Purchasing & Warehouse",
   "suppliers": "Suppliers",
   "stock": "Stock",
+  "stocktakes": "Stock counts",
   "issues": "Stock issues",
   "receipts": "Stock receipts",
   "purchaseOrders": "Purchase orders",

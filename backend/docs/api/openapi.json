@@ -7978,6 +7978,409 @@
           "inventory/supplier-returns"
         ]
       }
+    },
+    "/api/v1/inventory/stocktakes": {
+      "get": {
+        "operationId": "StocktakeController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "counting",
+                "submitted",
+                "approved",
+                "cancelled"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated stock counts"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List stock counts",
+        "tags": [
+          "inventory/stocktakes"
+        ]
+      },
+      "post": {
+        "operationId": "StocktakeController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateStocktakeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Count opened"
+          },
+          "409": {
+            "description": "Another count is still open"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Open a count of the whole warehouse or one location",
+        "tags": [
+          "inventory/stocktakes"
+        ]
+      }
+    },
+    "/api/v1/inventory/stocktakes/{id}": {
+      "get": {
+        "description": "Book and counted quantities and the difference to every reader; unit costs and values only with purchase_price:read.",
+        "operationId": "StocktakeController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stock count"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a stock count with its lines",
+        "tags": [
+          "inventory/stocktakes"
+        ]
+      }
+    },
+    "/api/v1/inventory/stocktakes/{id}/scan": {
+      "post": {
+        "description": "An item without a line gets one. Records the book quantity of the moment.",
+        "operationId": "StocktakeController_scan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeScanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Counted"
+          },
+          "404": {
+            "description": "Count or item not found"
+          },
+          "409": {
+            "description": "The count is not being counted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Count one more of a scanned item",
+        "tags": [
+          "inventory/stocktakes"
+        ]
+      }
+    },
+    "/api/v1/inventory/stocktakes/{id}/lines/{itemId}": {
+      "patch": {
+        "operationId": "StocktakeController_setCount",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeCountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Counted"
+          },
+          "404": {
+            "description": "Count or line not found"
+          },
+          "409": {
+            "description": "The count is not being counted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set the counted quantity of an item on the count",
+        "tags": [
+          "inventory/stocktakes"
+        ]
+      }
+    },
+    "/api/v1/inventory/stocktakes/{id}/submit": {
+      "post": {
+        "operationId": "StocktakeController_submit",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Submitted"
+          },
+          "409": {
+            "description": "Not being counted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Submit a count for approval",
+        "tags": [
+          "inventory/stocktakes"
+        ]
+      }
+    },
+    "/api/v1/inventory/stocktakes/{id}/approve": {
+      "post": {
+        "description": "Refused to its creator, every submitter and every counter. A result below zero refuses the whole count.",
+        "operationId": "StocktakeController_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Approved and posted"
+          },
+          "403": {
+            "description": "The actor took part in the count"
+          },
+          "409": {
+            "description": "Not submitted, or an item would go below zero"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Approve a submitted count and post its differences",
+        "tags": [
+          "inventory/stocktakes"
+        ]
+      }
+    },
+    "/api/v1/inventory/stocktakes/{id}/reject": {
+      "post": {
+        "operationId": "StocktakeController_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Back to counting"
+          },
+          "403": {
+            "description": "The actor took part in the count"
+          },
+          "409": {
+            "description": "Not submitted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Send a submitted count back to counting",
+        "tags": [
+          "inventory/stocktakes"
+        ]
+      }
+    },
+    "/api/v1/inventory/stocktakes/{id}/cancel": {
+      "post": {
+        "operationId": "StocktakeController_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StocktakeReasonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cancelled"
+          },
+          "409": {
+            "description": "Not open"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel an open count",
+        "tags": [
+          "inventory/stocktakes"
+        ]
+      }
     }
   },
   "info": {
@@ -9819,6 +10222,67 @@
           "purchaseOrderId",
           "reason",
           "lines"
+        ]
+      },
+      "CreateStocktakeDto": {
+        "type": "object",
+        "properties": {
+          "scope": {
+            "type": "string",
+            "enum": [
+              "all",
+              "location"
+            ]
+          },
+          "locationId": {
+            "type": "number",
+            "description": "The location counted, when the scope is one location"
+          },
+          "note": {
+            "type": "object",
+            "maxLength": 2000,
+            "nullable": true
+          }
+        },
+        "required": [
+          "scope"
+        ]
+      },
+      "StocktakeScanDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "A scanned barcode or a typed item code"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "StocktakeCountDto": {
+        "type": "object",
+        "properties": {
+          "countedQty": {
+            "type": "number",
+            "description": "Counted quantity, up to 3 decimals",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "countedQty"
+        ]
+      },
+      "StocktakeReasonDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 2000
+          }
+        },
+        "required": [
+          "reason"
         ]
       }
     }

@@ -127,6 +127,7 @@
     "stock_receipt": "Stock receipt",
     "stock_issue": "Stock issue",
     "stock_return": "Workshop return",
+    "stocktake": "Stock count",
     "subcontract_order": "Subcontract order",
     "supplier": "Supplier",
     "supplier:contact": "Supplier contacts",

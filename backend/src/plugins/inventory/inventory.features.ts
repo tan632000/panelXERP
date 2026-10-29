@@ -8,6 +8,8 @@ import { stockReceiptPermissions } from '@plugins/inventory/receipt/permissions/
 import { StockReceiptModule } from '@plugins/inventory/receipt/receipt.module';
 import { stockPermissions } from '@plugins/inventory/stock/permissions/stock.permissions';
 import { StockModule } from '@plugins/inventory/stock/stock.module';
+import { stocktakePermissions } from '@plugins/inventory/stocktake/permissions/stocktake.permissions';
+import { StocktakeModule } from '@plugins/inventory/stocktake/stocktake.module';
 import { supplierPermissions } from '@plugins/inventory/supplier/permissions/supplier.permissions';
 import { SupplierModule } from '@plugins/inventory/supplier/supplier.module';
 import { SupplierReturnModule } from '@plugins/inventory/supplier-return/supplier-return.module';
@@ -58,5 +60,11 @@ export const INVENTORY_FEATURES: ErpFeature[] = [
     module: SupplierReturnModule,
     // Gated by `stock_return:*`, which the issue feature declares with workshop returns.
     permissions: [],
+  },
+  {
+    key: 'stocktake',
+    plugin: 'inventory',
+    module: StocktakeModule,
+    permissions: stocktakePermissions,
   },
 ];

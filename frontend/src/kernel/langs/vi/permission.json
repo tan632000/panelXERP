@@ -127,6 +127,7 @@
     "stock_receipt": "Phiếu nhập kho",
     "stock_issue": "Phiếu xuất kho",
     "stock_return": "Nhập trả từ xưởng",
+    "stocktake": "Kiểm kê kho",
     "subcontract_order": "Đơn hàng gia công",
     "supplier": "Nhà cung cấp",
     "supplier:contact": "Liên hệ nhà cung cấp",

@@ -1,0 +1,85 @@
+{
+  "title": "Stock counts",
+  "description": "Count the whole warehouse or one location by scanning; differences post only on director approval",
+  "detailTitle": "Stock count",
+  "notFound": "The stock count was not found",
+  "loadError": "Could not load the stock counts",
+  "searchPlaceholder": "Search by count code…",
+  "code": "Count code",
+  "scope": "Scope",
+  "scopeAll": "Whole warehouse",
+  "scopeLocation": "Location {code}",
+  "status": "Status",
+  "progress": "Counted",
+  "progressValue": "{counted}/{total} lines",
+  "createdBy": "Created by",
+  "createdAt": "Created at",
+  "rejectReason": "Sent back because",
+  "infoBasic": "Count details",
+  "emptyValue": "—",
+  "notCounted": "Not counted",
+  "noItems": "No stock counts yet",
+  "noItemsFound": "No stock counts match",
+  "paginationItem": "counts",
+  "involvedCannotDecide": "You took part in this count (created, submitted or counted it), so you cannot approve or reject it.",
+  "scanTitle": "Scan counted goods",
+  "statuses": {
+    "counting": "Counting",
+    "submitted": "Awaiting approval",
+    "approved": "Approved",
+    "cancelled": "Cancelled"
+  },
+  "create": {
+    "title": "Open a stock count",
+    "oneLocation": "One location",
+    "location": "Location to count",
+    "pickLocation": "Pick a location…",
+    "submit": "Open count"
+  },
+  "scan": {
+    "placeholder": "Scan a barcode or type an item code…",
+    "notFound": "No item has this code",
+    "closed": "The count is no longer being counted",
+    "failed": "Could not record the scan, please scan again"
+  },
+  "lines": {
+    "title": "Counted goods",
+    "code": "Item code",
+    "name": "Item name",
+    "unit": "Unit",
+    "book": "Book",
+    "counted": "Counted",
+    "countedOf": "Counted of {code}",
+    "diff": "Difference",
+    "value": "Posted value"
+  },
+  "actions": {
+    "title": "Actions",
+    "submit": "Submit",
+    "submitTitle": "Submit count {code}?",
+    "submitDescription": "Once submitted the count takes no more counts unless it is sent back.",
+    "approve": "Approve",
+    "approveTitle": "Approve count {code}?",
+    "approveDescription": "The differences of the counted lines will be posted to the stock ledger.",
+    "reject": "Send back",
+    "rejectTitle": "Send count {code} back for a recount",
+    "cancel": "Cancel count",
+    "cancelTitle": "Cancel count {code}"
+  },
+  "reason": {
+    "label": "Reason",
+    "placeholder": "Enter a reason…",
+    "required": "Please enter a reason",
+    "max": "At most {max} characters"
+  },
+  "toast": {
+    "createSuccess": "Stock count opened",
+    "submitSuccess": "Stock count submitted",
+    "approveSuccess": "Approved and differences posted",
+    "rejectSuccess": "Count sent back for a recount",
+    "cancelSuccess": "Stock count cancelled",
+    "conflict": "Could not do this: another count is open, the count changed, or a difference would leave negative stock.",
+    "forbidden": "You do not have permission to do this.",
+    "systemError": "Something went wrong, please try again"
+  }
+}
