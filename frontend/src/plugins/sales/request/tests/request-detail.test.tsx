@@ -85,11 +85,11 @@ const DETAIL = {
   },
 };
 
-function respond(detail: object = DETAIL) {
+function respond(detail: object = DETAIL, activities: object[] = []) {
   apiGet.mockImplementation((url: string) => {
     if (url === "/sales/requests/5") return Promise.resolve({ data: detail });
     if (url === "/sales/requests/5/activities") {
-      return Promise.resolve({ data: [] });
+      return Promise.resolve({ data: activities });
     }
     if (url === "/sales/requests/5/attachments") {
       return Promise.resolve({ data: [] });
@@ -135,6 +135,47 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("RequestDetailPage", () => {
+  it("names every step the estimate, quotation and order write to the timeline, never a raw key", async () => {
+    const actions = [
+      "estimate_created",
+      "estimate_submitted",
+      "quotation_created",
+      "quotation_submitted",
+      "quotation_approved",
+      "quotation_confirmed",
+      "order_created",
+      "something_new",
+    ];
+    respond(
+      DETAIL,
+      actions.map((action, index) => ({
+        id: index + 1,
+        action,
+        fromStatus: null,
+        toStatus: null,
+        note: null,
+        actorName: "Sales A",
+        createdAt: "2026-10-29T15:30:00.000Z",
+      })),
+    );
+    renderPage();
+
+    expect(
+      await screen.findByText(viRequest.timeline.estimate_created),
+    ).toBeInTheDocument();
+    for (const action of actions.slice(1, -1)) {
+      expect(
+        screen.getByText(
+          viRequest.timeline[action as keyof typeof viRequest.timeline],
+        ),
+      ).toBeInTheDocument();
+    }
+    expect(screen.getByText(viRequest.timeline.other)).toBeInTheDocument();
+    for (const action of actions) {
+      expect(screen.queryByText(action)).not.toBeInTheDocument();
+    }
+  });
+
   it("shows the embedded customer, project and contact summaries", async () => {
     renderPage();
 
