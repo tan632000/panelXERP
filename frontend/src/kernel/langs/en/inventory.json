@@ -7,6 +7,7 @@
   "stocktakes": "Stock counts",
   "issues": "Stock issues",
   "receipts": "Stock receipts",
+  "supplierReturns": "Supplier returns",
   "purchaseOrders": "Purchase orders",
   "materials": "Order materials"
 }

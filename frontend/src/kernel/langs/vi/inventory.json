@@ -7,6 +7,7 @@
   "stocktakes": "Kiểm kê kho",
   "issues": "Phiếu xuất kho",
   "receipts": "Phiếu nhập kho",
+  "supplierReturns": "Trả hàng nhà cung cấp",
   "purchaseOrders": "Đơn mua hàng",
   "materials": "Vật tư đơn hàng"
 }
