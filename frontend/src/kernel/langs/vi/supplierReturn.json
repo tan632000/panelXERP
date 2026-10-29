@@ -1,0 +1,41 @@
+{
+  "title": "Trả nhà cung cấp",
+  "description": "Trả lại hàng đã nhận theo đơn mua hàng, xuất kho theo giá PO",
+  "titleOf": "Trả nhà cung cấp theo {code}",
+  "notReturnable": "{code} chưa nhận hàng nên chưa trả được.",
+  "orderNotFound": "Không tìm thấy đơn mua hàng",
+  "scanTitle": "Quét hàng trả",
+  "nothingReceived": "Đơn chưa nhận hàng nào.",
+  "reason": "Lý do trả",
+  "submit": "Trả nhà cung cấp",
+  "scan": {
+    "placeholder": "Quét mã vạch hoặc nhập mã hàng…",
+    "notOnOrder": "Mặt hàng này không có trong đơn mua hàng",
+    "nothingReceived": "Đã trả hết số đã nhận của mặt hàng này",
+    "notFound": "Không tìm thấy mặt hàng với mã này",
+    "failed": "Không tra được mã vừa quét, vui lòng quét lại"
+  },
+  "lines": {
+    "title": "Hàng đã nhận",
+    "code": "Mã hàng",
+    "name": "Tên hàng",
+    "unit": "ĐVT",
+    "received": "Đã nhận",
+    "returning": "Trả lần này",
+    "returningOf": "Trả lần này của {code}",
+    "overReceived": "Vượt số đã nhận"
+  },
+  "history": {
+    "title": "Phiếu trả nhà cung cấp",
+    "code": "Mã phiếu",
+    "lineCount": "Số dòng",
+    "createdBy": "Người lập",
+    "createdAt": "Thời gian"
+  },
+  "toast": {
+    "createSuccess": "Đã trả nhà cung cấp",
+    "conflict": "Không trả được: số đã nhận hoặc tồn kho đã thay đổi. Vui lòng tải lại.",
+    "forbidden": "Bạn không có quyền thực hiện chức năng này.",
+    "systemError": "Đã có lỗi xảy ra, vui lòng thử lại"
+  }
+}

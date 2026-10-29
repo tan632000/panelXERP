@@ -8,6 +8,9 @@ import { Decimal } from 'decimal.js';
  *   inbound      = +round(quantity × unit cost) to whole VND, half-up
  *   outbound     = −round(quantity × average cost), except that the movement emptying the
  *                  item takes the whole remaining value, so an empty item is worth exactly 0
+ *   supplier return = leaves at its purchase price: `reference = round(quantity × PO price)`;
+ *                  the value drops by that reference, never below 0, except that the return
+ *                  emptying the item takes the whole remaining value
  */
 
 /** Quantities are stored with 3 decimals; anything finer would be rounded away by Postgres. */
@@ -29,6 +32,8 @@ export interface CostedMovement {
   valueAfter: Decimal;
   /** The average after the movement; an emptied item keeps the average it left at. */
   avgCostAfter: Decimal;
+  /** A supplier return only: what the returned goods were worth on their purchase order. */
+  referenceValue?: Decimal;
 }
 
 function wholeVnd(amount: Decimal): Decimal {
@@ -92,6 +97,34 @@ export function outbound(state: StockState, quantity: Decimal): CostedMovement {
     onHandAfter: after.onHand,
     valueAfter: after.value,
     avgCostAfter: remaining.isZero() ? unitCost : averageCost(after),
+  };
+}
+
+/**
+ * Goods going back to their supplier at the purchase price. `quantity` is the positive amount
+ * returned and must not exceed what is on hand. The movement's value is the real change of the
+ * stock value — also when it differs from the reference (the stock was worth less, or the last
+ * unit leaves), which stays visible for the supplier-payable reconciliation.
+ */
+export function supplierReturn(
+  state: StockState,
+  quantity: Decimal,
+  purchaseUnitPrice: Decimal,
+): CostedMovement {
+  const referenceValue = wholeVnd(quantity.times(purchaseUnitPrice));
+  const remaining = state.onHand.minus(quantity);
+  const valueAfter = remaining.isZero()
+    ? new Decimal(0)
+    : Decimal.max(0, state.value.minus(referenceValue));
+  const after: StockState = { onHand: remaining, value: valueAfter };
+  return {
+    quantity: quantity.negated(),
+    unitCost: purchaseUnitPrice,
+    value: valueAfter.minus(state.value),
+    onHandAfter: remaining,
+    valueAfter,
+    avgCostAfter: remaining.isZero() ? averageCost(state) : averageCost(after),
+    referenceValue,
   };
 }
 

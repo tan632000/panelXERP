@@ -82,6 +82,7 @@
     "reject": "Từ chối",
     "cancel": "Huỷ đơn",
     "close": "Đóng đơn",
+    "supplierReturn": "Trả NCC",
     "receive": "Nhập kho",
     "involvedCannotDecide": "Bạn đã tạo, gửi duyệt hoặc sửa đơn này nên không thể duyệt hay từ chối.",
     "submitTitle": "Gửi duyệt đơn {code}?",

@@ -82,6 +82,7 @@
     "reject": "Reject",
     "cancel": "Cancel order",
     "close": "Close order",
+    "supplierReturn": "Return to supplier",
     "receive": "Receive goods",
     "involvedCannotDecide": "You created, submitted or edited this order, so you cannot approve or reject it.",
     "submitTitle": "Submit order {code}?",

@@ -1,0 +1,41 @@
+{
+  "title": "Return to supplier",
+  "description": "Send received goods back against their purchase order, at the order price",
+  "titleOf": "Return to supplier for {code}",
+  "notReturnable": "{code} has received nothing to return yet.",
+  "orderNotFound": "The purchase order was not found",
+  "scanTitle": "Scan returned goods",
+  "nothingReceived": "Nothing has been received on this order.",
+  "reason": "Reason for the return",
+  "submit": "Return to supplier",
+  "scan": {
+    "placeholder": "Scan a barcode or type an item code…",
+    "notOnOrder": "This item is not on the purchase order",
+    "nothingReceived": "Everything received of this item is going back",
+    "notFound": "No item has this code",
+    "failed": "Could not look the scan up, please scan again"
+  },
+  "lines": {
+    "title": "Goods received",
+    "code": "Item code",
+    "name": "Item name",
+    "unit": "Unit",
+    "received": "Received",
+    "returning": "Returning",
+    "returningOf": "Returning of {code}",
+    "overReceived": "More than received"
+  },
+  "history": {
+    "title": "Supplier returns",
+    "code": "Document code",
+    "lineCount": "Lines",
+    "createdBy": "Created by",
+    "createdAt": "Created at"
+  },
+  "toast": {
+    "createSuccess": "Goods returned to the supplier",
+    "conflict": "Could not return: what was received or is on hand changed. Please reload.",
+    "forbidden": "You do not have permission to do this.",
+    "systemError": "Something went wrong, please try again"
+  }
+}

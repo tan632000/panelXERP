@@ -1,6 +1,6 @@
 # Task 13 — Return to supplier against a PO
 
-Status: pending
+Status: done
 
 ## Outcome
 A storekeeper returns received goods to the supplier against the PO line they came on; stock leaves at that PO price, the PO's received quantity drops (so replacements can be received unless the PO is closed), and reservations shrink if stock no longer covers them.
@@ -58,3 +58,77 @@ A storekeeper returns received goods to the supplier against the PO line they ca
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/inventory/supplier-return/services/supplier-return.service.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npx jest --ci src/plugins/inventory src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/supplier-return/tests/supplier-return-form.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory"
+Exit: 0
+Base: ca3cea2e8246d491eada0d5737e0540d41831165
+Head: 4e3757c97ec3a75b0ea75fbc2e35e55773961b8311508350e5126faea469619b
+```text
+$ docker compose exec -T backend sh -c "test -f src/plugins/inventory/supplier-return/services/supplier-return.service.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npx jest --ci src/plugins/inventory src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/supplier-return/tests/supplier-return-form.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory"
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+> panelxerp-backend@0.0.1 migration:run
+> panelxerp-backend@0.0.1 typeorm
+No migrations are pending
+PASS src/plugins/inventory/receipt/services/receipt.service.spec.ts (21.024 s)
+PASS src/plugins/inventory/issue/services/issue-race.spec.ts (21.839 s)
+PASS src/plugins/inventory/issue/services/workshop-return.service.spec.ts (23.854 s)
+PASS src/plugins/inventory/supplier-return/services/supplier-return.service.spec.ts (25.261 s)
+PASS src/plugins/inventory/stock/stock.controller.spec.ts (9.275 s)
+PASS src/plugins/inventory/stock/services/stock-availability.service.spec.ts (9.583 s)
+PASS src/plugins/inventory/stock/services/stock-posting.service.spec.ts
+PASS src/plugins/inventory/receipt/services/receipt-race.spec.ts (31.647 s)
+PASS src/plugins/inventory/stock/services/stock-alert.service.spec.ts
+PASS src/plugins/inventory/stock/services/stock-posting-race.spec.ts
+PASS src/plugins/inventory/purchase-order/services/purchase-order-approval.service.spec.ts (11.876 s)
+PASS src/plugins/inventory/issue/services/issue.service.spec.ts (7.108 s)
+PASS src/plugins/inventory/material/material.controller.spec.ts (6.385 s)
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts (5.87 s)
+PASS src/kernel/core/database/soft-delete-unique-index.spec.ts (15.801 s)
+PASS src/plugins/inventory/material/services/reservation.service.spec.ts
+PASS src/plugins/inventory/material/services/shortage-alert.service.spec.ts
+PASS src/plugins/inventory/supplier/services/supplier.service.spec.ts
+PASS src/plugins/inventory/stock/utils/stock-cost.util.spec.ts
+PASS src/plugins/inventory/material/services/material.service.spec.ts
+PASS src/plugins/inventory/material/services/reservation-race.spec.ts
+PASS src/plugins/inventory/_shared/gateways/supplier-reference-check-registry.spec.ts
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/plugins/inventory/purchase-order/utils/purchase-order-pricing.spec.ts
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+PASS src/plugins/inventory/supplier/supplier.controller.spec.ts (6.124 s)
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts (5.987 s)
+Test Suites: 28 passed, 28 total
+Tests:       235 passed, 235 total
+> panelxerp-backend@0.0.1 validate:migrations
+Migration filename check passed (36 files).
+> panelxerp-frontend@0.1.0 lint
+> panelxerp-frontend@0.1.0 lint:i18n
+ ✓ src/kernel/core/tests/i18n-enum-conformance.test.ts (7 tests) 4726ms
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+ ✓ src/plugins/inventory/stock/tests/stock-list.test.tsx (6 tests) 534ms
+ ✓ src/plugins/inventory/supplier-return/tests/supplier-return-form.test.tsx (3 tests) 906ms
+ ✓ src/plugins/inventory/receipt/tests/receive-screen.test.tsx (5 tests) 1528ms
+ ✓ src/plugins/inventory/issue/tests/issue-screen.test.tsx (6 tests) 2613ms
+ ✓ src/plugins/inventory/supplier/tests/supplier-list.test.tsx (4 tests) 1340ms
+ ✓ src/plugins/inventory/material/tests/shortage-notification.test.ts (4 tests) 37ms
+ ✓ src/plugins/inventory/stock/tests/stock-notification.test.ts (4 tests) 29ms
+ ✓ src/plugins/inventory/material/tests/order-material.test.tsx (4 tests) 457ms
+ ✓ src/plugins/inventory/purchase-order/tests/purchase-order-detail.test.tsx (12 tests) 544ms
+ Test Files  9 passed (9)
+      Tests  48 passed (48)
+EXIT=0
+```
+
+Negative proof (each counterexample applied alone, supplier return spec rerun, files restored byte-for-byte):
+- the return valued at the current average → step 1 fails (avg 110 000 instead of 105 000).
+- deallocation in forward priority → step 1 fails (O1 instead of O3 gives back 2).
+- the last unit valued at its PO cost → step 4 fails (value 50 000 left with nothing on hand).
+- the header inserted after the received check → race (c) fails (the twin gets 409).
+
+Reachability: backend restarted; `SupplierReturnModule dependencies initialized`, `Mapped {/api/v1/inventory/supplier-returns, GET}`, `{/api/v1/inventory/supplier-returns/:id, GET}`, `{/api/v1/inventory/supplier-returns, POST}`, `Nest application successfully started`. Frontend route `/inventory/supplier-returns/new`, the "Trả NCC" action and the returns history on the purchase order page.
+
+Review: code-auditor PASS (0 Critical / 0 High / 0 Medium); Lows recorded for GATE-DONE.

@@ -10,6 +10,7 @@ import { stockPermissions } from '@plugins/inventory/stock/permissions/stock.per
 import { StockModule } from '@plugins/inventory/stock/stock.module';
 import { supplierPermissions } from '@plugins/inventory/supplier/permissions/supplier.permissions';
 import { SupplierModule } from '@plugins/inventory/supplier/supplier.module';
+import { SupplierReturnModule } from '@plugins/inventory/supplier-return/supplier-return.module';
 
 import type { ErpFeature } from '@kernel/platform/features/feature.contract';
 
@@ -50,5 +51,12 @@ export const INVENTORY_FEATURES: ErpFeature[] = [
     plugin: 'inventory',
     module: StockIssueModule,
     permissions: stockIssuePermissions,
+  },
+  {
+    key: 'supplier-return',
+    plugin: 'inventory',
+    module: SupplierReturnModule,
+    // Gated by `stock_return:*`, which the issue feature declares with workshop returns.
+    permissions: [],
   },
 ];

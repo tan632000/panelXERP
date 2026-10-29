@@ -2474,6 +2474,47 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/inventory/supplier-returns": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List supplier returns */
+    get: operations["SupplierReturnController_findAll"];
+    put?: never;
+    /**
+     * Return received goods to the supplier
+     * @description At most what the purchase order line has received; leaves at the order price and shrinks reservations the stock no longer covers. A request key already used answers the first return with 200.
+     */
+    post: operations["SupplierReturnController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/inventory/supplier-returns/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a supplier return with its lines
+     * @description Unit costs, values and reference values only with purchase_price:read.
+     */
+    get: operations["SupplierReturnController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3225,6 +3266,24 @@ export interface components {
       requestKey?: string;
       note?: Record<string, never> | null;
       lines: Array<components["schemas"]["WorkshopReturnLineDto"]>;
+    };
+    SupplierReturnLineDto: {
+      /** @description Line of the purchase order the goods came on */
+      poLineId: number;
+      /** @description Quantity returned, up to 3 decimals */
+      quantity: number;
+    };
+    CreateSupplierReturnDto: {
+      /** @description Purchase order goods were received on */
+      purchaseOrderId: number;
+      /**
+       * Format: uuid
+       * @description One key per return screen: posting it again returns the first return with 200 and posts nothing.
+       */
+      requestKey?: string;
+      /** @description Why the goods go back */
+      reason: string;
+      lines: Array<components["schemas"]["SupplierReturnLineDto"]>;
     };
   };
   responses: never;
@@ -9151,6 +9210,121 @@ export interface operations {
     requestBody?: never;
     responses: {
       /** @description Workshop return */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupplierReturnController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Only the returns of this purchase order */
+        purchaseOrderId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated supplier returns */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires stock_return:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupplierReturnController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateSupplierReturnDto"];
+      };
+    };
+    responses: {
+      /** @description The request key was posted before: the first return */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Return posted */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Validation error, no reason, or a line not on the order */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Purchase order not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Nothing received on the order, more than received or on hand, or item deleted */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  SupplierReturnController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Supplier return */
       200: {
         headers: {
           [name: string]: unknown;

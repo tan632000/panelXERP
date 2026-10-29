@@ -14,32 +14,33 @@ import {
   onHandAfter,
   outbound,
   QUANTITY_DECIMALS,
+  supplierReturn,
   type CostedMovement,
   type StockState,
 } from '@plugins/inventory/stock/utils/stock-cost.util';
 
-/**
- * Movement kinds this service costs. A supplier return leaves at its purchase price rather than
- * at the average, and is added together with the document that posts it.
- */
-export type PostableMovementType = Exclude<
-  StockMovementType,
-  StockMovementType.SUPPLIER_RETURN
->;
+/** Movement kinds this service costs: all of them. */
+export type PostableMovementType = StockMovementType;
 
 /** Kinds that only bring stock in, and kinds that only take it out. */
 const INBOUND_ONLY = new Set<StockMovementType>([
   StockMovementType.RECEIPT,
   StockMovementType.WORKSHOP_RETURN,
 ]);
-const OUTBOUND_ONLY = new Set<StockMovementType>([StockMovementType.ISSUE]);
+const OUTBOUND_ONLY = new Set<StockMovementType>([
+  StockMovementType.ISSUE,
+  StockMovementType.SUPPLIER_RETURN,
+]);
 
 export interface StockPostingLine {
   itemId: number;
   movementType: PostableMovementType;
   /** Signed: positive into stock, negative out of it. Up to 3 decimals. */
   quantity: Decimal.Value;
-  /** Unit cost of stock coming in, VND; ignored for stock going out, which leaves at the average. */
+  /**
+   * Unit cost of stock coming in, VND. Stock going out leaves at the average, except a supplier
+   * return, which leaves at this purchase price (required there).
+   */
   unitCost?: Decimal.Value | null;
   documentLineId?: number | null;
   orderId?: number | null;
@@ -298,7 +299,14 @@ export class StockPostingService {
           `Item ${ledger.code} would leave ${remaining.toFixed()} on hand.`,
         );
       }
-      movement = outbound(ledger.state, quantity.negated());
+      movement =
+        line.movementType === StockMovementType.SUPPLIER_RETURN
+          ? supplierReturn(
+              ledger.state,
+              quantity.negated(),
+              this.unitCostOf(line),
+            )
+          : outbound(ledger.state, quantity.negated());
     }
 
     if (movement.onHandAfter.lessThan(ledger.reserved)) {
@@ -338,8 +346,9 @@ export class StockPostingService {
     const [row]: Array<{ id: string }> = await manager.query(
       `INSERT INTO stock_movements (
          item_id, movement_type, quantity, unit_cost, value, on_hand_after, avg_cost_after,
-         document_type, document_id, document_line_id, order_id, order_line_id, reason, created_by
-       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+         document_type, document_id, document_line_id, order_id, order_line_id, reason, created_by,
+         reference_value
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
        RETURNING id`,
       [
         line.itemId,
@@ -356,6 +365,7 @@ export class StockPostingService {
         line.orderLineId ?? null,
         line.reason ?? null,
         request.actorId ?? null,
+        movement.referenceValue?.toFixed() ?? null,
       ],
     );
     return String(row.id);

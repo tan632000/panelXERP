@@ -18,6 +18,7 @@ import {
   formatIsoDateTime,
 } from "@/kernel/core/lib/formatters";
 
+import { IssuePermission } from "@plugins/inventory/issue/permissions/issue-permission.keys";
 import { purchaseOrderPageRoutes } from "@plugins/inventory/purchase-order/constants";
 import {
   usePurchaseOrder,
@@ -25,6 +26,7 @@ import {
 } from "@plugins/inventory/purchase-order/hooks/api/usePurchaseOrder";
 import { purchaseOrderFeature } from "@plugins/inventory/purchase-order/purchase-order.feature";
 import { purchaseOrderActions } from "@plugins/inventory/purchase-order/utils/purchase-order-actions";
+import { SupplierReturnHistory } from "@plugins/inventory/supplier-return/components/SupplierReturnHistory";
 
 import { PurchaseOrderActionPanel } from "./PurchaseOrderActionPanel";
 import { PurchaseOrderEditor } from "./PurchaseOrderEditor";
@@ -153,6 +155,10 @@ export function PurchaseOrderDetailPage() {
           <PurchaseOrderLinesTable lines={order.lines} showCosts={showCosts} />
         </DetailSection>
       )}
+
+      {can(IssuePermission.returnRead) ? (
+        <SupplierReturnHistory purchaseOrderId={order.id} />
+      ) : null}
 
       <PurchaseOrderHistory events={order.events} />
     </DetailPageLayout>

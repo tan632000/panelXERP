@@ -14,6 +14,7 @@ import { PURCHASE_ORDER_REASON_MAX } from "@plugins/inventory/purchase-order/con
 import { usePurchaseOrderAction } from "@plugins/inventory/purchase-order/hooks/api/usePurchaseOrder";
 import { purchaseOrderActions } from "@plugins/inventory/purchase-order/utils/purchase-order-actions";
 import { receiptPageRoutes } from "@plugins/inventory/receipt/constants";
+import { supplierReturnPageRoutes } from "@plugins/inventory/supplier-return/constants";
 
 import type { PurchaseOrderDetail } from "@plugins/inventory/purchase-order/types";
 
@@ -100,6 +101,16 @@ export function PurchaseOrderActionPanel({
                 label={t("receive")}
                 disabled={busy}
                 onClick={() => router.push(receiptPageRoutes.receive(order.id))}
+              />
+            ) : null}
+            {allowed.supplierReturn ? (
+              <DetailPanelActionButton
+                icon="package-export"
+                label={t("supplierReturn")}
+                disabled={busy}
+                onClick={() =>
+                  router.push(supplierReturnPageRoutes.create(order.id))
+                }
               />
             ) : null}
             {allowed.close ? (

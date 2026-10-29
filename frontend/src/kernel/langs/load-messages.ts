@@ -23,6 +23,7 @@ import salesEn from "@kernel/langs/en/sales.json";
 import statusEn from "@kernel/langs/en/status.json";
 import stockEn from "@kernel/langs/en/stock.json";
 import supplierEn from "@kernel/langs/en/supplier.json";
+import supplierReturnEn from "@kernel/langs/en/supplierReturn.json";
 import systemEn from "@kernel/langs/en/system.json";
 import authVi from "@kernel/langs/vi/auth.json";
 import catalogVi from "@kernel/langs/vi/catalog.json";
@@ -49,6 +50,7 @@ import salesVi from "@kernel/langs/vi/sales.json";
 import statusVi from "@kernel/langs/vi/status.json";
 import stockVi from "@kernel/langs/vi/stock.json";
 import supplierVi from "@kernel/langs/vi/supplier.json";
+import supplierReturnVi from "@kernel/langs/vi/supplierReturn.json";
 import systemVi from "@kernel/langs/vi/system.json";
 
 export const enMessages = {
@@ -70,6 +72,7 @@ export const enMessages = {
   purchaseOrder: purchaseOrderEn,
   receipt: receiptEn,
   issue: issueEn,
+  supplierReturn: supplierReturnEn,
   material: materialEn,
   location: locationEn,
   system: systemEn,
@@ -99,6 +102,7 @@ export const viMessages = {
   purchaseOrder: purchaseOrderVi,
   receipt: receiptVi,
   issue: issueVi,
+  supplierReturn: supplierReturnVi,
   material: materialVi,
   location: locationVi,
   system: systemVi,

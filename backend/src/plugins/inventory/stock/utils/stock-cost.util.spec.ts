@@ -6,6 +6,7 @@ import {
   inbound,
   onHandAfter,
   outbound,
+  supplierReturn,
   type CostedMovement,
   type StockState,
 } from '@plugins/inventory/stock/utils/stock-cost.util';
@@ -116,5 +117,49 @@ describe('weighted-average costing — exact decimals', () => {
   it('rejects quantities finer than the 3 decimals the ledger stores', () => {
     expect(exceedsQuantityPrecision(d('0.001'))).toBe(false);
     expect(exceedsQuantityPrecision(d('0.0001'))).toBe(true);
+  });
+});
+
+describe('supplier returns at the purchase price', () => {
+  it('drops the value by the PO receipt value: 3 of 15 worth 1 650 000 at 130 000', () => {
+    const m = supplierReturn(
+      { onHand: d(15), value: d(1650000) },
+      d(3),
+      d(130000),
+    );
+    expect(m.value.toString()).toBe('-390000');
+    expect(m.referenceValue?.toString()).toBe('390000');
+    expect(m.valueAfter.toString()).toBe('1260000');
+    expect(m.avgCostAfter.toFixed(4)).toBe('105000.0000');
+    // At the average it would leave 1 320 000, an average of 110 000.
+  });
+
+  it('takes the whole remaining value with the last unit, whatever the PO price', () => {
+    const last = { onHand: d(1), value: d(150000) };
+    for (const price of [100000, 200000]) {
+      const m = supplierReturn(last, d(1), d(price));
+      expect(m.value.toString()).toBe('-150000');
+      expect(m.referenceValue?.toString()).toBe(String(price));
+      expect(m.onHandAfter.toString()).toBe('0');
+      expect(m.valueAfter.toString()).toBe('0');
+    }
+  });
+
+  it('never lets the value go below 0 on a partial return', () => {
+    const m = supplierReturn(
+      { onHand: d(2), value: d(100000) },
+      d(1),
+      d(130000),
+    );
+    expect(m.value.toString()).toBe('-100000');
+    expect(m.referenceValue?.toString()).toBe('130000');
+    expect(m.onHandAfter.toString()).toBe('1');
+    expect(m.valueAfter.toString()).toBe('0');
+    // The last unit then leaves worth nothing.
+    const after = outbound(
+      { onHand: m.onHandAfter, value: m.valueAfter },
+      d(1),
+    );
+    expect(after.value.isZero()).toBe(true);
   });
 });

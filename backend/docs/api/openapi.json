@@ -7821,6 +7821,163 @@
           "inventory/workshop-returns"
         ]
       }
+    },
+    "/api/v1/inventory/supplier-returns": {
+      "get": {
+        "operationId": "SupplierReturnController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number",
+            "schema": {
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Items per page",
+            "schema": {
+              "default": 25,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search keyword",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchClassifications",
+            "required": false,
+            "in": "query",
+            "description": "Enum values whose translated label matched the keyword",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "columnFilters",
+            "required": false,
+            "in": "query",
+            "description": "JSON map of column key to selected values, e.g. {\"classification\":[\"mechanical\"]}",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "purchaseOrderId",
+            "required": false,
+            "in": "query",
+            "description": "Only the returns of this purchase order",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated supplier returns"
+          },
+          "403": {
+            "description": "Forbidden — requires stock_return:read"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List supplier returns",
+        "tags": [
+          "inventory/supplier-returns"
+        ]
+      },
+      "post": {
+        "description": "At most what the purchase order line has received; leaves at the order price and shrinks reservations the stock no longer covers. A request key already used answers the first return with 200.",
+        "operationId": "SupplierReturnController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSupplierReturnDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request key was posted before: the first return"
+          },
+          "201": {
+            "description": "Return posted"
+          },
+          "400": {
+            "description": "Validation error, no reason, or a line not on the order"
+          },
+          "404": {
+            "description": "Purchase order not found"
+          },
+          "409": {
+            "description": "Nothing received on the order, more than received or on hand, or item deleted"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Return received goods to the supplier",
+        "tags": [
+          "inventory/supplier-returns"
+        ]
+      }
+    },
+    "/api/v1/inventory/supplier-returns/{id}": {
+      "get": {
+        "description": "Unit costs, values and reference values only with purchase_price:read.",
+        "operationId": "SupplierReturnController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Supplier return"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a supplier return with its lines",
+        "tags": [
+          "inventory/supplier-returns"
+        ]
+      }
     }
   },
   "info": {
@@ -9613,6 +9770,54 @@
         },
         "required": [
           "orderId",
+          "lines"
+        ]
+      },
+      "SupplierReturnLineDto": {
+        "type": "object",
+        "properties": {
+          "poLineId": {
+            "type": "number",
+            "description": "Line of the purchase order the goods came on"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Quantity returned, up to 3 decimals",
+            "minimum": 0.001
+          }
+        },
+        "required": [
+          "poLineId",
+          "quantity"
+        ]
+      },
+      "CreateSupplierReturnDto": {
+        "type": "object",
+        "properties": {
+          "purchaseOrderId": {
+            "type": "number",
+            "description": "Purchase order goods were received on"
+          },
+          "requestKey": {
+            "type": "string",
+            "description": "One key per return screen: posting it again returns the first return with 200 and posts nothing.",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the goods go back",
+            "maxLength": 2000
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupplierReturnLineDto"
+            }
+          }
+        },
+        "required": [
+          "purchaseOrderId",
+          "reason",
           "lines"
         ]
       }
