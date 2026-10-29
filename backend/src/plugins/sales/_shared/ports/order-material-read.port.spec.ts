@@ -125,6 +125,33 @@ describeWithDatabase('OrderMaterialReadPort (real Postgres)', () => {
     expect(await port.getOrder(dataSource.manager, 2147483000)).toBeNull();
   });
 
+  it('sums the estimate’s BOM amounts times panel quantities per item, and nothing without one', async () => {
+    const estimated = await fixture.createOrder({
+      ownerUsername: 'sales_a',
+      panels: [
+        {
+          tag: 'MSB-01',
+          quantity: 2,
+          bomLines: [
+            {
+              itemId,
+              itemCode: `${fixture.tag}-I`,
+              quantity: '3',
+              estimateUnitCost: '95000',
+            },
+          ],
+        },
+      ],
+    });
+
+    const costs = await port.estimatedCostByItem(dataSource.manager, estimated);
+    // 3 × 95 000 = 285 000 per panel, × 2 panels.
+    expect(Number(costs.get(itemId))).toBe(570000);
+    expect(
+      (await port.estimatedCostByItem(dataSource.manager, ownOrder)).size,
+    ).toBe(0);
+  });
+
   it('holds the order row FOR SHARE: a writer of the row waits, another reader does not', async () => {
     const holder = dataSource.createQueryRunner();
     const other = dataSource.createQueryRunner();

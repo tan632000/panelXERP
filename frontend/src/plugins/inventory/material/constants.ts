@@ -6,6 +6,8 @@ export const materialPageRoutes = {
 export const materialApiRoutes = {
   orders: "/inventory/materials/orders",
   order: (orderId: number | string) => `/inventory/materials/orders/${orderId}`,
+  estimateVsActual: (orderId: number | string) =>
+    `/inventory/materials/orders/${orderId}/estimate-vs-actual`,
 } as const;
 
 export const materialQueryKeys = {
@@ -14,4 +16,6 @@ export const materialQueryKeys = {
     [...materialQueryKeys.all, "orders", filters] as const,
   order: (orderId: number) =>
     [...materialQueryKeys.all, "order", orderId] as const,
+  estimateVsActual: (orderId: number) =>
+    [...materialQueryKeys.all, "estimate-vs-actual", orderId] as const,
 };

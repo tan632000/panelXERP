@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { AuditModule } from '@kernel/core/audit/audit.module';
 
 import { MaterialController } from '@plugins/inventory/material/material.controller';
+import { EstimateVsActualService } from '@plugins/inventory/material/services/estimate-vs-actual.service';
 import { MaterialService } from '@plugins/inventory/material/services/material.service';
 import { ReservationService } from '@plugins/inventory/material/services/reservation.service';
 import { ShortageAlertService } from '@plugins/inventory/material/services/shortage-alert.service';
@@ -12,7 +13,12 @@ import { SalesSharedModule } from '@plugins/sales/_shared/sales-shared.module';
 @Module({
   imports: [SalesSharedModule, StockModule, AuditModule],
   controllers: [MaterialController],
-  providers: [MaterialService, ReservationService, ShortageAlertService],
+  providers: [
+    MaterialService,
+    EstimateVsActualService,
+    ReservationService,
+    ShortageAlertService,
+  ],
   exports: [ReservationService, ShortageAlertService],
 })
 export class MaterialModule {}

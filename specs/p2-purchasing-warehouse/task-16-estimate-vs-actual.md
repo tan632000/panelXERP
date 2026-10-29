@@ -1,6 +1,6 @@
 # Task 16 — Estimate versus actual material per order
 
-Status: pending
+Status: done
 
 ## Outcome
 For any order they may see, users compare per item the estimated quantity (and, with `purchase_price:read`, cost) against what was actually issued net of workshop returns, with every over-BOM issue and its reason.
@@ -48,3 +48,59 @@ For any order they may see, users compare per item the estimated quantity (and, 
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/inventory/material/services/estimate-vs-actual.service.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npx jest --ci src/plugins/inventory/material src/plugins/sales/_shared src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/material/tests/estimate-vs-actual.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory/material"
+Exit: 0
+Base: 1c4c85dca118fea8451f77ad6a68775538d23213
+Head: 8c38fd9be66e17b9191909732a533750d3cdcfaa8b8233960c8e30898f1a4699
+```text
+$ docker compose exec -T backend sh -c "test -f src/plugins/inventory/material/services/estimate-vs-actual.service.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npx jest --ci src/plugins/inventory/material src/plugins/sales/_shared src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts" && docker compose exec -T frontend sh -c "test -f src/plugins/inventory/material/tests/estimate-vs-actual.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/inventory/material"
+> panelxerp-backend@0.0.1 lint
+> panelxerp-backend@0.0.1 typecheck
+> panelxerp-backend@0.0.1 migration:run
+> panelxerp-backend@0.0.1 typeorm
+No migrations are pending
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts (13.196 s)
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts (13.307 s)
+PASS src/plugins/sales/_shared/ports/request-status.port.spec.ts
+PASS src/kernel/core/database/soft-delete-unique-index.spec.ts (15.144 s)
+PASS src/plugins/inventory/material/services/reservation-race.spec.ts
+PASS src/plugins/inventory/material/services/reservation.service.spec.ts
+PASS src/plugins/sales/_shared/ports/order-material-read.port.spec.ts
+PASS src/plugins/inventory/material/services/material.service.spec.ts
+PASS src/plugins/sales/_shared/utils/sales-document-code.util.spec.ts
+PASS src/plugins/sales/_shared/ports/order-lifecycle-registry.spec.ts
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/plugins/sales/_shared/ports/request-close-registry.spec.ts
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/plugins/inventory/material/services/shortage-alert.service.spec.ts
+PASS src/plugins/inventory/material/material.controller.spec.ts (22.036 s)
+PASS src/plugins/inventory/material/services/estimate-vs-actual.service.spec.ts (25.28 s)
+Test Suites: 17 passed, 17 total
+Tests:       186 passed, 186 total
+> panelxerp-frontend@0.1.0 lint
+> panelxerp-frontend@0.1.0 lint:i18n
+ ✓ src/kernel/core/tests/i18n-enum-conformance.test.ts (7 tests) 5810ms
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+ ✓ src/plugins/inventory/material/tests/shortage-notification.test.ts (4 tests) 64ms
+ ✓ src/plugins/inventory/material/tests/estimate-vs-actual.test.tsx (3 tests) 546ms
+ ✓ src/plugins/inventory/material/tests/order-material.test.tsx (4 tests) 513ms
+ Test Files  3 passed (3)
+      Tests  11 passed (11)
+EXIT=0
+```
+
+Negative proof (each counterexample applied alone, the estimate-vs-actual spec rerun, file restored byte-for-byte):
+- actual cost from gross issues only (workshop returns ignored) → the worked-example and reader tests fail (2 failed).
+- estimated cost without the panel quantity → the worked-example and estimate-only tests fail (2 failed).
+- no row for an item the estimate costs but the order's BOM lacks → the estimate-only test fails (row undefined).
+
+Reachability: backend restarted; `Mapped {/api/v1/inventory/materials/orders/:orderId/estimate-vs-actual, GET}` ahead of `{/api/v1/inventory/materials/orders/:orderId, GET}`, `Nest application successfully started`. Frontend: the "estimate" tab of the order material page mounts `EstimateVsActualTab`.
+
+Review: code-auditor PASS_WITH_WARNINGS (1 Medium: estimated cost dropped for an estimate item not on the order's linked BOM; Lows) → fixed with a new spec vector → re-review PASS (0 Critical / 0 High / 0 Medium).
+
+Limitations for GATE-DONE: over-BOM row key is not guaranteed unique for two identical lines of one issue (render-only); an estimate-only item shows estimated qty 0 with an estimated cost; estimated cost uses the estimate's panel quantity while estimated qty uses the order's; the report's queries do not share one snapshot; estimated qty is shown whatever the order status.

@@ -18,7 +18,8 @@ export interface OrderSpec {
   deliveryDate?: string | null;
   /** Panels ordered, each with these BOM lines per panel. */
   panels?: number;
-  bom: Array<{ itemId: number; perPanel: string }>;
+  /** Per panel; `estimateUnitCost` also puts the line on the order's estimate at that cost. */
+  bom: Array<{ itemId: number; perPanel: string; estimateUnitCost?: string }>;
 }
 
 export interface ReservationKit {
@@ -78,6 +79,7 @@ export function reservationKit(db: InventoryDb): ReservationKit {
         itemId: line.itemId,
         itemCode: `I${line.itemId}`,
         quantity: line.perPanel,
+        estimateUnitCost: line.estimateUnitCost,
       }));
       const orderId = await orders.createOrder({
         ownerUsername: spec.owner ?? 'sales_a',

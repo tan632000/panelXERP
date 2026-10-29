@@ -26,6 +26,7 @@ import {
   type MaterialWorld,
 } from '@plugins/inventory/material/material-db.helper-spec';
 import { MaterialController } from '@plugins/inventory/material/material.controller';
+import { EstimateVsActualService } from '@plugins/inventory/material/services/estimate-vs-actual.service';
 import { MaterialService } from '@plugins/inventory/material/services/material.service';
 import { OrderMaterialReadPort } from '@plugins/sales/_shared/ports/order-material-read.port';
 
@@ -69,8 +70,8 @@ function salesMoneyKeys(json: unknown, path = '$'): string[] {
   );
 }
 
-it('guards both reads with material:read', () => {
-  for (const handler of ['findOrders', 'findOrder']) {
+it('guards every read with material:read', () => {
+  for (const handler of ['findOrders', 'findOrder', 'findEstimateVsActual']) {
     const method = Object.getOwnPropertyDescriptor(
       MaterialController.prototype,
       handler,
@@ -108,6 +109,7 @@ describeWithDatabase('MaterialController (real Postgres)', () => {
       controllers: [MaterialController],
       providers: [
         MaterialService,
+        EstimateVsActualService,
         OrderMaterialReadPort,
         DataScopeService,
         { provide: DataSource, useValue: db.dataSource },

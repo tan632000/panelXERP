@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import React from "react";
+import React, { useState } from "react";
 
 import { useAuth } from "@/kernel/core/auth/AuthContext";
 import { DetailField } from "@/kernel/core/components/ui/DetailField";
@@ -14,6 +14,7 @@ import { LoadingState } from "@/kernel/core/components/ui/LoadingState";
 import { Table, type TableColumn } from "@/kernel/core/components/ui/Table";
 import { useEntityIdParam } from "@/kernel/core/hooks/useEntityIdParam";
 import { isNotFoundError } from "@/kernel/core/lib/api-error-mapping";
+import { cn } from "@/kernel/core/lib/cn";
 import {
   formatIsoDate,
   formatIsoDateTime,
@@ -30,6 +31,8 @@ import { purchaseRequestPageRoutes } from "@plugins/inventory/purchase-request/c
 import { useRequestFromOrder } from "@plugins/inventory/purchase-request/hooks/api/usePurchaseRequest";
 import { PurchaseRequestPermission } from "@plugins/inventory/purchase-request/permissions/purchase-request-permission.keys";
 import { OrderStatusBadge } from "@plugins/sales/order/components/OrderStatusBadge";
+
+import { EstimateVsActualTab } from "./EstimateVsActualTab";
 
 import type {
   MaterialItemRow,
@@ -55,6 +58,7 @@ export function OrderMaterialPage() {
   const router = useRouter();
   const orderId = useEntityIdParam();
   const requestPurchase = useRequestFromOrder();
+  const [tab, setTab] = useState<"materials" | "estimate">("materials");
   const query = useOrderMaterial(orderId);
   const detail = query.data;
   const icon = materialFeature.items[0]?.icon ?? "package";
@@ -269,6 +273,30 @@ export function OrderMaterialPage() {
         </DetailSection>
       ) : null}
 
+      <div role="tablist" aria-label={t("tabs.label")} className="flex gap-2">
+        {(["materials", "estimate"] as const).map((value) => (
+          <button
+            key={value}
+            type="button"
+            role="tab"
+            aria-selected={tab === value}
+            className={cn(
+              "rounded-md border px-3 py-1.5 text-sm",
+              tab === value
+                ? "border-brand bg-brand text-white"
+                : "border-border-secondary text-text-primary",
+            )}
+            onClick={() => setTab(value)}
+          >
+            {t(`tabs.${value}`)}
+          </button>
+        ))}
+      </div>
+
+      {tab === "estimate" ? (
+        <EstimateVsActualTab orderId={order.id} />
+      ) : (
+        <>
       <DetailSection title={t("itemsTitle")}>
         <Table
           columns={itemColumns}
@@ -315,6 +343,8 @@ export function OrderMaterialPage() {
           />
         </DetailSection>
       ))}
+        </>
+      )}
     </DetailPageLayout>
   );
 }

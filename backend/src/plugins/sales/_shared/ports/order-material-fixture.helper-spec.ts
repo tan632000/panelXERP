@@ -8,6 +8,11 @@ export interface FixtureBomLine {
   itemCode: string;
   /** Quantity for one panel, as numeric text. */
   quantity: string;
+  /**
+   * When given, the line is also on the order's estimate revision at this unit cost (amount =
+   * quantity × unit cost per panel), as the estimate the order was quoted from.
+   */
+  estimateUnitCost?: string;
 }
 
 export interface FixturePanel {
@@ -133,6 +138,30 @@ export function orderMaterialFixture(
              VALUES ($1, $2, $3, 'Material spec item', 'Cái', $4)`,
             [line, bom.itemId, bom.itemCode, bom.quantity],
           );
+        }
+        const estimated = panel.bomLines.filter(
+          (bom) => bom.estimateUnitCost !== undefined && bom.itemId !== null,
+        );
+        if (estimated.length > 0) {
+          const estimatePanel = await one(
+            `INSERT INTO sales_estimate_panels (revision_id, tag, quantity) VALUES ($1, $2, $3)`,
+            [revision, panel.tag, panel.quantity],
+          );
+          for (const bom of estimated) {
+            await dataSource.query(
+              `INSERT INTO sales_estimate_bom_lines
+                 (panel_id, item_id, item_code, item_name, item_unit, quantity, unit_cost, amount)
+               VALUES ($1, $2, $3, 'Material spec item', 'Cái', $4::numeric, $5::numeric,
+                       round($4::numeric * $5::numeric))`,
+              [
+                estimatePanel,
+                bom.itemId,
+                bom.itemCode,
+                bom.quantity,
+                bom.estimateUnitCost,
+              ],
+            );
+          }
         }
       }
       return order;

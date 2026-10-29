@@ -48,5 +48,39 @@
     "quantity": "SL xuất",
     "reason": "Lý do",
     "issuedAt": "Thời gian"
+  },
+  "tabs": {
+    "label": "Nội dung",
+    "materials": "Vật tư",
+    "estimate": "Dự toán – Thực tế"
+  },
+  "estimateVsActual": {
+    "loadError": "Không tải được báo cáo dự toán – thực tế.",
+    "emptyValue": "-",
+    "itemsTitle": "Dự toán so với thực tế",
+    "totals": "Tổng dự toán {estimated} · thực tế {actual} · chênh lệch {variance}",
+    "unlinkedTitle": "Vật tư chưa liên kết",
+    "unlinkedWarning": "{count} dòng BOM không gắn với vật tư trong danh mục nên không có trong so sánh.",
+    "columns": {
+      "code": "Mã",
+      "name": "Tên vật tư",
+      "unit": "ĐVT",
+      "estimatedQty": "SL dự toán",
+      "actualQty": "SL thực tế",
+      "qtyVariance": "Chênh lệch SL",
+      "estimatedCost": "Chi phí dự toán",
+      "actualCost": "Chi phí thực tế",
+      "costVariance": "Chênh lệch chi phí",
+      "perPanel": "SL / 1 tủ"
+    },
+    "overBom": {
+      "title": "Xuất vượt BOM",
+      "none": "Không có lần xuất vượt BOM.",
+      "issueCode": "Phiếu xuất",
+      "issuedAt": "Thời gian",
+      "quantity": "SL",
+      "reason": "Lý do",
+      "panel": "Tủ"
+    }
   }
 }

@@ -7355,6 +7355,39 @@
         ]
       }
     },
+    "/api/v1/inventory/materials/orders/{orderId}/estimate-vs-actual": {
+      "get": {
+        "description": "Per item: estimated (BOM) and actual (issued net of workshop returns) quantity; costs only with purchase_price:read. Every over-BOM issue with its reason. No sales money.",
+        "operationId": "MaterialController_findEstimateVsActual",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estimate against actual"
+          },
+          "404": {
+            "description": "Not found or outside the actor’s scope"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Estimate against actual material of one order",
+        "tags": [
+          "inventory/materials"
+        ]
+      }
+    },
     "/api/v1/inventory/materials/orders/{orderId}": {
       "get": {
         "description": "Per item: demand, reserved, issued, returned and short; per panel its BOM; unlinked BOM lines listed apart. No sales money.",

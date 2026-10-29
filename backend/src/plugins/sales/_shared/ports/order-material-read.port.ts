@@ -191,6 +191,27 @@ export class OrderMaterialReadPort {
   }
 
   /**
+   * What the order's materials were estimated to cost, per item: Σ over the BOM lines of the
+   * estimate revision the order was quoted from of `amount × panel quantity`, as numeric text.
+   * A purchase-cost estimate, never a sales price; the caller gates it like any purchase cost.
+   */
+  async estimatedCostByItem(
+    manager: EntityManager,
+    orderId: number,
+  ): Promise<Map<number, string>> {
+    const rows: Array<{ item_id: number; cost: string }> = await manager.query(
+      `SELECT b.item_id, SUM(b.amount * p.quantity)::text AS cost
+         FROM sales_orders o
+         JOIN sales_estimate_panels p ON p.revision_id = o.estimate_revision_id
+         JOIN sales_estimate_bom_lines b ON b.panel_id = p.id
+        WHERE o.id = $1 AND o.is_deleted = false
+        GROUP BY b.item_id`,
+      [orderId],
+    );
+    return new Map(rows.map((row) => [Number(row.item_id), row.cost]));
+  }
+
+  /**
    * The order's header with its row held `FOR SHARE` for the rest of the transaction, or null
    * when it does not exist. The first lock of an inventory document that moves stock for an
    * order (D-04): a cancel, which writes the row, waits for the document, and the document sees

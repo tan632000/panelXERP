@@ -2351,6 +2351,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/inventory/materials/orders/{orderId}/estimate-vs-actual": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Estimate against actual material of one order
+     * @description Per item: estimated (BOM) and actual (issued net of workshop returns) quantity; costs only with purchase_price:read. Every over-BOM issue with its reason. No sales money.
+     */
+    get: operations["MaterialController_findEstimateVsActual"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/inventory/materials/orders/{orderId}": {
     parameters: {
       query?: never;
@@ -9179,6 +9199,33 @@ export interface operations {
       };
       /** @description Forbidden — requires material:read */
       403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MaterialController_findEstimateVsActual: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        orderId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Estimate against actual */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found or outside the actor’s scope */
+      404: {
         headers: {
           [name: string]: unknown;
         };

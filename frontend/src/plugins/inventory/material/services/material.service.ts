@@ -4,6 +4,7 @@ import { materialApiRoutes } from "@plugins/inventory/material/constants";
 
 import type { PaginatedResponse } from "@/kernel/core/types/common";
 import type {
+  EstimateVsActualReport,
   MaterialOrderListParams,
   MaterialOrderRow,
   OrderMaterialDetail,
@@ -24,6 +25,15 @@ export async function getOrderMaterial(
 ): Promise<OrderMaterialDetail> {
   const { data } = await api.get<OrderMaterialDetail>(
     materialApiRoutes.order(orderId),
+  );
+  return data;
+}
+
+export async function getEstimateVsActual(
+  orderId: number,
+): Promise<EstimateVsActualReport> {
+  const { data } = await api.get<EstimateVsActualReport>(
+    materialApiRoutes.estimateVsActual(orderId),
   );
   return data;
 }

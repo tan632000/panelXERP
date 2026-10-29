@@ -48,5 +48,39 @@
     "quantity": "Quantity",
     "reason": "Reason",
     "issuedAt": "Issued at"
+  },
+  "tabs": {
+    "label": "Content",
+    "materials": "Materials",
+    "estimate": "Estimate vs actual"
+  },
+  "estimateVsActual": {
+    "loadError": "Could not load the estimate against actual.",
+    "emptyValue": "-",
+    "itemsTitle": "Estimate against actual",
+    "totals": "Estimated {estimated} · actual {actual} · variance {variance}",
+    "unlinkedTitle": "Unlinked materials",
+    "unlinkedWarning": "{count} BOM lines are not linked to a catalog item and are left out of the comparison.",
+    "columns": {
+      "code": "Code",
+      "name": "Item",
+      "unit": "Unit",
+      "estimatedQty": "Estimated qty",
+      "actualQty": "Actual qty",
+      "qtyVariance": "Qty variance",
+      "estimatedCost": "Estimated cost",
+      "actualCost": "Actual cost",
+      "costVariance": "Cost variance",
+      "perPanel": "Per panel"
+    },
+    "overBom": {
+      "title": "Issued beyond the BOM",
+      "none": "Nothing issued beyond the BOM.",
+      "issueCode": "Issue",
+      "issuedAt": "Issued at",
+      "quantity": "Qty",
+      "reason": "Reason",
+      "panel": "Panel"
+    }
   }
 }

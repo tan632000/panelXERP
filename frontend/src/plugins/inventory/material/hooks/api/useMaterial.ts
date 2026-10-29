@@ -6,6 +6,7 @@ import { DEFAULT_LIST_STALE_MS } from "@/kernel/core/constants/list-ui";
 
 import { materialQueryKeys } from "@plugins/inventory/material/constants";
 import {
+  getEstimateVsActual,
   getMaterialOrders,
   getOrderMaterial,
 } from "@plugins/inventory/material/services/material.service";
@@ -24,6 +25,15 @@ export function useOrderMaterial(orderId: number | null) {
   return useQuery({
     queryKey: materialQueryKeys.order(orderId ?? 0),
     queryFn: () => getOrderMaterial(orderId as number),
+    enabled: orderId !== null && orderId > 0,
+  });
+}
+
+/** The tab mounts only when opened, so the report is read only then. */
+export function useEstimateVsActual(orderId: number | null) {
+  return useQuery({
+    queryKey: materialQueryKeys.estimateVsActual(orderId ?? 0),
+    queryFn: () => getEstimateVsActual(orderId as number),
     enabled: orderId !== null && orderId > 0,
   });
 }

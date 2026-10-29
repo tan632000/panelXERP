@@ -84,3 +84,43 @@ export interface MaterialOrderListParams {
   search?: string;
   status?: OrderStatus;
 }
+
+/**
+ * One item of an order, estimated against actual. The cost keys are present only for an actor
+ * holding `purchase_price:read`; the API drops them for everyone else.
+ */
+export interface EstimateVsActualRow {
+  itemId: number;
+  itemCode: string;
+  itemName: string;
+  itemUnit: string;
+  estimatedQty: number;
+  actualQty: number;
+  qtyVariance: number;
+  estimatedCost?: number;
+  actualCost?: number;
+  costVariance?: number;
+}
+
+export interface EstimateVsActualReport {
+  order: MaterialOrderHeader;
+  items: EstimateVsActualRow[];
+  overBomIssues: Array<{
+    issueCode: string;
+    issuedAt: string;
+    itemId: number;
+    itemCode: string;
+    itemName: string;
+    quantity: number;
+    reason: string;
+    panelTag: string | null;
+  }>;
+  unlinked: Array<{
+    bomLineId: number;
+    panelTag: string;
+    itemCode: string;
+    itemName: string;
+    perPanelQuantity: number;
+  }>;
+  totals?: { estimatedCost: number; actualCost: number; costVariance: number };
+}

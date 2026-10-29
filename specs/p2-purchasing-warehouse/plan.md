@@ -109,7 +109,7 @@ Strictly sequential (shared registration files, one writer each, as P1 R-08).
 | 13 | Supplier return | P2 | AC-02, AC-08, AC-19, AC-26 | `*/src/plugins/inventory/supplier-return` | 12 | done |
 | 14 | Stock count + approval | P2 | AC-02, AC-04, AC-08, AC-20 | `*/src/plugins/inventory/stocktake` | 13 | done |
 | 15 | Purchase requests | P2 | AC-03, AC-04, AC-21 | `*/src/plugins/inventory/purchase-request` | 14 | done |
-| 16 | Estimate-vs-actual | P2 | AC-02, AC-23 | `inventory/material` report | 15 | pending |
+| 16 | Estimate-vs-actual | P2 | AC-02, AC-23 | `inventory/material` report | 15 | done |
 | 17 | Chain e2e | P1 | AC-02, AC-24 | `backend/test/inventory-chain.e2e-spec.ts` | 16 | pending |
 
 Shared registration files (owned by the running task only): the P1 list in `specs/p1-foundation-sales-chain/plan.md` (Tasks section) plus `backend/src/kernel/core/database/seeds/seed-roles.panel.spec.ts` (PENDING lists) and `backend/src/kernel/core/database/soft-delete-unique-index.spec.ts` (`DOCUMENT_NUMBER_INDEXES`). Every feature task removes its modules from the PENDING lists, adds vi/en permission labels and notification event labels (`frontend/src/kernel/core/hooks/api/useNotifications.ts`), and ends by regenerating `backend/docs/api/openapi.json` (`npm run generate:api-docs` in the backend container) and `frontend/src/kernel/core/api/generated/api.ts` (`npm run generate:api` from host `frontend/`: the frontend container has no `../backend` mount, `compose.yml:138-142`) before its Verification Command.
