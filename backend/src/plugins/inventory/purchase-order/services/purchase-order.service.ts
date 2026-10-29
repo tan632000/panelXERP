@@ -294,8 +294,9 @@ export class PurchaseOrderService {
         ? await this.requestLinkedLines(manager, id)
         : [];
       if (dto.lines && linked.length > 0) {
-        totals = await this.repriceLinkedLines(
+        totals = await this.editRequestOrderLines(
           manager,
+          id,
           order.code,
           linked,
           dto.lines,
@@ -352,57 +353,71 @@ export class PurchaseOrderService {
   }
 
   /**
-   * The lines of an order made from purchase requests, when it has any. Those lines carry the
-   * request line and the sales order they were bought for (D-11, D-05): replacing them would
-   * drop both, so the request would show the goods as never ordered and the receipt would no
-   * longer go to the order first.
+   * The request lines of an order made from purchase requests, in line order. Those lines carry
+   * the request line and the sales order they were bought for (D-11, D-05): replacing them
+   * would drop both, so the request would show the goods as never ordered and the receipt
+   * would no longer go to the order first. They are made first, so they lead the order.
    */
   private async requestLinkedLines(
     manager: EntityManager,
     orderId: number,
   ): Promise<Array<{ id: number; item_id: number; quantity: string }>> {
-    const lines: Array<{
-      id: number;
-      item_id: number;
-      quantity: string;
-      pr_line_id: number | null;
-    }> = await manager.query(
-      `SELECT id, item_id, quantity::text AS quantity, pr_line_id
-         FROM purchase_order_lines WHERE purchase_order_id = $1
+    return manager.query(
+      `SELECT id, item_id, quantity::text AS quantity
+         FROM purchase_order_lines
+        WHERE purchase_order_id = $1 AND pr_line_id IS NOT NULL
         ORDER BY line_no, id`,
       [orderId],
     );
-    return lines.some((line) => line.pr_line_id !== null) ? lines : [];
   }
 
   /**
-   * On an order made from requests only the prices change: the same items in the same
-   * quantities, line for line, are repriced in place and keep their links (409 otherwise).
+   * On an order made from requests the request lines stay what was requested: the edit starts
+   * with the same items in the same quantities, line for line, and those are repriced in place
+   * so they keep their links (409 otherwise). The lines after them are the order's own, bought
+   * for no order, and replace its own lines as on any draft.
    */
-  private async repriceLinkedLines(
+  private async editRequestOrderLines(
     manager: EntityManager,
+    orderId: number,
     code: string,
-    stored: ReadonlyArray<{ id: number; item_id: number; quantity: string }>,
+    linked: ReadonlyArray<{ id: number; item_id: number; quantity: string }>,
     lines: readonly PurchaseOrderLineDto[],
     vatRate: number,
   ): Promise<PurchaseOrderTotals> {
-    const same =
-      lines.length === stored.length &&
-      lines.every(
-        (line, index) =>
-          line.itemId === Number(stored[index].item_id) &&
-          new Decimal(String(line.quantity)).equals(stored[index].quantity),
+    const kept =
+      lines.length >= linked.length &&
+      linked.every(
+        (stored, index) =>
+          lines[index].itemId === Number(stored.item_id) &&
+          new Decimal(String(lines[index].quantity)).equals(stored.quantity),
       );
-    if (!same) {
+    if (!kept) {
       throw new ConflictException(
-        `${PURCHASE_ORDER_LABEL} ${code} was made from purchase requests: only its prices can change.`,
+        `${PURCHASE_ORDER_LABEL} ${code} was made from purchase requests: its request lines keep their items and quantities, only their prices can change.`,
       );
     }
     const totals = priceOrder(lines, vatRate);
-    for (const [index, line] of lines.entries()) {
+    for (const [index, stored] of linked.entries()) {
       await manager.query(
         `UPDATE purchase_order_lines SET unit_price = $2, amount = $3 WHERE id = $1`,
-        [stored[index].id, String(line.unitPrice), totals.lineAmounts[index]],
+        [stored.id, String(lines[index].unitPrice), totals.lineAmounts[index]],
+      );
+    }
+    await manager.query(
+      `DELETE FROM purchase_order_lines WHERE purchase_order_id = $1 AND pr_line_id IS NULL`,
+      [orderId],
+    );
+    const own = lines.slice(linked.length);
+    if (own.length > 0) {
+      const items = await this.lockActiveItems(manager, own);
+      await this.insertLines(
+        manager,
+        orderId,
+        own,
+        items,
+        totals,
+        linked.length,
       );
     }
     return totals;
@@ -463,8 +478,11 @@ export class PurchaseOrderService {
     lines: readonly PurchaseOrderLineDto[],
     items: Map<number, LockedItem>,
     totals: { lineAmounts: string[] },
+    /** Lines the order keeps ahead of these, so numbering and amounts continue after them. */
+    offset = 0,
   ): Promise<void> {
-    for (const [index, line] of lines.entries()) {
+    for (const [own, line] of lines.entries()) {
+      const index = offset + own;
       const item = items.get(line.itemId) as LockedItem;
       await manager.query(
         `INSERT INTO purchase_order_lines

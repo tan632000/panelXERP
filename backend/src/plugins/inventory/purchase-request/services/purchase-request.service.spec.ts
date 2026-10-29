@@ -115,31 +115,67 @@ describeWithDatabase('PurchaseRequestService (real Postgres)', () => {
       lines: [expect.objectContaining({ ordered: 6, remaining: 4 })],
     });
 
-    // Repricing the draft keeps its link to PR1 and O3; changing what it orders is refused.
+    // Repricing the draft keeps its link to PR1 and O3, and a line of its own can follow;
+    // changing what the request line orders, or dropping it, is refused.
+    await h
+      .patch(h.PURCHASING, `/inventory/purchase-orders/${poA.id}`, {
+        lines: [
+          { itemId: x, quantity: 6, unitPrice: 11500 },
+          { itemId: x, quantity: 1, unitPrice: 11000 },
+        ],
+      })
+      .expect(200);
+    for (const lines of [
+      [{ itemId: x, quantity: 7, unitPrice: 11500 }],
+      [{ itemId: x, quantity: 1, unitPrice: 11000 }],
+      [
+        { itemId: x, quantity: 1, unitPrice: 11000 },
+        { itemId: x, quantity: 6, unitPrice: 11500 },
+      ],
+    ]) {
+      await h
+        .patch(h.PURCHASING, `/inventory/purchase-orders/${poA.id}`, { lines })
+        .expect(409);
+    }
+    const repriced: Array<{
+      line_no: number;
+      source_order_id: number | null;
+      pr_line_id: number | null;
+      quantity: string;
+      unit_price: string;
+    }> = await h.db.dataSource.query(
+      `SELECT line_no, source_order_id, pr_line_id, trim_scale(quantity)::text AS quantity,
+              trim_scale(unit_price)::text AS unit_price
+           FROM purchase_order_lines WHERE purchase_order_id = $1 ORDER BY line_no`,
+      [poA.id],
+    );
+    expect(repriced).toEqual([
+      {
+        line_no: 1,
+        source_order_id: o3,
+        pr_line_id: line.id,
+        quantity: '6',
+        unit_price: '11500',
+      },
+      {
+        line_no: 2,
+        source_order_id: null,
+        pr_line_id: null,
+        quantity: '1',
+        unit_price: '11000',
+      },
+    ]);
+    // Its own line is replaced like on any draft: back to the request line alone.
     await h
       .patch(h.PURCHASING, `/inventory/purchase-orders/${poA.id}`, {
         lines: [{ itemId: x, quantity: 6, unitPrice: 11500 }],
       })
       .expect(200);
-    await h
-      .patch(h.PURCHASING, `/inventory/purchase-orders/${poA.id}`, {
-        lines: [{ itemId: x, quantity: 7, unitPrice: 11500 }],
-      })
-      .expect(409);
-    const [repriced]: Array<{
-      source_order_id: number;
-      pr_line_id: number;
-      unit_price: string;
-    }> = await h.db.dataSource.query(
-      `SELECT source_order_id, pr_line_id, trim_scale(unit_price)::text AS unit_price
-           FROM purchase_order_lines WHERE purchase_order_id = $1`,
+    const [{ count }]: Array<{ count: number }> = await h.db.dataSource.query(
+      `SELECT COUNT(*)::int AS count FROM purchase_order_lines WHERE purchase_order_id = $1`,
       [poA.id],
     );
-    expect(repriced).toEqual({
-      source_order_id: o3,
-      pr_line_id: line.id,
-      unit_price: '11500',
-    });
+    expect(count).toBe(1);
     expect((await requestState(pr1.id)).lines[0]).toMatchObject({
       ordered: 6,
       remaining: 4,
