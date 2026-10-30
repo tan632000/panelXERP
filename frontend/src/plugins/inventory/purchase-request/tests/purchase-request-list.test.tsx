@@ -119,7 +119,10 @@ beforeEach(() => {
   apiGet.mockImplementation((url: string) => {
     if (url === "/inventory/purchase-requests") {
       return Promise.resolve({
-        data: { data: REQUESTS, meta: { total: 2, page: 1, limit: 20, totalPages: 1 } },
+        data: {
+          data: REQUESTS,
+          meta: { total: 2, page: 1, limit: 20, totalPages: 1 },
+        },
       });
     }
     if (url === "/inventory/suppliers") {
@@ -157,7 +160,9 @@ function renderPage() {
 }
 
 const selectLabel = (code: string, request: string) =>
-  viPurchaseRequest.selectLine.replace("{code}", code).replace("{request}", request);
+  viPurchaseRequest.selectLine
+    .replace("{code}", code)
+    .replace("{request}", request);
 
 describe("PurchaseRequestListPage", () => {
   it("shows what each line has remaining and offers only open lines to order", async () => {
@@ -188,7 +193,9 @@ describe("PurchaseRequestListPage", () => {
     fireEvent.click(screen.getByLabelText(selectLabel("VT-X", "PR_2026_0001")));
     count = 1;
     await waitFor(() =>
-      expect(screen.getByRole("option", { name: "NCC-01 — Công ty Điện Nam" })).toBeInTheDocument(),
+      expect(
+        screen.getByRole("option", { name: "NCC-01 — Công ty Điện Nam" }),
+      ).toBeInTheDocument(),
     );
     // No supplier yet.
     expect(submit()).toBeDisabled();
@@ -198,24 +205,79 @@ describe("PurchaseRequestListPage", () => {
     fireEvent.click(submit());
 
     await waitFor(() =>
-      expect(apiPost).toHaveBeenCalledWith("/inventory/purchase-orders/from-requests", {
-        supplierId: 7,
-        lines: [{ prLineId: 11, quantity: 4 }],
-      }),
+      expect(apiPost).toHaveBeenCalledWith(
+        "/inventory/purchase-orders/from-requests",
+        {
+          supplierId: 7,
+          lines: [{ prLineId: 11, quantity: 4 }],
+        },
+      ),
     );
     await waitFor(() =>
       expect(push).toHaveBeenCalledWith("/inventory/purchase-orders/40"),
     );
   });
 
+  it("drops a scanned line before the request is raised", async () => {
+    const base = apiGet.getMockImplementation();
+    apiGet.mockImplementation((url: string, config?: unknown) =>
+      url === "/items/resolve"
+        ? Promise.resolve({
+            data: { id: 103, code: "VT-Z", name: "Thanh cái đồng", unit: "m" },
+          })
+        : base?.(url, config),
+    );
+    renderPage();
+    await screen.findByText("DH_2026_0003");
+
+    const scan = screen.getByPlaceholderText(
+      viPurchaseRequest.scan.placeholder,
+    );
+    fireEvent.change(scan, { target: { value: "VT-Z" } });
+    fireEvent.keyDown(scan, { key: "Enter" });
+    const quantityLabel = viPurchaseRequest.create.quantityOf.replace(
+      "{code}",
+      "VT-Z",
+    );
+    expect(await screen.findByLabelText(quantityLabel)).toBeInTheDocument();
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: viPurchaseRequest.create.remove.replace("{code}", "VT-Z"),
+      }),
+    );
+    expect(screen.queryByLabelText(quantityLabel)).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: viPurchaseRequest.create.submit }),
+    ).toBeDisabled();
+  });
+
+  it("keeps the raise and order forms inside the page's padded list area", async () => {
+    renderPage();
+    await screen.findByText("DH_2026_0003");
+
+    // Outside that area the forms sat flush against the sidebar with no gutter.
+    for (const title of [
+      viPurchaseRequest.create.title,
+      viPurchaseRequest.order.title,
+    ]) {
+      expect(screen.getByText(title).closest(".px-5")).not.toBeNull();
+    }
+  });
+
   it("hides ordering from a reader who cannot create purchase orders", async () => {
-    granted.value = new Set(["purchase_request:read", "purchase_request:create"]);
+    granted.value = new Set([
+      "purchase_request:read",
+      "purchase_request:create",
+    ]);
     renderPage();
 
     await screen.findByText("DH_2026_0003");
     expect(
       screen.queryByLabelText(selectLabel("VT-X", "PR_2026_0001")),
     ).not.toBeInTheDocument();
-    expect(screen.queryByText(viPurchaseRequest.order.title)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(viPurchaseRequest.order.title),
+    ).not.toBeInTheDocument();
   });
 });

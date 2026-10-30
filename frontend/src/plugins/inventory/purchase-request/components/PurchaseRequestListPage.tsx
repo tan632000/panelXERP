@@ -8,6 +8,7 @@ import { Button } from "@/kernel/core/components/ui/Button";
 import { CancelReasonModal } from "@/kernel/core/components/ui/CancelReasonModal";
 import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
 import { EmptyState } from "@/kernel/core/components/ui/EmptyState";
+import { Icon } from "@/kernel/core/components/ui/Icon";
 import { ListPageLayout } from "@/kernel/core/components/ui/ListPageLayout";
 import { ListQueryBody } from "@/kernel/core/components/ui/ListQueryBody";
 import { NumberInput } from "@/kernel/core/components/ui/NumberInput";
@@ -106,7 +107,9 @@ export function PurchaseRequestListPage() {
   );
   const orderable = (line: ListedLine) =>
     line.status === "open" && line.remaining > 0;
-  const picked = lines.filter((line) => selected.has(line.id) && orderable(line));
+  const picked = lines.filter(
+    (line) => selected.has(line.id) && orderable(line),
+  );
   const { totalItems, totalPages, startIndex, endIndex } =
     computePaginationMeta({
       page: currentPage,
@@ -135,7 +138,10 @@ export function PurchaseRequestListPage() {
               orderable(row) ? (
                 <input
                   type="checkbox"
-                  aria-label={t("selectLine", { code: row.itemCode, request: row.requestCode })}
+                  aria-label={t("selectLine", {
+                    code: row.itemCode,
+                    request: row.requestCode,
+                  })}
                   checked={selected.has(row.id)}
                   onChange={() => toggle(row.id)}
                 />
@@ -193,7 +199,9 @@ export function PurchaseRequestListPage() {
             ...PLAIN,
             header: "",
             render: (_, row) => {
-              const request = requests.find((entry) => entry.id === row.requestId);
+              const request = requests.find(
+                (entry) => entry.id === row.requestId,
+              );
               const first = request?.lines[0]?.id === row.id;
               const untouched =
                 request?.status === "open" &&
@@ -217,123 +225,146 @@ export function PurchaseRequestListPage() {
     <>
       <PageHeader title={t("title")} description={t("description")} />
 
-      {canCreate ? (
-        <DetailSection title={t("create.title")}>
-          <div className="flex flex-col gap-3">
-            <ScanInput
-              resolve={resolveItem}
-              onResult={(item) =>
-                setDraft((current) =>
-                  current.some((line) => line.itemId === item.id)
-                    ? current
-                    : [
-                        ...current,
-                        {
-                          itemId: item.id,
-                          code: item.code,
-                          name: item.name,
-                          quantity: "1",
-                        },
-                      ],
-                )
-              }
-              errorMessage={(error) =>
-                isNotFoundError(error) ? t("scan.notFound") : t("scan.failed")
-              }
-              placeholder={t("scan.placeholder")}
-              disabled={create.isPending}
-            />
-            {draft.map((line) => (
-              <div key={line.itemId} className="flex items-center gap-3 text-sm">
-                <span className="font-mono">{line.code}</span>
-                <span className="min-w-[160px]">{line.name}</span>
-                <NumberInput
-                  aria-label={t("create.quantityOf", { code: line.code })}
-                  decimalScale={PURCHASE_REQUEST_QUANTITY_DECIMALS}
-                  value={line.quantity}
-                  onChange={(event) =>
-                    setDraft((current) =>
-                      current.map((entry) =>
-                        entry.itemId === line.itemId
-                          ? { ...entry, quantity: event.target.value }
-                          : entry,
-                      ),
+      {/* The forms sit inside the list layout, above its body: that gives them the page gutter,
+          and they stay put while only the table scrolls. */}
+      <ListPageLayout>
+        {canCreate ? (
+          <DetailSection title={t("create.title")}>
+            <div className="flex flex-col gap-3">
+              <ScanInput
+                resolve={resolveItem}
+                onResult={(item) =>
+                  setDraft((current) =>
+                    current.some((line) => line.itemId === item.id)
+                      ? current
+                      : [
+                          ...current,
+                          {
+                            itemId: item.id,
+                            code: item.code,
+                            name: item.name,
+                            quantity: "1",
+                          },
+                        ],
+                  )
+                }
+                errorMessage={(error) =>
+                  isNotFoundError(error) ? t("scan.notFound") : t("scan.failed")
+                }
+                placeholder={t("scan.placeholder")}
+                disabled={create.isPending}
+              />
+              {draft.map((line) => (
+                <div
+                  key={line.itemId}
+                  className="flex items-center gap-3 text-sm"
+                >
+                  <span className="font-mono">{line.code}</span>
+                  <span className="min-w-[160px]">{line.name}</span>
+                  {/* `cn` only joins classes, so a width on the input loses to its own `w-full`. */}
+                  <div className="w-32 shrink-0">
+                    <NumberInput
+                      aria-label={t("create.quantityOf", { code: line.code })}
+                      className="text-right"
+                      decimalScale={PURCHASE_REQUEST_QUANTITY_DECIMALS}
+                      value={line.quantity}
+                      onChange={(event) =>
+                        setDraft((current) =>
+                          current.map((entry) =>
+                            entry.itemId === line.itemId
+                              ? { ...entry, quantity: event.target.value }
+                              : entry,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="cursor-pointer text-danger-text"
+                    aria-label={t("create.remove", { code: line.code })}
+                    onClick={() =>
+                      setDraft((current) =>
+                        current.filter((entry) => entry.itemId !== line.itemId),
+                      )
+                    }
+                  >
+                    <Icon name="trash" size={16} />
+                  </button>
+                </div>
+              ))}
+              <div>
+                <Button
+                  type="button"
+                  disabled={
+                    create.isPending ||
+                    draft.length === 0 ||
+                    draft.some((line) => !(Number(line.quantity) > 0))
+                  }
+                  onClick={() =>
+                    create.mutate(
+                      {
+                        lines: draft.map((line) => ({
+                          itemId: line.itemId,
+                          quantity: Number(line.quantity),
+                        })),
+                      },
+                      { onSuccess: () => setDraft([]) },
                     )
                   }
-                />
+                >
+                  {t("create.submit")}
+                </Button>
               </div>
-            ))}
-            <div>
+            </div>
+          </DetailSection>
+        ) : null}
+
+        {canOrder ? (
+          <DetailSection title={t("order.title")}>
+            <div className="flex flex-wrap items-center gap-3">
+              <select
+                aria-label={t("order.supplier")}
+                className="h-9 rounded-[7px] border border-border-secondary bg-surface-primary px-2 text-sm"
+                value={supplierId}
+                onChange={(event) => setSupplierId(event.target.value)}
+              >
+                <option value="">{t("order.pickSupplier")}</option>
+                {(suppliers.data ?? []).map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>
+                    {`${supplier.code} — ${supplier.name}`}
+                  </option>
+                ))}
+              </select>
               <Button
                 type="button"
                 disabled={
-                  create.isPending ||
-                  draft.length === 0 ||
-                  draft.some((line) => !(Number(line.quantity) > 0))
+                  order.isPending || picked.length === 0 || supplierId === ""
                 }
                 onClick={() =>
-                  create.mutate(
+                  order.mutate(
                     {
-                      lines: draft.map((line) => ({
-                        itemId: line.itemId,
-                        quantity: Number(line.quantity),
+                      supplierId: Number(supplierId),
+                      lines: picked.map((line) => ({
+                        prLineId: line.id,
+                        quantity: line.remaining,
                       })),
                     },
-                    { onSuccess: () => setDraft([]) },
+                    {
+                      onSuccess: (created) => {
+                        setSelected(new Set());
+                        router.push(purchaseOrderPageRoutes.detail(created.id));
+                      },
+                    },
                   )
                 }
               >
-                {t("create.submit")}
+                {t("order.submit", { count: picked.length })}
               </Button>
             </div>
-          </div>
-        </DetailSection>
-      ) : null}
+          </DetailSection>
+        ) : null}
 
-      {canOrder ? (
-        <DetailSection title={t("order.title")}>
-          <div className="flex flex-wrap items-center gap-3">
-            <select
-              aria-label={t("order.supplier")}
-              className="h-9 rounded-[7px] border border-border-secondary bg-surface-primary px-2 text-sm"
-              value={supplierId}
-              onChange={(event) => setSupplierId(event.target.value)}
-            >
-              <option value="">{t("order.pickSupplier")}</option>
-              {(suppliers.data ?? []).map((supplier) => (
-                <option key={supplier.id} value={supplier.id}>
-                  {`${supplier.code} — ${supplier.name}`}
-                </option>
-              ))}
-            </select>
-            <Button
-              type="button"
-              disabled={order.isPending || picked.length === 0 || supplierId === ""}
-              onClick={() =>
-                order.mutate(
-                  {
-                    supplierId: Number(supplierId),
-                    lines: picked.map((line) => ({
-                      prLineId: line.id,
-                      quantity: line.remaining,
-                    })),
-                  },
-                  {
-                    onSuccess: (created) => {
-                      setSelected(new Set());
-                      router.push(purchaseOrderPageRoutes.detail(created.id));
-                    },
-                  },
-                )
-              }
-            >
-              {t("order.submit", { count: picked.length })}
-            </Button>
-          </div>
-        </DetailSection>
-      ) : null}
-
-      <ListPageLayout>
         <ListQueryBody
           isLoading={isLoading}
           isEmpty={lines.length === 0}
@@ -353,7 +384,11 @@ export function PurchaseRequestListPage() {
             itemLabel: t("paginationItem"),
           }}
         >
-          <Table columns={columns} data={lines} rowKey={(row) => String(row.id)} />
+          <Table
+            columns={columns}
+            data={lines}
+            rowKey={(row) => String(row.id)}
+          />
         </ListQueryBody>
       </ListPageLayout>
 

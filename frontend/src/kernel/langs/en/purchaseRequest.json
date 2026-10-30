@@ -26,7 +26,8 @@
   "create": {
     "title": "Raise a purchase request",
     "quantityOf": "Quantity of {code}",
-    "submit": "Raise request"
+    "submit": "Raise request",
+    "remove": "Remove {code}"
   },
   "order": {
     "title": "Order the selected lines",

@@ -129,64 +129,65 @@ export function StocktakeListPage() {
     <>
       <PageHeader title={t("title")} description={t("description")} />
 
-      {canCreate ? (
-        <DetailSection title={t("create.title")}>
-          <div className="flex flex-wrap items-end gap-3">
-            <div role="group" aria-label={t("scope")} className="flex gap-2">
-              {(["all", "location"] as const).map((value) => (
-                <button
-                  key={value}
-                  type="button"
-                  aria-pressed={scope === value}
-                  className={cn(
-                    "rounded-md border px-3 py-1.5 text-sm",
-                    scope === value
-                      ? "border-brand bg-brand text-white"
-                      : "border-border-secondary text-text-primary",
-                  )}
-                  onClick={() => setScope(value)}
-                >
-                  {value === "all" ? t("scopeAll") : t("create.oneLocation")}
-                </button>
-              ))}
-            </div>
-            {scope === "location" ? (
-              <select
-                aria-label={t("create.location")}
-                className="h-9 rounded-[7px] border border-border-secondary bg-surface-primary px-2 text-sm"
-                value={locationId}
-                onChange={(event) => setLocationId(event.target.value)}
-              >
-                <option value="">{t("create.pickLocation")}</option>
-                {(locations.data ?? []).map((location) => (
-                  <option key={location.id} value={location.id}>
-                    {`${location.code} — ${location.name}`}
-                  </option>
-                ))}
-              </select>
-            ) : null}
-            <Button
-              type="button"
-              disabled={startBlocked}
-              onClick={() =>
-                create.mutate(
-                  scope === "all"
-                    ? { scope }
-                    : { scope, locationId: Number(locationId) },
-                  {
-                    onSuccess: (detail) =>
-                      router.push(stocktakePageRoutes.detail(detail.id)),
-                  },
-                )
-              }
-            >
-              {t("create.submit")}
-            </Button>
-          </div>
-        </DetailSection>
-      ) : null}
-
+      {/* Inside the list layout, above its body: the page gutter applies and only the table scrolls. */}
       <ListPageLayout>
+        {canCreate ? (
+          <DetailSection title={t("create.title")}>
+            <div className="flex flex-wrap items-end gap-3">
+              <div role="group" aria-label={t("scope")} className="flex gap-2">
+                {(["all", "location"] as const).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={scope === value}
+                    className={cn(
+                      "rounded-md border px-3 py-1.5 text-sm",
+                      scope === value
+                        ? "border-brand bg-brand text-white"
+                        : "border-border-secondary text-text-primary",
+                    )}
+                    onClick={() => setScope(value)}
+                  >
+                    {value === "all" ? t("scopeAll") : t("create.oneLocation")}
+                  </button>
+                ))}
+              </div>
+              {scope === "location" ? (
+                <select
+                  aria-label={t("create.location")}
+                  className="h-9 rounded-[7px] border border-border-secondary bg-surface-primary px-2 text-sm"
+                  value={locationId}
+                  onChange={(event) => setLocationId(event.target.value)}
+                >
+                  <option value="">{t("create.pickLocation")}</option>
+                  {(locations.data ?? []).map((location) => (
+                    <option key={location.id} value={location.id}>
+                      {`${location.code} — ${location.name}`}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
+              <Button
+                type="button"
+                disabled={startBlocked}
+                onClick={() =>
+                  create.mutate(
+                    scope === "all"
+                      ? { scope }
+                      : { scope, locationId: Number(locationId) },
+                    {
+                      onSuccess: (detail) =>
+                        router.push(stocktakePageRoutes.detail(detail.id)),
+                    },
+                  )
+                }
+              >
+                {t("create.submit")}
+              </Button>
+            </div>
+          </DetailSection>
+        ) : null}
+
         <ListToolbar>
           <SearchInput
             placeholder={t("searchPlaceholder")}
@@ -223,7 +224,9 @@ export function StocktakeListPage() {
               columns={columns}
               data={items}
               rowKey={(row) => String(row.id)}
-              onRowClick={(row) => router.push(stocktakePageRoutes.detail(row.id))}
+              onRowClick={(row) =>
+                router.push(stocktakePageRoutes.detail(row.id))
+              }
             />
           </ListQueryBody>
         </TableMobileCards>

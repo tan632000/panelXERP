@@ -26,7 +26,8 @@
   "create": {
     "title": "Lập đề nghị mua",
     "quantityOf": "Số lượng của {code}",
-    "submit": "Lập đề nghị"
+    "submit": "Lập đề nghị",
+    "remove": "Bỏ dòng {code}"
   },
   "order": {
     "title": "Tạo PO từ các dòng đã chọn",
