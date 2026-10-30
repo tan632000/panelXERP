@@ -61,6 +61,19 @@ describe("app sidebar", () => {
     }
   });
 
+  // A page with no link of its own still tells the reader which module they are in.
+  it("lights a visible entry of its section on every page that has no link of its own", () => {
+    for (const section of appNavigationSections) {
+      const visible = section.items.filter((item) => !item.hidden);
+      for (const page of section.items.filter((item) => item.hidden)) {
+        expect(
+          visible.filter((item) => item.activeMatch?.includes(page.href)),
+          `${page.href} lights nothing in ${section.title}`,
+        ).toHaveLength(1);
+      }
+    }
+  });
+
   /**
    * Both locales ship the same set of bundles. A bundle present on one side only means
    * a screen renders in one language and falls back to its key in the other.

@@ -13,6 +13,8 @@ export const purchaseOrderFeature: ErpFrontendFeature = {
       icon: "file-invoice",
       label: "purchaseOrders",
       permissions: [PURCHASE_ORDER_READ, "purchase_order:*"],
+      // A return to the supplier is opened from its purchase order.
+      activeMatch: ["/inventory/supplier-returns"],
     },
   ],
 };
