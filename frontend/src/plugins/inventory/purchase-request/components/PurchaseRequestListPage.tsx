@@ -261,24 +261,21 @@ export function PurchaseRequestListPage() {
                 >
                   <span className="font-mono">{line.code}</span>
                   <span className="min-w-[160px]">{line.name}</span>
-                  {/* `cn` only joins classes, so a width on the input loses to its own `w-full`. */}
-                  <div className="w-32 shrink-0">
-                    <NumberInput
-                      aria-label={t("create.quantityOf", { code: line.code })}
-                      className="text-right"
-                      decimalScale={PURCHASE_REQUEST_QUANTITY_DECIMALS}
-                      value={line.quantity}
-                      onChange={(event) =>
-                        setDraft((current) =>
-                          current.map((entry) =>
-                            entry.itemId === line.itemId
-                              ? { ...entry, quantity: event.target.value }
-                              : entry,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
+                  <NumberInput
+                    aria-label={t("create.quantityOf", { code: line.code })}
+                    className="w-32 shrink-0 text-right"
+                    decimalScale={PURCHASE_REQUEST_QUANTITY_DECIMALS}
+                    value={line.quantity}
+                    onChange={(event) =>
+                      setDraft((current) =>
+                        current.map((entry) =>
+                          entry.itemId === line.itemId
+                            ? { ...entry, quantity: event.target.value }
+                            : entry,
+                        ),
+                      )
+                    }
+                  />
                   <button
                     type="button"
                     className="cursor-pointer text-danger-text"

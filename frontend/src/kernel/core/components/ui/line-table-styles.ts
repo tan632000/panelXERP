@@ -65,9 +65,6 @@ export const LINE_TABLE_SCROLL_CLASS =
  * the label exactly as it pads the control, so a label starts where its input starts, like a
  * form label above its field. A label wraps rather than spill into its neighbour under
  * `table-fixed`.
- *
- * `cn` only joins classes, so each alignment is its own constant rather than an override
- * appended to a left-aligned base.
  */
 const LINE_HEADER_CELL_BASE_CLASS = `border-b border-border-secondary bg-surface-secondary px-1.5 py-2 whitespace-normal ${LINE_TABLE_HEADER_LABEL_CLASS}`;
 
@@ -98,9 +95,7 @@ export const LINE_INPUT_READONLY_CLASS = `${LINE_READONLY_BOX_CLASS} cursor-not-
 /**
  * The read-only box for a figure that carries its own tone — stock in red, a total in green.
  *
- * `cn` only joins classes, so a tone appended to `LINE_INPUT_READONLY_CLASS` would compete with
- * its grey and lose to stylesheet order; this variant has no text colour, and the caller adds
- * one.
+ * It has no text colour; the caller adds one.
  */
 export const LINE_INPUT_READONLY_TONE_CLASS = `${LINE_READONLY_BOX_CLASS} cursor-not-allowed`;
 

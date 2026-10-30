@@ -102,7 +102,6 @@ export function Modal({
       <div
         className={cn(
           "flex max-h-[92vh] max-w-[96vw] flex-col rounded-xl border border-border-secondary bg-surface-primary shadow-[0_20px_60px_rgba(0,0,0,0.15)]",
-          // `cn` only joins classes, so exactly one width class may be emitted.
           widthClassName ?? presetWidthClass(wide, extraWide),
           // A phone gets the whole screen: a dialog sized for a desktop either overflows it or
           // leaves a strip too narrow to type in. `!` beats whatever width the caller asked for.
