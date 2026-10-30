@@ -52,7 +52,9 @@ const quantityText = (value: number | null, empty: string) =>
     empty
   ) : (
     <span className="tabular-nums">
-      {formatNumber(value, { maximumFractionDigits: STOCKTAKE_QUANTITY_DECIMALS })}
+      {formatNumber(value, {
+        maximumFractionDigits: STOCKTAKE_QUANTITY_DECIMALS,
+      })}
     </span>
   );
 
@@ -104,6 +106,12 @@ export function StocktakeDetailPage() {
   const involved = user ? count.involvedUserIds.includes(user.id) : false;
   const mayDecide =
     count.status === "submitted" && can(StocktakePermission.approve);
+  const canSubmit = counting && can(StocktakePermission.submit);
+  const canCancel =
+    (counting || count.status === "submitted") &&
+    can(StocktakePermission.cancel);
+  // An approved or cancelled count, or a reader allowed none of these, has nothing to show here.
+  const hasActions = canSubmit || mayDecide || canCancel;
   const busy = [setCount, submit, approve, reject, cancel].some(
     (mutation) => mutation.isPending,
   );
@@ -178,9 +186,7 @@ export function StocktakeDetailPage() {
         ) : (
           <span
             className={
-              row.diff < 0
-                ? "text-danger-text tabular-nums"
-                : "tabular-nums"
+              row.diff < 0 ? "text-danger-text tabular-nums" : "tabular-nums"
             }
           >
             {row.diff > 0 ? "+" : ""}
@@ -249,52 +255,55 @@ export function StocktakeDetailPage() {
         </DetailFieldGrid>
       </DetailSection>
 
-      <DetailSection title={t("actions.title")}>
-        <div className="flex flex-col gap-3">
-          {mayDecide && involved ? (
-            <p className="text-sm text-text-secondary">{t("involvedCannotDecide")}</p>
-          ) : null}
-          <div className="flex flex-wrap items-center gap-2">
-            {counting && can(StocktakePermission.submit) ? (
-              <DetailPanelActionButton
-                variant="primary"
-                icon="check"
-                label={t("actions.submit")}
-                disabled={busy}
-                onClick={() => setDialog("submit")}
-              />
+      {hasActions ? (
+        <DetailSection title={t("actions.title")}>
+          <div className="flex flex-col gap-3">
+            {mayDecide && involved ? (
+              <p className="text-sm text-text-secondary">
+                {t("involvedCannotDecide")}
+              </p>
             ) : null}
-            {mayDecide && !involved ? (
-              <>
+            <div className="flex flex-wrap items-center gap-2">
+              {canSubmit ? (
                 <DetailPanelActionButton
                   variant="primary"
-                  icon="circle-check"
-                  label={t("actions.approve")}
+                  icon="check"
+                  label={t("actions.submit")}
                   disabled={busy}
-                  onClick={() => setDialog("approve")}
+                  onClick={() => setDialog("submit")}
                 />
+              ) : null}
+              {mayDecide && !involved ? (
+                <>
+                  <DetailPanelActionButton
+                    variant="primary"
+                    icon="circle-check"
+                    label={t("actions.approve")}
+                    disabled={busy}
+                    onClick={() => setDialog("approve")}
+                  />
+                  <DetailPanelActionButton
+                    variant="danger"
+                    icon="circle-x"
+                    label={t("actions.reject")}
+                    disabled={busy}
+                    onClick={() => setDialog("reject")}
+                  />
+                </>
+              ) : null}
+              {canCancel ? (
                 <DetailPanelActionButton
                   variant="danger"
-                  icon="circle-x"
-                  label={t("actions.reject")}
+                  icon="ban"
+                  label={t("actions.cancel")}
                   disabled={busy}
-                  onClick={() => setDialog("reject")}
+                  onClick={() => setDialog("cancel")}
                 />
-              </>
-            ) : null}
-            {(counting || count.status === "submitted") &&
-            can(StocktakePermission.cancel) ? (
-              <DetailPanelActionButton
-                variant="danger"
-                icon="ban"
-                label={t("actions.cancel")}
-                disabled={busy}
-                onClick={() => setDialog("cancel")}
-              />
-            ) : null}
+              ) : null}
+            </div>
           </div>
-        </div>
-      </DetailSection>
+        </DetailSection>
+      ) : null}
 
       {canCount ? (
         <DetailSection title={t("scanTitle")}>
@@ -350,7 +359,9 @@ export function StocktakeDetailPage() {
         submitLabel={t("actions.reject")}
         pending={reject.isPending}
         onClose={closeDialog}
-        onConfirm={(reason) => reject.mutate(reason, { onSuccess: closeDialog })}
+        onConfirm={(reason) =>
+          reject.mutate(reason, { onSuccess: closeDialog })
+        }
         {...reasonProps}
       />
       <CancelReasonModal
@@ -359,7 +370,9 @@ export function StocktakeDetailPage() {
         submitLabel={t("actions.cancel")}
         pending={cancel.isPending}
         onClose={closeDialog}
-        onConfirm={(reason) => cancel.mutate(reason, { onSuccess: closeDialog })}
+        onConfirm={(reason) =>
+          cancel.mutate(reason, { onSuccess: closeDialog })
+        }
         {...reasonProps}
       />
     </DetailPageLayout>

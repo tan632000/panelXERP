@@ -23,7 +23,9 @@ const apiGet = vi.hoisted(() => vi.fn());
 const apiPost = vi.hoisted(() => vi.fn());
 const apiPatch = vi.hoisted(() => vi.fn());
 const granted = vi.hoisted(() => ({ value: new Set<string>() }));
-const actorUser = vi.hoisted(() => ({ value: { id: 40, role: "storekeeper" } }));
+const actorUser = vi.hoisted(() => ({
+  value: { id: 40, role: "storekeeper" },
+}));
 
 vi.mock("@/kernel/core/api/api", () => ({
   default: { get: apiGet, post: apiPost, patch: apiPatch, delete: vi.fn() },
@@ -201,7 +203,10 @@ describe("StocktakeDetailPage — counting", () => {
 
   it("keeps the focus and says so when a scanned code is unknown", async () => {
     respond(count());
-    apiPost.mockRejectedValue({ isAxiosError: true, response: { status: 404 } });
+    apiPost.mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 404 },
+    });
     renderPage();
     const field = (await screen.findByPlaceholderText(
       viStocktake.scan.placeholder,
@@ -263,7 +268,10 @@ describe("StocktakeDetailPage — approval", () => {
 
   it("offers approve and reject to a director who took no part", async () => {
     actorUser.value = { id: DIRECTOR_ID, role: "director" };
-    granted.value = new Set([StocktakePermission.read, StocktakePermission.approve]);
+    granted.value = new Set([
+      StocktakePermission.read,
+      StocktakePermission.approve,
+    ]);
     respond(submitted([STOREKEEPER_ID]));
     renderPage();
 
@@ -281,7 +289,10 @@ describe("StocktakeDetailPage — approval", () => {
 
   it("withholds the decision from a director who counted", async () => {
     actorUser.value = { id: DIRECTOR_ID, role: "director" };
-    granted.value = new Set([StocktakePermission.read, StocktakePermission.approve]);
+    granted.value = new Set([
+      StocktakePermission.read,
+      StocktakePermission.approve,
+    ]);
     respond(submitted([STOREKEEPER_ID, DIRECTOR_ID]));
     renderPage();
 
@@ -292,4 +303,19 @@ describe("StocktakeDetailPage — approval", () => {
       screen.queryByRole("button", { name: viStocktake.actions.approve }),
     ).not.toBeInTheDocument();
   });
+
+  it.each(["approved", "cancelled"] as const)(
+    "drops the empty actions heading once the count is %s",
+    async (status) => {
+      respond(count({ status }));
+      renderPage();
+
+      expect(
+        await screen.findByText(viStocktake.lines.title),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText(viStocktake.actions.title),
+      ).not.toBeInTheDocument();
+    },
+  );
 });
