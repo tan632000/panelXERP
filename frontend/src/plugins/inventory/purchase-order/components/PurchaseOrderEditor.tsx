@@ -13,7 +13,7 @@ import { Icon } from "@/kernel/core/components/ui/Icon";
 import { LINE_TABLE_SCROLL_CLASS } from "@/kernel/core/components/ui/line-table-styles";
 import { NumberInput } from "@/kernel/core/components/ui/NumberInput";
 import { RecordPickerSourceField } from "@/kernel/core/components/ui/RecordPickerSourceField";
-import { formatCurrency } from "@/kernel/core/lib/formatters";
+import { formatCurrency, formatNumber } from "@/kernel/core/lib/formatters";
 
 import {
   fetchItemPickerPage,
@@ -52,6 +52,11 @@ interface DraftLine {
   itemUnit: string;
   quantity: string;
   unitPrice: string;
+  /**
+   * Taken from a purchase request: the server refuses a save that changes its quantity or
+   * drops it, so the row offers neither.
+   */
+  fromRequest: boolean;
 }
 
 interface DraftOrder {
@@ -88,6 +93,7 @@ function fromOrder(order?: PurchaseOrderDetail): DraftOrder {
       itemUnit: line.itemUnit,
       quantity: String(line.quantity),
       unitPrice: String(line.unitPrice ?? 0),
+      fromRequest: Boolean(line.fromRequest),
     })),
   };
 }
@@ -117,6 +123,7 @@ export function PurchaseOrderEditor({
     (line) => !(Number(line.quantity) > 0) || line.unitPrice === "",
   );
   const supplierMissing = draft.supplierId === null;
+  const hasRequestLines = draft.lines.some((line) => line.fromRequest);
 
   const supplierColumns = useMemo<Array<TableColumn<Supplier>>>(
     () => [
@@ -253,19 +260,25 @@ export function PurchaseOrderEditor({
                   <td className={CELL}>{line.itemName}</td>
                   <td className={CELL}>{line.itemUnit}</td>
                   <td className={NUMBER_CELL}>
-                    <NumberInput
-                      aria-label={t("lines.quantityOf", {
-                        code: line.itemCode,
-                      })}
-                      className="w-28 text-right"
-                      value={line.quantity}
-                      decimalScale={PURCHASE_ORDER_QUANTITY_DECIMALS}
-                      allowNegative={false}
-                      error={showErrors && !(Number(line.quantity) > 0)}
-                      onChange={(event) =>
-                        patchLine(line.key, { quantity: event.target.value })
-                      }
-                    />
+                    {line.fromRequest ? (
+                      formatNumber(Number(line.quantity), {
+                        maximumFractionDigits: PURCHASE_ORDER_QUANTITY_DECIMALS,
+                      })
+                    ) : (
+                      <NumberInput
+                        aria-label={t("lines.quantityOf", {
+                          code: line.itemCode,
+                        })}
+                        className="w-28 text-right"
+                        value={line.quantity}
+                        decimalScale={PURCHASE_ORDER_QUANTITY_DECIMALS}
+                        allowNegative={false}
+                        error={showErrors && !(Number(line.quantity) > 0)}
+                        onChange={(event) =>
+                          patchLine(line.key, { quantity: event.target.value })
+                        }
+                      />
+                    )}
                   </td>
                   <td className={NUMBER_CELL}>
                     <NumberInput
@@ -286,27 +299,34 @@ export function PurchaseOrderEditor({
                     {formatCurrency(previewLineAmount(line))}
                   </td>
                   <td className={CELL}>
-                    <button
-                      type="button"
-                      className="cursor-pointer text-danger-text"
-                      aria-label={t("lines.remove", { code: line.itemCode })}
-                      onClick={() =>
-                        setDraft((current) => ({
-                          ...current,
-                          lines: current.lines.filter(
-                            (entry) => entry.key !== line.key,
-                          ),
-                        }))
-                      }
-                    >
-                      <Icon name="trash" size={16} />
-                    </button>
+                    {line.fromRequest ? null : (
+                      <button
+                        type="button"
+                        className="cursor-pointer text-danger-text"
+                        aria-label={t("lines.remove", { code: line.itemCode })}
+                        onClick={() =>
+                          setDraft((current) => ({
+                            ...current,
+                            lines: current.lines.filter(
+                              (entry) => entry.key !== line.key,
+                            ),
+                          }))
+                        }
+                      >
+                        <Icon name="trash" size={16} />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+        {hasRequestLines ? (
+          <p className="text-xs text-text-secondary">
+            {t("lines.fromRequestHint")}
+          </p>
+        ) : null}
 
         <div className="max-w-md">
           <RecordPickerSourceField<Item>
@@ -325,6 +345,7 @@ export function PurchaseOrderEditor({
                     quantity: "1",
                     // The catalog reference price is not what this supplier charges.
                     unitPrice: "",
+                    fromRequest: false,
                   },
                 ],
               }))

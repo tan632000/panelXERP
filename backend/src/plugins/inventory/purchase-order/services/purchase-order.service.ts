@@ -80,6 +80,8 @@ export interface PurchaseOrderLineView {
   unitPrice: number;
   amount: number;
   receivedQty: number;
+  /** Raised from a purchase request: its item and quantity are fixed, only the price moves. */
+  fromRequest: boolean;
 }
 
 export interface PurchaseOrderEventView {
@@ -538,6 +540,7 @@ export class PurchaseOrderService {
       unitPrice: Number(row.unit_price),
       amount: Number(row.amount),
       receivedQty: Number(row.received_qty),
+      fromRequest: row.pr_line_id !== null && row.pr_line_id !== undefined,
     };
   }
 }

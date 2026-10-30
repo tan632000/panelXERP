@@ -36,6 +36,8 @@ export interface PurchaseOrderLine {
   unitPrice?: number;
   amount?: number;
   receivedQty: number;
+  /** Raised from a purchase request: its item and quantity are fixed, only the price moves. */
+  fromRequest?: boolean;
 }
 
 export type PurchaseOrderEventType =

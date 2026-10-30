@@ -61,7 +61,8 @@
     "addItem": "Chọn vật tư để thêm...",
     "quantityOf": "Số lượng {code}",
     "unitPriceOf": "Đơn giá {code}",
-    "remove": "Xoá dòng {code}"
+    "remove": "Xoá dòng {code}",
+    "fromRequestHint": "Số lượng các dòng lấy từ đề nghị mua được giữ nguyên; chỉ sửa được đơn giá. Có thể thêm dòng vật tư riêng bên dưới."
   },
   "history": {
     "title": "Lịch sử",

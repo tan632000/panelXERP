@@ -268,6 +268,61 @@ describe("PurchaseOrderDetailPage", () => {
     },
   );
 
+  it("locks what a request line orders and leaves the order's own line editable", async () => {
+    actorUser.value = { id: PURCHASING_ID, role: "purchasing" };
+    const requestLine = { ...pricedOrder().lines[0], fromRequest: true };
+    respond(
+      pricedOrder({
+        status: "draft",
+        submittedBy: null,
+        submittedAt: null,
+        lines: [
+          requestLine,
+          {
+            ...requestLine,
+            id: 12,
+            lineNo: 2,
+            itemId: 102,
+            itemCode: "VT-0102",
+            quantity: 2,
+            fromRequest: false,
+          },
+        ],
+      }),
+    );
+    renderPage();
+
+    expect(
+      await screen.findByRole("textbox", {
+        name: viPurchaseOrder.lines.quantityOf.replace("{code}", "VT-0102"),
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("textbox", {
+        name: viPurchaseOrder.lines.quantityOf.replace("{code}", "VT-0101"),
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", {
+        name: viPurchaseOrder.lines.remove.replace("{code}", "VT-0101"),
+      }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", {
+        name: viPurchaseOrder.lines.remove.replace("{code}", "VT-0102"),
+      }),
+    ).toBeInTheDocument();
+    // The price of a request line stays open: repricing is what the server allows.
+    expect(
+      screen.getByRole("textbox", {
+        name: viPurchaseOrder.lines.unitPriceOf.replace("{code}", "VT-0101"),
+      }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(viPurchaseOrder.lines.fromRequestHint),
+    ).toBeInTheDocument();
+  });
+
   it("lists the rejection reason in the history", async () => {
     respond(
       pricedOrder({

@@ -61,7 +61,8 @@
     "addItem": "Pick an item to add...",
     "quantityOf": "Quantity of {code}",
     "unitPriceOf": "Unit price of {code}",
-    "remove": "Delete line {code}"
+    "remove": "Delete line {code}",
+    "fromRequestHint": "Lines taken from a purchase request keep their quantity; only the price can change. Lines of your own can be added below."
   },
   "history": {
     "title": "History",

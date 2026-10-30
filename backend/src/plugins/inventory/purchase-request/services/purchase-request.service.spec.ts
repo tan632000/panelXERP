@@ -117,7 +117,7 @@ describeWithDatabase('PurchaseRequestService (real Postgres)', () => {
 
     // Repricing the draft keeps its link to PR1 and O3, and a line of its own can follow;
     // changing what the request line orders, or dropping it, is refused.
-    await h
+    const withOwnLine = await h
       .patch(h.PURCHASING, `/inventory/purchase-orders/${poA.id}`, {
         lines: [
           { itemId: x, quantity: 6, unitPrice: 11500 },
@@ -125,6 +125,12 @@ describeWithDatabase('PurchaseRequestService (real Postgres)', () => {
         ],
       })
       .expect(200);
+    // The editor locks what the request line orders, so the order says which line that is.
+    expect(
+      (
+        withOwnLine.body as { lines: Array<{ fromRequest: boolean }> }
+      ).lines.map((entry) => entry.fromRequest),
+    ).toEqual([true, false]);
     for (const lines of [
       [{ itemId: x, quantity: 7, unitPrice: 11500 }],
       [{ itemId: x, quantity: 1, unitPrice: 11000 }],
