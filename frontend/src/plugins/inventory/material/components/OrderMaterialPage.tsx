@@ -273,7 +273,11 @@ export function OrderMaterialPage() {
         </DetailSection>
       ) : null}
 
-      <div role="tablist" aria-label={t("tabs.label")} className="flex gap-2">
+      <div
+        role="tablist"
+        aria-label={t("tabs.label")}
+        className="mb-6 flex gap-2"
+      >
         {(["materials", "estimate"] as const).map((value) => (
           <button
             key={value}

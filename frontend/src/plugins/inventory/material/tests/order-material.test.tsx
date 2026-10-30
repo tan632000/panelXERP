@@ -199,6 +199,14 @@ describe("OrderMaterialPage", () => {
       expect(screen.queryByText(text)).not.toBeInTheDocument();
     }
   });
+
+  it("spaces the tabs from the section under them like any other section", async () => {
+    renderWith(<OrderMaterialPage />);
+    await screen.findByText("VT-0102");
+
+    // Sections are kept apart by their own bottom margin; without one the tabs touch the heading.
+    expect(screen.getByRole("tablist")).toHaveClass("mb-6");
+  });
 });
 
 describe("MaterialOrderListPage", () => {
