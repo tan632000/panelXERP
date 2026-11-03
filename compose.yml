@@ -132,6 +132,9 @@ services:
     build:
       context: .
       dockerfile: docker/frontend/Dockerfile.dev
+    # A Turbopack route cache kept across a container restart can answer 404 for every page,
+    # so each start drops it first; `exec` keeps npm as PID 1 so it receives the stop signal.
+    command: sh -c "rm -rf /app/.next/dev/cache && exec npm run dev"
     ports:
       # App URLs — host port from FRONTEND_PORT (default 3000)
       - "${FRONTEND_PORT:-3000}:3000"

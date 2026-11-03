@@ -48,6 +48,23 @@ chmod +x docker/localstack/*.sh
 docker compose up --build -d
 ```
 
+## Troubleshooting: every frontend page answers 404
+
+After the frontend container restarts (Docker Desktop or the machine restarted, `docker compose up -d` on existing containers), Turbopack can reuse a stale route cache and answer **404 — Không tìm thấy trang** for every route, `/` and `/login` included.
+
+The `frontend` service in `compose.yml` now drops that cache on every start (`command: sh -c "rm -rf /app/.next/dev/cache && exec npm run dev"`), so a plain `docker compose restart frontend` is enough. A container created before that change keeps its old command until it is recreated with `docker compose up -d frontend`. If 404s still appear, clear the cache by hand and restart:
+
+```bash
+docker compose exec -T frontend sh -c 'rm -rf /app/.next/dev/cache'
+docker compose restart frontend
+```
+
+The first request then takes about 30 s while Turbopack recompiles. A signed-out `http://localhost:3000/` should redirect to `/login` and answer 200.
+
+- Keep the `sh -c '...'` wrapper: in Git Bash on Windows a bare `/app/...` argument is rewritten into a Windows path.
+- Clearing without restarting does not help, and a restart without clearing still answers 404.
+- Never run `docker compose rm -sfv frontend` to "reset" it: `-v` deletes the `node_modules` volume.
+
 ## Manual image build
 
 ```bash
