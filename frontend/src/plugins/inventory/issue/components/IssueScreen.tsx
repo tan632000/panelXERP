@@ -19,6 +19,7 @@ import { formatNumber } from "@/kernel/core/lib/formatters";
 import { generateClientUuid } from "@/kernel/core/lib/utils";
 import { useRouter } from "@/kernel/i18n/navigation";
 
+import { isIssuableOrder } from "@plugins/inventory/_shared/order-status-gates";
 import {
   ISSUE_QUANTITY_DECIMALS,
   ISSUE_REASON_MAX,
@@ -77,7 +78,7 @@ export function IssueScreen() {
   const listCrumb = { label: t("title"), href: issuePageRoutes.list, icon };
   const header = { pageTitle: t("title"), pageDescription: t("description") };
 
-  if (!detail || detail.order.status !== "open") {
+  if (!detail || !isIssuableOrder(detail.order.status)) {
     let body: React.ReactNode = <LoadingState variant="list" />;
     if (detail) {
       body = (

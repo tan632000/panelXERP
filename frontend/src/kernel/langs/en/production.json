@@ -1,0 +1,191 @@
+{
+  "moduleName": "Production",
+  "sidebarProduction": "Production",
+  "orders": "Production orders",
+  "title": "Production orders",
+  "description": "Draw up a production order from an order, give each cabinet a technician and an end date, then release it to the workshop",
+  "detailTitle": "Production order",
+  "notFound": "The production order was not found",
+  "loadError": "Could not load the production orders",
+  "addButton": "New production order",
+  "clearOrderFilter": "Show all production orders",
+  "code": "Order code",
+  "orderCode": "Sales order",
+  "customer": "Customer",
+  "deliveryDate": "Delivery date",
+  "unitCount": "Cabinets",
+  "status": "Status",
+  "allStatuses": "All statuses",
+  "createdAt": "Created at",
+  "releasedAt": "Released at",
+  "cancelReason": "Cancel reason",
+  "infoBasic": "Order details",
+  "emptyValue": "—",
+  "myUnits": "My cabinets",
+  "issuesMenu": "Issues",
+  "myUnitsDescription": "The cabinets assigned to you and the stage each one is at",
+  "workshopUnits": "Cabinets in production",
+  "workshopUnitsDescription": "Every cabinet in your scope and the stage each one is at",
+  "noWorkshopUnits": "No cabinets yet",
+  "noUnitsFound": "No matching cabinets",
+  "allStageStatuses": "Any stage status",
+  "noUnits": "No cabinet is assigned to you",
+  "unitItem": "cabinets",
+  "unitsLoadError": "Could not load the cabinets",
+  "unitTitle": "Production cabinet",
+  "unitDescription": "Start and finish the six stages of the cabinet in order",
+  "unitNotFound": "The cabinet was not found",
+  "stagesTitle": "Stages",
+  "stages": {
+    "material_prep": "Material preparation",
+    "enclosure": "Enclosure fabrication",
+    "device_mounting": "Device mounting",
+    "wiring": "Wiring",
+    "internal_test": "Internal test",
+    "finishing": "Finishing and packing"
+  },
+  "stageStatuses": {
+    "pending": "Not started",
+    "in_progress": "In progress",
+    "done": "Done"
+  },
+  "stageActions": {
+    "start": "Start",
+    "finish": "Finish",
+    "undo": "Undo"
+  },
+  "stageDone": "All done",
+  "stageNotStarted": "Not started",
+  "stageDoneBy": "Finished by {name} at {time}",
+  "stageStartedBy": "Started by {name} at {time}",
+  "undo": {
+    "title": "Undo stage {stage}",
+    "description": "The stage goes back to in progress. Only the latest finished stage can be undone, while the next stage has not started.",
+    "submit": "Undo",
+    "reason": "Reason for the undo",
+    "placeholder": "Enter the reason…"
+  },
+  "noItems": "No production orders yet",
+  "noItemsFound": "No production orders match",
+  "paginationItem": "orders",
+  "statuses": {
+    "draft": "Draft",
+    "released": "Released",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "create": {
+    "title": "New production order",
+    "submit": "Create",
+    "order": "Sales order",
+    "pickOrder": "Pick an order…",
+    "noOpenOrders": "No open order is waiting for a production order."
+  },
+  "units": {
+    "title": "Cabinets",
+    "code": "Cabinet code",
+    "description": "Description",
+    "assignee": "Technician",
+    "assigneeOf": "Technician of cabinet {code}",
+    "pickTechnician": "Pick a technician…",
+    "unassigned": "Not assigned",
+    "plannedEndDate": "Planned end date",
+    "progress": "Progress"
+  },
+  "actions": {
+    "title": "Actions",
+    "release": "Release",
+    "cancel": "Cancel order",
+    "releaseTitle": "Release order {code}",
+    "releaseDescription": "Every cabinet needs a technician and a planned end date. Once released, the sales order moves to in production.",
+    "releaseIncomplete": "Cabinets without a technician or a planned end date: {codes}",
+    "cancelTitle": "Cancel order {code}",
+    "cancelReleasedWarning": "This order is released: the sales order reopens and the stage history stays."
+  },
+  "reason": {
+    "label": "Cancel reason",
+    "placeholder": "Why is the order cancelled…",
+    "required": "Please enter a reason",
+    "max": "The reason must not exceed {max} characters"
+  },
+  "toast": {
+    "systemError": "Something went wrong, please try again",
+    "forbidden": "You are not allowed to do this",
+    "conflict": "The production order changed or the sales order is no longer in a suitable state. Please reload.",
+    "createSuccess": "Production order created",
+    "releaseSuccess": "Production order released",
+    "cancelSuccess": "Production order cancelled",
+    "issueConflict": "The production order changed or the issue is already resolved. Please reload.",
+    "issueOpened": "Issue reported",
+    "issueResolved": "Issue resolved",
+    "photoUploaded": "Photo uploaded",
+    "photoTooLarge": "The photo is larger than 10 MB",
+    "photoRejected": "The photo was not accepted: only genuine PNG or JPEG, at most 30 photos per cabinet"
+  },
+  "shortage": {
+    "title": "Material shortage",
+    "none": "All materials are covered for this order",
+    "code": "Item code",
+    "name": "Item name",
+    "unit": "Unit",
+    "demand": "Needed",
+    "reserved": "Reserved",
+    "short": "Short",
+    "loadError": "Could not load the material shortage"
+  },
+  "issues": {
+    "title": "Production issues",
+    "pageDescription": "Problems technicians report on a cabinet; a production manager resolves each one",
+    "loadError": "Could not load the issues",
+    "allStatuses": "All statuses",
+    "none": "No issues yet",
+    "noneFound": "No matching issues",
+    "item": "issues",
+    "stage": "Stage",
+    "severity": "Severity",
+    "description": "Description",
+    "reporter": "Reported by",
+    "report": "Report an issue",
+    "reportedBy": "{name} reported at {time}",
+    "resolvedWith": "{name} resolved it: {resolution}",
+    "noneOnUnit": "This cabinet has no issues",
+    "resolveButton": "Resolve",
+    "statuses": {
+      "open": "Open",
+      "resolved": "Resolved"
+    },
+    "severities": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "form": {
+      "title": "Report an issue on cabinet {code}",
+      "submit": "Report",
+      "placeholder": "Describe the issue…"
+    },
+    "resolve": {
+      "title": "Resolve the issue on cabinet {code}",
+      "submit": "Resolve",
+      "resolution": "How it was resolved",
+      "placeholder": "Enter the resolution…",
+      "required": "Please enter the resolution",
+      "max": "The text must not exceed {max} characters"
+    }
+  },
+  "photos": {
+    "title": "Photos",
+    "stage": "Stage of the photo",
+    "issue": "Attach to an issue",
+    "noIssue": "No issue",
+    "choose": "Choose a photo",
+    "hint": "PNG or JPEG, up to 10 MB",
+    "empty": "No photos yet",
+    "full": "The cabinet holds {count} photos already",
+    "problems": {
+      "type": "Only PNG or JPEG photos are accepted",
+      "size": "The photo is larger than 10 MB",
+      "empty": "The file is empty"
+    }
+  }
+}

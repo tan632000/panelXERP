@@ -37,14 +37,23 @@ function permissionFiles(dir: string): string[] {
 /** One `'resource:action' as const` declaration. */
 const SCOPE_DECLARATION = /'([a-z_]+:[a-z_:]+)'\s+as const/g;
 
+/**
+ * The scopes each permission file declares, read once for the whole file: walking the backend
+ * tree through a Windows bind mount takes seconds, so a test that walks it again outruns the
+ * default timeout.
+ */
+const SCOPES_BY_FILE: ReadonlyArray<readonly [string, string[]]> = PLUGINS_ROOT
+  ? permissionFiles(PLUGINS_ROOT).map((file) => [
+      file,
+      [...readFileSync(file, "utf8").matchAll(SCOPE_DECLARATION)].map(
+        (match) => match[1],
+      ),
+    ])
+  : [];
+
 /** Every `'resource:action' as const` a plugin declares. */
 function declaredScopes(): string[] {
-  if (!PLUGINS_ROOT) return [];
-  const scopes = permissionFiles(PLUGINS_ROOT).flatMap((file) =>
-    [...readFileSync(file, "utf8").matchAll(SCOPE_DECLARATION)].map(
-      (match) => match[1],
-    ),
-  );
+  const scopes = SCOPES_BY_FILE.flatMap(([, declared]) => declared);
   return [...new Set(scopes)].filter((scope) => !UNLISTED.has(scope));
 }
 
@@ -59,11 +68,9 @@ describe.each([
   it("reads a scope out of every permission file the plugins hold", () => {
     // Guards against a matcher that silently reads nothing: each declaring file must yield a
     // scope, so the label checks below cover every plugin that declares any.
-    const files = PLUGINS_ROOT ? permissionFiles(PLUGINS_ROOT) : [];
-    const silent = files.filter(
-      (file) =>
-        ![...readFileSync(file, "utf8").matchAll(SCOPE_DECLARATION)].length,
-    );
+    const silent = SCOPES_BY_FILE.filter(
+      ([, declared]) => declared.length === 0,
+    ).map(([file]) => file);
     expect(silent).toEqual([]);
   });
 

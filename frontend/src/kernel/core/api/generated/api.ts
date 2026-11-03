@@ -2777,6 +2777,368 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/production/orders": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List production orders
+     * @description Filter by status or sales order. A sales actor sees the production orders of the orders they own; a technician only those with a cabinet assigned to them.
+     */
+    get: operations["ProductionOrderController_findAll"];
+    put?: never;
+    /**
+     * Create a draft production order for an open order
+     * @description One cabinet per panel ordered, coded <tag>-<n>, each with its six stages pending.
+     */
+    post: operations["ProductionOrderController_create"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/open-orders": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List the open orders a production order can still be made for
+     * @description Code, customer name and delivery date only.
+     */
+    get: operations["ProductionOrderController_findOpenOrders"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/technician-options": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List the accounts a cabinet may be assigned to
+     * @description Active accounts holding the technician role.
+     */
+    get: operations["ProductionOrderController_listTechnicianOptions"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/orders/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Get a production order with its cabinets and history
+     * @description A technician sees only the cabinets assigned to them.
+     */
+    get: operations["ProductionOrderController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/orders/{id}/shortage": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List the items the order is still short of
+     * @description Quantities only, as the material view computes them. Nothing here blocks a stage.
+     */
+    get: operations["ProductionOrderController_findShortage"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/orders/{id}/units/{unitId}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    /**
+     * Assign a technician and a planned end date to a cabinet
+     * @description The assignee must hold the technician role. Refused once the order is completed or cancelled, or the cabinet is finished.
+     */
+    patch: operations["ProductionOrderController_updateUnit"];
+    trace?: never;
+  };
+  "/api/v1/production/orders/{id}/release": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Release a draft to the workshop
+     * @description Every cabinet needs a technician and a planned end date. The sales order becomes in_production and keeps its materials.
+     */
+    post: operations["ProductionOrderController_releaseOrder"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/orders/{id}/cancel": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Cancel a draft or released production order
+     * @description A released order gives the sales order back: it becomes open again. Stage history stays.
+     */
+    post: operations["ProductionOrderController_cancel"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/units": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List cabinets with the progress of their six stages
+     * @description Filter by mine, production order or the status of the current stage. A technician sees only their own cabinets; a sales actor those of the orders they own.
+     */
+    get: operations["ProgressController_findAll"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/units/{id}": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Get a cabinet with its six stages */
+    get: operations["ProgressController_findOne"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/units/{id}/stages/{stage}/start": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start a stage
+     * @description The previous stage must be done and the production order released. Only the assigned technician or a production manager.
+     */
+    post: operations["ProgressController_startStage"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/units/{id}/stages/{stage}/finish": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Finish a stage
+     * @description The last finishing completes the production order and tells the production managers and the sales owner.
+     */
+    post: operations["ProgressController_finishStage"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/units/{id}/stages/{stage}/undo": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Take the latest finished stage back to in progress
+     * @description Production manager only, with a reason, while the production order is released and the next stage is still pending.
+     */
+    post: operations["ProgressController_undoStage"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/units/{id}/photos": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** List the photos of a cabinet, oldest first */
+    get: operations["UnitPhotoController_list"];
+    put?: never;
+    /**
+     * Attach a photo to a stage of a cabinet
+     * @description PNG or JPEG, by extension and by content, up to 10 MB each and 30 per cabinet, while the production order is released. Only the assigned technician or a production manager. An optional issue must belong to the same cabinet.
+     */
+    post: operations["UnitPhotoController_upload"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/photos/{photoId}/content": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The image of a photo
+     * @description Served with the content type stored at upload. Requires access to the cabinet.
+     */
+    get: operations["UnitPhotoController_content"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/issues": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * List production issues
+     * @description Filter by status, production order or cabinet. A technician sees only the issues of their own cabinets; a sales actor those of the orders they own.
+     */
+    get: operations["ProductionIssueController_findAll"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/units/{id}/issues": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Report an issue on a stage of a cabinet
+     * @description Only the assigned technician or a production manager, while the production order is released. An open issue never blocks a stage; the production managers are told.
+     */
+    post: operations["ProductionIssueController_open"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/production/issues/{id}/resolve": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Resolve an issue
+     * @description Production manager only, with a resolution. The technician who reported it is told.
+     */
+    post: operations["ProductionIssueController_resolve"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3601,6 +3963,41 @@ export interface components {
     };
     PurchaseRequestReasonDto: {
       reason: string;
+    };
+    CreateProductionOrderDto: {
+      /** @description The open sales order to build */
+      orderId: number;
+    };
+    UpdateProductionUnitDto: {
+      /** @description Account holding the technician role */
+      assigneeId?: number;
+      /**
+       * @description Planned end date, YYYY-MM-DD
+       * @example 2026-12-31
+       */
+      plannedEndDate?: string;
+    };
+    ProductionOrderReasonDto: {
+      reason: string;
+    };
+    StageUndoDto: {
+      reason: string;
+    };
+    CreateProductionIssueDto: {
+      /** @enum {string} */
+      stage:
+        | "material_prep"
+        | "enclosure"
+        | "device_mounting"
+        | "wiring"
+        | "internal_test"
+        | "finishing";
+      description: string;
+      /** @enum {string} */
+      severity: "low" | "medium" | "high";
+    };
+    ResolveProductionIssueDto: {
+      resolution: string;
     };
   };
   responses: never;
@@ -10195,6 +10592,745 @@ export interface operations {
         content?: never;
       };
       /** @description Already cancelled or ordered */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionOrderController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        status?: "draft" | "released" | "completed" | "cancelled";
+        /** @description Only the production orders of this sales order */
+        orderId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated production orders */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires production_order:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionOrderController_create: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateProductionOrderDto"];
+      };
+    };
+    responses: {
+      /** @description Draft created */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Order not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description The order is not open or already has a production order */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionOrderController_findOpenOrders: {
+    parameters: {
+      query?: {
+        /** @description Order code, customer or project */
+        search?: string;
+        limit?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Open orders without production */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires production_order:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionOrderController_listTechnicianOptions: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Technician options */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires production_order:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionOrderController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Production order */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionOrderController_findShortage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Short items, possibly none */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller’s data scope */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionOrderController_updateUnit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        unitId: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateProductionUnitDto"];
+      };
+    };
+    responses: {
+      /** @description Cabinet updated */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Assignee is not a technician */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Production order or cabinet not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Order completed or cancelled, or cabinet finished */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionOrderController_releaseOrder: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Released */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Cabinets without a technician or a planned end date */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not a draft, or the sales order is no longer open */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionOrderController_cancel: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProductionOrderReasonDto"];
+      };
+    };
+    responses: {
+      /** @description Cancelled */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Already completed or cancelled */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProgressController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        /** @description Only the cabinets assigned to the caller */
+        mine?: boolean;
+        /** @description Only the cabinets of this production order */
+        productionOrderId?: number;
+        /** @description Status of the current stage: the first one not done. `done` means every stage is done. */
+        stageStatus?: "pending" | "in_progress" | "done";
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated cabinets */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires production_progress:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProgressController_findOne: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cabinet */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Not found, or outside the caller data scope */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProgressController_startStage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        stage:
+          | "material_prep"
+          | "enclosure"
+          | "device_mounting"
+          | "wiring"
+          | "internal_test"
+          | "finishing";
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cabinet with its stages */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Cabinet not found or not yours */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Previous stage not done, stage not pending, or order not released */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProgressController_finishStage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        stage:
+          | "material_prep"
+          | "enclosure"
+          | "device_mounting"
+          | "wiring"
+          | "internal_test"
+          | "finishing";
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Cabinet with its stages */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Cabinet not found or not yours */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Stage not in progress, or order not released */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProgressController_undoStage: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+        stage:
+          | "material_prep"
+          | "enclosure"
+          | "device_mounting"
+          | "wiring"
+          | "internal_test"
+          | "finishing";
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StageUndoDto"];
+      };
+    };
+    responses: {
+      /** @description Cabinet with its stages */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Stage not done, next stage already started, or order not released */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UnitPhotoController_list: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Photos of every stage */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Cabinet not found, or outside the caller data scope */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UnitPhotoController_upload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string;
+          /** @enum {string} */
+          stage:
+            | "material_prep"
+            | "enclosure"
+            | "device_mounting"
+            | "wiring"
+            | "internal_test"
+            | "finishing";
+          issueId?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Photo attached */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File missing, type not allowed, content mismatch, foreign issue, or limit reached */
+      400: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires production_progress:update */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Cabinet not found or not yours */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Order not released */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description File larger than 10 MB */
+      413: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  UnitPhotoController_content: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        photoId: number;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Image bytes */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Photo not found, or outside the caller data scope */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionIssueController_findAll: {
+    parameters: {
+      query?: {
+        /** @description Page number */
+        page?: number;
+        /** @description Items per page */
+        limit?: number;
+        /** @description Search keyword */
+        search?: string;
+        /** @description Enum values whose translated label matched the keyword */
+        searchClassifications?: string[];
+        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+        columnFilters?: string;
+        status?: "open" | "resolved";
+        /** @description Only the issues of this production order */
+        productionOrderId?: number;
+        /** @description Only the issues of this cabinet */
+        unitId?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated issues, newest first */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires production_issue:read */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionIssueController_open: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateProductionIssueDto"];
+      };
+    };
+    responses: {
+      /** @description Issue opened */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires production_issue:create */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Cabinet not found or not yours */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Order not released */
+      409: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductionIssueController_resolve: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        id: number;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ResolveProductionIssueDto"];
+      };
+    };
+    responses: {
+      /** @description Issue resolved */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Forbidden — requires production_issue:resolve */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Issue not found */
+      404: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Issue already resolved */
       409: {
         headers: {
           [name: string]: unknown;

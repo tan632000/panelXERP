@@ -111,6 +111,8 @@ export interface DateInputProps {
   error?: boolean;
   name?: string;
   id?: string;
+  /** Told when the calendar opens or closes, for a caller that saves on its own and must know whether a pick may still come. */
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function DateInput({
@@ -126,6 +128,7 @@ export function DateInput({
   error = false,
   name,
   id,
+  onOpenChange,
 }: Readonly<DateInputProps>) {
   const locked = disabled || readOnly;
   const selectedDate = parseIsoDate(value) ?? null;
@@ -133,6 +136,13 @@ export function DateInput({
   const maxDate = parseIsoDate(max ?? "");
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const reportedOpen = useRef(false);
+
+  useEffect(() => {
+    if (reportedOpen.current === isOpen) return;
+    reportedOpen.current = isOpen;
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
 
   useEffect(() => {
     if (!isOpen) return;

@@ -85,9 +85,11 @@
     "notConfirmed": "Only a customer-confirmed quotation version can become an order.",
     "alreadyExists": "This quotation already has an order.",
     "requestCannotMove": "The current status of the request does not allow this action.",
+    "hasProductionOrder": "The order has a production order. Cancel the production order before cancelling the order.",
     "orderState": "The current status of the order does not allow this action.",
     "systemError": "Something went wrong, please try again later.",
     "forbidden": "You do not have permission to do this."
   },
-  "materials": "Materials"
+  "materials": "Materials",
+  "production": "Production"
 }

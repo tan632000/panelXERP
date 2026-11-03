@@ -1,3 +1,4 @@
+import { createTranslator } from "next-intl";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -167,7 +168,20 @@ describe("notification bell surface", () => {
         "purchase_order:approve",
         "purchase_order:read",
         "material:read",
+        // Production orders released or cancelled, and a cabinet handed to a technician.
+        "production_order:read",
+        // An issue reported on a cabinet, and its closing.
+        "production_issue:read",
       ]);
+    });
+
+    it("lets a technician, who holds only the production scopes, see the bell", () => {
+      expect(
+        canReadAnyNotification([
+          "production_order:read",
+          "production_progress:read",
+        ]),
+      ).toBe(true);
     });
   });
 
@@ -307,6 +321,61 @@ describe("notification bell surface", () => {
         });
       },
     );
+
+    it("phrases each production event from its payload, in both languages", () => {
+      const payload = {
+        code: "LSX_2026_0007",
+        orderCode: "DH_2026_0003",
+        unitCode: "MSB-2",
+        reason: "Khách đổi thiết kế",
+        severity: "high",
+        plannedEndDate: "2026-11-02",
+      };
+      const expected: Record<string, string[]> = {
+        "production.order.released": ["LSX_2026_0007"],
+        "production.order.released.owner": ["LSX_2026_0007", "DH_2026_0003"],
+        "production.order.cancelled": ["LSX_2026_0007", "Khách đổi thiết kế"],
+        "production.order.cancelled.owner": [
+          "LSX_2026_0007",
+          "DH_2026_0003",
+          "Khách đổi thiết kế",
+        ],
+        "production.unit.assigned": ["LSX_2026_0007", "MSB-2"],
+        "production.order.completed": ["LSX_2026_0007"],
+        "production.order.completed.owner": ["LSX_2026_0007", "DH_2026_0003"],
+        "production.issue.opened": ["LSX_2026_0007", "MSB-2"],
+        "production.issue.resolved": ["LSX_2026_0007", "MSB-2"],
+        "production.unit.overdue": ["LSX_2026_0007", "MSB-2", "2026-11-02"],
+        "production.unit.overdue.assignee": [
+          "LSX_2026_0007",
+          "MSB-2",
+          "2026-11-02",
+        ],
+      };
+      for (const common of [viCommon, enCommon]) {
+        const t = createTranslator({
+          locale: common === viCommon ? "vi" : "en",
+          messages: { common },
+          namespace: "common.notification",
+        });
+        for (const [eventType, parts] of Object.entries(expected)) {
+          expect(NOTIFICATION_EVENT_KEYS).toContain(eventType);
+          const message = resolveNotificationMessage(
+            notification({ id: 1, eventType, payload }),
+          );
+          expect(message.kind).toBe("key");
+          if (message.kind !== "key") return;
+          const text = t(
+            message.key as Parameters<typeof t>[0],
+            message.values,
+          );
+          for (const part of parts) expect(text, eventType).toContain(part);
+          if (eventType === "production.issue.opened") {
+            expect(text).toContain(common === viCommon ? "cao" : "high");
+          }
+        }
+      }
+    });
 
     it("phrases a purchase-order event from its own payload fields", () => {
       const cancelled = notification({

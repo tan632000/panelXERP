@@ -85,9 +85,11 @@
     "notConfirmed": "Chỉ phiên bản báo giá khách đã xác nhận mới chuyển được thành đơn hàng.",
     "alreadyExists": "Báo giá này đã có đơn hàng.",
     "requestCannotMove": "Trạng thái hiện tại của yêu cầu không cho phép thao tác này.",
+    "hasProductionOrder": "Đơn hàng đang có lệnh sản xuất. Hãy hủy lệnh sản xuất trước khi hủy đơn hàng.",
     "orderState": "Trạng thái hiện tại của đơn hàng không cho phép thao tác này.",
     "systemError": "Đã xảy ra lỗi, vui lòng thử lại sau.",
     "forbidden": "Bạn không có quyền thực hiện thao tác này."
   },
-  "materials": "Vật tư"
+  "materials": "Vật tư",
+  "production": "Sản xuất"
 }

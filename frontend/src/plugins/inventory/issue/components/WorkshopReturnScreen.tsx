@@ -16,6 +16,7 @@ import { formatNumber } from "@/kernel/core/lib/formatters";
 import { generateClientUuid } from "@/kernel/core/lib/utils";
 import { useRouter } from "@/kernel/i18n/navigation";
 
+import { isReturnableOrder } from "@plugins/inventory/_shared/order-status-gates";
 import {
   ISSUE_QUANTITY_DECIMALS,
   issuePageRoutes,
@@ -32,8 +33,6 @@ import { useOrderMaterial } from "@plugins/inventory/material/hooks/api/useMater
 import type { MaterialItemRow } from "@plugins/inventory/material/types";
 
 const PLAIN = { filterable: false, sortable: false } as const;
-/** Orders the workshop may return from (user, Q7). */
-const RETURNABLE = ["open", "cancelled"];
 
 const quantityText = (value: number) => (
   <span className="tabular-nums">
@@ -42,7 +41,7 @@ const quantityText = (value: number) => (
 );
 
 /**
- * Takes back what the workshop did not use from one open or cancelled order: per item what is
+ * Takes back what the workshop did not use from one open, in-production or cancelled order: per item what is
  * still out, never more. The post carries one request key for the life of the screen.
  */
 export function WorkshopReturnScreen() {
@@ -61,7 +60,7 @@ export function WorkshopReturnScreen() {
   const listCrumb = { label: t("title"), href: issuePageRoutes.list, icon };
   const header = { pageTitle: t("title"), pageDescription: t("description") };
 
-  if (!detail || !RETURNABLE.includes(detail.order.status)) {
+  if (!detail || !isReturnableOrder(detail.order.status)) {
     let body: React.ReactNode = <LoadingState variant="list" />;
     if (detail) {
       body = (

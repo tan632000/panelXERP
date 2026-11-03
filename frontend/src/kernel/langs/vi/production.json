@@ -1,0 +1,191 @@
+{
+  "moduleName": "Sản xuất",
+  "sidebarProduction": "Sản xuất",
+  "orders": "Lệnh sản xuất",
+  "title": "Lệnh sản xuất",
+  "description": "Lập lệnh sản xuất từ đơn hàng, giao kỹ thuật viên và ngày hoàn thành cho từng tủ, rồi phát hành xuống xưởng",
+  "detailTitle": "Lệnh sản xuất",
+  "notFound": "Không tìm thấy lệnh sản xuất",
+  "loadError": "Không tải được danh sách lệnh sản xuất",
+  "addButton": "Tạo lệnh sản xuất",
+  "clearOrderFilter": "Xem tất cả lệnh sản xuất",
+  "code": "Mã lệnh",
+  "orderCode": "Đơn hàng",
+  "customer": "Khách hàng",
+  "deliveryDate": "Ngày giao",
+  "unitCount": "Số tủ",
+  "status": "Trạng thái",
+  "allStatuses": "Tất cả trạng thái",
+  "createdAt": "Thời gian lập",
+  "releasedAt": "Thời gian phát hành",
+  "cancelReason": "Lý do huỷ",
+  "infoBasic": "Thông tin lệnh",
+  "emptyValue": "—",
+  "myUnits": "Tủ của tôi",
+  "issuesMenu": "Sự cố",
+  "myUnitsDescription": "Các tủ được giao cho bạn và công đoạn đang làm của từng tủ",
+  "workshopUnits": "Tủ đang sản xuất",
+  "workshopUnitsDescription": "Mọi tủ trong phạm vi của bạn và công đoạn đang làm của từng tủ",
+  "noWorkshopUnits": "Chưa có tủ nào",
+  "noUnitsFound": "Không có tủ phù hợp",
+  "allStageStatuses": "Mọi trạng thái công đoạn",
+  "noUnits": "Bạn chưa được giao tủ nào",
+  "unitItem": "tủ",
+  "unitsLoadError": "Không tải được danh sách tủ",
+  "unitTitle": "Tủ sản xuất",
+  "unitDescription": "Bắt đầu và hoàn thành lần lượt sáu công đoạn của tủ",
+  "unitNotFound": "Không tìm thấy tủ",
+  "stagesTitle": "Công đoạn",
+  "stages": {
+    "material_prep": "Chuẩn bị vật tư",
+    "enclosure": "Gia công vỏ tủ",
+    "device_mounting": "Lắp thiết bị",
+    "wiring": "Đấu dây",
+    "internal_test": "Kiểm tra nội bộ",
+    "finishing": "Hoàn thiện/đóng gói"
+  },
+  "stageStatuses": {
+    "pending": "Chưa bắt đầu",
+    "in_progress": "Đang làm",
+    "done": "Đã xong"
+  },
+  "stageActions": {
+    "start": "Bắt đầu",
+    "finish": "Hoàn thành",
+    "undo": "Hoàn tác"
+  },
+  "stageDone": "Đã xong tất cả",
+  "stageNotStarted": "Chưa bắt đầu",
+  "stageDoneBy": "Hoàn thành bởi {name} lúc {time}",
+  "stageStartedBy": "Bắt đầu bởi {name} lúc {time}",
+  "undo": {
+    "title": "Hoàn tác công đoạn {stage}",
+    "description": "Công đoạn quay về trạng thái đang làm. Chỉ hoàn tác được công đoạn đã xong gần nhất khi công đoạn sau chưa bắt đầu.",
+    "submit": "Hoàn tác",
+    "reason": "Lý do hoàn tác",
+    "placeholder": "Nhập lý do hoàn tác…"
+  },
+  "noItems": "Chưa có lệnh sản xuất nào",
+  "noItemsFound": "Không có lệnh sản xuất phù hợp",
+  "paginationItem": "lệnh",
+  "statuses": {
+    "draft": "Nháp",
+    "released": "Đã phát hành",
+    "completed": "Hoàn thành",
+    "cancelled": "Đã huỷ"
+  },
+  "create": {
+    "title": "Tạo lệnh sản xuất",
+    "submit": "Tạo lệnh",
+    "order": "Đơn hàng",
+    "pickOrder": "Chọn đơn hàng…",
+    "noOpenOrders": "Không có đơn hàng nào đang mở mà chưa có lệnh sản xuất."
+  },
+  "units": {
+    "title": "Danh sách tủ",
+    "code": "Mã tủ",
+    "description": "Mô tả",
+    "assignee": "Kỹ thuật viên",
+    "assigneeOf": "Kỹ thuật viên của tủ {code}",
+    "pickTechnician": "Chọn kỹ thuật viên…",
+    "unassigned": "Chưa giao",
+    "plannedEndDate": "Hạn hoàn thành",
+    "progress": "Tiến độ"
+  },
+  "actions": {
+    "title": "Thao tác",
+    "release": "Phát hành",
+    "cancel": "Huỷ lệnh",
+    "releaseTitle": "Phát hành lệnh {code}",
+    "releaseDescription": "Mỗi tủ cần có kỹ thuật viên và hạn hoàn thành. Sau khi phát hành, đơn hàng chuyển sang đang sản xuất.",
+    "releaseIncomplete": "Các tủ chưa có kỹ thuật viên hoặc hạn hoàn thành: {codes}",
+    "cancelTitle": "Huỷ lệnh {code}",
+    "cancelReleasedWarning": "Lệnh đã phát hành: đơn hàng sẽ mở lại, lịch sử công đoạn vẫn được giữ."
+  },
+  "reason": {
+    "label": "Lý do huỷ",
+    "placeholder": "Nhập lý do huỷ lệnh…",
+    "required": "Vui lòng nhập lý do",
+    "max": "Lý do không quá {max} ký tự"
+  },
+  "toast": {
+    "systemError": "Có lỗi xảy ra, vui lòng thử lại",
+    "forbidden": "Bạn không có quyền thực hiện thao tác này",
+    "conflict": "Lệnh sản xuất đã thay đổi hoặc đơn hàng không còn ở trạng thái phù hợp. Vui lòng tải lại.",
+    "createSuccess": "Đã tạo lệnh sản xuất",
+    "releaseSuccess": "Đã phát hành lệnh sản xuất",
+    "cancelSuccess": "Đã huỷ lệnh sản xuất",
+    "issueConflict": "Lệnh sản xuất đã thay đổi hoặc sự cố đã được giải quyết. Vui lòng tải lại.",
+    "issueOpened": "Đã ghi nhận sự cố",
+    "issueResolved": "Đã giải quyết sự cố",
+    "photoUploaded": "Đã tải ảnh lên",
+    "photoTooLarge": "Ảnh vượt quá 10 MB",
+    "photoRejected": "Không tải được ảnh: chỉ nhận PNG hoặc JPEG đúng định dạng, tối đa 30 ảnh mỗi tủ"
+  },
+  "shortage": {
+    "title": "Thiếu vật tư",
+    "none": "Đủ vật tư cho đơn này",
+    "code": "Mã vật tư",
+    "name": "Tên vật tư",
+    "unit": "ĐVT",
+    "demand": "Cần",
+    "reserved": "Đã giữ",
+    "short": "Thiếu",
+    "loadError": "Không tải được thông tin thiếu vật tư"
+  },
+  "issues": {
+    "title": "Sự cố sản xuất",
+    "pageDescription": "Các sự cố kỹ thuật viên báo trên tủ; quản lý sản xuất giải quyết từng sự cố",
+    "loadError": "Không tải được danh sách sự cố",
+    "allStatuses": "Mọi trạng thái",
+    "none": "Chưa có sự cố nào",
+    "noneFound": "Không có sự cố phù hợp",
+    "item": "sự cố",
+    "stage": "Công đoạn",
+    "severity": "Mức độ",
+    "description": "Mô tả",
+    "reporter": "Người báo",
+    "report": "Báo sự cố",
+    "reportedBy": "{name} báo lúc {time}",
+    "resolvedWith": "{name} đã giải quyết: {resolution}",
+    "noneOnUnit": "Tủ này chưa có sự cố nào",
+    "resolveButton": "Giải quyết",
+    "statuses": {
+      "open": "Đang mở",
+      "resolved": "Đã giải quyết"
+    },
+    "severities": {
+      "low": "Thấp",
+      "medium": "Trung bình",
+      "high": "Cao"
+    },
+    "form": {
+      "title": "Báo sự cố tủ {code}",
+      "submit": "Gửi báo cáo",
+      "placeholder": "Mô tả sự cố…"
+    },
+    "resolve": {
+      "title": "Giải quyết sự cố tủ {code}",
+      "submit": "Giải quyết",
+      "resolution": "Cách giải quyết",
+      "placeholder": "Nhập cách giải quyết…",
+      "required": "Vui lòng nhập cách giải quyết",
+      "max": "Nội dung không được vượt quá {max} ký tự"
+    }
+  },
+  "photos": {
+    "title": "Ảnh",
+    "stage": "Công đoạn của ảnh",
+    "issue": "Gắn với sự cố",
+    "noIssue": "Không gắn sự cố",
+    "choose": "Chọn ảnh",
+    "hint": "PNG hoặc JPEG, tối đa 10 MB",
+    "empty": "Chưa có ảnh nào",
+    "full": "Tủ đã đủ {count} ảnh",
+    "problems": {
+      "type": "Chỉ nhận ảnh PNG hoặc JPEG",
+      "size": "Ảnh vượt quá 10 MB",
+      "empty": "Tệp trống"
+    }
+  }
+}

@@ -41,7 +41,9 @@
     "title": "Warehouse",
     "issue": "Issue materials",
     "workshopReturn": "Workshop return",
-    "requestPurchase": "Request purchase"
+    "requestPurchase": "Request purchase",
+    "createProduction": "New production order",
+    "viewProduction": "View production order {code}"
   },
   "overBom": {
     "title": "Issued beyond the BOM",

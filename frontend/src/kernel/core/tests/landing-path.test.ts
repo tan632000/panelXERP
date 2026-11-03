@@ -77,3 +77,27 @@ describe("getLandingPath", () => {
     expect(getLandingPath(() => false)).toBe(LANDING_FALLBACK_PATH);
   });
 });
+
+describe("getLandingPath for production roles", () => {
+  it("opens a technician on their own cabinets", () => {
+    expect(
+      getLandingPath(
+        grants(
+          "production_order:read",
+          "production_progress:read",
+          "production_progress:update",
+          "production_issue:read",
+          "production_issue:create",
+        ),
+      ),
+    ).toBe("/production/my-units");
+  });
+
+  it("keeps a read-only follower on the production orders", () => {
+    expect(
+      getLandingPath(
+        grants("production_order:read", "production_progress:read"),
+      ),
+    ).toBe("/production/orders");
+  });
+});

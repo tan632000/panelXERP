@@ -21,7 +21,7 @@
   "issueScreen": {
     "title": "Xuất kho",
     "titleOf": "Xuất kho cho {code}",
-    "notOpen": "{code} không còn mở: chỉ xuất vật tư cho đơn đang mở.",
+    "notOpen": "{code} không nhận xuất kho: chỉ xuất vật tư cho đơn đang mở hoặc đang sản xuất.",
     "itemsTitle": "Vật tư của đơn",
     "scanTitle": "Quét vật tư xuất",
     "panel": "Tủ nhận vật tư",
@@ -35,7 +35,7 @@
   "returnScreen": {
     "title": "Nhập trả từ xưởng",
     "titleOf": "Nhập trả từ xưởng cho {code}",
-    "notReturnable": "{code} không nhận hàng trả: chỉ đơn đang mở hoặc đã huỷ.",
+    "notReturnable": "{code} không nhận hàng trả: chỉ đơn đang mở, đang sản xuất hoặc đã huỷ.",
     "itemsTitle": "Vật tư xưởng đang giữ",
     "nothingOut": "Xưởng không còn giữ vật tư nào của đơn này.",
     "submit": "Nhập trả"

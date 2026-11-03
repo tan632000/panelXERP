@@ -41,7 +41,9 @@
     "title": "Kho",
     "issue": "Xuất kho",
     "workshopReturn": "Nhập trả từ xưởng",
-    "requestPurchase": "Tạo đề nghị mua"
+    "requestPurchase": "Tạo đề nghị mua",
+    "createProduction": "Tạo lệnh sản xuất",
+    "viewProduction": "Xem lệnh sản xuất {code}"
   },
   "overBom": {
     "title": "Xuất vượt BOM",

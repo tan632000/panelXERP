@@ -1,7 +1,7 @@
 /**
  * Frontend plugin registry — catalog is compile-time; enable list from env.
  *
- * NEXT_PUBLIC_ENABLED_PLUGINS=crm,catalog,sales,inventory (frontend/.env)
+ * NEXT_PUBLIC_ENABLED_PLUGINS=crm,catalog,sales,inventory,production (frontend/.env)
  * Omit or empty → all registered plugins enabled.
  * make restart after change (Docker dev) — no rebuild.
  */
@@ -13,6 +13,7 @@ import {
 import { catalogFrontendPlugin } from "@plugins/catalog/plugin";
 import { crmFrontendPlugin } from "@plugins/crm/plugin";
 import { inventoryFrontendPlugin } from "@plugins/inventory/plugin";
+import { productionFrontendPlugin } from "@plugins/production/plugin";
 import { salesFrontendPlugin } from "@plugins/sales/plugin";
 
 import type { ErpFrontendPlugin } from "@kernel/platform/plugins/plugin.contract";
@@ -23,6 +24,7 @@ export const FRONTEND_PLUGIN_CATALOG: ErpFrontendPlugin[] = [
   catalogFrontendPlugin,
   salesFrontendPlugin,
   inventoryFrontendPlugin,
+  productionFrontendPlugin,
 ];
 
 const defaultPluginKeys = FRONTEND_PLUGIN_CATALOG.map((plugin) => plugin.key);

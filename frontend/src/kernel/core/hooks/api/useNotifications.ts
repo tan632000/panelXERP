@@ -114,6 +114,12 @@ export const NOTIFICATION_REQUIRED_SCOPES = [
   // An order short of materials goes to purchasing and its sales owner, both of whom read
   // the material view.
   "material:read",
+  // A production order released or cancelled goes to its technicians and its sales owner; a
+  // cabinet handed to a technician goes to them. Both hold the production order read scope.
+  "production_order:read",
+  // An issue reported on a cabinet goes to the production managers, its closing to the
+  // technician who reported it; both hold the production issue read scope.
+  "production_issue:read",
 ] as const;
 
 /** The purchase order and order shortage events the bell phrases, with their message keys. */
@@ -126,6 +132,21 @@ const INVENTORY_EVENT_MESSAGE_KEYS: Readonly<Record<string, string>> = {
     "events.inventory_purchase_order_rejected",
   "inventory.order.short": "events.inventory_order_short",
   "inventory.order.short.owner": "events.inventory_order_short_owner",
+};
+
+/** The production order events the bell phrases, with their message keys. */
+const PRODUCTION_EVENT_MESSAGE_KEYS: Readonly<Record<string, string>> = {
+  "production.order.released": "events.production_order_released",
+  "production.order.released.owner": "events.production_order_released_owner",
+  "production.order.cancelled": "events.production_order_cancelled",
+  "production.order.cancelled.owner": "events.production_order_cancelled_owner",
+  "production.unit.assigned": "events.production_unit_assigned",
+  "production.order.completed": "events.production_order_completed",
+  "production.order.completed.owner": "events.production_order_completed_owner",
+  "production.issue.opened": "events.production_issue_opened",
+  "production.issue.resolved": "events.production_issue_resolved",
+  "production.unit.overdue": "events.production_unit_overdue",
+  "production.unit.overdue.assignee": "events.production_unit_overdue_assignee",
 };
 
 /** Badge stops counting past this and renders the overflow marker instead. */
@@ -150,6 +171,17 @@ export const NOTIFICATION_EVENT_KEYS = [
   "inventory.purchase_order.rejected",
   "inventory.order.short",
   "inventory.order.short.owner",
+  "production.order.released",
+  "production.order.released.owner",
+  "production.order.cancelled",
+  "production.order.cancelled.owner",
+  "production.unit.assigned",
+  "production.order.completed",
+  "production.order.completed.owner",
+  "production.issue.opened",
+  "production.issue.resolved",
+  "production.unit.overdue",
+  "production.unit.overdue.assignee",
   "purchaseRequestAwaitingReceipt",
   "purchaseRequestReceived",
   "purchaseRequestApproved",
@@ -1250,6 +1282,22 @@ export function resolveNotificationMessage(
           reason: field(payload.reason),
           customerName: field(payload.customerName),
           shortItemCount: displayNumber(payload.shortItemCount),
+        },
+      };
+    }
+
+    const productionKey = PRODUCTION_EVENT_MESSAGE_KEYS[item.eventType];
+    if (productionKey) {
+      return {
+        kind: "key",
+        key: productionKey,
+        values: {
+          code: field(payload.code),
+          orderCode: field(payload.orderCode),
+          unitCode: field(payload.unitCode),
+          reason: field(payload.reason),
+          severity: field(payload.severity),
+          plannedEndDate: field(payload.plannedEndDate),
         },
       };
     }

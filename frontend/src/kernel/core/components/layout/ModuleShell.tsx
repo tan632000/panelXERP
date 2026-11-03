@@ -72,12 +72,15 @@ export function ModuleShell({
     : isModuleRoot && hasModuleAccess;
   const isAuthorized = isFeatureRouteEnabled && (hasPageAccess || can("*:*"));
   // "Back to module" lands on the first screen of the module this user may open: a module root
-  // such as `/production` has no page of its own, so pointing there showed a 404.
+  // such as `/production` has no page of its own, so pointing there showed a 404. A hidden
+  // entry only grants the pages under it and may have no page at its own href, so it is skipped.
   const firstReadableHref = moduleKey
     ? (navigationConfig[moduleKey]?.sections ?? [])
         .flatMap((section) => section.items)
-        .find((item) => (item.permissions ?? []).some((perm) => can(perm)))
-        ?.href
+        .find(
+          (item) =>
+            !item.hidden && (item.permissions ?? []).some((perm) => can(perm)),
+        )?.href
     : undefined;
   const moduleHref = firstReadableHref ?? "/";
 

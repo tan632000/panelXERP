@@ -21,7 +21,7 @@
   "issueScreen": {
     "title": "Issue materials",
     "titleOf": "Issue materials to {code}",
-    "notOpen": "{code} is not open: only open orders take materials.",
+    "notOpen": "{code} takes no issues: only open or in-production orders take materials.",
     "itemsTitle": "Materials of the order",
     "scanTitle": "Scan materials out",
     "panel": "Panel receiving the materials",
@@ -35,7 +35,7 @@
   "returnScreen": {
     "title": "Workshop return",
     "titleOf": "Workshop return for {code}",
-    "notReturnable": "{code} takes no returns: only open or cancelled orders do.",
+    "notReturnable": "{code} takes no returns: only open, in-production or cancelled orders do.",
     "itemsTitle": "Materials out at the workshop",
     "nothingOut": "The workshop holds nothing of this order.",
     "submit": "Return"

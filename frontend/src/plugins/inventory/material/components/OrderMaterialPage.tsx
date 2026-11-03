@@ -20,8 +20,13 @@ import {
   formatIsoDateTime,
   formatNumber,
 } from "@/kernel/core/lib/formatters";
-import { useRouter } from "@/kernel/i18n/navigation";
+import { Link, useRouter } from "@/kernel/i18n/navigation";
 
+import {
+  isDemandBearingOrder,
+  isIssuableOrder,
+  isReturnableOrder,
+} from "@plugins/inventory/_shared/order-status-gates";
 import { issuePageRoutes } from "@plugins/inventory/issue/constants";
 import { IssuePermission } from "@plugins/inventory/issue/permissions/issue-permission.keys";
 import { materialPageRoutes } from "@plugins/inventory/material/constants";
@@ -30,6 +35,12 @@ import { materialFeature } from "@plugins/inventory/material/material.feature";
 import { purchaseRequestPageRoutes } from "@plugins/inventory/purchase-request/constants";
 import { useRequestFromOrder } from "@plugins/inventory/purchase-request/hooks/api/usePurchaseRequest";
 import { PurchaseRequestPermission } from "@plugins/inventory/purchase-request/permissions/purchase-request-permission.keys";
+import { productionOrderPageRoutes } from "@plugins/production/production-order/constants";
+import {
+  useCreateProductionOrder,
+  useLiveProductionOrderOf,
+} from "@plugins/production/production-order/hooks/api/useProductionOrder";
+import { ProductionOrderPermission } from "@plugins/production/production-order/permissions/production-order-permission.keys";
 import { OrderStatusBadge } from "@plugins/sales/order/components/OrderStatusBadge";
 
 import { EstimateVsActualTab } from "./EstimateVsActualTab";
@@ -40,9 +51,6 @@ import type {
   OverBomIssue,
   UnlinkedBomLine,
 } from "@plugins/inventory/material/types";
-
-/** Orders the workshop may return materials from (user, Q7). */
-const RETURNABLE = ["open", "cancelled"];
 
 const PLAIN = { filterable: false, sortable: false } as const;
 const QUANTITY = { maximumFractionDigits: 3 };
@@ -58,8 +66,15 @@ export function OrderMaterialPage() {
   const router = useRouter();
   const orderId = useEntityIdParam();
   const requestPurchase = useRequestFromOrder();
+  const createProduction = useCreateProductionOrder();
   const [tab, setTab] = useState<"materials" | "estimate">("materials");
   const query = useOrderMaterial(orderId);
+  const canStartProduction = can(ProductionOrderPermission.create);
+  const canSeeProduction = can(ProductionOrderPermission.read);
+  const production = useLiveProductionOrderOf(
+    orderId,
+    canStartProduction || canSeeProduction,
+  );
   const detail = query.data;
   const icon = materialFeature.items[0]?.icon ?? "package";
   const header = { pageTitle: t("title"), pageDescription: t("description") };
@@ -178,13 +193,22 @@ export function OrderMaterialPage() {
     },
   ];
 
-  const canIssue = order.status === "open" && can(IssuePermission.create);
+  const canIssue = isIssuableOrder(order.status) && can(IssuePermission.create);
   const canReturn =
-    RETURNABLE.includes(order.status) && can(IssuePermission.returnCreate);
+    isReturnableOrder(order.status) && can(IssuePermission.returnCreate);
   const canRequest =
-    order.status === "open" &&
+    isDemandBearingOrder(order.status) &&
     detail.items.some((item) => item.short > 0) &&
     can(PurchaseRequestPermission.create);
+  // A cancelled production order leaves the order free to start another; only a live one
+  // replaces the create button with a link to itself.
+  const liveProduction = production.live;
+  const canCreateProduction =
+    order.status === "open" &&
+    canStartProduction &&
+    !production.isLoading &&
+    !liveProduction;
+  const productionLink = canSeeProduction ? liveProduction : undefined;
   const overBomColumns: Array<TableColumn<OverBomIssue>> = [
     {
       key: "itemCode",
@@ -237,7 +261,11 @@ export function OrderMaterialPage() {
         ) : null}
       </DetailSection>
 
-      {canIssue || canReturn || canRequest ? (
+      {canIssue ||
+      canReturn ||
+      canRequest ||
+      canCreateProduction ||
+      productionLink ? (
         <DetailSection title={t("actions.title")}>
           <div className="flex flex-wrap items-center gap-2">
             {canIssue ? (
@@ -255,7 +283,8 @@ export function OrderMaterialPage() {
                 disabled={requestPurchase.isPending}
                 onClick={() =>
                   requestPurchase.mutate(order.id, {
-                    onSuccess: () => router.push(purchaseRequestPageRoutes.list),
+                    onSuccess: () =>
+                      router.push(purchaseRequestPageRoutes.list),
                   })
                 }
               />
@@ -268,6 +297,28 @@ export function OrderMaterialPage() {
                   router.push(issuePageRoutes.workshopReturn(order.id))
                 }
               />
+            ) : null}
+            {canCreateProduction ? (
+              <DetailPanelActionButton
+                variant="primary"
+                icon="building-factory"
+                label={t("actions.createProduction")}
+                disabled={createProduction.isPending}
+                onClick={() =>
+                  createProduction.mutate(order.id, {
+                    onSuccess: (created) =>
+                      router.push(productionOrderPageRoutes.detail(created.id)),
+                  })
+                }
+              />
+            ) : null}
+            {productionLink ? (
+              <Link
+                href={productionOrderPageRoutes.detail(productionLink.id)}
+                className="inline-flex items-center gap-1.5 rounded-md border border-border-secondary bg-surface-primary px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-surface-secondary"
+              >
+                {t("actions.viewProduction", { code: productionLink.code })}
+              </Link>
             ) : null}
           </div>
         </DetailSection>
@@ -301,52 +352,55 @@ export function OrderMaterialPage() {
         <EstimateVsActualTab orderId={order.id} />
       ) : (
         <>
-      <DetailSection title={t("itemsTitle")}>
-        <Table
-          columns={itemColumns}
-          data={detail.items}
-          rowKey={(row) => String(row.itemId)}
-        />
-      </DetailSection>
+          <DetailSection title={t("itemsTitle")}>
+            <Table
+              columns={itemColumns}
+              data={detail.items}
+              rowKey={(row) => String(row.itemId)}
+            />
+          </DetailSection>
 
-      {detail.unlinked.length > 0 ? (
-        <DetailSection title={t("unlinkedTitle")}>
-          <p
-            role="alert"
-            className="mb-3 rounded-md border border-warning-bg bg-warning-bg px-3 py-2 text-sm text-warning-text"
-          >
-            {t("unlinkedWarning")}
-          </p>
-          <Table
-            columns={unlinkedColumns}
-            data={detail.unlinked}
-            rowKey={(row) => String(row.bomLineId)}
-          />
-        </DetailSection>
-      ) : null}
+          {detail.unlinked.length > 0 ? (
+            <DetailSection title={t("unlinkedTitle")}>
+              <p
+                role="alert"
+                className="mb-3 rounded-md border border-warning-bg bg-warning-bg px-3 py-2 text-sm text-warning-text"
+              >
+                {t("unlinkedWarning")}
+              </p>
+              <Table
+                columns={unlinkedColumns}
+                data={detail.unlinked}
+                rowKey={(row) => String(row.bomLineId)}
+              />
+            </DetailSection>
+          ) : null}
 
-      {detail.overBomIssues.length > 0 ? (
-        <DetailSection title={t("overBom.title")}>
-          <Table
-            columns={overBomColumns}
-            data={detail.overBomIssues}
-            rowKey={(row) => row.movementId}
-          />
-        </DetailSection>
-      ) : null}
+          {detail.overBomIssues.length > 0 ? (
+            <DetailSection title={t("overBom.title")}>
+              <Table
+                columns={overBomColumns}
+                data={detail.overBomIssues}
+                rowKey={(row) => row.movementId}
+              />
+            </DetailSection>
+          ) : null}
 
-      {detail.panels.map((panel) => (
-        <DetailSection
-          key={panel.lineId}
-          title={t("panel.title", { tag: panel.tag, quantity: panel.quantity })}
-        >
-          <Table
-            columns={panelColumns}
-            data={panel.bomLines}
-            rowKey={(row) => String(row.bomLineId)}
-          />
-        </DetailSection>
-      ))}
+          {detail.panels.map((panel) => (
+            <DetailSection
+              key={panel.lineId}
+              title={t("panel.title", {
+                tag: panel.tag,
+                quantity: panel.quantity,
+              })}
+            >
+              <Table
+                columns={panelColumns}
+                data={panel.bomLines}
+                rowKey={(row) => String(row.bomLineId)}
+              />
+            </DetailSection>
+          ))}
         </>
       )}
     </DetailPageLayout>

@@ -377,7 +377,18 @@
       "inventory_purchase_order_approved": "Purchase order {code} was approved.",
       "inventory_purchase_order_rejected": "Purchase order {code} was rejected: {reason}",
       "inventory_order_short": "Order {code} ({customerName}) is short of {shortItemCount} item(s).",
-      "inventory_order_short_owner": "Your order {code} is short of {shortItemCount} item(s); purchasing has been told."
+      "inventory_order_short_owner": "Your order {code} is short of {shortItemCount} item(s); purchasing has been told.",
+      "production_order_released": "Production order {code} has been released: you have cabinets assigned in it.",
+      "production_order_released_owner": "Production order {code} for your order {orderCode} has been released.",
+      "production_order_cancelled": "Production order {code} has been cancelled. Reason: {reason}",
+      "production_order_cancelled_owner": "Production order {code} for your order {orderCode} has been cancelled. Reason: {reason}",
+      "production_order_completed": "Production order {code} is completed: every cabinet has finished its last stage.",
+      "production_order_completed_owner": "Production order {code} for your order {orderCode} is completed.",
+      "production_unit_assigned": "You have been assigned cabinet {unitCode} in production order {code}.",
+      "production_issue_opened": "New issue on cabinet {unitCode} of production order {code}, severity {severity, select, low {low} medium {medium} high {high} other {{severity}}}.",
+      "production_issue_resolved": "The issue on cabinet {unitCode} of production order {code} has been resolved.",
+      "production_unit_overdue": "Cabinet {unitCode} of production order {code} is past its planned end date ({plannedEndDate}).",
+      "production_unit_overdue_assignee": "Cabinet {unitCode} you are responsible for in production order {code} is past its planned end date ({plannedEndDate})."
     }
   },
   "english": "English",

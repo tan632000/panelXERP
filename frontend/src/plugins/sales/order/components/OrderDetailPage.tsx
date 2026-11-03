@@ -25,6 +25,8 @@ import { Link } from "@/kernel/i18n/navigation";
 
 import { materialPageRoutes } from "@plugins/inventory/material/constants";
 import { MaterialPermission } from "@plugins/inventory/material/permissions/material-permission.keys";
+import { productionOrderPageRoutes } from "@plugins/production/production-order/constants";
+import { ProductionOrderPermission } from "@plugins/production/production-order/permissions/production-order-permission.keys";
 import { REASON_MAX, orderPageRoutes } from "@plugins/sales/order/constants";
 import {
   useCancelOrder,
@@ -37,6 +39,9 @@ import { OrderChain } from "./OrderChain";
 import { OrderHeaderEditor } from "./OrderHeaderEditor";
 import { OrderLines } from "./OrderLines";
 import { OrderStatusBadge } from "./OrderStatusBadge";
+
+const LINK_CLASS =
+  "inline-flex items-center gap-1.5 rounded-md border border-border-secondary bg-surface-primary px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-surface-secondary";
 
 export function OrderDetailPage() {
   const t = useTranslations("order");
@@ -103,14 +108,27 @@ export function OrderDetailPage() {
       title={order.code}
       subtitle={order.chain.request.title}
       actions={
-        can(MaterialPermission.read) ? (
-          <Link
-            href={materialPageRoutes.order(order.id)}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border-secondary bg-surface-primary px-3 py-1.5 text-sm font-medium text-text-primary hover:bg-surface-secondary"
-          >
-            <Icon name="package" size={15} />
-            {t("materials")}
-          </Link>
+        can(MaterialPermission.read) || can(ProductionOrderPermission.read) ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {can(MaterialPermission.read) ? (
+              <Link
+                href={materialPageRoutes.order(order.id)}
+                className={LINK_CLASS}
+              >
+                <Icon name="package" size={15} />
+                {t("materials")}
+              </Link>
+            ) : null}
+            {can(ProductionOrderPermission.read) ? (
+              <Link
+                href={productionOrderPageRoutes.forOrder(order.id)}
+                className={LINK_CLASS}
+              >
+                <Icon name="building-factory" size={15} />
+                {t("production")}
+              </Link>
+            ) : null}
+          </div>
         ) : null
       }
     >

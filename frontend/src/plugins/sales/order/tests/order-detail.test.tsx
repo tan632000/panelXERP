@@ -188,6 +188,21 @@ describe("OrderDetailPage", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("links sales to the production of the order only for a holder of production_order:read", async () => {
+    grant(...EVERYTHING, "production_order:read");
+    renderPage();
+    const link = await screen.findByRole("link", { name: viOrder.production });
+    expect(link).toHaveAttribute("href", "/production/orders?orderId=4");
+    cleanup();
+
+    grant(...EVERYTHING, "material:read");
+    renderPage();
+    await screen.findByRole("link", { name: viOrder.materials });
+    expect(
+      screen.queryByRole("link", { name: viOrder.production }),
+    ).not.toBeInTheDocument();
+  });
+
   it("shows the copied lines, BOM, totals and terms, none of them editable", async () => {
     renderPage();
 

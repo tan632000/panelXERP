@@ -51,12 +51,14 @@ vi.mock("@/kernel/i18n/navigation", () => ({
 }));
 
 /** O-4: X fully issued against its BOM of 6, Y not issued; panel MSB-01 holds both, DB-02 only Y. */
-function openOrder(): OrderMaterialDetail {
+type OrderStatus = OrderMaterialDetail["order"]["status"];
+
+function openOrder(status: OrderStatus = "open"): OrderMaterialDetail {
   return {
     order: {
       id: 4,
       code: "DH_2026_0004",
-      status: "open",
+      status,
       deliveryDate: "2026-11-05",
       createdAt: "2026-10-20T08:00:00.000Z",
       customerName: "Công ty Điện Nam",
@@ -140,12 +142,14 @@ function openOrder(): OrderMaterialDetail {
   };
 }
 
-const SCANS: Record<string, { id: number; code: string; name: string; unit: string }> =
-  {
-    "893-X": { id: 101, code: "VT-X", name: "Aptomat 3P", unit: "Cái" },
-    "893-Y": { id: 102, code: "VT-Y", name: "Cáp 4x16", unit: "m" },
-    "893-Z": { id: 103, code: "VT-Z", name: "Đầu cos", unit: "Cái" },
-  };
+const SCANS: Record<
+  string,
+  { id: number; code: string; name: string; unit: string }
+> = {
+  "893-X": { id: 101, code: "VT-X", name: "Aptomat 3P", unit: "Cái" },
+  "893-Y": { id: 102, code: "VT-Y", name: "Cáp 4x16", unit: "m" },
+  "893-Z": { id: 103, code: "VT-Z", name: "Đầu cos", unit: "Cái" },
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -261,19 +265,27 @@ describe("IssueScreen", () => {
     scan(field, "893-Y");
     await waitFor(() =>
       expect(
-        (screen.getByLabelText(fill(viIssue.lines.quantityOf, "VT-Y")) as HTMLInputElement)
-          .value,
+        (
+          screen.getByLabelText(
+            fill(viIssue.lines.quantityOf, "VT-Y"),
+          ) as HTMLInputElement
+        ).value,
       ).toBe("1"),
     );
     scan(field, "893-Y");
     await waitFor(() =>
       expect(
-        (screen.getByLabelText(fill(viIssue.lines.quantityOf, "VT-Y")) as HTMLInputElement)
-          .value,
+        (
+          screen.getByLabelText(
+            fill(viIssue.lines.quantityOf, "VT-Y"),
+          ) as HTMLInputElement
+        ).value,
       ).toBe("2"),
     );
     // Within its BOM: no reason asked.
-    expect(screen.queryByText(viIssue.lines.reasonRequired)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(viIssue.lines.reasonRequired),
+    ).not.toBeInTheDocument();
 
     fireEvent.click(submitButton());
     await waitFor(() => expect(submitButton()).toBeDisabled());
@@ -293,10 +305,16 @@ describe("IssueScreen", () => {
     const field = await scanField();
 
     scan(field, "893-Y");
-    expect(await screen.findByText(viIssue.issueScreen.noPanel, { selector: "td *, td" })).toBeInTheDocument();
+    expect(
+      await screen.findByText(viIssue.issueScreen.noPanel, {
+        selector: "td *, td",
+      }),
+    ).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "MSB-01" }));
-    expect(await screen.findByText(viIssue.lines.panelDemand)).toBeInTheDocument();
+    expect(
+      await screen.findByText(viIssue.lines.panelDemand),
+    ).toBeInTheDocument();
   });
 
   it("puts an item on no BOM of the order outside the BOM", async () => {
@@ -311,6 +329,42 @@ describe("IssueScreen", () => {
     ).toBeInTheDocument();
     // Not on the BOM at all: beyond it from the first unit.
     expect(screen.getByText(viIssue.lines.reasonRequired)).toBeInTheDocument();
+  });
+});
+
+/** The order read answers with the given status instead of an open one. */
+function orderIs(status: OrderStatus) {
+  const base = apiGet.getMockImplementation() as (
+    url: string,
+    config?: unknown,
+  ) => Promise<unknown>;
+  apiGet.mockImplementation((url: string, config?: unknown) =>
+    url === "/inventory/materials/orders/4"
+      ? Promise.resolve({ data: openOrder(status) })
+      : base(url, config),
+  );
+}
+
+describe("IssueScreen by order status", () => {
+  it("renders the issue form for an order in production", async () => {
+    orderIs("in_production");
+    renderScreen(<IssueScreen />);
+
+    expect(await scanField()).toBeInTheDocument();
+    expect(
+      screen.queryByText(fill(viIssue.issueScreen.notOpen, "DH_2026_0004")),
+    ).not.toBeInTheDocument();
+  });
+
+  it("refuses a delivered order", async () => {
+    orderIs("delivered");
+    renderScreen(<IssueScreen />);
+
+    expect(
+      await screen.findByText(
+        fill(viIssue.issueScreen.notOpen, "DH_2026_0004"),
+      ),
+    ).toBeInTheDocument();
   });
 });
 

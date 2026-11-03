@@ -377,7 +377,18 @@
       "inventory_purchase_order_approved": "Đơn mua hàng {code} đã được duyệt.",
       "inventory_purchase_order_rejected": "Đơn mua hàng {code} bị từ chối: {reason}",
       "inventory_order_short": "Đơn hàng {code} ({customerName}) còn thiếu {shortItemCount} vật tư.",
-      "inventory_order_short_owner": "Đơn hàng {code} của bạn còn thiếu {shortItemCount} vật tư; bộ phận mua hàng đã được báo."
+      "inventory_order_short_owner": "Đơn hàng {code} của bạn còn thiếu {shortItemCount} vật tư; bộ phận mua hàng đã được báo.",
+      "production_order_released": "Lệnh sản xuất {code} đã được phát hành: bạn có tủ được giao trong lệnh này.",
+      "production_order_released_owner": "Lệnh sản xuất {code} cho đơn hàng {orderCode} của bạn đã được phát hành.",
+      "production_order_cancelled": "Lệnh sản xuất {code} đã bị huỷ. Lý do: {reason}",
+      "production_order_cancelled_owner": "Lệnh sản xuất {code} cho đơn hàng {orderCode} của bạn đã bị huỷ. Lý do: {reason}",
+      "production_order_completed": "Lệnh sản xuất {code} đã hoàn thành: mọi tủ đã xong công đoạn hoàn thiện.",
+      "production_order_completed_owner": "Lệnh sản xuất {code} cho đơn hàng {orderCode} của bạn đã hoàn thành.",
+      "production_unit_assigned": "Bạn được giao tủ {unitCode} trong lệnh sản xuất {code}.",
+      "production_issue_opened": "Sự cố mới ở tủ {unitCode} của lệnh sản xuất {code}, mức độ {severity, select, low {thấp} medium {trung bình} high {cao} other {{severity}}}.",
+      "production_issue_resolved": "Sự cố ở tủ {unitCode} của lệnh sản xuất {code} đã được giải quyết.",
+      "production_unit_overdue": "Tủ {unitCode} của lệnh sản xuất {code} đã quá hạn hoàn thành (dự kiến {plannedEndDate}).",
+      "production_unit_overdue_assignee": "Tủ {unitCode} bạn phụ trách trong lệnh sản xuất {code} đã quá hạn hoàn thành (dự kiến {plannedEndDate})."
     }
   },
   "english": "Tiếng Anh",
