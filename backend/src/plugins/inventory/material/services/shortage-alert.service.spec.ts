@@ -62,7 +62,7 @@ describeWithDatabase('ShortageAlertService (real Postgres)', () => {
     return made.orderId;
   };
 
-  it('tells purchasing and the owner once per short order, and releases on any order’s change', async () => {
+  it('tells purchasing, the production manager and the owner once per short order, and releases on any order’s change', async () => {
     const x = await db.createItem();
     await db.post({
       documentType: 'spec_opening',
@@ -94,7 +94,7 @@ describeWithDatabase('ShortageAlertService (real Postgres)', () => {
     expect(await outstanding(o3)).toEqual(both);
     const [toPurchasing, toOwner] = await noticesOf(o2);
     expect(toPurchasing).toMatchObject({
-      role_codes: ['purchasing'],
+      role_codes: ['purchasing', 'productionManager'],
       required_scope: 'material:read',
       dedupe_key: `order:${o2}`,
     });

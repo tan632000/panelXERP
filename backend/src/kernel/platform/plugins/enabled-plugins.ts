@@ -1,7 +1,7 @@
 /**
  * Plugin registry — catalog is compile-time; enable list from env at runtime.
  *
- * ENABLED_PLUGINS=crm,catalog,sales,inventory (backend/.env or root .env via compose)
+ * ENABLED_PLUGINS=crm,catalog,sales,inventory,production (backend/.env or root .env via compose)
  * Omit or empty → all registered plugins enabled.
  * Restart backend after change — no rebuild.
  */
@@ -13,6 +13,7 @@ import {
 import { catalogPlugin } from '@plugins/catalog/catalog.plugin';
 import { crmPlugin } from '@plugins/crm/crm.plugin';
 import { inventoryPlugin } from '@plugins/inventory/inventory.plugin';
+import { productionPlugin } from '@plugins/production/production.plugin';
 import { salesPlugin } from '@plugins/sales/sales.plugin';
 
 import type { ErpPlugin } from '@kernel/platform/plugins/plugin.contract';
@@ -24,6 +25,7 @@ export const PLUGIN_CATALOG: ErpPlugin[] = [
   catalogPlugin,
   salesPlugin,
   inventoryPlugin,
+  productionPlugin,
 ];
 
 const defaultPluginNames = PLUGIN_CATALOG.map((plugin) => plugin.name);

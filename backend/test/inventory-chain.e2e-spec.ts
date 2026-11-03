@@ -519,7 +519,7 @@ describe('Inventory chain (e2e)', () => {
       {
         event_type: 'inventory.order.short',
         dedupe_key: `order:${created.orderId}`,
-        role_codes: ['purchasing'],
+        role_codes: ['purchasing', 'productionManager'],
         user_ids: [],
       },
       {

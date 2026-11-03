@@ -23,6 +23,8 @@ describe('DataScopeService', () => {
     expect(scopeOf('storekeeper')).toBe('material');
     expect(scopeOf('sales')).toBe('ownSales');
     expect(scopeOf('engineer')).toBe('assignedEngineer');
+    expect(scopeOf('productionManager')).toBe('material');
+    expect(scopeOf('technician')).toBe('assignedTechnician');
   });
 
   it('gives full access the whole scope whatever the role code', () => {
@@ -93,6 +95,29 @@ describe('DataScopeService', () => {
     expect(materialListCondition('assignedEngineer', 5)).toEqual({
       salesOwnerId: NO_OWNER_ID,
     });
+    expect(materialListCondition('assignedTechnician', 5)).toEqual({
+      salesOwnerId: NO_OWNER_ID,
+    });
+  });
+
+  it('hides every sales-chain record and every material view from a technician', () => {
+    const technician = { userId: 11, role: 'technician' };
+    // Owning or being assigned the record by id never reaches it from the technician scope.
+    expect(service.canSee(technician, record)).toBe(false);
+    expect(service.canSee(technician, { salesOwnerId: 11 })).toBe(false);
+    expect(service.canSee(technician, { assignedEngineerId: 11 })).toBe(false);
+    expect(service.canSeeMaterial(technician, { salesOwnerId: 11 })).toBe(
+      false,
+    );
+    expect(() => service.assertVisible(technician, record, 'Order')).toThrow(
+      NotFoundException,
+    );
+  });
+
+  it('lets the production manager read any order material but no sales-chain record', () => {
+    const manager = { userId: 11, role: 'productionManager' };
+    expect(service.canSee(manager, record)).toBe(false);
+    expect(service.canSeeMaterial(manager, { salesOwnerId: 99 })).toBe(true);
   });
 
   it('answers 404, not 403, for a record outside the scope or missing', () => {

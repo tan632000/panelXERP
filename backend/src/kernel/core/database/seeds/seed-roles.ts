@@ -62,6 +62,13 @@ const PURCHASE_REQUEST_RAISE = [
   'purchase_request:create',
 ];
 
+/** What the roles that follow production, without running it, may read. */
+const PRODUCTION_VIEW = [
+  'production_order:read',
+  'production_progress:read',
+  'production_issue:read',
+];
+
 /** The director reads every estimate but never writes one: that is the engineers' work. */
 const DIRECTOR_GRANTS = [
   ...SALES_CHAIN_ALL.map((scope) =>
@@ -80,6 +87,7 @@ const DIRECTOR_GRANTS = [
   'stock_return:read',
   'stocktake:read',
   'stocktake:approve',
+  ...PRODUCTION_VIEW,
 ];
 
 /**
@@ -112,6 +120,7 @@ const ROLES: ReadonlyArray<
       'purchase_price:read',
       ...STOCK_VIEW,
       'material:read',
+      ...PRODUCTION_VIEW,
     ],
   ],
   [
@@ -128,6 +137,9 @@ const ROLES: ReadonlyArray<
       'reference_price:read',
       'stock:availability',
       'material:read',
+      // The progress of their own orders; issues stay with production.
+      'production_order:read',
+      'production_progress:read',
     ],
   ],
   [
@@ -213,6 +225,30 @@ const ROLES: ReadonlyArray<
       'stocktake:update',
       'stocktake:submit',
       'stocktake:cancel',
+    ],
+  ],
+  [
+    'Production Manager',
+    'productionManager',
+    'Runs the workshop: production orders, cabinet assignments, stage progress and issues; reads every order material, never a sales price',
+    [
+      'production_order:*',
+      'production_progress:*',
+      'production_issue:*',
+      'material:read',
+      'stock:availability',
+    ],
+  ],
+  [
+    'Technician',
+    'technician',
+    'Builds the cabinets assigned to them: stage progress, photos and issues',
+    [
+      'production_order:read',
+      'production_progress:read',
+      'production_progress:update',
+      'production_issue:read',
+      'production_issue:create',
     ],
   ],
 ];

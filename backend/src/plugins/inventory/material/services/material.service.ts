@@ -203,6 +203,20 @@ export class MaterialService {
     };
   }
 
+  /**
+   * The order's per-item figures, shortage included; null for a missing order. It checks no
+   * scope: the caller has already decided the actor may read the order.
+   */
+  async itemRowsOf(orderId: number): Promise<MaterialItemRow[] | null> {
+    const manager = this.dataSource.manager;
+    const order = await this.orders.getOrder(manager, orderId);
+    if (!order) return null;
+    const orderLines =
+      (await this.orders.getLines(manager, [orderId])).get(orderId) ?? [];
+    const stock = (await this.stockFigures(manager, [orderId])).get(orderId);
+    return this.itemRows(order, orderLines, stock);
+  }
+
   private async overBomIssues(
     manager: EntityManager,
     orderId: number,

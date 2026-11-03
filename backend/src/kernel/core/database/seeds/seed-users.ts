@@ -106,6 +106,30 @@ export const DEMO_USER_SPECS: readonly SeedUserSpec[] = [
     department: 'warehouse',
     title: 'Storekeeper',
   },
+  {
+    username: 'production_manager',
+    emailLocal: 'production.manager',
+    fullName: 'Demo Production Manager',
+    roleCode: 'productionManager',
+    department: 'planning',
+    title: 'Production Manager',
+  },
+  {
+    username: 'technician_a',
+    emailLocal: 'technician.a',
+    fullName: 'Demo Technician A',
+    roleCode: 'technician',
+    department: 'technical',
+    title: 'Technician',
+  },
+  {
+    username: 'technician_b',
+    emailLocal: 'technician.b',
+    fullName: 'Demo Technician B',
+    roleCode: 'technician',
+    department: 'technical',
+    title: 'Technician',
+  },
 ];
 
 /**

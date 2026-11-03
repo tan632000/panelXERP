@@ -23,15 +23,16 @@ import {
   type MaterialOrderHeader,
 } from '@plugins/sales/_shared/ports/order-material-read.port';
 
-const PURCHASING_ROLE = 'purchasing';
+const SHORTAGE_ROLES = ['purchasing', 'productionManager'];
 const CANCELLED_STATUS = 'cancelled';
 
 const dedupeKeyOf = (orderId: number) => `order:${orderId}`;
 
 /**
  * Shortage notices (D-15), after the commit that changed reservations: a notice is never part
- * of the stock change, and a failed one must not undo it. Purchasing and the order's sales
- * owner each get one open notice per short order; when the order's shortage reaches 0 — by its
+ * of the stock change, and a failed one must not undo it. Purchasing and the production manager
+ * share one open notice per short order and the order's sales owner gets another; when the
+ * order's shortage reaches 0 — by its
  * own change or another order's — both dedupe slots are released, and a cancelled order closes
  * both. Then the low-stock check runs for the touched items, whose available stock moved.
  */
@@ -99,7 +100,7 @@ export class ShortageAlertService {
     const short = await this.shortItemCount(orderId);
     if (short > 0) {
       await this.raise(order, short, ORDER_SHORT_EVENT, {
-        roleCodes: [PURCHASING_ROLE],
+        roleCodes: SHORTAGE_ROLES,
       });
       await this.raise(order, short, ORDER_SHORT_OWNER_EVENT, {
         roleCodes: [],

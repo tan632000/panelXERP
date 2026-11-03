@@ -9,6 +9,7 @@ import { ENABLED_PLUGINS } from '@kernel/platform/plugins/enabled-plugins';
 import { CATALOG_FEATURES } from '@plugins/catalog/catalog.features';
 import { CRM_FEATURES } from '@plugins/crm/crm.features';
 import { INVENTORY_FEATURES } from '@plugins/inventory/inventory.features';
+import { PRODUCTION_FEATURES } from '@plugins/production/production.features';
 import { SALES_FEATURES } from '@plugins/sales/sales.features';
 
 import type { ErpFeature } from '@kernel/platform/features/feature.contract';
@@ -25,6 +26,7 @@ const FEATURE_CATALOG: ErpFeature[] = [
   ...CATALOG_FEATURES,
   ...SALES_FEATURES,
   ...INVENTORY_FEATURES,
+  ...PRODUCTION_FEATURES,
 ];
 
 function resolveGlobalEnabledFeatures(): ErpFeature[] {

@@ -5,7 +5,7 @@ import type { DataScope } from '@shared/services/data-scope.service';
 /**
  * The `salesOwnerId` condition a list adds for an actor's data scope, so a list never fetches
  * a row the single-record check would answer 404. Full access adds none; a scope that reaches
- * no customer (an engineer's, tied to requests, or `material`) matches nothing.
+ * no customer (an engineer's, tied to requests, `material` or a technician's) matches nothing.
  */
 export function ownerCondition(
   scope: DataScope,
@@ -18,6 +18,7 @@ export function ownerCondition(
       return { salesOwnerId: userId };
     case 'assignedEngineer':
     case 'material':
+    case 'assignedTechnician':
       return { salesOwnerId: In([]) };
   }
 }

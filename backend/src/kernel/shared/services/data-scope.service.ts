@@ -10,12 +10,15 @@ import { RequestContextStore } from '@shared/context/request-context.store';
  *   assignedEngineer — requests (and their estimates) whose `assignedEngineerId` is the actor
  *   material         — every order's material view (purchasing, storekeeper) and no sales-chain
  *                      record: customers, requests, estimates, quotations and orders stay hidden
+ *   assignedTechnician — the production cabinets assigned to the actor; no sales-chain record and
+ *                      no material view
  *
  * Permissions still decide which actions are allowed; the scope only decides which records an
  * allowed action reaches. A record outside the scope answers 404, never 403, so its existence
  * is not disclosed.
  */
-export type DataScope = 'all' | 'ownSales' | 'assignedEngineer' | 'material';
+export type DataScope =
+  'all' | 'ownSales' | 'assignedEngineer' | 'material' | 'assignedTechnician';
 
 /** An owner id no user has, so `owner = NO_OWNER_ID` matches no row. */
 export const NO_OWNER_ID = -1;
@@ -32,6 +35,10 @@ export const ROLE_DATA_SCOPES: Readonly<Record<string, DataScope>> = {
   // permission; should one be granted later, `material` still reaches no sales-chain record.
   purchasing: 'material',
   storekeeper: 'material',
+  // The production manager plans every order's production and reads its materials, never a
+  // sales-chain record; a technician reaches only the cabinets assigned to them.
+  productionManager: 'material',
+  technician: 'assignedTechnician',
   sales: 'ownSales',
   engineer: 'assignedEngineer',
 };
@@ -65,6 +72,7 @@ export function materialListCondition(
     case 'ownSales':
       return { salesOwnerId: userId };
     case 'assignedEngineer':
+    case 'assignedTechnician':
       return { salesOwnerId: NO_OWNER_ID };
   }
 }
@@ -87,13 +95,14 @@ export class DataScopeService {
       case 'assignedEngineer':
         return record.assignedEngineerId === actor.userId;
       case 'material':
+      case 'assignedTechnician':
         return false;
     }
   }
 
   /**
    * Whether the actor may read the material view of an order: the `material` scope reaches
-   * every order, a sales actor only their own, an engineer none.
+   * every order, a sales actor only their own, an engineer or a technician none.
    */
   canSeeMaterial(
     actor: ScopedActor,
@@ -106,6 +115,7 @@ export class DataScopeService {
       case 'ownSales':
         return record.salesOwnerId === actor.userId;
       case 'assignedEngineer':
+      case 'assignedTechnician':
         return false;
     }
   }

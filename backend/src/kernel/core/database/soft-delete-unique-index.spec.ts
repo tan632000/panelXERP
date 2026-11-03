@@ -231,6 +231,7 @@ const DOCUMENT_NUMBER_INDEXES: ReadonlySet<string> = new Set([
   'uq_sales_quotations_code',
   'uq_sales_orders_code',
   'uq_purchase_orders_code',
+  'uq_production_orders_code',
   // An order is never deleted, only cancelled: this index counts cancelled rows on purpose, so
   // a quotation whose order was cancelled cannot be converted a second time.
   'uq_sales_orders_quotation_id',

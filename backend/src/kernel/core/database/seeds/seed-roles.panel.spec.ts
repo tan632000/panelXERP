@@ -20,6 +20,8 @@ const PANEL_ROLES = [
   'engineer',
   'purchasing',
   'storekeeper',
+  'productionManager',
+  'technician',
 ];
 
 /**
@@ -236,5 +238,66 @@ describe('panel-shop role matrix', () => {
     for (const role of roles) expect(PANEL_ROLES).toContain(role);
     expect(roles.filter((role) => role === 'sales')).toHaveLength(2);
     expect(roles.filter((role) => role === 'engineer')).toHaveLength(2);
+    expect(roles.filter((role) => role === 'productionManager')).toHaveLength(
+      1,
+    );
+    expect(roles.filter((role) => role === 'technician')).toHaveLength(2);
+  });
+
+  it('grants the production manager and technicians exactly the production matrix', () => {
+    expect([...grantsOf('productionManager')].sort()).toEqual(
+      [
+        'production_order:*',
+        'production_progress:*',
+        'production_issue:*',
+        'material:read',
+        'stock:availability',
+      ].sort(),
+    );
+    expect([...grantsOf('technician')].sort()).toEqual(
+      [
+        'production_order:read',
+        'production_progress:read',
+        'production_progress:update',
+        'production_issue:read',
+        'production_issue:create',
+      ].sort(),
+    );
+  });
+
+  it('keeps production roles away from sales records and prices', () => {
+    for (const role of ['productionManager', 'technician']) {
+      for (const scope of [
+        'order:read',
+        'purchase_price:read',
+        'reference_price:read',
+      ]) {
+        expect(holds(grantsOf(role), scope)).toBe(false);
+      }
+    }
+    expect(holds(grantsOf('technician'), 'material:read')).toBe(false);
+    expect(holds(grantsOf('technician'), 'production_issue:resolve')).toBe(
+      false,
+    );
+    expect(holds(grantsOf('technician'), 'production_order:create')).toBe(
+      false,
+    );
+  });
+
+  it('lets managers and sales follow production without running it', () => {
+    for (const role of ['director', 'salesManager']) {
+      for (const scope of [
+        'production_order:read',
+        'production_progress:read',
+        'production_issue:read',
+      ]) {
+        expect(holds(grantsOf(role), scope)).toBe(true);
+      }
+      expect(holds(grantsOf(role), 'production_order:create')).toBe(false);
+    }
+    const sales = grantsOf('sales');
+    expect(holds(sales, 'production_order:read')).toBe(true);
+    expect(holds(sales, 'production_progress:read')).toBe(true);
+    expect(holds(sales, 'production_issue:read')).toBe(false);
   });
 });

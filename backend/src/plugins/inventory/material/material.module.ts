@@ -19,6 +19,6 @@ import { SalesSharedModule } from '@plugins/sales/_shared/sales-shared.module';
     ReservationService,
     ShortageAlertService,
   ],
-  exports: [ReservationService, ShortageAlertService],
+  exports: [MaterialService, ReservationService, ShortageAlertService],
 })
 export class MaterialModule {}

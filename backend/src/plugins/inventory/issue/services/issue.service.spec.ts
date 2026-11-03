@@ -10,6 +10,7 @@ import {
 import { playIssueSteps } from '@plugins/inventory/issue/issue-worked-example.helper-spec';
 import { MaterialService } from '@plugins/inventory/material/services/material.service';
 import { OrderMaterialReadPort } from '@plugins/sales/_shared/ports/order-material-read.port';
+import { OrderProductionPort } from '@plugins/sales/_shared/ports/order-production.port';
 
 interface DocumentBody {
   id: number;
@@ -83,6 +84,42 @@ describeWithDatabase('StockIssueService (real Postgres)', () => {
     await h.issue(2147483000, [{ itemId: x, quantity: 1 }]).expect(404);
     expect(await h.movementCount(mine, x)).toBe(0);
     expect(await h.movementCount(other, x)).toBe(0);
+  });
+
+  it('keeps an order in production demanding, reserving, issuing and taking returns, until it is delivered', async () => {
+    const x = await h.db.createItem();
+    await h.stockOf(x, '3', 1000);
+    const { orderId } = await h.kit.createOrder({
+      bom: [{ itemId: x, perPanel: '5' }],
+    });
+    expect(await h.kit.reservationsOf(x)).toEqual({ [orderId]: '3' });
+
+    // A release moves the order the way the production port does, and nothing else.
+    await h.db.dataSource.transaction((manager) =>
+      new OrderProductionPort().moveStatus(
+        manager,
+        orderId,
+        'open',
+        'in_production',
+      ),
+    );
+    expect(await h.kit.reservationsOf(x)).toEqual({ [orderId]: '3' });
+
+    // Its demand still takes what arrives, and the workshop still issues and returns.
+    await h.kit.receive(x, '2');
+    expect(await h.kit.reservationsOf(x)).toEqual({ [orderId]: '5' });
+    await h.issue(orderId, [{ itemId: x, quantity: 2 }]).expect(201);
+    await h.workshopReturn(orderId, [{ itemId: x, quantity: 1 }]).expect(201);
+    expect(await h.netIssued(orderId, x)).toBe('1');
+
+    // A delivered order is out of both lists.
+    await h.db.dataSource.query(
+      `UPDATE sales_orders SET status = 'delivered' WHERE id = $1`,
+      [orderId],
+    );
+    await h.issue(orderId, [{ itemId: x, quantity: 1 }]).expect(409);
+    await h.workshopReturn(orderId, [{ itemId: x, quantity: 1 }]).expect(409);
+    expect(await h.netIssued(orderId, x)).toBe('1');
   });
 
   it('lists only the documents of orders the reader’s scope reaches', async () => {

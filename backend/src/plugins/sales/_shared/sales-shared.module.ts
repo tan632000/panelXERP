@@ -6,6 +6,7 @@ import { User } from '@kernel/core/users/entities/user.entity';
 import { EstimateReadPort } from '@plugins/sales/_shared/ports/estimate-read.port';
 import { OrderLifecycleRegistry } from '@plugins/sales/_shared/ports/order-lifecycle-registry';
 import { OrderMaterialReadPort } from '@plugins/sales/_shared/ports/order-material-read.port';
+import { OrderProductionPort } from '@plugins/sales/_shared/ports/order-production.port';
 import { RequestCloseRegistry } from '@plugins/sales/_shared/ports/request-close-registry';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
 import { SalesUserLookup } from '@plugins/sales/_shared/services/sales-user-lookup.service';
@@ -21,6 +22,7 @@ import { SalesUserLookup } from '@plugins/sales/_shared/services/sales-user-look
     EstimateReadPort,
     OrderLifecycleRegistry,
     OrderMaterialReadPort,
+    OrderProductionPort,
     RequestCloseRegistry,
     SalesUserLookup,
   ],
@@ -29,6 +31,7 @@ import { SalesUserLookup } from '@plugins/sales/_shared/services/sales-user-look
     EstimateReadPort,
     OrderLifecycleRegistry,
     OrderMaterialReadPort,
+    OrderProductionPort,
     RequestCloseRegistry,
     SalesUserLookup,
   ],
