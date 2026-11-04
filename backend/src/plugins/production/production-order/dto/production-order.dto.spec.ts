@@ -8,7 +8,21 @@ function refusedFields(body: Record<string, unknown>): string[] {
   return validateSync(dto).map((e) => e.property);
 }
 
+function messagesOf(body: Record<string, unknown>): string[] {
+  const dto = plainToInstance(UpdateProductionUnitDto, body);
+  return validateSync(dto).flatMap((e) => Object.values(e.constraints ?? {}));
+}
+
 describe('UpdateProductionUnitDto', () => {
+  it.each(['abc', 0, 2147483648, 1.5])(
+    'refuses the assignee %p with one message',
+    (assigneeId) => {
+      expect(messagesOf({ assigneeId })).toEqual([
+        'Assignee must be a user id.',
+      ]);
+    },
+  );
+
   it('leaves a field that is not sent as it is', () => {
     expect(refusedFields({})).toEqual([]);
     expect(refusedFields({ plannedEndDate: '2026-12-31' })).toEqual([]);

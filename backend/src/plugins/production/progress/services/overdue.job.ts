@@ -1,6 +1,7 @@
 import {
   Injectable,
   Logger,
+  type BeforeApplicationShutdown,
   type OnApplicationBootstrap,
 } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
@@ -13,13 +14,22 @@ import { OverdueService } from '@plugins/production/progress/services/overdue.se
  * missed while the backend was down is made up (the dedupe makes a repeat harmless).
  */
 @Injectable()
-export class OverdueJob implements OnApplicationBootstrap {
+export class OverdueJob
+  implements OnApplicationBootstrap, BeforeApplicationShutdown
+{
   private readonly logger = new Logger(OverdueJob.name);
+  private startupRun: Promise<void> | undefined;
 
   constructor(private readonly overdue: OverdueService) {}
 
-  onApplicationBootstrap(): Promise<void> {
-    return this.runToday();
+  /** Not awaited: a slow check must not keep the app from listening. */
+  onApplicationBootstrap(): void {
+    this.startupRun = this.runToday();
+  }
+
+  /** The app must not close under a check that is still writing. */
+  async beforeApplicationShutdown(): Promise<void> {
+    await this.startupRun;
   }
 
   @Cron('0 7 * * *', { timeZone: 'Asia/Ho_Chi_Minh' })

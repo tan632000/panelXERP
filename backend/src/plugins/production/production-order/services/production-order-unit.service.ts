@@ -82,6 +82,26 @@ export class ProductionOrderUnitService {
           `${PRODUCTION_ORDER_LABEL} cabinet not found`,
         );
       }
+      // The first check ran before any lock. Share-locking the account and its role rows here
+      // makes a role change or a deactivation wait for this assignment, or be seen by it.
+      if (dto.assigneeId !== undefined) {
+        const holders: unknown[] = await manager.query(
+          `SELECT 1
+             FROM users account
+             JOIN user_roles account_role ON account_role.user_id = account.id
+             JOIN roles role ON role.id = account_role.role_id
+            WHERE account.id = $1 AND account.is_deleted = false
+              AND account.deleted_at IS NULL AND account.is_active = true
+              AND role.code = $2 AND role.deleted_at IS NULL
+              FOR SHARE OF account, account_role`,
+          [dto.assigneeId, PRODUCTION_TECHNICIAN_ROLE],
+        );
+        if (holders.length === 0) {
+          throw new BadRequestException(
+            'The assignee must be an active technician.',
+          );
+        }
+      }
       const [finished]: Array<{ done: boolean }> = await manager.query(
         `SELECT EXISTS (SELECT 1 FROM production_unit_stages
                          WHERE unit_id = $1 AND stage = $2 AND status = $3) AS done`,

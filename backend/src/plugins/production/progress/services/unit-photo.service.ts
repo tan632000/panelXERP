@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+import { isFeatureKeyEnabled } from '@kernel/platform/features/feature-module.utils';
+
 import { DataScopeService } from '@shared/services/data-scope.service';
 import { S3StorageService } from '@shared/services/s3-storage.service';
 
@@ -29,6 +31,7 @@ import {
 import { sanitizePhotoName } from '@plugins/production/progress/utils/photo-filename.util';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
+import type { ErpFeature } from '@kernel/platform/features/feature.contract';
 import type { ProductionStage } from '@plugins/production/production-order/enums/production-stage.enum';
 import type { UploadPhotoDto } from '@plugins/production/progress/dto/progress.dto';
 import type { Readable } from 'stream';
@@ -58,6 +61,15 @@ export type UploadedPhoto = Pick<
   Express.Multer.File,
   'originalname' | 'buffer' | 'size'
 >;
+
+/**
+ * The catalog the issue check reads. `production.features.ts` lists it in full, but importing
+ * that file here would close a cycle through the progress module; the key is all this needs.
+ */
+const ISSUE_FEATURE_KEY = 'production-issue';
+const ISSUE_CATALOG: readonly ErpFeature[] = [
+  { key: ISSUE_FEATURE_KEY, plugin: 'production' },
+];
 
 const WORKING = [ProductionOrderStatus.RELEASED];
 const limitMessage = () =>
@@ -120,6 +132,12 @@ export class UnitPhotoService {
     actor: AuthUserPayload,
   ): Promise<UnitPhotoView> {
     const checked = this.validate(file);
+    if (
+      dto.issueId !== undefined &&
+      !isFeatureKeyEnabled(ISSUE_CATALOG, ISSUE_FEATURE_KEY)
+    ) {
+      throw new BadRequestException('Issue reports are not enabled.');
+    }
     // Refuse a cabinet the actor cannot read before storing anything.
     await this.queries.findOne(unitId, actor);
 

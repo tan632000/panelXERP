@@ -265,13 +265,51 @@ describeWithDatabase('Unit photos (real Postgres)', () => {
       const [first, second] = order.units;
       const foreign = await openIssue(first.id);
 
-      await p
+      const res = await p
         .upload(second.id, { name: 'a.png', bytes: PNG }, { issueId: foreign })
         .expect(400);
 
+      expect((res.body as { message: string }).message).toBe(
+        'The issue does not belong to this cabinet.',
+      );
       const [stored] = p.storage.upload.mock.calls[0];
       expect(p.storage.deleteObject).toHaveBeenCalledWith(stored);
       expect(await p.photoRows(second.id)).toBe(0);
+    });
+
+    it('refuses an issue when issue reports are not enabled (400), before anything is stored', async () => {
+      const { unitId } = await cabinet();
+      const issueId = await openIssue(unitId);
+      const enabled = process.env.ENABLED_FEATURES;
+      process.env.ENABLED_FEATURES = 'production-order,progress';
+
+      try {
+        const res = await p
+          .upload(unitId, { name: 'a.png', bytes: PNG }, { issueId })
+          .expect(400);
+
+        expect((res.body as { message: string }).message).toBe(
+          'Issue reports are not enabled.',
+        );
+      } finally {
+        if (enabled === undefined) delete process.env.ENABLED_FEATURES;
+        else process.env.ENABLED_FEATURES = enabled;
+      }
+      expect(p.storage.upload).not.toHaveBeenCalled();
+      expect(await p.photoRows(unitId)).toBe(0);
+    });
+
+    it('still takes a photo without an issue when issue reports are not enabled', async () => {
+      const { unitId } = await cabinet();
+      const enabled = process.env.ENABLED_FEATURES;
+      process.env.ENABLED_FEATURES = 'production-order,progress';
+
+      try {
+        await p.upload(unitId, { name: 'a.png', bytes: PNG }).expect(201);
+      } finally {
+        if (enabled === undefined) delete process.env.ENABLED_FEATURES;
+        else process.env.ENABLED_FEATURES = enabled;
+      }
     });
 
     it('refuses an issue that does not exist (400)', async () => {

@@ -1,3 +1,5 @@
+import { randomBytes } from 'crypto';
+
 import { ConflictException } from '@nestjs/common';
 
 import { queuedBehind } from '@kernel/shared/testing/queued-behind.helper-spec';
@@ -199,5 +201,76 @@ describeWithDatabase('Production order races (real Postgres)', () => {
       [first.id],
     );
     expect(unit.assignee_id).toBe(h.actors.techA.userId);
+  });
+
+  describe('the technician role of an assignee', () => {
+    let spareId: number;
+
+    /** A technician of its own, so removing the role cannot reach another spec's account. */
+    beforeEach(async () => {
+      const suffix = randomBytes(4).toString('hex');
+      const [user]: Array<{ id: number }> = await h.dataSource.query(
+        `INSERT INTO users (username, email, password_hash, full_name)
+         VALUES ($1, $2, 'x', 'Spare technician') RETURNING id`,
+        [`spare_${suffix}`, `spare_${suffix}@example.test`],
+      );
+      spareId = user.id;
+      await h.dataSource.query(
+        `INSERT INTO user_roles (user_id, role_id)
+         SELECT $1, id FROM roles WHERE code = 'technician'`,
+        [spareId],
+      );
+    });
+
+    afterEach(async () => {
+      await h.dataSource.query(`DELETE FROM user_roles WHERE user_id = $1`, [
+        spareId,
+      ]);
+      await h.dataSource.query(`DELETE FROM users WHERE id = $1`, [spareId]);
+    });
+
+    const assigneeOf = async (unitId: number) => {
+      const [unit]: Array<{ assignee_id: number }> = await h.dataSource.query(
+        `SELECT assignee_id FROM production_units WHERE id = $1`,
+        [unitId],
+      );
+      return unit.assignee_id;
+    };
+
+    it('refuses an assignee whose role was removed after the first check', async () => {
+      const { id } = await readyOrder();
+      const [first] = await h.units(id);
+
+      const [result] = await queuedBehind<Response>(
+        h.dataSource,
+        HEADER_LOCK,
+        [id],
+        [async () => h.assign(id, first.id, { assigneeId: spareId })],
+        // The assignment is past its first check and queued; the role goes before it runs.
+        () =>
+          h.dataSource
+            .query(`DELETE FROM user_roles WHERE user_id = $1`, [spareId])
+            .then(() => undefined),
+      );
+
+      expect(statusOf(result)).toBe(400);
+      expect(await assigneeOf(first.id)).toBe(h.actors.techA.userId);
+    });
+
+    it('waits for a role change in flight and then refuses the assignee', async () => {
+      const { id } = await readyOrder();
+      const [first] = await h.units(id);
+
+      const [result] = await queuedBehind<Response>(
+        h.dataSource,
+        // Holds the role row until the contender is queued, then removes it on commit.
+        `DELETE FROM user_roles WHERE user_id = $1`,
+        [spareId],
+        [async () => h.assign(id, first.id, { assigneeId: spareId })],
+      );
+
+      expect(statusOf(result)).toBe(400);
+      expect(await assigneeOf(first.id)).toBe(h.actors.techA.userId);
+    });
   });
 });

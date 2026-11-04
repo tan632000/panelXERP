@@ -4,6 +4,7 @@ import {
   IsInt,
   IsString,
   Matches,
+  registerDecorator,
   Max,
   MaxLength,
   Min,
@@ -22,6 +23,24 @@ export class CreateProductionOrderDto {
   orderId: number;
 }
 
+/** One check, so a bad id answers one message rather than one per rule. */
+function IsUserId() {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'isUserId',
+      target: object.constructor,
+      propertyName,
+      options: { message: 'Assignee must be a user id.' },
+      validator: {
+        validate: (value: unknown) =>
+          Number.isInteger(value) &&
+          (value as number) >= 1 &&
+          (value as number) <= 2147483647,
+      },
+    });
+  };
+}
+
 /**
  * The assignment of one cabinet; a field left out stays as it is. Null is refused rather than
  * skipped: a released cabinet must keep a technician and a planned end date.
@@ -30,9 +49,7 @@ export class UpdateProductionUnitDto {
   @ApiPropertyOptional({ description: 'Account holding the technician role' })
   @ValidateIf((o: UpdateProductionUnitDto) => o.assigneeId !== undefined)
   @Type(() => Number)
-  @IsInt({ message: 'Assignee must be a user id.' })
-  @Min(1, { message: 'Assignee must be a user id.' })
-  @Max(2147483647, { message: 'Assignee must be a user id.' })
+  @IsUserId()
   assigneeId?: number;
 
   @ApiPropertyOptional({
