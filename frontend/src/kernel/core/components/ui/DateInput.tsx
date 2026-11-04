@@ -1,6 +1,7 @@
 "use client";
 
 import { offset } from "@floating-ui/react";
+import { isValid, parse } from "date-fns";
 import { enUS } from "date-fns/locale";
 import { useTranslations } from "next-intl";
 import { forwardRef, useEffect, useRef, useState } from "react";
@@ -23,7 +24,7 @@ registerLocale("en", enUS);
 interface DateInputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   locked?: boolean;
   error?: boolean;
-  onOpenCalendar?: () => void;
+  onOpenCalendar?: (input: HTMLInputElement | null) => void;
 }
 
 const DateInputField = forwardRef<HTMLInputElement, DateInputFieldProps>(
@@ -67,8 +68,8 @@ const DateInputField = forwardRef<HTMLInputElement, DateInputFieldProps>(
           // state), so an explicit click opens the calendar like the icon
           // does. Focus alone still does not open it (`preventOpenOnFocus`),
           // keeping keyboard tab-through quiet.
-          onClick={() => {
-            if (!isLocked) onOpenCalendar?.();
+          onClick={(event) => {
+            if (!isLocked) onOpenCalendar?.(event.currentTarget);
           }}
           className={cn(
             "min-w-0 flex-1 border-none bg-transparent text-sm tabular-nums text-text-primary outline-none [font-family:inherit]",
@@ -83,8 +84,12 @@ const DateInputField = forwardRef<HTMLInputElement, DateInputFieldProps>(
           disabled={isLocked}
           aria-label={t("openCalendar")}
           onMouseDown={(event) => event.preventDefault()}
-          onClick={() => {
-            if (!isLocked) onOpenCalendar?.();
+          onClick={(event) => {
+            if (isLocked) return;
+            const sibling = event.currentTarget.previousElementSibling;
+            onOpenCalendar?.(
+              sibling instanceof HTMLInputElement ? sibling : null,
+            );
           }}
           className={cn(
             "inline-flex shrink-0 border-none bg-transparent p-0 text-text-tertiary",
@@ -97,6 +102,23 @@ const DateInputField = forwardRef<HTMLInputElement, DateInputFieldProps>(
     );
   },
 );
+
+const TYPED_DATE = /^\d{2}\/\d{2}\/\d{4}$/;
+
+/** A whole dd/MM/yyyy text inside min/max, else undefined. */
+function typedDateInRange(
+  text: string,
+  min?: string,
+  max?: string,
+): Date | undefined {
+  const trimmed = text.trim();
+  if (!TYPED_DATE.test(trimmed)) return undefined;
+  const date = parse(trimmed, "dd/MM/yyyy", new Date());
+  if (!isValid(date)) return undefined;
+  const iso = toIsoDate(date);
+  if ((min && iso < min) || (max && iso > max)) return undefined;
+  return date;
+}
 
 export interface DateInputProps {
   value: string;
@@ -135,8 +157,15 @@ export function DateInput({
   const minDate = parseIsoDate(min ?? "");
   const maxDate = parseIsoDate(max ?? "");
   const [isOpen, setIsOpen] = useState(false);
+  // Month the calendar opens on when the field holds a whole typed date; set on each open.
+  const [openToDate, setOpenToDate] = useState<Date | undefined>();
   const rootRef = useRef<HTMLDivElement>(null);
   const reportedOpen = useRef(false);
+
+  const openCalendar = (input: HTMLInputElement | null) => {
+    setOpenToDate(typedDateInRange(input?.value ?? "", min, max));
+    setIsOpen(true);
+  };
 
   useEffect(() => {
     if (reportedOpen.current === isOpen) return;
@@ -200,6 +229,19 @@ export function DateInput({
           }
         }}
         open={isOpen}
+        openToDate={openToDate}
+        // The picker's own Tab-close only runs for its internal open state, which the
+        // controlled `open` never sets. Day keys reach this prop too; only the field's
+        // own input (inside the root, unlike the portaled calendar) closes it.
+        onKeyDown={(event) => {
+          if (
+            event.key === "Tab" &&
+            event.target instanceof Node &&
+            rootRef.current?.contains(event.target)
+          ) {
+            setIsOpen(false);
+          }
+        }}
         onClickOutside={(event) => {
           const target = "target" in event ? event.target : null;
           if (target instanceof Node && rootRef.current?.contains(target)) {
@@ -239,7 +281,7 @@ export function DateInput({
             locked={locked}
             error={error}
             className={inputClassName}
-            onOpenCalendar={() => setIsOpen(true)}
+            onOpenCalendar={openCalendar}
           />
         }
       />
