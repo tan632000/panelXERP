@@ -1297,7 +1297,7 @@ export function resolveNotificationMessage(
           unitCode: field(payload.unitCode),
           reason: field(payload.reason),
           severity: field(payload.severity),
-          plannedEndDate: field(payload.plannedEndDate),
+          plannedEndDate: formatIsoDate(field(payload.plannedEndDate)),
         },
       };
     }

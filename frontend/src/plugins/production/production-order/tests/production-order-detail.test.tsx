@@ -12,12 +12,18 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { NotificationProvider } from "@/kernel/core/contexts/NotificationContext";
+import { formatIsoDateTime } from "@/kernel/core/lib/formatters";
+import enProduction from "@/kernel/langs/en/production.json";
 import viCommon from "@/kernel/langs/vi/common.json";
 import viModal from "@/kernel/langs/vi/modal.json";
 import viProduction from "@/kernel/langs/vi/production.json";
 import viStatus from "@/kernel/langs/vi/status.json";
 
 import { ProductionOrderDetailPage } from "@plugins/production/production-order/components/ProductionOrderDetailPage";
+import {
+  PRODUCTION_ORDER_EVENTS,
+  productionOrderQueryKeys,
+} from "@plugins/production/production-order/constants";
 import { ProductionOrderPermission } from "@plugins/production/production-order/permissions/production-order-permission.keys";
 
 import type {
@@ -130,13 +136,12 @@ function respond(detail: ProductionOrderDetail) {
   });
 }
 
+let client: QueryClient;
+
 function renderPage() {
+  client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider
-      client={
-        new QueryClient({ defaultOptions: { queries: { retry: false } } })
-      }
-    >
+    <QueryClientProvider client={client}>
       <NextIntlClientProvider
         locale="vi"
         messages={{
@@ -420,6 +425,161 @@ describe("ProductionOrderDetailPage", () => {
     await waitFor(() => expect(date).toHaveValue("20/11/2026"));
   });
 
+  it("shows the saved date again after Enter on text that is not a date", async () => {
+    renderPage();
+    const date = await dateField("MSB-01-1");
+    date.focus();
+
+    fireEvent.change(date, { target: { value: "31/02/2026" } });
+    fireEvent.keyDown(date, { key: "Enter" });
+
+    await waitFor(() => expect(date).toHaveValue("20/11/2026"));
+    await settle();
+    expect(apiPatch).not.toHaveBeenCalled();
+  });
+
+  it("shows the saved date and sends nothing more when a save after Enter is refused", async () => {
+    apiPatch.mockRejectedValue({
+      isAxiosError: true,
+      response: { status: 409, data: { message: "Cabinet is finished." } },
+    });
+    renderPage();
+    const date = await dateField("MSB-01-1");
+    date.focus();
+
+    fireEvent.change(date, { target: { value: "26/11/2026" } });
+    fireEvent.keyDown(date, { key: "Enter" });
+
+    await waitFor(() => expect(date).toHaveValue("20/11/2026"));
+    fireEvent.blur(date);
+    await settle();
+    expect(apiPatch).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps focus in the field after an Enter save refreshes the order", async () => {
+    const saved = order();
+    saved.units[0].plannedEndDate = "2026-11-26";
+    apiPatch.mockImplementation(() => {
+      respond(saved);
+      return Promise.resolve({ data: saved });
+    });
+    renderPage();
+    const date = await dateField("MSB-01-1");
+    date.focus();
+
+    fireEvent.change(date, { target: { value: "26/11/2026" } });
+    fireEvent.keyDown(date, { key: "Enter" });
+
+    await waitFor(async () =>
+      expect(await dateField("MSB-01-1")).toHaveValue("26/11/2026"),
+    );
+    await settle();
+    expect(document.activeElement).toBe(await dateField("MSB-01-1"));
+  });
+
+  /** The order comes back with a planned end date someone else set meanwhile. */
+  const orderComesBack = async (plannedEndDate: string) => {
+    const moved = order();
+    moved.units[0].plannedEndDate = plannedEndDate;
+    respond(moved);
+    // The query tells its observers in a later task; the cell renders with it before this returns.
+    await act(async () => {
+      client.setQueryData(productionOrderQueryKeys.detail(3), moved);
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+  };
+
+  it("saves the date it first showed once the order comes back with another", async () => {
+    apiPatch.mockResolvedValue({ data: order() });
+    renderPage();
+    const date = await dateField("MSB-01-1");
+    await orderComesBack("2026-11-28");
+    await waitFor(() => expect(date).toHaveValue("28/11/2026"));
+    date.focus();
+
+    fireEvent.change(date, { target: { value: "20/11/2026" } });
+    fireEvent.keyDown(date, { key: "Enter" });
+
+    await waitFor(() =>
+      expect(apiPatch).toHaveBeenCalledWith("/production/orders/3/units/31", {
+        plannedEndDate: "2026-11-20",
+      }),
+    );
+  });
+
+  it("shows the date the order came back with after Enter on text that is not a date", async () => {
+    renderPage();
+    const date = await dateField("MSB-01-1");
+    await orderComesBack("2026-11-28");
+    await waitFor(() => expect(date).toHaveValue("28/11/2026"));
+    date.focus();
+
+    fireEvent.change(date, { target: { value: "31/02/2026" } });
+    fireEvent.keyDown(date, { key: "Enter" });
+
+    await waitFor(() => expect(date).toHaveValue("28/11/2026"));
+    await settle();
+    expect(apiPatch).not.toHaveBeenCalled();
+  });
+
+  it("saves a date again once the order comes back with the one it replaced", async () => {
+    const saved = order();
+    saved.units[0].plannedEndDate = "2026-11-26";
+    apiPatch.mockImplementation(() => {
+      respond(saved);
+      return Promise.resolve({ data: saved });
+    });
+    renderPage();
+    const date = await dateField("MSB-01-1");
+    date.focus();
+    fireEvent.change(date, { target: { value: "26/11/2026" } });
+    fireEvent.keyDown(date, { key: "Enter" });
+    await waitFor(() => expect(apiPatch).toHaveBeenCalledTimes(1));
+    await settle();
+
+    // Still in the field, which keeps its text while it has focus.
+    await orderComesBack("2026-11-20");
+    fireEvent.change(date, { target: { value: "26/11/2026" } });
+    fireEvent.keyDown(date, { key: "Enter" });
+
+    await waitFor(() => expect(apiPatch).toHaveBeenCalledTimes(2));
+    expect(apiPatch).toHaveBeenLastCalledWith("/production/orders/3/units/31", {
+      plannedEndDate: "2026-11-26",
+    });
+  });
+
+  it("shows the date the order came back with when a save sent before it is refused", async () => {
+    let refuse: (reason: unknown) => void = () => {};
+    apiPatch.mockImplementation(
+      () =>
+        new Promise((_, reject) => {
+          refuse = reject;
+        }),
+    );
+    renderPage();
+    const date = await dateField("MSB-01-1");
+    date.focus();
+    fireEvent.change(date, { target: { value: "26/11/2026" } });
+    fireEvent.keyDown(date, { key: "Enter" });
+    await waitFor(() => expect(apiPatch).toHaveBeenCalledTimes(1));
+
+    await orderComesBack("2026-11-28");
+    // Another Enter while the save is out, on text that is not a date.
+    fireEvent.change(date, { target: { value: "31/02/2026" } });
+    fireEvent.keyDown(date, { key: "Enter" });
+    await act(async () => {
+      refuse({
+        isAxiosError: true,
+        response: { status: 409, data: { message: "Cabinet is finished." } },
+      });
+    });
+
+    await waitFor(() => expect(date).toHaveValue("28/11/2026"));
+    fireEvent.blur(date);
+    await settle();
+    expect(apiPatch).toHaveBeenCalledTimes(1);
+  });
+
   it("shows the cabinet codes a release refused for lacking a technician or a date", async () => {
     apiPost.mockRejectedValue({
       isAxiosError: true,
@@ -566,5 +726,96 @@ describe("ProductionOrderDetailPage shortage panel", () => {
     expect(
       screen.getByText(viProduction.stages.material_prep),
     ).toBeInTheDocument();
+  });
+});
+
+describe("ProductionOrderDetailPage history", () => {
+  const history = (): ProductionOrderDetail["events"] => [
+    {
+      id: 1,
+      event: "created",
+      actorId: 50,
+      actorName: "Quản lý SX",
+      unitCode: null,
+      stage: null,
+      severity: null,
+      reason: null,
+      createdAt: "2026-10-30T08:00:00.000Z",
+    },
+    {
+      id: 2,
+      event: "issue_reported",
+      actorId: 61,
+      actorName: "Kỹ thuật A",
+      unitCode: "MSB-01-1",
+      stage: "wiring",
+      severity: "high",
+      reason: "Thiếu dây cáp",
+      createdAt: "2026-10-31T09:30:00.000Z",
+    },
+  ];
+
+  it("lists the events newest first with their stage and severity", async () => {
+    respond(order({ events: history() }));
+    renderPage();
+
+    const list = await screen.findByRole("list", {
+      name: viProduction.history.title,
+    });
+    const rows = within(list).getAllByRole("listitem");
+    expect(rows).toHaveLength(2);
+
+    expect(rows[0]).toHaveTextContent(
+      formatIsoDateTime("2026-10-31T09:30:00.000Z"),
+    );
+    expect(rows[0]).toHaveTextContent("Kỹ thuật A");
+    expect(rows[0]).toHaveTextContent(
+      viProduction.history.events.issue_reported,
+    );
+    expect(rows[0]).toHaveTextContent("MSB-01-1");
+    expect(rows[0]).toHaveTextContent(viProduction.stages.wiring);
+    expect(rows[0]).toHaveTextContent(viProduction.issues.severities.high);
+    expect(rows[0]).toHaveTextContent("Thiếu dây cáp");
+
+    expect(rows[1]).toHaveTextContent("Quản lý SX");
+    expect(rows[1]).toHaveTextContent(viProduction.history.events.created);
+  });
+
+  it("shows no history section when the response has no events", async () => {
+    const withoutEvents: ProductionOrderDetail = order();
+    delete withoutEvents.events;
+    respond(withoutEvents);
+    renderPage();
+
+    await screen.findByText("MSB-01-1");
+    expect(
+      screen.queryByText(viProduction.history.title),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(viProduction.history.empty),
+    ).not.toBeInTheDocument();
+  });
+
+  it("says so when the order has no history yet", async () => {
+    respond(order({ events: [] }));
+    renderPage();
+
+    expect(
+      await screen.findByText(viProduction.history.title),
+    ).toBeInTheDocument();
+    expect(screen.getByText(viProduction.history.empty)).toBeInTheDocument();
+  });
+});
+
+describe("production order event labels", () => {
+  it.each([
+    ["vi", viProduction],
+    ["en", enProduction],
+  ])("has a %s label for every event", (_locale, messages) => {
+    for (const event of PRODUCTION_ORDER_EVENTS) {
+      expect(
+        (messages.history.events as Record<string, string>)[event],
+      ).toBeTruthy();
+    }
   });
 });

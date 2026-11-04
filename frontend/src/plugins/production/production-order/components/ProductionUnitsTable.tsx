@@ -2,7 +2,8 @@
 
 import { isValid, parse } from "date-fns";
 import { useTranslations } from "next-intl";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 import { useAuth } from "@/kernel/core/auth/AuthContext";
 import { DateInput } from "@/kernel/core/components/ui/DateInput";
@@ -121,8 +122,6 @@ export function ProductionUnitsTable({
         }
         return (
           <PlannedEndDateCell
-            // A saved date replaces the draft; the key remounts the cell with it.
-            key={row.plannedEndDate ?? ""}
             saved={row.plannedEndDate ?? ""}
             onCommit={(value, onFailed) =>
               onChange(row.id, { plannedEndDate: value }, onFailed)
@@ -167,9 +166,34 @@ function PlannedEndDateCell({
   onCommit: (value: string, onFailed: () => void) => void;
 }>) {
   const [draft, setDraft] = useState(saved);
+  // A saved date replaces the draft; adjusted while rendering so the field is not remounted.
+  const [prevSaved, setPrevSaved] = useState(saved);
+  // Counts every saved date that arrives, so one that comes back to an earlier value still counts.
+  const [savedVersion, setSavedVersion] = useState(0);
+  if (saved !== prevSaved) {
+    setPrevSaved(saved);
+    setDraft(saved);
+    setSavedVersion((version) => version + 1);
+  }
+  // A refused save settles after later renders; its handler reads the newest saved date here.
+  const latest = useRef({ saved, version: savedVersion });
+  useEffect(() => {
+    latest.current = { saved, version: savedVersion };
+  });
   const rootRef = useRef<HTMLDivElement>(null);
+  // Set while the cell blurs and refocuses its own field, which is not leaving it.
+  const resetting = useRef(false);
   // The last date sent, so a pick of the saved date after a save of another is still sent.
   const sent = useRef(saved);
+  // The saved version `sent` last followed; a newer one (a save, another change) replaces it.
+  const sentFor = useRef(savedVersion);
+  const lastSent = () => {
+    if (sentFor.current !== latest.current.version) {
+      sentFor.current = latest.current.version;
+      sent.current = latest.current.saved;
+    }
+    return sent.current;
+  };
   const calendarOpen = useRef(false);
   // The text left when focus went towards the open calendar's blank space; the picker puts the
   // shown date back into the field on blur, so it is read then and used when the calendar closes.
@@ -179,13 +203,30 @@ function PlannedEndDateCell({
   const focusedInside = () =>
     Boolean(rootRef.current?.contains(document.activeElement));
 
+  // The picker keeps the typed text while the field has focus; a blur makes it show the date
+  // again, so a focused field is blurred and focused once more.
+  const showDate = (value: string) => {
+    const input = rootRef.current?.querySelector("input");
+    if (!input || document.activeElement !== input) {
+      setDraft(value);
+      return;
+    }
+    // Rendered first, so the picker shows this date when it resets its text on blur.
+    flushSync(() => setDraft(value));
+    resetting.current = true;
+    input.blur();
+    input.focus();
+    resetting.current = false;
+  };
+
   const commit = (value: string) => {
     setDraft(value);
-    if (value === sent.current) return;
+    if (value === lastSent()) return;
     sent.current = value;
     onCommit(value, () => {
-      sent.current = saved;
-      setDraft(saved);
+      // Follow the newest saved date, which another change may have replaced meanwhile.
+      sentFor.current = -1;
+      showDate(lastSent());
     });
   };
   // Leaving the field, Enter or a closing calendar: save the date the field shows, or put the
@@ -194,7 +235,7 @@ function PlannedEndDateCell({
   const finish = (text: string) => {
     const typed = typedDate(text);
     if (typed) commit(typed);
-    else setDraft(sent.current);
+    else showDate(lastSent());
   };
 
   return (
@@ -205,6 +246,7 @@ function PlannedEndDateCell({
         if (rootRef.current?.contains(event.target)) leftText.current = null;
       }}
       onBlur={(event) => {
+        if (resetting.current) return;
         const next = event.relatedTarget;
         if (next instanceof Element && next.closest(CALENDAR_SELECTOR)) return;
         // A press on the open calendar's buttons or blank space leaves no focus target in some
@@ -257,5 +299,7 @@ function typedDate(text: string): string | null {
   const date = parse(text.trim(), "dd/MM/yyyy", new Date());
   if (!isValid(date)) return null;
   const iso = toIsoDate(date);
-  return iso >= PLANNED_END_DATE_MIN && iso <= PLANNED_END_DATE_MAX ? iso : null;
+  return iso >= PLANNED_END_DATE_MIN && iso <= PLANNED_END_DATE_MAX
+    ? iso
+    : null;
 }

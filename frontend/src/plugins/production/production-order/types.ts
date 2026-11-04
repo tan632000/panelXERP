@@ -1,4 +1,7 @@
-import type { ProductionOrderStatus } from "@plugins/production/production-order/constants";
+import type {
+  ProductionOrderEventType,
+  ProductionOrderStatus,
+} from "@plugins/production/production-order/constants";
 import type { ProductionStage } from "@plugins/production/progress/constants";
 
 export interface ProductionOrderRow {
@@ -29,20 +32,12 @@ export interface ProductionUnit {
 
 export interface ProductionOrderEvent {
   id: number;
-  event:
-    | "created"
-    | "released"
-    | "cancelled"
-    | "unit_updated"
-    | "stage_started"
-    | "stage_finished"
-    | "stage_undone"
-    | "completed"
-    | "issue_reported"
-    | "issue_resolved";
+  event: ProductionOrderEventType;
   actorId: number;
   actorName: string | null;
   unitCode: string | null;
+  stage: ProductionStage | null;
+  severity: string | null;
   reason: string | null;
   createdAt: string;
 }
@@ -52,7 +47,8 @@ export interface ProductionOrderDetail extends ProductionOrderRow {
   cancelledAt: string | null;
   completedAt: string | null;
   units: ProductionUnit[];
-  events: ProductionOrderEvent[];
+  /** Only a production manager or an admin gets the history. */
+  events?: ProductionOrderEvent[];
 }
 
 /** An item the order still lacks: quantities only. */

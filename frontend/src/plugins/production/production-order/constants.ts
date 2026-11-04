@@ -47,3 +47,18 @@ export const PRODUCTION_REASON_MAX = 1000;
 /** The planned end dates a cabinet takes; the API refuses a year outside 2000-2999. */
 export const PLANNED_END_DATE_MIN = "2000-01-01";
 export const PLANNED_END_DATE_MAX = "2999-12-31";
+
+/** What a production order's history records — keep in sync with the backend enum. */
+export const PRODUCTION_ORDER_EVENTS = [
+  "created",
+  "released",
+  "cancelled",
+  "unit_updated",
+  "stage_started",
+  "stage_finished",
+  "stage_undone",
+  "completed",
+  "issue_reported",
+  "issue_resolved",
+] as const;
+export type ProductionOrderEventType = (typeof PRODUCTION_ORDER_EVENTS)[number];

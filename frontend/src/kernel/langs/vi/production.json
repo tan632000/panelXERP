@@ -55,6 +55,11 @@
     "undo": "Hoàn tác"
   },
   "stageDone": "Đã xong tất cả",
+  "unitClosed": {
+    "draft": "Lệnh sản xuất chưa phát hành nên không thêm ảnh hoặc báo vấn đề được.",
+    "completed": "Lệnh sản xuất đã hoàn thành nên không thêm ảnh hoặc báo vấn đề được.",
+    "cancelled": "Lệnh sản xuất đã huỷ nên không thêm ảnh hoặc báo vấn đề được."
+  },
   "stageNotStarted": "Chưa bắt đầu",
   "stageDoneBy": "Hoàn thành bởi {name} lúc {time}",
   "stageStartedBy": "Bắt đầu bởi {name} lúc {time}",
@@ -121,6 +126,22 @@
     "photoUploaded": "Đã tải ảnh lên",
     "photoTooLarge": "Ảnh vượt quá 10 MB",
     "photoRejected": "Không tải được ảnh: chỉ nhận PNG hoặc JPEG đúng định dạng, tối đa 30 ảnh mỗi tủ"
+  },
+  "history": {
+    "title": "Lịch sử",
+    "empty": "Chưa có lịch sử nào",
+    "events": {
+      "created": "Tạo lệnh",
+      "released": "Phát hành lệnh",
+      "cancelled": "Huỷ lệnh",
+      "unit_updated": "Cập nhật tủ",
+      "stage_started": "Bắt đầu công đoạn",
+      "stage_finished": "Hoàn thành công đoạn",
+      "stage_undone": "Hoàn tác công đoạn",
+      "completed": "Hoàn thành lệnh",
+      "issue_reported": "Báo sự cố",
+      "issue_resolved": "Giải quyết sự cố"
+    }
   },
   "shortage": {
     "title": "Thiếu vật tư",

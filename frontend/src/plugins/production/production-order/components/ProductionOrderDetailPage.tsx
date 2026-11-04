@@ -179,6 +179,45 @@ export function ProductionOrderDetailPage() {
         <ProductionShortagePanel id={order.id} />
       )}
 
+      {order.events ? (
+        <DetailSection title={t("history.title")}>
+          {order.events.length === 0 ? (
+            <p className="text-sm text-text-secondary">{t("history.empty")}</p>
+          ) : (
+            <ol
+              aria-label={t("history.title")}
+              className="divide-y divide-border-secondary"
+            >
+              {[...order.events]
+                .sort((a, b) => b.id - a.id)
+                .map((event) => (
+                  <li key={event.id} className="py-2 text-sm">
+                    <div className="flex flex-wrap items-center gap-x-2">
+                      <span className="text-text-secondary">
+                        {formatIsoDateTime(event.createdAt)}
+                      </span>
+                      <span>{event.actorName ?? t("emptyValue")}</span>
+                      <span className="font-medium">
+                        {t(`history.events.${event.event}`)}
+                      </span>
+                      {event.unitCode ? <span>{event.unitCode}</span> : null}
+                      {event.stage ? (
+                        <span>{t(`stages.${event.stage}`)}</span>
+                      ) : null}
+                      {event.severity ? (
+                        <span>{t(`issues.severities.${event.severity}`)}</span>
+                      ) : null}
+                    </div>
+                    {event.reason ? (
+                      <p className="mt-1 whitespace-pre-wrap">{event.reason}</p>
+                    ) : null}
+                  </li>
+                ))}
+            </ol>
+          )}
+        </DetailSection>
+      ) : null}
+
       <ConfirmDialog
         open={dialog === "release"}
         variant="default"

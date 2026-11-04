@@ -162,6 +162,12 @@ export function UnitDetailPage() {
         />
       </DetailSection>
 
+      {unit.productionOrderStatus !== "released" ? (
+        <p className="text-sm text-text-secondary">
+          {t(`unitClosed.${unit.productionOrderStatus}`)}
+        </p>
+      ) : null}
+
       <UnitPhotos
         unitId={unit.id}
         currentStage={workStage}

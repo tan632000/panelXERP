@@ -55,6 +55,11 @@
     "undo": "Undo"
   },
   "stageDone": "All done",
+  "unitClosed": {
+    "draft": "The production order is not released yet, so photos and issues cannot be added.",
+    "completed": "The production order has been completed, so photos and issues cannot be added.",
+    "cancelled": "The production order has been cancelled, so photos and issues cannot be added."
+  },
   "stageNotStarted": "Not started",
   "stageDoneBy": "Finished by {name} at {time}",
   "stageStartedBy": "Started by {name} at {time}",
@@ -121,6 +126,22 @@
     "photoUploaded": "Photo uploaded",
     "photoTooLarge": "The photo is larger than 10 MB",
     "photoRejected": "The photo was not accepted: only genuine PNG or JPEG, at most 30 photos per cabinet"
+  },
+  "history": {
+    "title": "History",
+    "empty": "No history yet",
+    "events": {
+      "created": "Order created",
+      "released": "Order released",
+      "cancelled": "Order cancelled",
+      "unit_updated": "Cabinet updated",
+      "stage_started": "Stage started",
+      "stage_finished": "Stage finished",
+      "stage_undone": "Stage undone",
+      "completed": "Order completed",
+      "issue_reported": "Issue reported",
+      "issue_resolved": "Issue resolved"
+    }
   },
   "shortage": {
     "title": "Material shortage",

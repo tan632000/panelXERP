@@ -345,11 +345,11 @@ describe("notification bell surface", () => {
         "production.order.completed.owner": ["LSX_2026_0007", "DH_2026_0003"],
         "production.issue.opened": ["LSX_2026_0007", "MSB-2"],
         "production.issue.resolved": ["LSX_2026_0007", "MSB-2"],
-        "production.unit.overdue": ["LSX_2026_0007", "MSB-2", "2026-11-02"],
+        "production.unit.overdue": ["LSX_2026_0007", "MSB-2", "02/11/2026"],
         "production.unit.overdue.assignee": [
           "LSX_2026_0007",
           "MSB-2",
-          "2026-11-02",
+          "02/11/2026",
         ],
       };
       for (const common of [viCommon, enCommon]) {

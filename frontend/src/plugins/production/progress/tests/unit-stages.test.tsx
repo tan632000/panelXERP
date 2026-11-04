@@ -266,6 +266,32 @@ describe("UnitDetailPage stages", () => {
   });
 });
 
+describe("UnitDetailPage closed notice", () => {
+  const SUFFIX = " nên không thêm ảnh hoặc báo vấn đề được.";
+
+  it.each([
+    ["draft", "Lệnh sản xuất chưa phát hành"],
+    ["completed", "Lệnh sản xuất đã hoàn thành"],
+    ["cancelled", "Lệnh sản xuất đã huỷ"],
+  ] as const)(
+    "says why photos and issues are closed when the order is %s",
+    async (productionOrderStatus, lead) => {
+      show(unit(6, "done", { productionOrderStatus }));
+      renderPage();
+
+      expect(await screen.findByText(lead + SUFFIX)).toBeTruthy();
+      expect(screen.queryByText(viProduction.photos.choose)).toBeNull();
+    },
+  );
+
+  it("shows no such line while the order is released", async () => {
+    renderPage();
+
+    await screen.findByText(viProduction.photos.choose);
+    expect(screen.queryByText(SUFFIX, { exact: false })).toBeNull();
+  });
+});
+
 describe("UnitDetailPage issues", () => {
   const issueCalls = () =>
     apiGet.mock.calls.filter(([url]) => url === "/production/issues");
