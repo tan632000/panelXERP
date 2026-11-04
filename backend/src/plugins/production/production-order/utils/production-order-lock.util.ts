@@ -115,13 +115,20 @@ export async function recordProductionEvent(
   productionOrderId: number,
   event: ProductionOrderEventType,
   actorId: number,
-  detail: { unitCode?: string; reason?: string } = {},
+  detail: {
+    unitCode?: string;
+    stage?: string;
+    severity?: string;
+    reason?: string;
+  } = {},
 ): Promise<void> {
   await manager.getRepository(ProductionOrderEvent).insert({
     productionOrderId,
     event,
     actorId,
     unitCode: detail.unitCode ?? null,
+    stage: detail.stage ?? null,
+    severity: detail.severity ?? null,
     reason: detail.reason ?? null,
   });
 }

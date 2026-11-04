@@ -16,6 +16,7 @@ import {
 import {
   OPEN_ORDER_BATCH,
   OPEN_ORDER_DEFAULT_LIMIT,
+  PRODUCTION_MANAGER_ROLE,
   PRODUCTION_ORDER_LABEL,
 } from '@plugins/production/production-order/constants/production-order.constant';
 import { ProductionOrderFilterDto } from '@plugins/production/production-order/dto/production-order-filter.dto';
@@ -67,6 +68,9 @@ export interface ProductionOrderEventView {
   actorId: number;
   actorName: string | null;
   unitCode: string | null;
+  /** Stage and severity codes of an issue event; null for every other event. */
+  stage: string | null;
+  severity: string | null;
   reason: string | null;
   createdAt: Date;
 }
@@ -76,8 +80,8 @@ export interface ProductionOrderDetail extends ProductionOrderRow {
   cancelledAt: Date | null;
   completedAt: Date | null;
   units: ProductionUnitView[];
-  /** Empty for a technician: the history names cabinets that are not theirs. */
-  events: ProductionOrderEventView[];
+  /** Present for a production manager or an admin only; absent for every other reader. */
+  events?: ProductionOrderEventView[];
 }
 
 export interface OpenOrderOption {
@@ -86,6 +90,9 @@ export interface OpenOrderOption {
   customerName: string;
   deliveryDate: string | null;
 }
+
+/** The roles that read a production order's history. */
+const HISTORY_ROLES: readonly string[] = [PRODUCTION_MANAGER_ROLE, 'admin'];
 
 type RawRow = Record<string, unknown>;
 
@@ -204,18 +211,18 @@ export class ProductionOrderQueryService {
         ORDER BY unit.id`,
       [id, ...mine.params],
     );
-    const events: RawRow[] =
-      scope === 'assignedTechnician'
-        ? []
-        : await this.dataSource.query(
+    const events: RawRow[] | null =
+      actor.role !== undefined && HISTORY_ROLES.includes(actor.role)
+        ? await this.dataSource.query(
             `SELECT e.id, e.event, e.actor_id, actor.full_name AS actor_name, e.unit_code,
-                    e.reason, e.created_at
+                    e.stage, e.severity, e.reason, e.created_at
                FROM production_order_events e
                LEFT JOIN users actor ON actor.id = e.actor_id
               WHERE e.production_order_id = $1
               ORDER BY e.id`,
             [id],
-          );
+          )
+        : null;
     const headers = await this.orders.getOrders(this.dataSource.manager, [
       Number(head.order_id),
     ]);
@@ -236,15 +243,19 @@ export class ProductionOrderQueryService {
         doneCount: Number(unit.done_count),
         currentStage: (unit.current_stage as ProductionStage | null) ?? null,
       })),
-      events: events.map((event) => ({
-        id: Number(event.id),
-        event: event.event as ProductionOrderEventType,
-        actorId: Number(event.actor_id),
-        actorName: textOrNull(event.actor_name),
-        unitCode: textOrNull(event.unit_code),
-        reason: textOrNull(event.reason),
-        createdAt: event.created_at as Date,
-      })),
+      ...(events && {
+        events: events.map((event) => ({
+          id: Number(event.id),
+          event: event.event as ProductionOrderEventType,
+          actorId: Number(event.actor_id),
+          actorName: textOrNull(event.actor_name),
+          unitCode: textOrNull(event.unit_code),
+          stage: textOrNull(event.stage),
+          severity: textOrNull(event.severity),
+          reason: textOrNull(event.reason),
+          createdAt: event.created_at as Date,
+        })),
+      }),
     };
   }
 

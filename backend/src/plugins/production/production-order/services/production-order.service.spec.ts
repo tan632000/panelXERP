@@ -27,7 +27,7 @@ interface DetailBody {
   status: string;
   orderId: number;
   units: UnitBody[];
-  events: Array<{ event: string; unitCode: string | null }>;
+  events?: Array<{ event: string; unitCode: string | null }>;
 }
 interface PageBody {
   data: Array<{ id: number; status: string; unitCount: number }>;
@@ -308,7 +308,7 @@ describeWithDatabase('Production orders (real Postgres)', () => {
       await h.get(`/production/orders/${id}`, 'techA').expect(200),
     );
     expect(mineA.units.map((unit) => unit.code)).toEqual([first.code]);
-    expect(mineA.events).toEqual([]);
+    expect(mineA).not.toHaveProperty('events');
     const mineB = detail(
       await h.get(`/production/orders/${id}`, 'techB').expect(200),
     );
@@ -339,6 +339,26 @@ describeWithDatabase('Production orders (real Postgres)', () => {
       expectNoMoneyKeys((await h.get(`/production/orders/${id}`, as)).body);
       expectNoMoneyKeys((await h.get('/production/orders', as)).body);
     }
+  });
+
+  it('returns the history only to a production manager or an admin', async () => {
+    const { id } = await draftFor();
+
+    for (const as of ['manager', 'admin'] as const) {
+      const read = detail(
+        await h.get(`/production/orders/${id}`, as).expect(200),
+      );
+      expect(read.events?.map((entry) => entry.event)).toEqual(['created']);
+    }
+
+    // The sales owner, the sales manager, the director and a technician read the order, not
+    // its history; a storekeeper is refused the order altogether.
+    await h.prepare(id);
+    for (const as of ['salesA', 'salesMgr', 'director', 'techA'] as const) {
+      const read = await h.get(`/production/orders/${id}`, as).expect(200);
+      expect(read.body).not.toHaveProperty('events');
+    }
+    await h.get(`/production/orders/${id}`, 'storekeeper').expect(403);
   });
 
   it('lists the open orders still without production and the technicians to assign', async () => {

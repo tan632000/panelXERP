@@ -207,7 +207,9 @@ export class ProductionIssueService {
           actor.userId,
           {
             unitCode: locked.unit.code,
-            reason: `${dto.stage}, ${dto.severity}: ${dto.description}`,
+            stage: dto.stage,
+            severity: dto.severity,
+            reason: dto.description,
           },
         );
         return { ...locked, issue: created };
@@ -274,7 +276,12 @@ export class ProductionIssueService {
           locked.order.id,
           ProductionOrderEventType.ISSUE_RESOLVED,
           actor.userId,
-          { unitCode: locked.unit.code, reason: resolution },
+          {
+            unitCode: locked.unit.code,
+            stage: current.stage,
+            severity: current.severity,
+            reason: resolution,
+          },
         );
         return { ...locked, issue: current };
       },

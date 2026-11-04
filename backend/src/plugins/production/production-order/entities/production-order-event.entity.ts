@@ -30,6 +30,14 @@ export class ProductionOrderEvent {
   @Column({ type: 'varchar', length: 60, name: 'unit_code', nullable: true })
   unitCode?: string | null;
 
+  /** The stage code an issue event is about. */
+  @Column({ type: 'varchar', length: 40, nullable: true })
+  stage?: string | null;
+
+  /** The severity code of an issue event. */
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  severity?: string | null;
+
   @Column({ type: 'text', nullable: true })
   reason?: string | null;
 

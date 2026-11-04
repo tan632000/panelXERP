@@ -1,6 +1,9 @@
+import { Logger } from '@nestjs/common';
+
 import { expectNoMoneyKeys } from '@kernel/shared/testing/money-keys.helper-spec';
 import { queuedBehind } from '@kernel/shared/testing/queued-behind.helper-spec';
 
+import { AddEventStageSeverity1793721100992 } from '@plugins/production/production-order/database/migrations/1793721100992-add-event-stage-severity';
 import { ProductionStage } from '@plugins/production/production-order/enums/production-stage.enum';
 import {
   describeWithDatabase,
@@ -16,6 +19,7 @@ import {
 } from '@plugins/production/progress/unit-photo-db.helper-spec';
 
 import type { Response } from 'supertest';
+import type { QueryRunner } from 'typeorm';
 
 interface IssueBody {
   id: number;
@@ -84,7 +88,7 @@ describeWithDatabase('Production issues (real Postgres)', () => {
 
   const issueEventsOf = async (productionOrderId: number) => {
     const rows: Array<Record<string, unknown>> = await p.h.dataSource.query(
-      `SELECT event, unit_code AS "unitCode", actor_id AS "actorId", reason
+      `SELECT event, unit_code AS "unitCode", actor_id AS "actorId", stage, severity, reason
          FROM production_order_events
         WHERE production_order_id = $1 AND event::text LIKE 'issue_%'
         ORDER BY id`,
@@ -129,7 +133,9 @@ describeWithDatabase('Production issues (real Postgres)', () => {
           event: 'issue_reported',
           unitCode: expect.any(String) as unknown,
           actorId: p.h.actors.techA.userId,
-          reason: 'wiring, high: Terminal block missing',
+          stage: 'wiring',
+          severity: 'high',
+          reason: 'Terminal block missing',
         },
       ]);
     });
@@ -223,11 +229,25 @@ describeWithDatabase('Production issues (real Postgres)', () => {
         (await issueEventsOf(id)).map((row) => [
           row.event,
           row.actorId,
+          row.stage,
+          row.severity,
           row.reason,
         ]),
       ).toEqual([
-        ['issue_reported', p.h.actors.techA.userId, expect.any(String)],
-        ['issue_resolved', p.h.actors.manager.userId, 'Block fitted'],
+        [
+          'issue_reported',
+          p.h.actors.techA.userId,
+          'wiring',
+          'high',
+          'Terminal block missing',
+        ],
+        [
+          'issue_resolved',
+          p.h.actors.manager.userId,
+          'wiring',
+          'high',
+          'Block fitted',
+        ],
       ]);
     });
 
@@ -343,6 +363,191 @@ describeWithDatabase('Production issues (real Postgres)', () => {
 
     it('answers 403 to sales, who hold no issue read', async () => {
       await p.h.get('/production/issues', 'salesA').expect(403);
+    });
+  });
+
+  describe('event stage and severity migration', () => {
+    const migration = new AddEventStageSeverity1793721100992();
+    const BASE_VALUES = ['created', 'released', 'cancelled', 'unit_updated'];
+    const ISSUE_VALUES = ['issue_reported', 'issue_resolved'];
+
+    /**
+     * Runs the migration's SQL against a copy of the events table in a schema of its own, inside
+     * a transaction that is always rolled back, so no other spec sees it. Only that schema is on
+     * the search path, so a name the migration does not qualify can never reach the real table.
+     */
+    async function inScratchSchema(
+      eventValues: string[],
+      run: (runner: QueryRunner) => Promise<void>,
+    ): Promise<void> {
+      const runner = p.h.dataSource.createQueryRunner();
+      await runner.connect();
+      await runner.startTransaction();
+      try {
+        const schema = `scratch_events_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+        await runner.query(`CREATE SCHEMA ${schema}`);
+        await runner.query(`SET LOCAL search_path TO ${schema}`);
+        const values = eventValues.map((value) => `'${value}'`).join(', ');
+        await runner.query(
+          `CREATE TYPE production_order_event_type AS ENUM (${values})`,
+        );
+        await runner.query(`
+          CREATE TABLE production_order_events (
+            id SERIAL PRIMARY KEY,
+            production_order_id INT NOT NULL,
+            event production_order_event_type NOT NULL,
+            actor_id INT NOT NULL,
+            unit_code VARCHAR(60),
+            reason TEXT,
+            created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+          )
+        `);
+        await run(runner);
+      } finally {
+        await runner.rollbackTransaction();
+        await runner.release();
+      }
+    }
+
+    const insert = async (
+      runner: QueryRunner,
+      event: string,
+      reason: string | null,
+    ): Promise<number> => {
+      const [row] = (await runner.query(
+        `INSERT INTO production_order_events (production_order_id, event, actor_id, reason)
+         VALUES (1, $1, 1, $2) RETURNING id`,
+        [event, reason],
+      )) as Array<{ id: number }>;
+      return row.id;
+    };
+
+    const rowOf = async (runner: QueryRunner, id: number) => {
+      const [row] = (await runner.query(
+        `SELECT stage, severity, reason FROM production_order_events WHERE id = $1`,
+        [id],
+      )) as Array<{
+        stage: string | null;
+        severity: string | null;
+        reason: string | null;
+      }>;
+      return row;
+    };
+
+    const reasonsOf = async (runner: QueryRunner, ids: number[]) =>
+      (
+        (await runner.query(
+          `SELECT reason FROM production_order_events WHERE id = ANY($1) ORDER BY id`,
+          [ids],
+        )) as Array<{ reason: string }>
+      ).map((row) => row.reason);
+
+    const columnsOf = async (runner: QueryRunner) =>
+      (
+        (await runner.query(
+          `SELECT column_name FROM information_schema.columns
+            WHERE table_schema = current_schema() AND table_name = 'production_order_events'
+              AND column_name IN ('stage', 'severity')`,
+        )) as Array<{ column_name: string }>
+      ).map((row) => row.column_name);
+
+    it('splits an old issue_reported reason into its columns and folds it back on down', async () => {
+      const log = jest.spyOn(Logger.prototype, 'log').mockImplementation();
+      try {
+        await inScratchSchema(
+          [...BASE_VALUES, ...ISSUE_VALUES],
+          async (runner) => {
+            const parsed = await insert(
+              runner,
+              'issue_reported',
+              'wiring, high: Terminal block missing',
+            );
+            const multiline = await insert(
+              runner,
+              'issue_reported',
+              'finishing, low: Scratch: left door\nsecond line',
+            );
+            const free = await insert(runner, 'issue_reported', 'free text');
+            const resolved = await insert(
+              runner,
+              'issue_resolved',
+              'Block fitted',
+            );
+            const created = await insert(runner, 'created', null);
+
+            await migration.up(runner);
+
+            expect(await rowOf(runner, parsed)).toEqual({
+              stage: 'wiring',
+              severity: 'high',
+              reason: 'Terminal block missing',
+            });
+            expect(await rowOf(runner, multiline)).toEqual({
+              stage: 'finishing',
+              severity: 'low',
+              reason: 'Scratch: left door\nsecond line',
+            });
+            // A row that does not parse is left as it is, and counted in the log.
+            expect(await rowOf(runner, free)).toEqual({
+              stage: null,
+              severity: null,
+              reason: 'free text',
+            });
+            expect(await rowOf(runner, resolved)).toEqual({
+              stage: null,
+              severity: null,
+              reason: 'Block fitted',
+            });
+            expect(await rowOf(runner, created)).toMatchObject({
+              stage: null,
+            });
+            expect(log).toHaveBeenCalledWith(
+              expect.stringContaining(
+                '1 issue_reported event(s) did not parse',
+              ),
+            );
+
+            // A resolve written after the migration carries its stage and severity.
+            await runner.query(
+              `UPDATE production_order_events SET stage = 'wiring', severity = 'high'
+                WHERE id = $1`,
+              [resolved],
+            );
+
+            await migration.down(runner);
+
+            expect(await columnsOf(runner)).toEqual([]);
+            expect(
+              await reasonsOf(runner, [parsed, multiline, free, resolved]),
+            ).toEqual([
+              'wiring, high: Terminal block missing',
+              'finishing, low: Scratch: left door\nsecond line',
+              'free text',
+              'Block fitted',
+            ]);
+          },
+        );
+      } finally {
+        log.mockRestore();
+      }
+    });
+
+    it('runs up and down where the enum never received the issue values', async () => {
+      await inScratchSchema(BASE_VALUES, async (runner) => {
+        const created = await insert(runner, 'created', null);
+
+        await migration.up(runner);
+
+        expect((await columnsOf(runner)).sort()).toEqual(['severity', 'stage']);
+        expect(await rowOf(runner, created)).toMatchObject({
+          stage: null,
+          severity: null,
+        });
+
+        await migration.down(runner);
+
+        expect(await columnsOf(runner)).toEqual([]);
+      });
     });
   });
 });

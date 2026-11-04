@@ -81,6 +81,7 @@ const ACTORS = {
   storekeeper: { username: 'storekeeper', role: 'storekeeper' },
   salesMgr: { username: 'sales_mgr', role: 'salesManager' },
   director: { username: 'director', role: 'director' },
+  admin: { username: 'admin', role: 'admin' },
 } as const;
 
 export type ActorName = keyof typeof ACTORS;
