@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuditModule } from '@kernel/core/audit/audit.module';
+
 import { GatewayModule as CatalogGatewayModule } from '@plugins/catalog/_shared/gateways/gateway.module';
 import { MaterialModule } from '@plugins/inventory/material/material.module';
 import { StockModule } from '@plugins/inventory/stock/stock.module';
@@ -15,6 +17,7 @@ import { StocktakeController } from '@plugins/inventory/stocktake/stocktake.cont
 @Module({
   imports: [
     TypeOrmModule.forFeature([Stocktake, StocktakeLine, StocktakeCountLog]),
+    AuditModule,
     StockModule,
     MaterialModule,
     CatalogGatewayModule,

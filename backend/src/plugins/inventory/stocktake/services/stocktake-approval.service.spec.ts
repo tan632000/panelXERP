@@ -1,3 +1,4 @@
+import { Logger } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
 
 import { expectNoMoneyKeys } from '@kernel/shared/testing/money-keys.helper-spec';
@@ -129,29 +130,20 @@ describeWithDatabase('StocktakeApprovalService (real Postgres)', () => {
     const x = await h.item();
     await h.stockOf(x, '4', 1000);
     const count = bodyOf(await h.open(h.STOREKEEPER));
-    // A director saves a count, then the storekeeper recounts the same line after them.
-    const COUNTING_DIRECTOR = await h.as('sales_mgr', 'director');
-    await h.count(COUNTING_DIRECTOR, count.id, x, 3).expect(403);
-    const directorWhoCounts = JSON.stringify({
-      ...(JSON.parse(COUNTING_DIRECTOR) as Record<string, unknown>),
-      permissions: [
-        ...(JSON.parse(COUNTING_DIRECTOR) as { permissions: string[] })
-          .permissions,
-        'stocktake:update',
-      ],
-    });
-    await h.count(directorWhoCounts, count.id, x, 3).expect(200);
+    // An admin saves a count, then the storekeeper recounts the same line after them.
+    const COUNTING_ADMIN = await h.as('sales_mgr', 'admin');
+    await h.count(COUNTING_ADMIN, count.id, x, 3).expect(200);
     await h.count(h.STOREKEEPER, count.id, x, 4).expect(200);
     // Someone else submits.
     const submitter = await h.as('sales_b', 'storekeeper');
     await h.act(submitter, count.id, 'submit').expect(200);
-    const submitterAsDirector = await h.as('sales_b', 'director');
-    const storekeeperAsDirector = await h.as('storekeeper', 'director');
+    const submitterAsAdmin = await h.as('sales_b', 'admin');
+    const storekeeperAsAdmin = await h.as('storekeeper', 'admin');
 
-    await h.act(storekeeperAsDirector, count.id, 'approve').expect(403);
-    await h.act(submitterAsDirector, count.id, 'approve').expect(403);
+    await h.act(storekeeperAsAdmin, count.id, 'approve').expect(403);
+    await h.act(submitterAsAdmin, count.id, 'approve').expect(403);
     // Not the last counter of the line, still a counter.
-    await h.act(COUNTING_DIRECTOR, count.id, 'approve').expect(403);
+    await h.act(COUNTING_ADMIN, count.id, 'approve').expect(403);
     await h.act(h.STOREKEEPER, count.id, 'cancel', 'Thử quyền').expect(200);
   });
 
@@ -165,14 +157,246 @@ describeWithDatabase('StocktakeApprovalService (real Postgres)', () => {
     await h.act(h.STOREKEEPER, count.id, 'submit').expect(200);
 
     await h
-      .act(await h.as('sales_a', 'director'), count.id, 'approve')
+      .act(await h.as('sales_a', 'admin'), count.id, 'approve')
       .expect(403);
     await h
-      .act(await h.as('storekeeper', 'director'), count.id, 'reject', 'Đếm lại')
+      .act(await h.as('storekeeper', 'admin'), count.id, 'reject', 'Đếm lại')
       .expect(403);
     // Someone who took no part may still decide.
     await h.act(h.DIRECTOR, count.id, 'reject', 'Đếm lại').expect(200);
     await h.act(h.STOREKEEPER, count.id, 'cancel', 'Thử quyền').expect(200);
+  });
+
+  describe('the director deciding on a count', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    /** Runs the real transaction between `before` and `after`; `once` leaves later calls alone. */
+    const aroundTransaction = (
+      hooks: { before?: () => Promise<void>; after?: () => unknown },
+      once = false,
+    ) => {
+      const real = h.db.dataSource.transaction.bind(
+        h.db.dataSource,
+      ) as unknown as (...args: unknown[]) => Promise<unknown>;
+      const around = (async (...args: unknown[]) => {
+        await hooks.before?.();
+        const result = await real(...args);
+        hooks.after?.();
+        return result;
+      }) as never;
+      const spy = jest.spyOn(h.db.dataSource, 'transaction');
+      return once
+        ? spy.mockImplementationOnce(around)
+        : spy.mockImplementation(around);
+    };
+    const noticesOf = (stocktakeId: number) =>
+      h.db.dataSource.query<
+        Array<{
+          event_type: string;
+          role_codes: string[];
+          exclude_user_ids: number[];
+          required_scope: string;
+          link: string;
+          payload: { stocktakeId: number; code: string };
+        }>
+      >(
+        `SELECT event_type, role_codes, exclude_user_ids, required_scope, link, payload
+           FROM notifications
+          WHERE event_type LIKE 'inventory.stocktake.%'
+            AND (payload->>'stocktakeId')::int = $1 ORDER BY id`,
+        [stocktakeId],
+      );
+    const movementsOfCount = async (stocktakeId: number) => {
+      const [row]: Array<{ count: string }> = await h.db.dataSource.query(
+        `SELECT COUNT(*) AS count FROM stock_movements
+          WHERE document_type = 'stocktake' AND document_id = $1
+            AND movement_type = 'count_adjustment'`,
+        [stocktakeId],
+      );
+      return Number(row.count);
+    };
+    const headerOf = async (stocktakeId: number) => {
+      const [row]: Array<{
+        status: string;
+        approved_by: number | null;
+        submitted_by: number | null;
+      }> = await h.db.dataSource.query(
+        `SELECT status, approved_by, submitted_by FROM stocktakes WHERE id = $1`,
+        [stocktakeId],
+      );
+      return row;
+    };
+
+    it('approves and posts in the submit request: one movement per changed line, and tells the storekeeper and purchasing', async () => {
+      const directorId = await h.db.userId('director');
+      const shortfall = await h.item();
+      const gain = await h.item();
+      const same = await h.item();
+      await h.stockOf(shortfall, '5', 1000);
+      await h.stockOf(gain, '2', 1000);
+      await h.stockOf(same, '4', 1000);
+
+      const count = bodyOf(await h.open(h.DIRECTOR));
+      await h.count(h.DIRECTOR, count.id, shortfall, 3).expect(200);
+      await h.count(h.DIRECTOR, count.id, gain, 4).expect(200);
+      await h.count(h.DIRECTOR, count.id, same, 4).expect(200);
+      const res = await h.act(h.DIRECTOR, count.id, 'submit').expect(200);
+
+      expect(bodyOf(res).status).toBe('approved');
+      expect(await headerOf(count.id)).toMatchObject({
+        status: 'approved',
+        approved_by: directorId,
+        submitted_by: directorId,
+      });
+      expect(await stockOf(shortfall)).toMatchObject({ onHand: '3' });
+      expect(await stockOf(gain)).toMatchObject({ onHand: '4' });
+      expect(await stockOf(same)).toMatchObject({ onHand: '4' });
+      expect(await h.movementsOf(shortfall)).toBe(1);
+      expect(await h.movementsOf(gain)).toBe(1);
+      expect(await h.movementsOf(same)).toBe(0);
+      expect(await movementsOfCount(count.id)).toBe(2);
+      for (const item of [shortfall, gain, same]) {
+        await expectLedgerBalanced(h.db, item);
+      }
+
+      const notices = await noticesOf(count.id);
+      expect(notices).toHaveLength(1);
+      expect(notices[0]).toMatchObject({
+        event_type: 'inventory.stocktake.approved',
+        exclude_user_ids: [directorId],
+        required_scope: 'stocktake:read',
+        link: `/inventory/stocktakes/${count.id}`,
+        payload: { stocktakeId: count.id, code: count.code },
+      });
+      expect([...notices[0].role_codes].sort()).toEqual([
+        'purchasing',
+        'storekeeper',
+      ]);
+    });
+
+    it('refuses a director count that would go below zero with 409 and leaves it counting', async () => {
+      const x = await h.item();
+      await h.stockOf(x, '3', 1000);
+      const count = bodyOf(await h.open(h.DIRECTOR));
+      await h.count(h.DIRECTOR, count.id, x, 1).expect(200);
+      await h.issue(x, '2');
+
+      const refused = await h.act(h.DIRECTOR, count.id, 'submit').expect(409);
+
+      expect(String((refused.body as { message: unknown }).message)).toContain(
+        await h.codeOf(x),
+      );
+      expect((await headerOf(count.id)).status).toBe('counting');
+      expect(await movementsOfCount(count.id)).toBe(0);
+      expect(await noticesOf(count.id)).toHaveLength(0);
+      await h.act(h.DIRECTOR, count.id, 'cancel', 'Thử').expect(200);
+    });
+
+    it('sends the notice only after the transaction has committed', async () => {
+      const x = await h.item();
+      await h.stockOf(x, '3', 1000);
+      const count = bodyOf(await h.open(h.DIRECTOR));
+      await h.count(h.DIRECTOR, count.id, x, 2).expect(200);
+
+      const emit = jest.spyOn(h.notifications, 'emit');
+      const emitsWhenResolved: number[] = [];
+      aroundTransaction({
+        after: () => emitsWhenResolved.push(emit.mock.calls.length),
+      });
+
+      await h.act(h.DIRECTOR, count.id, 'submit').expect(200);
+
+      expect(emitsWhenResolved).toEqual([0]);
+      expect(emit).toHaveBeenCalledTimes(1);
+      expect(await noticesOf(count.id)).toHaveLength(1);
+    });
+
+    it('answers 409 and sends nothing when a cancel commits first', async () => {
+      const x = await h.item();
+      await h.stockOf(x, '3', 1000);
+      const count = bodyOf(await h.open(h.DIRECTOR));
+      await h.count(h.DIRECTOR, count.id, x, 2).expect(200);
+
+      aroundTransaction(
+        {
+          before: async () => {
+            await h.act(h.STOREKEEPER, count.id, 'cancel', 'Hủy').expect(200);
+          },
+        },
+        true,
+      );
+
+      await h.act(h.DIRECTOR, count.id, 'submit').expect(409);
+
+      expect((await headerOf(count.id)).status).toBe('cancelled');
+      expect(await movementsOfCount(count.id)).toBe(0);
+      expect(await noticesOf(count.id)).toHaveLength(0);
+    });
+
+    it('lets the director approve a count they took part in, refuses the admin who did, and tells the stores', async () => {
+      const directorId = await h.db.userId('director');
+      const a = await h.item();
+      const b = await h.item();
+      await h.stockOf(a, '4', 1000);
+      await h.stockOf(b, '4', 1000);
+      const count = bodyOf(await h.open(h.STOREKEEPER));
+      const countingAdmin = await h.as('sales_mgr', 'admin');
+      await h.count(countingAdmin, count.id, a, 3).expect(200);
+      await h.count(h.DIRECTOR, count.id, b, 5).expect(200);
+      await h.act(h.STOREKEEPER, count.id, 'submit').expect(200);
+
+      await h.act(countingAdmin, count.id, 'approve').expect(403);
+      expect(await noticesOf(count.id)).toHaveLength(0);
+      const approved = await h.act(h.DIRECTOR, count.id, 'approve').expect(200);
+
+      expect(bodyOf(approved).status).toBe('approved');
+      const notices = await noticesOf(count.id);
+      expect(notices).toHaveLength(1);
+      expect(notices[0]).toMatchObject({
+        event_type: 'inventory.stocktake.approved',
+        exclude_user_ids: [directorId],
+      });
+      expect(await movementsOfCount(count.id)).toBe(2);
+    });
+
+    it('tells the stores when someone other than the director approves', async () => {
+      const approverId = await h.db.userId('sales_b');
+      const x = await h.item();
+      await h.stockOf(x, '3', 1000);
+      const count = bodyOf(await h.open(h.STOREKEEPER));
+      await h.count(h.STOREKEEPER, count.id, x, 2).expect(200);
+      await h.act(h.STOREKEEPER, count.id, 'submit').expect(200);
+
+      await h
+        .act(await h.as('sales_b', 'admin'), count.id, 'approve')
+        .expect(200);
+
+      const notices = await noticesOf(count.id);
+      expect(notices).toHaveLength(1);
+      expect(notices[0]).toMatchObject({ exclude_user_ids: [approverId] });
+    });
+
+    it('keeps the approval when the notice cannot be sent', async () => {
+      const x = await h.item();
+      await h.stockOf(x, '3', 1000);
+      const count = bodyOf(await h.open(h.STOREKEEPER));
+      await h.count(h.STOREKEEPER, count.id, x, 2).expect(200);
+      await h.act(h.STOREKEEPER, count.id, 'submit').expect(200);
+      jest
+        .spyOn(h.notifications, 'emit')
+        .mockRejectedValue(new Error('notification table unavailable'));
+      const logged = jest
+        .spyOn(Logger.prototype, 'error')
+        .mockImplementation(() => undefined);
+
+      await h.act(h.DIRECTOR, count.id, 'approve').expect(200);
+
+      expect(logged).toHaveBeenCalledTimes(1);
+      expect((await headerOf(count.id)).status).toBe('approved');
+      expect(await movementsOfCount(count.id)).toBe(1);
+    });
   });
 
   it('keeps one count open at a time, counts only while counting, and vetoes deleting its items', async () => {

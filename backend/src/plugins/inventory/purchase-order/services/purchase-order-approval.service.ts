@@ -39,6 +39,12 @@ import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorato
 import type { PurchaseOrder } from '@plugins/inventory/purchase-order/entities/purchase-order.entity';
 import type { EntityManager } from 'typeorm';
 
+/** The director decides alone, so an order they submit is approved at once. */
+const SELF_APPROVING_ROLE = 'director';
+
+/** Told, besides the creator, that an order was approved: they act on it next. */
+const PURCHASE_ORDER_APPROVED_ROLE_CODES = ['purchasing', 'storekeeper'];
+
 /**
  * The order's decisions. Each runs in one transaction that takes the header `FOR UPDATE` and
  * moves it with `UPDATE … WHERE status = :expected`, so two decisions on one order never both
@@ -55,7 +61,10 @@ export class PurchaseOrderApprovalService {
     private readonly notifications: NotificationService,
   ) {}
 
-  /** Hands a draft with at least one line to the directors. */
+  /**
+   * Hands a draft with at least one line to the directors. A director's submission is
+   * approved in the same transaction, with both steps in the history.
+   */
   async submit(id: number, actor: AuthUserPayload) {
     const order = await this.dataSource.transaction(async (manager) => {
       const held = await lockPurchaseOrder(manager, id);
@@ -85,14 +94,24 @@ export class PurchaseOrderApprovalService {
         PurchaseOrderEventType.SUBMITTED,
         actor.userId,
       );
-      return held;
+      if (actor.role === SELF_APPROVING_ROLE) {
+        // The move guards on the status read under the lock, which is now stale.
+        held.status = PurchaseOrderStatus.PENDING_APPROVAL;
+        await this.approveHeld(manager, held, actor);
+        return { held, selfApproved: true };
+      }
+      return { held, selfApproved: false };
     });
 
-    await this.notify(PURCHASE_ORDER_SUBMITTED_EVENT, order, actor, {
-      roleCodes: [...PURCHASE_ORDER_APPROVER_ROLE_CODES],
-      excludeUserIds: [actor.userId],
-      requiredScope: PURCHASE_ORDER_APPROVE,
-    });
+    if (order.selfApproved) {
+      await this.notifyApproved(order.held, actor);
+    } else {
+      await this.notify(PURCHASE_ORDER_SUBMITTED_EVENT, order.held, actor, {
+        roleCodes: [...PURCHASE_ORDER_APPROVER_ROLE_CODES],
+        excludeUserIds: [actor.userId],
+        requiredScope: PURCHASE_ORDER_APPROVE,
+      });
+    }
     return this.orders.findOne(id, actor);
   }
 
@@ -105,22 +124,30 @@ export class PurchaseOrderApprovalService {
         [PurchaseOrderStatus.PENDING_APPROVAL],
         'approved',
       );
-      await movePurchaseOrder(manager, held, PurchaseOrderStatus.APPROVED, {
-        approvedBy: actor.userId,
-        approvedAt: new Date(),
-        updatedBy: actor.userId,
-      });
-      await recordPurchaseOrderEvent(
-        manager,
-        id,
-        PurchaseOrderEventType.APPROVED,
-        actor.userId,
-      );
+      await this.approveHeld(manager, held, actor);
       return held;
     });
 
-    await this.notifyCreator(PURCHASE_ORDER_APPROVED_EVENT, order, actor);
+    await this.notifyApproved(order, actor);
     return this.orders.findOne(id, actor);
+  }
+
+  private async approveHeld(
+    manager: EntityManager,
+    held: PurchaseOrder,
+    actor: AuthUserPayload,
+  ): Promise<void> {
+    await movePurchaseOrder(manager, held, PurchaseOrderStatus.APPROVED, {
+      approvedBy: actor.userId,
+      approvedAt: new Date(),
+      updatedBy: actor.userId,
+    });
+    await recordPurchaseOrderEvent(
+      manager,
+      held.id,
+      PurchaseOrderEventType.APPROVED,
+      actor.userId,
+    );
   }
 
   /** Sends the order back to draft; the reason stays in its history for purchasing to act on. */
@@ -221,15 +248,16 @@ export class PurchaseOrderApprovalService {
   }
 
   /**
-   * Four eyes: whoever created, edited or ever submitted the order cannot decide on it. A
-   * rejection clears `submitted_by`, so earlier submitters come from the history: resubmitting
-   * unchanged content must not let its first submitter approve it.
+   * Four eyes: whoever created, edited or ever submitted the order cannot decide on it, except
+   * the director. A rejection clears `submitted_by`, so earlier submitters come from the
+   * history: resubmitting unchanged content must not let its first submitter approve it.
    */
   private async assertUninvolved(
     manager: EntityManager,
     order: PurchaseOrder,
     actor: AuthUserPayload,
   ): Promise<void> {
+    if (actor.role === SELF_APPROVING_ROLE) return;
     const submitters: Array<{ actor_id: number }> = await manager.query(
       `SELECT DISTINCT actor_id FROM purchase_order_events
         WHERE purchase_order_id = $1 AND event = $2`,
@@ -255,11 +283,35 @@ export class PurchaseOrderApprovalService {
     actor: AuthUserPayload,
     extra: Record<string, unknown> = {},
   ): Promise<void> {
-    if (typeof order.createdBy !== 'number') return Promise.resolve();
+    if (
+      typeof order.createdBy !== 'number' ||
+      order.createdBy === actor.userId
+    ) {
+      return Promise.resolve();
+    }
     return this.notify(eventType, order, actor, {
       userIds: [order.createdBy],
       requiredScope: PURCHASE_ORDER_READ,
       extra,
+    });
+  }
+
+  /** The creator hears of the approval, and so do purchasing and the stores, who act next; the approver does not. */
+  private async notifyApproved(
+    order: PurchaseOrder,
+    actor: AuthUserPayload,
+  ): Promise<void> {
+    await this.notifyCreator(PURCHASE_ORDER_APPROVED_EVENT, order, actor);
+    await this.notify(PURCHASE_ORDER_APPROVED_EVENT, order, actor, {
+      roleCodes: PURCHASE_ORDER_APPROVED_ROLE_CODES,
+      excludeUserIds: [
+        ...new Set(
+          [actor.userId, order.createdBy].filter(
+            (id): id is number => typeof id === 'number',
+          ),
+        ),
+      ],
+      requiredScope: PURCHASE_ORDER_READ,
     });
   }
 

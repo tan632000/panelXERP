@@ -9,6 +9,8 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 
+import { Notification } from '@kernel/core/audit/notification.entity';
+import { NotificationService } from '@kernel/core/audit/notification.service';
 import { RolesGuard } from '@kernel/core/auth/guards/roles.guard';
 import { seededRolePermissions } from '@kernel/core/database/seeds/seed-roles';
 
@@ -51,6 +53,8 @@ export interface StocktakeHarness {
   db: InventoryDb;
   kit: ReservationKit;
   itemChecks: ReferenceCheckRegistry;
+  /** The service the approvals send their notices through. */
+  notifications: NotificationService;
   /** Seeded users acting with the grants of a role. */
   as(username: string, role: string): Promise<string>;
   STOREKEEPER: string;
@@ -116,6 +120,13 @@ export async function openStocktakeHarness(): Promise<StocktakeHarness> {
   const STOREKEEPER = await as('storekeeper', 'storekeeper');
   const DIRECTOR = await as('director', 'director');
 
+  // Emit uses only the notification table.
+  const notifications = new NotificationService(
+    db.dataSource.getRepository(Notification),
+    null as never,
+    null as never,
+  );
+
   const moduleRef = await Test.createTestingModule({
     controllers: [StocktakeController],
     providers: [
@@ -126,6 +137,7 @@ export async function openStocktakeHarness(): Promise<StocktakeHarness> {
       { provide: StockPostingService, useValue: db.posting },
       { provide: ReservationService, useValue: kit.reservations },
       { provide: ShortageAlertService, useValue: kit.alerts },
+      { provide: NotificationService, useValue: notifications },
       { provide: DataSource, useValue: db.dataSource },
       { provide: APP_GUARD, useClass: HeaderAuthGuard },
       { provide: APP_GUARD, useClass: RolesGuard },
@@ -143,6 +155,7 @@ export async function openStocktakeHarness(): Promise<StocktakeHarness> {
     db,
     kit,
     itemChecks: moduleRef.get(ReferenceCheckRegistry),
+    notifications,
     as,
     STOREKEEPER,
     DIRECTOR,
@@ -233,6 +246,11 @@ export async function openStocktakeHarness(): Promise<StocktakeHarness> {
           [`${db.tag}-%`],
         );
       const ids = [...new Set([...created, ...(extra?.ids ?? [])])];
+      await db.dataSource.query(
+        `DELETE FROM notifications WHERE event_type LIKE 'inventory.stocktake.%'
+           AND (payload->>'stocktakeId')::int = ANY($1::int[])`,
+        [ids],
+      );
       // Lines and the count log go with their count (ON DELETE CASCADE).
       await db.dataSource.query(
         `DELETE FROM stocktakes WHERE id = ANY($1::int[])`,

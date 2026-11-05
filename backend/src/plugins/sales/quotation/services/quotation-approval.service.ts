@@ -54,6 +54,12 @@ import type { EntityManager } from 'typeorm';
 /** Name the quotation registers under at the request-close hook. */
 const REQUEST_CLOSE_HOOK_NAME = 'quotation';
 
+/** The director decides alone, so a version they submit is approved at once. */
+const SELF_APPROVING_ROLE = 'director';
+
+/** Told, besides the sales owner, that a version was approved. */
+const QUOTATION_APPROVED_BROADCAST_ROLE_CODES = ['salesManager'];
+
 /**
  * The quotation's decisions: hand in for approval, approve or reject, the customer's answer
  * (confirm) and cancel. Each runs in one transaction that takes the request row and then the
@@ -85,7 +91,8 @@ export class QuotationApprovalService implements OnModuleInit {
   /**
    * Hands the draft in. Only its creator, or a manager, may; a draft built on an estimate
    * revision that is no longer the latest submitted one is refused until it is refreshed.
-   * The approvers are told after the commit, once.
+   * The approvers are told after the commit, once; a director's submission is approved in the
+   * same transaction and only the approval is announced.
    */
   async submit(id: number, actor: AuthUserPayload): Promise<QuotationDetail> {
     const locked = await this.dataSource.transaction(async (manager) => {
@@ -111,29 +118,51 @@ export class QuotationApprovalService implements OnModuleInit {
         );
       }
 
+      const selfApproved = actor.role === SELF_APPROVING_ROLE;
       await this.move(
         manager,
         version,
         QuotationVersionStatus.DRAFT,
-        QuotationVersionStatus.PENDING_APPROVAL,
+        selfApproved
+          ? QuotationVersionStatus.APPROVED
+          : QuotationVersionStatus.PENDING_APPROVAL,
+        selfApproved ? this.decision(actor) : {},
       );
+      if (selfApproved) {
+        await this.statusPort.advance(
+          manager,
+          request.id,
+          RequestStatus.QUOTED,
+          { actorId: actor.userId, note: quotation.code },
+        );
+      }
       await this.touch(manager, quotation, actor, request, {
         action: 'quotation_submitted',
       });
-      return held;
+      if (selfApproved) {
+        await this.touch(manager, quotation, actor, request, {
+          action: 'quotation_approved',
+        });
+      }
+      return { ...held, selfApproved };
     });
 
-    await this.notify(QUOTATION_SUBMITTED_EVENT, locked, actor, {
-      roleCodes: [...QUOTATION_APPROVER_ROLE_CODES],
-      requiredScope: QUOTATION_APPROVE,
-    });
+    if (locked.selfApproved) {
+      await this.notifyApproved(locked, actor);
+    } else {
+      await this.notify(QUOTATION_SUBMITTED_EVENT, locked, actor, {
+        roleCodes: [...QUOTATION_APPROVER_ROLE_CODES],
+        requiredScope: QUOTATION_APPROVE,
+      });
+    }
     return this.quotations.findOne(id, actor);
   }
 
   /**
-   * One approval step. The approver is never the version's creator. The first approval moves
-   * the request from `estimated` to `quoted` in the same transaction; a revised version
-   * approved later finds it already there. The sales owner is told after the commit.
+   * One approval step. The approver is never the version's creator or last editor, unless
+   * they are the director. The first approval moves the request from `estimated` to `quoted`
+   * in the same transaction; a revised version approved later finds it already there. The
+   * sales owner and the sales managers are told after the commit.
    */
   async approve(id: number, actor: AuthUserPayload): Promise<QuotationDetail> {
     const locked = await this.dataSource.transaction(async (manager) => {
@@ -151,11 +180,7 @@ export class QuotationApprovalService implements OnModuleInit {
         version,
         QuotationVersionStatus.PENDING_APPROVAL,
         QuotationVersionStatus.APPROVED,
-        {
-          decidedBy: actor.userId,
-          decidedAt: new Date(),
-          decisionReason: null,
-        },
+        this.decision(actor),
       );
       await this.statusPort.advance(manager, request.id, RequestStatus.QUOTED, {
         actorId: actor.userId,
@@ -167,10 +192,7 @@ export class QuotationApprovalService implements OnModuleInit {
       return held;
     });
 
-    await this.notify(QUOTATION_APPROVED_EVENT, locked, actor, {
-      userIds: [locked.request.salesOwnerId],
-      requiredScope: QUOTATION_READ,
-    });
+    await this.notifyApproved(locked, actor);
     return this.quotations.findOne(id, actor);
   }
 
@@ -388,11 +410,23 @@ export class QuotationApprovalService implements OnModuleInit {
     }
   }
 
-  /** Four-eyes: nobody decides on a version they created or last edited themselves. */
+  private decision(actor: AuthUserPayload): Partial<QuotationVersion> {
+    return {
+      decidedBy: actor.userId,
+      decidedAt: new Date(),
+      decisionReason: null,
+    };
+  }
+
+  /**
+   * Four-eyes: nobody decides on a version they created or last edited themselves, except the
+   * director, who also approves their own submissions.
+   */
   private assertApprover(
     version: QuotationVersion,
     actor: AuthUserPayload,
   ): void {
+    if (actor.role === SELF_APPROVING_ROLE) return;
     if (
       version.createdBy === actor.userId ||
       version.lastEditedBy === actor.userId
@@ -403,6 +437,23 @@ export class QuotationApprovalService implements OnModuleInit {
     }
   }
 
+  /** The sales owner and the sales managers hear of an approval, never the approver. */
+  private async notifyApproved(
+    locked: LockedQuotation,
+    actor: AuthUserPayload,
+  ): Promise<void> {
+    const { salesOwnerId } = locked.request;
+    await this.notify(QUOTATION_APPROVED_EVENT, locked, actor, {
+      userIds: [salesOwnerId],
+      requiredScope: QUOTATION_READ,
+    });
+    await this.notify(QUOTATION_APPROVED_EVENT, locked, actor, {
+      roleCodes: QUOTATION_APPROVED_BROADCAST_ROLE_CODES,
+      excludeUserIds: [actor.userId, salesOwnerId],
+      requiredScope: QUOTATION_READ,
+    });
+  }
+
   /** After the commit; a failed notice must not undo a committed decision. */
   private async notify(
     eventType: string,
@@ -411,6 +462,7 @@ export class QuotationApprovalService implements OnModuleInit {
     target: {
       roleCodes?: string[];
       userIds?: number[];
+      excludeUserIds?: number[];
       requiredScope: string;
       extra?: Record<string, unknown>;
     },
@@ -420,6 +472,7 @@ export class QuotationApprovalService implements OnModuleInit {
         eventType,
         roleCodes: target.roleCodes ?? [],
         userIds: target.userIds ?? [],
+        excludeUserIds: target.excludeUserIds,
         // The bell phrases the event from the payload; the text is the fallback for a reader
         // whose client does not know the event.
         message: `${quotation.code} — ${request.code}`,

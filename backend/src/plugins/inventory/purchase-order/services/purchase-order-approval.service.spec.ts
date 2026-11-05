@@ -76,6 +76,9 @@ describeWithDatabase('PurchaseOrderApprovalService (real Postgres)', () => {
   let PURCHASING_ID: number;
   let DIRECTOR: string;
   let DIRECTOR_ID: number;
+  /** The admin role keeps four-eyes: it is refused on an order it created, edited or submitted. */
+  let ADMIN: string;
+  let ADMIN_ID: number;
   /** Two more directors: real user rows acting with the director's grants. */
   let DIRECTOR_2: string;
   let DIRECTOR_3: string;
@@ -103,7 +106,9 @@ describeWithDatabase('PurchaseOrderApprovalService (real Postgres)', () => {
     DIRECTOR_ID = await db.userId('director');
     PURCHASING = actor(PURCHASING_ID, 'purchasing');
     DIRECTOR = actor(DIRECTOR_ID, 'director');
-    DIRECTOR_2 = actor(await db.userId('admin'), 'director');
+    ADMIN_ID = await db.userId('admin');
+    ADMIN = actor(ADMIN_ID, 'admin');
+    DIRECTOR_2 = actor(ADMIN_ID, 'director');
     DIRECTOR_3 = actor(await db.userId('sales_mgr'), 'director');
     STOREKEEPER = actor(await db.userId('storekeeper'), 'storekeeper');
 
@@ -283,17 +288,26 @@ describeWithDatabase('PurchaseOrderApprovalService (real Postgres)', () => {
         'submitted',
         'approved',
       ]);
-      const notices: Array<{ event_type: string; user_ids: number[] | null }> =
-        await db.dataSource.query(
-          `SELECT event_type, user_ids FROM notifications
-            WHERE (payload->>'purchaseOrderId')::int = $1 ORDER BY id`,
-          [order.id],
-        );
+      const notices: Array<{
+        event_type: string;
+        user_ids: number[] | null;
+        role_codes: string[];
+        exclude_user_ids: number[];
+      }> = await db.dataSource.query(
+        `SELECT event_type, user_ids, role_codes, exclude_user_ids FROM notifications
+          WHERE (payload->>'purchaseOrderId')::int = $1 ORDER BY id`,
+        [order.id],
+      );
       expect(notices.map((notice) => notice.event_type)).toEqual([
         'inventory.purchase_order.submitted',
         'inventory.purchase_order.approved',
+        'inventory.purchase_order.approved',
       ]);
       expect(notices[1].user_ids).toEqual([PURCHASING_ID]);
+      expect(notices[2]).toMatchObject({
+        role_codes: ['purchasing', 'storekeeper'],
+        exclude_user_ids: [DIRECTOR_ID, PURCHASING_ID],
+      });
     });
 
     it('tells the directors, never the submitter, that an order waits', async () => {
@@ -313,44 +327,86 @@ describeWithDatabase('PurchaseOrderApprovalService (real Postgres)', () => {
       });
     });
 
-    it('refuses the creator with 403', async () => {
-      const order = await createDraft(DIRECTOR);
-      await act(DIRECTOR, order.id, 'submit').expect(200);
-      await act(DIRECTOR, order.id, 'approve').expect(403);
-      await act(DIRECTOR, order.id, 'reject', 'No').expect(403);
+    it('refuses an admin who created and submitted the order with 403', async () => {
+      const order = await createDraft(ADMIN);
+      await act(ADMIN, order.id, 'submit').expect(200);
+      await act(ADMIN, order.id, 'approve').expect(403);
+      await act(ADMIN, order.id, 'reject', 'No').expect(403);
       expect((await detail(order.id)).status).toBe('pending_approval');
     });
 
-    it('refuses the submitter with 403', async () => {
+    it('refuses an admin who only submitted the order with 403', async () => {
       const order = await createDraft();
-      await act(DIRECTOR, order.id, 'submit').expect(200);
-      await act(DIRECTOR, order.id, 'approve').expect(403);
+      await act(ADMIN, order.id, 'submit').expect(200);
+      await act(ADMIN, order.id, 'approve').expect(403);
     });
 
-    it('refuses a director who edited the draft even after someone else submitted it', async () => {
+    it('refuses an admin who edited the draft even after someone else submitted it', async () => {
       const order = await createDraft();
-      await edit(DIRECTOR, order.id, {
+      await edit(ADMIN, order.id, {
         note: 'Ask for delivery by truck',
       }).expect(200);
       await act(PURCHASING, order.id, 'submit').expect(200);
 
-      expect((await detail(order.id)).editorIds).toEqual([DIRECTOR_ID]);
-      await act(DIRECTOR, order.id, 'approve').expect(403);
-      await act(DIRECTOR_2, order.id, 'approve').expect(200);
+      expect((await detail(order.id)).editorIds).toEqual([ADMIN_ID]);
+      await act(ADMIN, order.id, 'approve').expect(403);
+      await act(DIRECTOR, order.id, 'approve').expect(200);
     });
 
-    it('refuses an earlier submitter after a rejection and an unchanged resubmit', async () => {
+    it('refuses an earlier admin submitter after a rejection and an unchanged resubmit', async () => {
       const order = await createDraft();
-      await act(DIRECTOR, order.id, 'submit').expect(200);
-      await act(DIRECTOR_2, order.id, 'reject', 'Check the quantities').expect(
+      await act(ADMIN, order.id, 'submit').expect(200);
+      await act(DIRECTOR, order.id, 'reject', 'Check the quantities').expect(
         200,
       );
       await act(PURCHASING, order.id, 'submit').expect(200);
 
       // The rejection cleared `submitted_by`; the history still names the first submitter.
-      await act(DIRECTOR, order.id, 'approve').expect(403);
-      await act(DIRECTOR, order.id, 'reject', 'No').expect(403);
+      await act(ADMIN, order.id, 'approve').expect(403);
+      await act(ADMIN, order.id, 'reject', 'No').expect(403);
       await act(DIRECTOR_3, order.id, 'approve').expect(200);
+    });
+
+    it('approves a director submission in the same request and tells purchasing and the stores', async () => {
+      const order = await createDraft(DIRECTOR);
+      const res = await act(DIRECTOR, order.id, 'submit').expect(200);
+      const approved = res.body as Detail;
+
+      expect(approved.status).toBe('approved');
+      expect(approved.events.map((event) => event.event)).toEqual([
+        'submitted',
+        'approved',
+      ]);
+      const notices: Array<{
+        event_type: string;
+        user_ids: number[] | null;
+        role_codes: string[];
+        exclude_user_ids: number[];
+        required_scope: string;
+      }> = await db.dataSource.query(
+        `SELECT event_type, user_ids, role_codes, exclude_user_ids, required_scope
+           FROM notifications
+          WHERE (payload->>'purchaseOrderId')::int = $1 ORDER BY id`,
+        [order.id],
+      );
+      expect(notices).toHaveLength(1);
+      expect(notices[0]).toMatchObject({
+        event_type: 'inventory.purchase_order.approved',
+        role_codes: ['purchasing', 'storekeeper'],
+        exclude_user_ids: [DIRECTOR_ID],
+        required_scope: 'purchase_order:read',
+      });
+      expect(notices[0].user_ids ?? []).toEqual([]);
+    });
+
+    it('lets the director approve an order purchasing submitted after the director edited it', async () => {
+      const order = await createDraft();
+      await edit(DIRECTOR, order.id, { note: 'Truck delivery' }).expect(200);
+      await act(PURCHASING, order.id, 'submit').expect(200);
+
+      await act(DIRECTOR, order.id, 'approve').expect(200);
+
+      expect((await detail(order.id)).status).toBe('approved');
     });
 
     it('refuses purchasing, which holds no approve grant', async () => {

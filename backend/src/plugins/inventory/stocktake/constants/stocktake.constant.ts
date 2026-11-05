@@ -7,5 +7,9 @@ export const STOCKTAKE_LABEL = 'Stock count';
 /** The document kind its stock movements carry. */
 export const STOCKTAKE_DOCUMENT_TYPE = 'stocktake';
 
+export const STOCKTAKE_APPROVED_EVENT = 'inventory.stocktake.approved';
+/** The departments told that a count was approved and its differences posted. */
+export const STOCKTAKE_APPROVED_ROLE_CODES = ['storekeeper', 'purchasing'];
+
 /** Name the count registers under at the catalog's item delete veto. */
 export const STOCKTAKE_REFERENCE_CHECK = 'inventory-stocktake';

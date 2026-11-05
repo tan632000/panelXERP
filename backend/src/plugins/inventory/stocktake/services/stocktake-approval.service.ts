@@ -2,9 +2,12 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
 } from '@nestjs/common';
 import { Decimal } from 'decimal.js';
 import { DataSource } from 'typeorm';
+
+import { NotificationService } from '@kernel/core/audit/notification.service';
 
 import { requireText } from '@plugins/inventory/_shared/utils/text.util';
 import { ReservationService } from '@plugins/inventory/material/services/reservation.service';
@@ -14,12 +17,17 @@ import {
   StockPostingService,
   type StockPostingLine,
 } from '@plugins/inventory/stock/services/stock-posting.service';
-import { STOCKTAKE_DOCUMENT_TYPE } from '@plugins/inventory/stocktake/constants/stocktake.constant';
+import {
+  STOCKTAKE_APPROVED_EVENT,
+  STOCKTAKE_APPROVED_ROLE_CODES,
+  STOCKTAKE_DOCUMENT_TYPE,
+} from '@plugins/inventory/stocktake/constants/stocktake.constant';
 import { StocktakeReasonDto } from '@plugins/inventory/stocktake/dto/stocktake.dto';
 import {
   STOCKTAKE_OPEN,
   StocktakeStatus,
 } from '@plugins/inventory/stocktake/enums/stocktake.enum';
+import { STOCKTAKE_READ } from '@plugins/inventory/stocktake/permissions/stocktake.permissions';
 import { StocktakeService } from '@plugins/inventory/stocktake/services/stocktake.service';
 import {
   assertStocktakeStatus,
@@ -33,6 +41,15 @@ import type { EntityManager } from 'typeorm';
 
 /** Cost of one unit: 4 dp half-up, like every average (D-06). */
 const COST_DECIMALS = 4;
+
+/** Who decides on a count without four eyes: their own submission is approved at once. */
+const SELF_APPROVING_ROLE = 'director';
+
+/** What a posting changed, for the alerts that follow the commit. */
+interface PostedChange {
+  orderIds: number[];
+  itemIds: number[];
+}
 
 interface CountedLine {
   id: number;
@@ -48,19 +65,24 @@ interface CountedLine {
  * act on the status they read (an approve racing a cancel: one wins, the other gets 409).
  * Approval posts, for every counted line, the difference against the book quantity at counting
  * time on top of today's stock (D-14): movements after the count stay counted once.
+ * The notice of an approval goes out after the commit; a failed notice never undoes it.
  */
 @Injectable()
 export class StocktakeApprovalService {
+  private readonly logger = new Logger(StocktakeApprovalService.name);
+
   constructor(
     private readonly dataSource: DataSource,
     private readonly stocktakes: StocktakeService,
     private readonly posting: StockPostingService,
     private readonly reservations: ReservationService,
     private readonly shortageAlerts: ShortageAlertService,
+    private readonly notifications: NotificationService,
   ) {}
 
+  /** A director's submission is approved and posted in the same transaction. */
   async submit(id: number, actor: AuthUserPayload) {
-    await this.dataSource.transaction(async (manager) => {
+    const selfApproved = await this.dataSource.transaction(async (manager) => {
       const held = await lockStocktake(manager, id);
       assertStocktakeStatus(held, [StocktakeStatus.COUNTING], 'submitted');
       await moveStocktake(
@@ -75,7 +97,15 @@ export class StocktakeApprovalService {
         ],
         [actor.userId],
       );
+      if (actor.role !== SELF_APPROVING_ROLE) return null;
+      // The move guards on the status read under the lock, which is now stale.
+      held.status = StocktakeStatus.SUBMITTED;
+      return { held, change: await this.approveHeld(manager, held, actor) };
     });
+
+    if (selfApproved) {
+      await this.afterApproval(selfApproved.held, selfApproved.change, actor);
+    }
     return this.stocktakes.findOne(id, actor);
   }
 
@@ -118,29 +148,63 @@ export class StocktakeApprovalService {
    * (409, naming the items) and posts nothing; an uncounted line never posts.
    */
   async approve(id: number, actor: AuthUserPayload) {
-    const posted = await this.dataSource.transaction(async (manager) => {
+    const approved = await this.dataSource.transaction(async (manager) => {
       const held = await lockStocktake(manager, id);
       await this.assertUninvolved(manager, held, actor);
       assertStocktakeStatus(held, [StocktakeStatus.SUBMITTED], 'approved');
-      const change = await this.postDifferences(manager, held, actor);
-      await moveStocktake(
-        manager,
-        held,
-        StocktakeStatus.APPROVED,
-        ['approved_by = $3', 'approved_at = NOW()'],
-        [actor.userId],
-      );
-      return change;
+      return { held, change: await this.approveHeld(manager, held, actor) };
     });
-    await this.shortageAlerts.afterCommit(posted.orderIds, posted.itemIds);
+    await this.afterApproval(approved.held, approved.change, actor);
     return this.stocktakes.findOne(id, actor);
+  }
+
+  private async approveHeld(
+    manager: EntityManager,
+    held: LockedStocktake,
+    actor: AuthUserPayload,
+  ): Promise<PostedChange> {
+    const change = await this.postDifferences(manager, held, actor);
+    await moveStocktake(
+      manager,
+      held,
+      StocktakeStatus.APPROVED,
+      ['approved_by = $3', 'approved_at = NOW()'],
+      [actor.userId],
+    );
+    return change;
+  }
+
+  private async afterApproval(
+    held: LockedStocktake,
+    change: PostedChange,
+    actor: AuthUserPayload,
+  ): Promise<void> {
+    await this.shortageAlerts.afterCommit(change.orderIds, change.itemIds);
+    try {
+      await this.notifications.emit({
+        eventType: STOCKTAKE_APPROVED_EVENT,
+        roleCodes: STOCKTAKE_APPROVED_ROLE_CODES,
+        excludeUserIds: [actor.userId],
+        // The bell phrases the event from the payload; the text is the fallback.
+        message: held.code,
+        requiredScope: STOCKTAKE_READ,
+        link: `/inventory/stocktakes/${held.id}`,
+        payload: { stocktakeId: held.id, code: held.code },
+        createdBy: actor.userId,
+      });
+    } catch (error: unknown) {
+      this.logger.error(
+        `Could not send the ${STOCKTAKE_APPROVED_EVENT} notice of stock count ${held.code}`,
+        error instanceof Error ? error.stack : String(error),
+      );
+    }
   }
 
   private async postDifferences(
     manager: EntityManager,
     stocktake: LockedStocktake,
     actor: AuthUserPayload,
-  ): Promise<{ orderIds: number[]; itemIds: number[] }> {
+  ): Promise<PostedChange> {
     const lines: CountedLine[] = await manager.query(
       `SELECT sl.id, sl.item_id, i.code AS item_code,
               sl.counted_qty::text AS counted_qty, sl.book_qty::text AS book_qty
@@ -268,13 +332,15 @@ export class StocktakeApprovalService {
 
   /**
    * Four eyes: whoever created the count, ever submitted it, or saved any count on it cannot
-   * decide on it — every user in the count log, not only the last counter of each line.
+   * decide on it — every user in the count log, not only the last counter of each line. The
+   * director is the exception.
    */
   private async assertUninvolved(
     manager: EntityManager,
     stocktake: LockedStocktake,
     actor: AuthUserPayload,
   ): Promise<void> {
+    if (actor.role === SELF_APPROVING_ROLE) return;
     const counters: Array<{ user_id: number }> = await manager.query(
       `SELECT DISTINCT c.user_id FROM stocktake_count_log c
          JOIN stocktake_lines sl ON sl.id = c.line_id
