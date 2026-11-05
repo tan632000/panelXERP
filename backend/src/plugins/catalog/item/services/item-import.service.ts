@@ -18,6 +18,7 @@ import {
   type ItemImportRawRow,
 } from '@plugins/catalog/item/services/item-import.parser';
 import { lockItemIdentifiers } from '@plugins/catalog/item/utils/item-identifier.util';
+import { canReadReferencePrice } from '@plugins/catalog/item/utils/item-price-visibility.util';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 
@@ -121,7 +122,10 @@ export class ItemImportService {
     actor: AuthUserPayload,
   ): Promise<ItemImportResult> {
     const rows = await readItemSheet(assertXlsxUpload(file));
-    const { candidates, errors } = this.judge(rows);
+    const { candidates, errors } = this.judge(
+      rows,
+      canReadReferencePrice(actor),
+    );
     await this.rejectActiveCodes(candidates, errors);
 
     const valid = candidates.filter(
@@ -141,8 +145,14 @@ export class ItemImportService {
     return Buffer.from(await workbook.xlsx.writeBuffer());
   }
 
-  /** Pure row rules; also merges a code repeated with identical data into one candidate. */
-  private judge(rows: ItemImportRawRow[]): {
+  /**
+   * Pure row rules; also merges a code repeated with identical data into one candidate. The price
+   * column is read only when `withPrice`; otherwise it is ignored, errors included.
+   */
+  private judge(
+    rows: ItemImportRawRow[],
+    withPrice: boolean,
+  ): {
     candidates: ImportCandidate[];
     errors: ItemImportRowError[];
   } {
@@ -180,7 +190,9 @@ export class ItemImportService {
         else fail('group', `group must be one of ${ITEM_GROUPS.join(', ')}`);
       }
 
-      const price = parsePrice(raw.referencePrice);
+      const price = withPrice
+        ? parsePrice(raw.referencePrice)
+        : { value: null };
       if ('error' in price) fail('referencePrice', price.error);
 
       for (const length of [

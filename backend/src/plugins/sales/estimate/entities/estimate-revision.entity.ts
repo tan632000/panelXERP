@@ -46,6 +46,13 @@ export class EstimateRevision {
   @Column({ type: 'int', name: 'submitted_by', nullable: true })
   submittedBy?: number | null;
 
+  /** When sales marked the submitted revision priced; null until then, and always null on a draft. */
+  @Column({ type: 'timestamptz', name: 'priced_at', nullable: true })
+  pricedAt?: Date | null;
+
+  @Column({ type: 'int', name: 'priced_by', nullable: true })
+  pricedBy?: number | null;
+
   @Column({ type: 'int', name: 'created_by', nullable: true })
   createdBy?: number | null;
 

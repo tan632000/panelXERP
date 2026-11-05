@@ -13,6 +13,7 @@ import { EstimateRevision } from '@plugins/sales/estimate/entities/estimate-revi
 import { Estimate } from '@plugins/sales/estimate/entities/estimate.entity';
 import { EstimateController } from '@plugins/sales/estimate/estimate.controller';
 import { EstimateEditService } from '@plugins/sales/estimate/services/estimate-edit.service';
+import { EstimatePricingService } from '@plugins/sales/estimate/services/estimate-pricing.service';
 import { EstimateService } from '@plugins/sales/estimate/services/estimate.service';
 import { SalesRequest } from '@plugins/sales/request/entities/request.entity';
 
@@ -32,7 +33,7 @@ import { SalesRequest } from '@plugins/sales/request/entities/request.entity';
     SalesSharedModule,
   ],
   controllers: [EstimateController],
-  providers: [EstimateService, EstimateEditService],
+  providers: [EstimateService, EstimateEditService, EstimatePricingService],
   exports: [EstimateService],
 })
 export class EstimateModule {}

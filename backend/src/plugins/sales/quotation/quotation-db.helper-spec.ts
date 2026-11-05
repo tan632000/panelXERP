@@ -16,6 +16,7 @@ import { EstimatePanel } from '@plugins/sales/estimate/entities/estimate-panel.e
 import { EstimateRevision } from '@plugins/sales/estimate/entities/estimate-revision.entity';
 import { Estimate } from '@plugins/sales/estimate/entities/estimate.entity';
 import { EstimateEditService } from '@plugins/sales/estimate/services/estimate-edit.service';
+import { EstimatePricingService } from '@plugins/sales/estimate/services/estimate-pricing.service';
 import { EstimateService } from '@plugins/sales/estimate/services/estimate.service';
 import { QuotationBomLine } from '@plugins/sales/quotation/entities/quotation-bom-line.entity';
 import { QuotationCostLine } from '@plugins/sales/quotation/entities/quotation-cost-line.entity';
@@ -57,6 +58,8 @@ export interface QuotationDb {
   dataSource: DataSource;
   estimateService: EstimateService;
   editor: EstimateEditService;
+  /** The pricing step: sales fills the costs of a submitted estimate and marks it priced. */
+  pricing: EstimatePricingService;
   quotations: QuotationService;
   versions: QuotationVersionService;
   approvals: QuotationApprovalService;
@@ -75,8 +78,15 @@ export interface QuotationDb {
   engineer: AuthUserPayload;
   lead: AuthUserPayload;
   director: AuthUserPayload;
-  /** An estimated request: assigned, estimate with the panels built and submitted. */
-  estimatedRequest(panels?: PanelSpec[]): Promise<{
+  /**
+   * An estimated request: assigned, estimate with the panels built and submitted by the
+   * engineer, then priced by the sales manager (each panel's BOM line gets its `unitCost`)
+   * unless `priced` is false, which leaves the submitted revision for the test to price.
+   */
+  estimatedRequest(
+    panels?: PanelSpec[],
+    options?: { priced?: boolean },
+  ): Promise<{
     requestId: number;
     estimateId: number;
     revisionId: number;
@@ -191,6 +201,11 @@ export async function openQuotationDb(
     new ReferenceCheckRegistry(),
   );
   const editor = new EstimateEditService(dataSource, estimateService);
+  const pricing = new EstimatePricingService(
+    dataSource,
+    estimateService,
+    dataScope,
+  );
   const quotations = new QuotationService(
     dataSource.getRepository(Quotation),
     dataSource.getRepository(QuotationVersion),
@@ -257,6 +272,10 @@ export async function openQuotationDb(
   const requestIds: number[] = [];
   const contactIds: number[] = [];
   const engineer: AuthUserPayload = { userId: engineerId, role: 'engineer' };
+  const manager: AuthUserPayload = {
+    userId: idOf('sales_mgr'),
+    role: 'salesManager',
+  };
 
   const requestAt = async (status: string): Promise<number> => {
     const [row]: Array<{ id: number }> = await dataSource.query(
@@ -278,6 +297,7 @@ export async function openQuotationDb(
     dataSource,
     estimateService,
     editor,
+    pricing,
     quotations,
     versions,
     approvals,
@@ -290,7 +310,7 @@ export async function openQuotationDb(
     customerId: customer.id,
     salesA: { userId: salesAId, role: 'sales' },
     salesB: { userId: idOf('sales_b'), role: 'sales' },
-    manager: { userId: idOf('sales_mgr'), role: 'salesManager' },
+    manager,
     engineer,
     lead: { userId: idOf('eng_lead'), role: 'engineeringLead' },
     director: { userId: idOf('director'), role: 'director' },
@@ -307,7 +327,7 @@ export async function openQuotationDb(
         [requestId, row.id],
       );
     },
-    async estimatedRequest(panels = DEFAULT_PANELS) {
+    async estimatedRequest(panels = DEFAULT_PANELS, options = {}) {
       const requestId = await requestAt('assigned');
       const estimate = await estimateService.create({ requestId }, engineer);
       for (const panel of panels) {
@@ -319,11 +339,22 @@ export async function openQuotationDb(
         await editor.addBomLine(
           estimate.id,
           view.panels[view.panels.length - 1].id,
-          { itemId: item.id, quantity: 1, unitCost: panel.unitCost },
+          { itemId: item.id, quantity: 1 },
           engineer,
         );
       }
       const submitted = await estimateService.submit(estimate.id, engineer);
+      if (options.priced ?? true) {
+        for (const [index, panel] of panels.entries()) {
+          await pricing.setUnitCost(
+            estimate.id,
+            submitted.current.panels[index].bomLines[0].id,
+            { unitCost: panel.unitCost },
+            manager,
+          );
+        }
+        await pricing.complete(estimate.id, manager);
+      }
       return {
         requestId,
         estimateId: estimate.id,

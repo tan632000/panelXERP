@@ -39,13 +39,16 @@ import {
   CreatePanelDto,
   UpdatePanelDto,
 } from '@plugins/sales/estimate/dto/panel.dto';
+import { PriceBomLineDto } from '@plugins/sales/estimate/dto/price-bom-line.dto';
 import {
   ESTIMATE_CREATE,
+  ESTIMATE_PRICE,
   ESTIMATE_READ,
   ESTIMATE_SUBMIT,
   ESTIMATE_UPDATE,
 } from '@plugins/sales/estimate/permissions/estimate.permissions';
 import { EstimateEditService } from '@plugins/sales/estimate/services/estimate-edit.service';
+import { EstimatePricingService } from '@plugins/sales/estimate/services/estimate-pricing.service';
 import { EstimateService } from '@plugins/sales/estimate/services/estimate.service';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
@@ -53,6 +56,8 @@ import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorato
 const NOT_FOUND =
   'Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer)';
 const READ_ONLY = 'The revision is submitted or superseded and read-only';
+const NOT_PRICEABLE =
+  'The latest revision is not submitted, is already priced, or the request is no longer estimated';
 
 @ApiTags('sales/estimates')
 @ApiBearerAuth()
@@ -61,6 +66,7 @@ export class EstimateController {
   constructor(
     private readonly service: EstimateService,
     private readonly editor: EstimateEditService,
+    private readonly pricing: EstimatePricingService,
   ) {}
 
   @Get()
@@ -237,7 +243,7 @@ export class EstimateController {
   @ApiOperation({
     summary: 'Add a BOM line to a panel',
     description:
-      'Copies the item code, name, brand and unit onto the line; the unit cost defaults to the item reference price.',
+      'Copies the item code, name, brand and unit onto the line; the unit cost is the item reference price until sales prices the submitted revision.',
   })
   @ApiParam({ name: 'id', type: Number })
   @ApiParam({ name: 'panelId', type: Number })
@@ -257,7 +263,7 @@ export class EstimateController {
 
   @Patch(':id/bom-lines/:lineId')
   @RequirePermission(ESTIMATE_UPDATE)
-  @ApiOperation({ summary: 'Update the quantity, unit cost or note of a line' })
+  @ApiOperation({ summary: 'Update the quantity or note of a line' })
   @ApiParam({ name: 'id', type: Number })
   @ApiParam({ name: 'lineId', type: Number })
   @ApiBody({ type: UpdateBomLineDto })
@@ -289,10 +295,63 @@ export class EstimateController {
     return this.editor.deleteBomLine(id, lineId, user);
   }
 
-  @Post(':id/panels/:panelId/cost-lines')
-  @RequirePermission(ESTIMATE_UPDATE)
+  @Patch(':id/bom-lines/:lineId/unit-cost')
+  @RequirePermission(ESTIMATE_PRICE)
   @ApiOperation({
-    summary: 'Add a cost line to a panel',
+    summary: 'Set the unit cost of a BOM line of the submitted revision',
+    description:
+      'Sales prices the revision the engineer submitted. Returns the whole revision with recomputed totals.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiParam({ name: 'lineId', type: Number })
+  @ApiBody({ type: PriceBomLineDto })
+  @ApiResponse({ status: 200, description: 'Unit cost set' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden — requires estimate:price',
+  })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({ status: 409, description: NOT_PRICEABLE })
+  setUnitCost(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('lineId', ParseIntPipe) lineId: number,
+    @Body() dto: PriceBomLineDto,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.pricing.setUnitCost(id, lineId, dto, user);
+  }
+
+  @Post(':id/price')
+  @HttpCode(200)
+  @RequirePermission(ESTIMATE_PRICE)
+  @ApiOperation({
+    summary: 'Mark the submitted revision priced',
+    description:
+      'Freezes the costs and lets a quotation be built on the revision. Refused while a BOM line still costs 0.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Revision priced' })
+  @ApiResponse({
+    status: 400,
+    description: 'A BOM line has no unit cost (the item codes are listed)',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden — requires estimate:price',
+  })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({ status: 409, description: NOT_PRICEABLE })
+  completePricing(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.pricing.complete(id, user);
+  }
+
+  @Post(':id/panels/:panelId/cost-lines')
+  @RequirePermission(ESTIMATE_PRICE)
+  @ApiOperation({
+    summary: 'Add a cost line to a panel of the submitted revision',
     description: 'The amount is the cost of ONE panel.',
   })
   @ApiParam({ name: 'id', type: Number })
@@ -300,47 +359,47 @@ export class EstimateController {
   @ApiBody({ type: CreateCostLineDto })
   @ApiResponse({ status: 201, description: 'Line added' })
   @ApiResponse({ status: 404, description: NOT_FOUND })
-  @ApiResponse({ status: 409, description: READ_ONLY })
+  @ApiResponse({ status: 409, description: NOT_PRICEABLE })
   addCostLine(
     @Param('id', ParseIntPipe) id: number,
     @Param('panelId', ParseIntPipe) panelId: number,
     @Body() dto: CreateCostLineDto,
     @CurrentUser() user: AuthUserPayload,
   ) {
-    return this.editor.addCostLine(id, panelId, dto, user);
+    return this.pricing.addCostLine(id, panelId, dto, user);
   }
 
   @Patch(':id/cost-lines/:lineId')
-  @RequirePermission(ESTIMATE_UPDATE)
-  @ApiOperation({ summary: 'Update a cost line' })
+  @RequirePermission(ESTIMATE_PRICE)
+  @ApiOperation({ summary: 'Update a cost line of the submitted revision' })
   @ApiParam({ name: 'id', type: Number })
   @ApiParam({ name: 'lineId', type: Number })
   @ApiBody({ type: UpdateCostLineDto })
   @ApiResponse({ status: 200, description: 'Line updated' })
   @ApiResponse({ status: 404, description: NOT_FOUND })
-  @ApiResponse({ status: 409, description: READ_ONLY })
+  @ApiResponse({ status: 409, description: NOT_PRICEABLE })
   updateCostLine(
     @Param('id', ParseIntPipe) id: number,
     @Param('lineId', ParseIntPipe) lineId: number,
     @Body() dto: UpdateCostLineDto,
     @CurrentUser() user: AuthUserPayload,
   ) {
-    return this.editor.updateCostLine(id, lineId, dto, user);
+    return this.pricing.updateCostLine(id, lineId, dto, user);
   }
 
   @Delete(':id/cost-lines/:lineId')
-  @RequirePermission(ESTIMATE_UPDATE)
-  @ApiOperation({ summary: 'Remove a cost line from the draft' })
+  @RequirePermission(ESTIMATE_PRICE)
+  @ApiOperation({ summary: 'Remove a cost line from the submitted revision' })
   @ApiParam({ name: 'id', type: Number })
   @ApiParam({ name: 'lineId', type: Number })
   @ApiResponse({ status: 200, description: 'Line removed' })
   @ApiResponse({ status: 404, description: NOT_FOUND })
-  @ApiResponse({ status: 409, description: READ_ONLY })
+  @ApiResponse({ status: 409, description: NOT_PRICEABLE })
   deleteCostLine(
     @Param('id', ParseIntPipe) id: number,
     @Param('lineId', ParseIntPipe) lineId: number,
     @CurrentUser() user: AuthUserPayload,
   ) {
-    return this.editor.deleteCostLine(id, lineId, user);
+    return this.pricing.deleteCostLine(id, lineId, user);
   }
 }

@@ -4,6 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { seededRolePermissions } from '@kernel/core/database/seeds/seed-roles';
+
 import { ReferenceCheckRegistry } from '@plugins/catalog/_shared/gateways/reference-check-registry';
 import { ItemService } from '@plugins/catalog/item/services/item.service';
 import {
@@ -15,7 +17,13 @@ import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorato
 import type { CreateItemDto } from '@plugins/catalog/item/dto/create-item.dto';
 import type { Item } from '@plugins/catalog/item/entities/item.entity';
 
-const PURCHASING: AuthUserPayload = { userId: 40, role: 'purchasing' };
+/** An actor holding what the seeded role matrix grants the role. */
+function seededActor(userId: number, role: string): AuthUserPayload {
+  return { userId, role, permissions: seededRolePermissions(role) };
+}
+
+const PURCHASING = seededActor(40, 'purchasing');
+const ENGINEERING_LEAD = seededActor(41, 'engineeringLead');
 
 type ItemRow = Item & FakeRow;
 
@@ -129,6 +137,32 @@ describe('ItemService', () => {
     await expect(
       service.update(item.id, { name: '  ' }, PURCHASING),
     ).rejects.toBeInstanceOf(BadRequestException);
+  });
+
+  it('stores no reference price for an actor without reference_price:read, and keeps the stored one on update', async () => {
+    const { service } = buildService();
+
+    const created = await service.create(
+      dto({ referencePrice: 450000 }),
+      ENGINEERING_LEAD,
+    );
+    expect(created.referencePrice).toBeNull();
+
+    const priced = await service.create(
+      dto({ code: 'LC1D12M7', referencePrice: 450000 }),
+      PURCHASING,
+    );
+    expect(priced.referencePrice).toBe(450000);
+    await expect(
+      service.update(
+        priced.id,
+        { name: 'Contactor 12A', referencePrice: 1 },
+        ENGINEERING_LEAD,
+      ),
+    ).resolves.toMatchObject({ name: 'Contactor 12A', referencePrice: 450000 });
+    await expect(
+      service.update(priced.id, { referencePrice: null }, ENGINEERING_LEAD),
+    ).resolves.toMatchObject({ referencePrice: 450000 });
   });
 
   it('refuses to delete a referenced item and reports it per row in a bulk delete', async () => {

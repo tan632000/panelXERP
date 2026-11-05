@@ -3,6 +3,8 @@ import { randomBytes } from 'crypto';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
+import { seededRolePermissions } from '@kernel/core/database/seeds/seed-roles';
+
 import { DataScopeService } from '@shared/services/data-scope.service';
 
 import { ReferenceCheckRegistry } from '@plugins/catalog/_shared/gateways/reference-check-registry';
@@ -18,6 +20,7 @@ import { EstimatePanel } from '@plugins/sales/estimate/entities/estimate-panel.e
 import { EstimateRevision } from '@plugins/sales/estimate/entities/estimate-revision.entity';
 import { Estimate } from '@plugins/sales/estimate/entities/estimate.entity';
 import { EstimateEditService } from '@plugins/sales/estimate/services/estimate-edit.service';
+import { EstimatePricingService } from '@plugins/sales/estimate/services/estimate-pricing.service';
 import { EstimateService } from '@plugins/sales/estimate/services/estimate.service';
 import { SalesRequestActivity } from '@plugins/sales/request/entities/request-activity.entity';
 import { SalesRequest } from '@plugins/sales/request/entities/request.entity';
@@ -42,6 +45,7 @@ describeWithDatabase('Estimate against Postgres', () => {
   let dataSource: DataSource;
   let service: EstimateService;
   let editor: EstimateEditService;
+  let pricing: EstimatePricingService;
   let registry: ReferenceCheckRegistry;
   let notifications: { emit: jest.Mock };
   let salesA: number;
@@ -51,6 +55,8 @@ describeWithDatabase('Estimate against Postgres', () => {
   let itemId: number;
   let engineer: AuthUserPayload;
   let leadActor: AuthUserPayload;
+  /** The sales owner of the requests: holds the price scope the engineers lack. */
+  let salesActor: AuthUserPayload;
   const requestIds: number[] = [];
 
   beforeAll(async () => {
@@ -99,6 +105,11 @@ describeWithDatabase('Estimate against Postgres', () => {
     [salesA, engineerA, lead] = [a, e, l];
     engineer = { userId: engineerA, role: 'engineer' };
     leadActor = { userId: lead, role: 'engineeringLead' };
+    salesActor = {
+      userId: salesA,
+      role: 'sales',
+      permissions: seededRolePermissions('sales'),
+    };
 
     registry = new ReferenceCheckRegistry();
     notifications = { emit: jest.fn().mockResolvedValue(1) };
@@ -124,6 +135,11 @@ describeWithDatabase('Estimate against Postgres', () => {
     );
     service.onModuleInit();
     editor = new EstimateEditService(dataSource, service);
+    pricing = new EstimatePricingService(
+      dataSource,
+      service,
+      new DataScopeService(),
+    );
 
     const [customer]: Array<{ id: number }> = await dataSource.query(
       `INSERT INTO customers (code, name, sales_owner_id) VALUES ($1, 'EST race customer', $2) RETURNING id`,
@@ -218,7 +234,7 @@ describeWithDatabase('Estimate against Postgres', () => {
   it('stores the totals the server computed, as numbers', async () => {
     const { estimate } = await readyEstimate();
 
-    const detail = await service.findOne(estimate.id, engineer);
+    const detail = await service.findOne(estimate.id, salesActor);
 
     // 2.5 × 1,000 = 2,500 per panel, two panels.
     expect(detail.total).toBe(5000);
@@ -292,11 +308,56 @@ describeWithDatabase('Estimate against Postgres', () => {
 
     const [{ status }] = await revisionsOf(estimate.id);
     expect(status).toBe('submitted');
-    const frozen = await service.findOne(estimate.id, engineer);
+    const frozen = await service.findOne(estimate.id, salesActor);
     const quantity = frozen.current.panels[0].quantity;
     // Whichever ran first, the stored total always matches the stored quantity.
     expect(frozen.current.total).toBe(quantity * 2500);
     expect(results[0].status).toBe('fulfilled');
+  });
+
+  it('lets exactly one of two concurrent completes of the pricing through', async () => {
+    const { estimate } = await readyEstimate();
+    await service.submit(estimate.id, engineer);
+
+    const results = await Promise.allSettled([
+      pricing.complete(estimate.id, salesActor),
+      pricing.complete(estimate.id, salesActor),
+    ]);
+
+    expect(outcomes(results)).toEqual({ fulfilled: 1, conflicts: 1 });
+    const [row] = await dataSource.query<
+      Array<{ priced_at: Date | null; priced_by: number | null }>
+    >(
+      `SELECT priced_at, priced_by FROM sales_estimate_revisions WHERE estimate_id = $1`,
+      [estimate.id],
+    );
+    expect(row.priced_at).toBeInstanceOf(Date);
+    expect(row.priced_by).toBe(salesA);
+  });
+
+  it('never prices the draft a racing revise opens: only revision 1 can carry the pricing', async () => {
+    const { estimate } = await readyEstimate();
+    await service.submit(estimate.id, engineer);
+
+    const [priced, revised] = await Promise.allSettled([
+      pricing.complete(estimate.id, salesActor),
+      service.revise(estimate.id, engineer),
+    ]);
+
+    // The revise always opens the draft; the pricing either took the lock first or finds the draft (409).
+    expect(revised.status).toBe('fulfilled');
+    expect(
+      priced.status === 'fulfilled' ||
+        (priced.reason as unknown) instanceof ConflictException,
+    ).toBe(true);
+    const rows = await dataSource.query<
+      Array<{ revision: number; priced_at: Date | null }>
+    >(
+      `SELECT revision, priced_at FROM sales_estimate_revisions WHERE estimate_id = $1 ORDER BY revision`,
+      [estimate.id],
+    );
+    expect(rows[0].priced_at !== null).toBe(priced.status === 'fulfilled');
+    expect(rows[1].priced_at).toBeNull();
   });
 
   it('gives two concurrent first drafts distinct codes', async () => {

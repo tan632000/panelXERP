@@ -458,14 +458,27 @@ describe('Production chain (e2e)', () => {
         ).expect(201)
       ).body as { panels: Array<{ id: number }> }
     ).panels[0].id;
-    await post(
+    const withLine = await post(
       'engineer_a',
       `/sales/estimates/${created.estimateId}/panels/${panelId}/bom-lines`,
-      { itemId: created.itemId, quantity: 1, unitCost: 100_000 },
+      { itemId: created.itemId, quantity: 1 },
     ).expect(201);
+    const bomLineId = (
+      withLine.body as { panels: Array<{ bomLines: Array<{ id: number }> }> }
+    ).panels[0].bomLines[0].id;
     await post(
       'engineer_a',
       `/sales/estimates/${created.estimateId}/submit`,
+    ).expect(200);
+    // The engineer sends quantities only: sales fills the unit cost and marks the estimate priced.
+    await patch(
+      'sales_a',
+      `/sales/estimates/${created.estimateId}/bom-lines/${bomLineId}/unit-cost`,
+      { unitCost: 100_000 },
+    ).expect(200);
+    await post(
+      'sales_a',
+      `/sales/estimates/${created.estimateId}/price`,
     ).expect(200);
     created.quotationId = (
       (

@@ -6,9 +6,12 @@ import {
 } from '@nestjs/common';
 import { QueryFailedError } from 'typeorm';
 
+import { seededRolePermissions } from '@kernel/core/database/seeds/seed-roles';
+
 import { ItemService } from '@plugins/catalog/item/services/item.service';
 import {
   buildEstimateFixture,
+  PRICER_SALES_A,
   type EstimateFixture,
 } from '@plugins/sales/estimate/estimate-fixture.helper-spec';
 import { RequestStatus } from '@plugins/sales/request/enums/request-status.enum';
@@ -21,9 +24,20 @@ import {
   SALES_B,
 } from '@plugins/sales/request/request-fixture.helper-spec';
 
+import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 import type { EstimateRevisionView } from '@plugins/sales/estimate/utils/estimate-revision.util';
 
-const DIRECTOR = { userId: 50, role: 'director' };
+/** Holds the price scope, so it reads the figures an engineer no longer receives. */
+const DIRECTOR = {
+  userId: 50,
+  role: 'director',
+  permissions: seededRolePermissions('director'),
+};
+const PURCHASING = {
+  userId: 40,
+  role: 'purchasing',
+  permissions: seededRolePermissions('purchasing'),
+};
 const ADMIN = { userId: 1, role: 'admin', permissions: ['*:*'] };
 
 /** The catalog's own item service on the fixture's item table and delete checks. */
@@ -40,84 +54,100 @@ async function startEstimate(fixture: EstimateFixture) {
   return { request, estimate };
 }
 
-/** The two-panel fixture of the totals spec, entered through the services. */
-async function enterFixtureBom(fixture: EstimateFixture, estimateId: number) {
-  const cable = fixture.itemOf({ name: 'Cable 3x4', unit: 'm' });
+/**
+ * The two-panel fixture of the totals spec as an engineer enters it: quantities only, so each
+ * line costs the item's reference price. The cost lines come with the pricing step.
+ */
+async function enterFixtureBom(
+  fixture: EstimateFixture,
+  estimateId: number,
+  actor: AuthUserPayload = ENGINEER_A,
+) {
+  const cable = fixture.itemOf({
+    name: 'Cable 3x4',
+    unit: 'm',
+    referencePrice: 24500,
+  });
   const mccb = fixture.itemOf({ name: 'MCCB 3P', referencePrice: 1250000.5 });
-  const gland = fixture.itemOf({ name: 'Gland' });
-  const busbar = fixture.itemOf({ name: 'Busbar', unit: 'm' });
-  const relay = fixture.itemOf({ name: 'Relay' });
+  const gland = fixture.itemOf({ name: 'Gland', referencePrice: 100 });
+  const busbar = fixture.itemOf({
+    name: 'Busbar',
+    unit: 'm',
+    referencePrice: 80000,
+  });
+  const relay = fixture.itemOf({ name: 'Relay', referencePrice: 15500.75 });
   const { editor } = fixture;
 
   let view = await editor.addPanel(
     estimateId,
     { tag: 'MSB-01', quantity: 2 },
-    ENGINEER_A,
+    actor,
   );
   const a = view.panels[0].id;
   view = await editor.addPanel(
     estimateId,
     { tag: 'MSB-02', description: 'Sub board', quantity: 1 },
-    ENGINEER_A,
+    actor,
   );
   const b = view.panels[1].id;
 
   await editor.addBomLine(
     estimateId,
     a,
-    { itemId: cable.id, quantity: 12.5, unitCost: 24500 },
-    ENGINEER_A,
+    { itemId: cable.id, quantity: 12.5 },
+    actor,
   );
-  // No unit cost: the item's reference price is used.
   await editor.addBomLine(
     estimateId,
     a,
     { itemId: mccb.id, quantity: 3 },
-    ENGINEER_A,
+    actor,
   );
   await editor.addBomLine(
     estimateId,
     a,
-    { itemId: gland.id, quantity: 1.005, unitCost: 100 },
-    ENGINEER_A,
-  );
-  await editor.addCostLine(
-    estimateId,
-    a,
-    { category: 'design' as never, amount: 500000 },
-    ENGINEER_A,
-  );
-  await editor.addCostLine(
-    estimateId,
-    a,
-    { category: 'labor' as never, amount: 1200000 },
-    ENGINEER_A,
+    { itemId: gland.id, quantity: 1.005 },
+    actor,
   );
   await editor.addBomLine(
     estimateId,
     b,
-    { itemId: busbar.id, quantity: 7.25, unitCost: 80000 },
-    ENGINEER_A,
+    { itemId: busbar.id, quantity: 7.25 },
+    actor,
   );
-  await editor.addBomLine(
+  view = await editor.addBomLine(
     estimateId,
     b,
-    { itemId: relay.id, quantity: 2, unitCost: 15500.75 },
-    ENGINEER_A,
-  );
-  await editor.addCostLine(
-    estimateId,
-    b,
-    { category: 'installation' as never, amount: 300000 },
-    ENGINEER_A,
-  );
-  view = await editor.addCostLine(
-    estimateId,
-    b,
-    { category: 'transport' as never, amount: 150000 },
-    ENGINEER_A,
+    { itemId: relay.id, quantity: 2 },
+    actor,
   );
   return { view, a, b, items: { cable, mccb, gland, busbar, relay } };
+}
+
+/** What sales adds to the submitted fixture: four cost lines on the two panels. */
+async function priceFixtureCosts(
+  fixture: EstimateFixture,
+  estimateId: number,
+  a: number,
+  b: number,
+) {
+  const { pricing } = fixture;
+  const costs: Array<[number, string, number]> = [
+    [a, 'design', 500000],
+    [a, 'labor', 1200000],
+    [b, 'installation', 300000],
+    [b, 'transport', 150000],
+  ];
+  let view!: EstimateRevisionView;
+  for (const [panelId, category, amount] of costs) {
+    view = await pricing.addCostLine(
+      estimateId,
+      panelId,
+      { category: category as never, amount },
+      PRICER_SALES_A,
+    );
+  }
+  return view;
 }
 
 /** A submitted estimate with one panel and one line. */
@@ -147,7 +177,7 @@ describe('EstimateService', () => {
 
       const estimate = await fixture.service.create(
         { requestId: request.id },
-        ENGINEER_A,
+        DIRECTOR,
       );
 
       expect(estimate).toMatchObject({
@@ -209,18 +239,11 @@ describe('EstimateService', () => {
       },
     );
 
-    it('lets only the assigned engineer or the engineering lead start it; anyone else, director and admin included, gets 404', async () => {
+    it('lets only the assigned engineer, the engineering lead or the director start it; anyone else, admin included, gets 404', async () => {
       const fixture = buildEstimateFixture();
       const request = fixture.requestAt(RequestStatus.ASSIGNED);
 
-      for (const actor of [
-        ENGINEER_B,
-        SALES_A,
-        SALES_B,
-        MANAGER,
-        DIRECTOR,
-        ADMIN,
-      ]) {
+      for (const actor of [ENGINEER_B, SALES_A, SALES_B, MANAGER, ADMIN]) {
         await expect(
           fixture.service.create({ requestId: request.id }, actor),
         ).rejects.toBeInstanceOf(NotFoundException);
@@ -232,6 +255,15 @@ describe('EstimateService', () => {
       ).resolves.toMatchObject({ status: 'draft' });
       // The failed attempts rolled back, so the table holds fresh copies of its rows.
       expect(fixture.requests.rows[0].status).toBe(RequestStatus.ESTIMATING);
+
+      const directorFixture = buildEstimateFixture();
+      const directorRequest = directorFixture.requestAt(RequestStatus.ASSIGNED);
+      await expect(
+        directorFixture.service.create(
+          { requestId: directorRequest.id },
+          DIRECTOR,
+        ),
+      ).resolves.toMatchObject({ status: 'draft' });
     });
 
     it('answers 404 for an unknown or deleted request', async () => {
@@ -250,11 +282,19 @@ describe('EstimateService', () => {
   });
 
   describe('totals and editing', () => {
-    it('stores the server-computed totals of the two-panel fixture', async () => {
+    it('stores the server-computed totals of the two-panel fixture, with the cost lines sales adds', async () => {
       const fixture = buildEstimateFixture();
       const { estimate } = await startEstimate(fixture);
+      const {
+        a,
+        b,
+        view: entered,
+      } = await enterFixtureBom(fixture, estimate.id, DIRECTOR);
+      // Quantities only: the lines cost the reference prices, no cost line yet.
+      expect(entered.total).toBe(8723708);
 
-      const { view } = await enterFixtureBom(fixture, estimate.id);
+      await fixture.service.submit(estimate.id, DIRECTOR);
+      const view = await priceFixtureCosts(fixture, estimate.id, a, b);
 
       expect(view.total).toBe(12573708);
       expect(view.panels[0]).toMatchObject({
@@ -270,7 +310,7 @@ describe('EstimateService', () => {
         unitCost: 1061002,
         total: 1061002,
       });
-      const reread = await fixture.service.findOne(estimate.id, ENGINEER_A);
+      const reread = await fixture.service.findOne(estimate.id, DIRECTOR);
       expect(reread.total).toBe(12573708);
       expect(reread.current.total).toBe(12573708);
     });
@@ -283,20 +323,20 @@ describe('EstimateService', () => {
       const view = await fixture.editor.addPanel(
         estimate.id,
         { tag: 'P', quantity: 1 },
-        ENGINEER_A,
+        DIRECTOR,
       );
 
       await fixture.editor.addBomLine(
         estimate.id,
         view.panels[0].id,
         { itemId: priced.id, quantity: 2 },
-        ENGINEER_A,
+        DIRECTOR,
       );
       const after = await fixture.editor.addBomLine(
         estimate.id,
         view.panels[0].id,
         { itemId: unpriced.id, quantity: 1 },
-        ENGINEER_A,
+        DIRECTOR,
       );
 
       expect(
@@ -310,47 +350,41 @@ describe('EstimateService', () => {
     it('recomputes when a line changes or goes, and when the panel quantity changes', async () => {
       const fixture = buildEstimateFixture();
       const { estimate } = await startEstimate(fixture);
-      const { a, view } = await enterFixtureBom(fixture, estimate.id);
-      const lineId = view.panels[0].bomLines[0].id;
-      const costId = view.panels[0].costLines[0].id;
+      const { a, b } = await enterFixtureBom(fixture, estimate.id, DIRECTOR);
+      await fixture.service.submit(estimate.id, DIRECTOR);
+      await priceFixtureCosts(fixture, estimate.id, a, b);
+      // The new draft carries the cost lines sales added.
+      const draft = (await fixture.service.revise(estimate.id, DIRECTOR))
+        .current;
+      const panelA = draft.panels[0].id;
+      const lineId = draft.panels[0].bomLines[0].id;
 
       let next = await fixture.editor.updateBomLine(
         estimate.id,
         lineId,
         { quantity: 10 },
-        ENGINEER_A,
+        DIRECTOR,
       );
       // 10 × 24,500 = 245,000 instead of 306,250.
       expect(next.panels[0].bomLines[0].amount).toBe(245000);
 
       next = await fixture.editor.updatePanel(
         estimate.id,
-        a,
+        panelA,
         { quantity: 3 },
-        ENGINEER_A,
+        DIRECTOR,
       );
       expect(next.panels[0].total).toBe(next.panels[0].unitCost * 3);
+      expect(next.panels[0].costLines).toHaveLength(2);
 
-      next = await fixture.editor.deleteCostLine(
-        estimate.id,
-        costId,
-        ENGINEER_A,
-      );
-      expect(next.panels[0].costLines).toHaveLength(1);
-      const remaining = next.panels[0].bomLines.reduce(
-        (sum, line) => sum + line.amount,
-        0,
-      );
-      expect(next.panels[0].unitCost).toBe(remaining + 1200000);
-
-      next = await fixture.editor.deletePanel(estimate.id, a, ENGINEER_A);
+      next = await fixture.editor.deletePanel(estimate.id, panelA, DIRECTOR);
       expect(next.panels).toHaveLength(1);
       expect(next.total).toBe(1061002);
       expect(
-        fixture.bomLines.rows.filter((row) => row.panelId === a),
+        fixture.bomLines.rows.filter((row) => row.panelId === panelA),
       ).toHaveLength(0);
       expect(
-        fixture.costLines.rows.filter((row) => row.panelId === a),
+        fixture.costLines.rows.filter((row) => row.panelId === panelA),
       ).toHaveLength(0);
     });
 
@@ -379,10 +413,10 @@ describe('EstimateService', () => {
       await itemServiceOf(fixture).update(
         item.id,
         { name: 'Renamed contactor', brand: 'Other', referencePrice: 900 },
-        { userId: 40, role: 'purchasing' },
+        PURCHASING,
       );
 
-      const line = (await fixture.service.findOne(estimate.id, ENGINEER_A))
+      const line = (await fixture.service.findOne(estimate.id, DIRECTOR))
         .current.panels[0].bomLines[0];
       expect(line).toMatchObject({
         itemId: item.id,
@@ -448,14 +482,6 @@ describe('EstimateService', () => {
           ENGINEER_A,
         ),
       ).rejects.toBeInstanceOf(NotFoundException);
-      await expect(
-        fixture.editor.addCostLine(
-          first.estimate.id,
-          foreign.panels[0].id,
-          { category: 'labor' as never, amount: 1 },
-          ENGINEER_A,
-        ),
-      ).rejects.toBeInstanceOf(NotFoundException);
 
       const item = fixture.itemOf();
       const line = await fixture.editor.addBomLine(
@@ -478,7 +504,8 @@ describe('EstimateService', () => {
     it('rejects a total beyond the amount cap with 400 and stores nothing', async () => {
       const fixture = buildEstimateFixture();
       const { estimate } = await startEstimate(fixture);
-      const item = fixture.itemOf();
+      // The unit cost an item carries is the reference price, the only source on a draft.
+      const item = fixture.itemOf({ referencePrice: 10000000000 });
       const view = await fixture.editor.addPanel(
         estimate.id,
         { tag: 'P', quantity: 10000 },
@@ -489,11 +516,7 @@ describe('EstimateService', () => {
         fixture.editor.addBomLine(
           estimate.id,
           view.panels[0].id,
-          {
-            itemId: item.id,
-            quantity: 1000000,
-            unitCost: 10000000000,
-          },
+          { itemId: item.id, quantity: 1000000 },
           ENGINEER_A,
         ),
       ).rejects.toBeInstanceOf(BadRequestException);
@@ -502,7 +525,7 @@ describe('EstimateService', () => {
   });
 
   describe('who may write', () => {
-    it('answers 404 to the director and the administrator on every write, though both read the estimate', async () => {
+    it('answers 404 to the administrator on every write, though the administrator reads the estimate', async () => {
       const fixture = buildEstimateFixture();
       const { estimate } = await startEstimate(fixture);
       const item = fixture.itemOf();
@@ -513,7 +536,7 @@ describe('EstimateService', () => {
       );
       const panelId = view.panels[0].id;
 
-      for (const actor of [DIRECTOR, ADMIN]) {
+      for (const actor of [ADMIN]) {
         await expect(
           fixture.service.findOne(estimate.id, actor),
         ).resolves.toMatchObject({ id: estimate.id });
@@ -540,6 +563,30 @@ describe('EstimateService', () => {
         ).rejects.toBeInstanceOf(NotFoundException);
       }
       expect(fixture.bomLines.rows).toHaveLength(0);
+    });
+
+    it('lets the director edit, submit and revise an estimate assigned to someone else', async () => {
+      const fixture = buildEstimateFixture();
+      const { estimate } = await startEstimate(fixture);
+      const item = fixture.itemOf({ referencePrice: 10 });
+      const view = await fixture.editor.addPanel(
+        estimate.id,
+        { tag: 'P', quantity: 1 },
+        DIRECTOR,
+      );
+      await fixture.editor.addBomLine(
+        estimate.id,
+        view.panels[0].id,
+        { itemId: item.id, quantity: 1 },
+        DIRECTOR,
+      );
+
+      await expect(
+        fixture.service.submit(estimate.id, DIRECTOR),
+      ).resolves.toMatchObject({ status: 'submitted' });
+      await expect(
+        fixture.service.revise(estimate.id, DIRECTOR),
+      ).resolves.toMatchObject({ latestRevision: 2 });
     });
 
     it('lets the engineering lead edit, submit and revise an estimate assigned to someone else', async () => {
@@ -730,13 +777,11 @@ describe('EstimateService', () => {
       expect(request.status).toBe(RequestStatus.ESTIMATED);
       expect(submitted).toMatchObject({
         status: 'submitted',
-        total: 12573708,
-        current: {
-          status: 'submitted',
-          submittedBy: ENGINEER_A.userId,
-          total: 12573708,
-        },
+        current: { status: 'submitted', submittedBy: ENGINEER_A.userId },
       });
+      expect(
+        await fixture.service.findOne(estimate.id, DIRECTOR),
+      ).toMatchObject({ total: 8723708, current: { total: 8723708 } });
       expect(submitted.current.submittedAt).toBeInstanceOf(Date);
       expect(fixture.notifications.emit).toHaveBeenCalledTimes(1);
       expect(fixture.notifications.emit).toHaveBeenCalledWith(
@@ -857,14 +902,6 @@ describe('EstimateService', () => {
         ),
         editor.updateBomLine(estimate.id, lineId, { quantity: 9 }, ENGINEER_A),
         editor.deleteBomLine(estimate.id, lineId, ENGINEER_A),
-        editor.addCostLine(
-          estimate.id,
-          panelId,
-          { category: 'labor' as never, amount: 1 },
-          ENGINEER_A,
-        ),
-        editor.updateCostLine(estimate.id, 1, { amount: 2 }, ENGINEER_A),
-        editor.deleteCostLine(estimate.id, 1, ENGINEER_A),
       ];
       for (const attempt of attempts) {
         await expect(attempt).rejects.toBeInstanceOf(ConflictException);
@@ -881,7 +918,7 @@ describe('EstimateService', () => {
       const fixture = buildEstimateFixture();
       const { estimate, item } = await submittedEstimate(fixture);
 
-      const revised = await fixture.service.revise(estimate.id, ENGINEER_A);
+      const revised = await fixture.service.revise(estimate.id, DIRECTOR);
 
       expect(revised).toMatchObject({
         status: 'draft',
@@ -915,10 +952,10 @@ describe('EstimateService', () => {
         estimate.id,
         revised.current.panels[0].id,
         { quantity: 4 },
-        ENGINEER_A,
+        DIRECTOR,
       );
       expect(edited.total).toBe(8000);
-      const first = await fixture.service.findOne(estimate.id, ENGINEER_A, 1);
+      const first = await fixture.service.findOne(estimate.id, DIRECTOR, 1);
       expect(first.current).toMatchObject({ status: 'submitted', total: 2000 });
       expect(first.current.panels[0].quantity).toBe(1);
       expect(fixture.panels.rows).toHaveLength(2);
@@ -1022,17 +1059,25 @@ describe('EstimateService', () => {
     it('stores and sums an integer amount exactly', async () => {
       const fixture = buildEstimateFixture();
       const { estimate } = await startEstimate(fixture);
+      const item = fixture.itemOf();
       const view = await fixture.editor.addPanel(
         estimate.id,
         { tag: 'P', quantity: 3 },
-        ENGINEER_A,
+        DIRECTOR,
       );
+      await fixture.editor.addBomLine(
+        estimate.id,
+        view.panels[0].id,
+        { itemId: item.id, quantity: 1 },
+        DIRECTOR,
+      );
+      await fixture.service.submit(estimate.id, DIRECTOR);
 
-      const next = await fixture.editor.addCostLine(
+      const next = await fixture.pricing.addCostLine(
         estimate.id,
         view.panels[0].id,
         { category: 'labor' as never, amount: 1000 },
-        ENGINEER_A,
+        PRICER_SALES_A,
       );
 
       expect(next.panels[0].costLines[0].amount).toBe(1000);

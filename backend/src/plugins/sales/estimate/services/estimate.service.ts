@@ -41,6 +41,10 @@ import { Estimate } from '@plugins/sales/estimate/entities/estimate.entity';
 import { EstimateRevisionStatus } from '@plugins/sales/estimate/enums/estimate-revision-status.enum';
 import { ESTIMATE_READ } from '@plugins/sales/estimate/permissions/estimate.permissions';
 import {
+  presentEstimate,
+  presentEstimatePage,
+} from '@plugins/sales/estimate/utils/estimate-price-visibility.util';
+import {
   loadRevisionTree,
   loadRevisionView,
   recalculateRevision,
@@ -54,8 +58,11 @@ import type { EntityManager } from 'typeorm';
 
 const ESTIMATE_LABEL = 'Estimate';
 
-/** The one role besides the assigned engineer that may write any estimate. */
-const ESTIMATE_LEAD_ROLE = 'engineeringLead';
+/** The roles besides the assigned engineer that may write any estimate. */
+const ESTIMATE_WRITER_ROLES: readonly string[] = [
+  'engineeringLead',
+  'director',
+];
 
 /** Request states in which an estimate may still be written: it is being, or has been, built. */
 const REQUEST_ESTIMATABLE_STATUSES: readonly RequestStatus[] = [
@@ -78,6 +85,8 @@ export interface EstimateRequestSummary {
 
 export type EstimateListItem = Estimate & {
   request: EstimateRequestSummary | null;
+  /** When the latest revision was priced; null while it is a draft or awaits pricing. */
+  latestPricedAt: Date | null;
 };
 
 export interface EstimateRevisionSummary {
@@ -85,6 +94,8 @@ export interface EstimateRevisionSummary {
   status: string;
   total: number;
   submittedAt: Date | null;
+  pricedAt: Date | null;
+  pricedBy: number | null;
 }
 
 export type EstimateDetail = Estimate & {
@@ -155,7 +166,10 @@ export class EstimateService implements OnModuleInit {
         })
       : [[], 0];
 
-    return paginate(await this.toListItems(rows), total, page, limit);
+    return presentEstimatePage(
+      paginate(await this.toListItems(rows), total, page, limit),
+      actor,
+    );
   }
 
   async findOne(
@@ -187,16 +201,20 @@ export class EstimateService implements OnModuleInit {
       loadRevisionView(this.dataSource.manager, current),
       this.requestSummary(request),
     ]);
-    return Object.assign(estimate, {
+    // A copy: the loaded row is not the response, so a presented detail never changes the row.
+    const detail: EstimateDetail = Object.assign({}, estimate, {
       request: summary,
       revisions: revisions.map((revision) => ({
         revision: revision.revision,
         status: revision.status,
         total: revision.total,
         submittedAt: revision.submittedAt ?? null,
+        pricedAt: revision.pricedAt ?? null,
+        pricedBy: revision.pricedBy ?? null,
       })),
       current: view,
     });
+    return presentEstimate(detail, actor);
   }
 
   /**
@@ -442,7 +460,7 @@ export class EstimateService implements OnModuleInit {
 
   /**
    * The request is visible to the actor (404 otherwise) and the actor is the engineer it is
-   * assigned to or an engineering lead. Anyone else, the director and the administrator
+   * assigned to, an engineering lead or the director. Anyone else, the administrator
    * included, answers 404 like a record out of scope.
    */
   private assertWritable(
@@ -455,7 +473,8 @@ export class EstimateService implements OnModuleInit {
       ESTIMATE_LABEL,
     );
     const mayWrite =
-      actor.role === ESTIMATE_LEAD_ROLE ||
+      (actor.role !== undefined &&
+        ESTIMATE_WRITER_ROLES.includes(actor.role)) ||
       visible.assignedEngineerId === actor.userId;
     if (!mayWrite) throw new NotFoundException(`${ESTIMATE_LABEL} not found`);
     return visible;
@@ -573,6 +592,9 @@ export class EstimateService implements OnModuleInit {
       withDeleted: true,
     });
     const byId = new Map(requests.map((request) => [request.id, request]));
+    const latest = await this.revisionRepo.find({
+      where: { estimateId: In(rows.map((row) => row.id)) },
+    });
     const [customers, names] = await Promise.all([
       this.crm.getCustomerSummaries(requests.map((r) => r.customerId)),
       this.users.namesOf(
@@ -582,7 +604,13 @@ export class EstimateService implements OnModuleInit {
 
     return rows.map((row) => {
       const request = byId.get(row.requestId);
+      const pricedAt = latest.find(
+        (revision) =>
+          revision.estimateId === row.id &&
+          revision.revision === row.latestRevision,
+      )?.pricedAt;
       return Object.assign(row, {
+        latestPricedAt: pricedAt ?? null,
         request: request
           ? this.summaryOf(
               request,

@@ -16,10 +16,6 @@ import {
   UpdateBomLineDto,
 } from '@plugins/sales/estimate/dto/bom-line.dto';
 import {
-  CreateCostLineDto,
-  UpdateCostLineDto,
-} from '@plugins/sales/estimate/dto/cost-line.dto';
-import {
   CreatePanelDto,
   UpdatePanelDto,
 } from '@plugins/sales/estimate/dto/panel.dto';
@@ -28,7 +24,10 @@ import { EstimateCostLine } from '@plugins/sales/estimate/entities/estimate-cost
 import { EstimatePanel } from '@plugins/sales/estimate/entities/estimate-panel.entity';
 import { EstimateRevision } from '@plugins/sales/estimate/entities/estimate-revision.entity';
 import { EstimateService } from '@plugins/sales/estimate/services/estimate.service';
+import { presentRevision } from '@plugins/sales/estimate/utils/estimate-price-visibility.util';
 import {
+  lineOfRevision,
+  panelOfRevision,
   recalculateRevision,
   type EstimateRevisionView,
 } from '@plugins/sales/estimate/utils/estimate-revision.util';
@@ -42,8 +41,6 @@ interface DraftContext {
   revision: EstimateRevision;
 }
 
-const PANEL_LABEL = 'Panel';
-
 /** The catalog columns a BOM line copies; read here because the catalog entity is not importable. */
 interface LockedItem {
   id: number;
@@ -56,10 +53,12 @@ interface LockedItem {
 }
 
 /**
- * Edits of the draft revision: panels, BOM lines and cost lines. Every edit runs in one
+ * Edits of the draft revision: panels and BOM lines, by quantity only; sales prices the costs
+ * once the revision is submitted. Every edit runs in one
  * transaction that locks the estimate (and its request), so it cannot interleave with a submit
  * or a revise, refuses a revision that is no longer a draft, and ends by recomputing every
- * figure on the server. Each returns the whole revision as it now stands.
+ * figure on the server. Each returns the whole revision as it now stands, as the actor may see
+ * it (an actor without the price scope gets no price key).
  */
 @Injectable()
 export class EstimateEditService {
@@ -98,7 +97,7 @@ export class EstimateEditService {
     actor: AuthUserPayload,
   ): Promise<EstimateRevisionView> {
     return this.edit(id, actor, async ({ manager, revision }) => {
-      const panel = await this.panelOf(manager, revision.id, panelId);
+      const panel = await panelOfRevision(manager, revision.id, panelId);
       if (dto.tag !== undefined) {
         const tag = requireText(dto.tag, 'Tag is required.');
         if (tag.toLowerCase() !== panel.tag.toLowerCase()) {
@@ -120,7 +119,7 @@ export class EstimateEditService {
     actor: AuthUserPayload,
   ): Promise<EstimateRevisionView> {
     return this.edit(id, actor, async ({ manager, revision }) => {
-      const panel = await this.panelOf(manager, revision.id, panelId);
+      const panel = await panelOfRevision(manager, revision.id, panelId);
       // Explicit, not left to the foreign keys' cascade: the lines go in this transaction.
       await manager.getRepository(EstimateBomLine).delete({ panelId });
       await manager.getRepository(EstimateCostLine).delete({ panelId });
@@ -130,7 +129,7 @@ export class EstimateEditService {
 
   /**
    * Adds a material to a panel. The item's code, name, brand and unit are copied onto the line
-   * now; the unit cost defaults to the item's reference price (0 when it has none).
+   * now; the unit cost is the item's reference price (0 when it has none) until sales prices it.
    */
   addBomLine(
     id: number,
@@ -139,7 +138,7 @@ export class EstimateEditService {
     actor: AuthUserPayload,
   ): Promise<EstimateRevisionView> {
     return this.edit(id, actor, async ({ manager, revision }) => {
-      const panel = await this.panelOf(manager, revision.id, panelId);
+      const panel = await panelOfRevision(manager, revision.id, panelId);
       const item = await this.lockLiveItem(manager, dto.itemId);
       const repo = manager.getRepository(EstimateBomLine);
       await repo.save(
@@ -151,7 +150,7 @@ export class EstimateEditService {
           itemBrand: item.brand,
           itemUnit: item.unit,
           quantity: dto.quantity,
-          unitCost: dto.unitCost ?? item.referencePrice,
+          unitCost: item.referencePrice,
           amount: 0,
           note: trimToNull(dto.note),
         }),
@@ -167,11 +166,8 @@ export class EstimateEditService {
   ): Promise<EstimateRevisionView> {
     return this.edit(id, actor, async ({ manager, revision }) => {
       const repo = manager.getRepository(EstimateBomLine);
-      const line = await this.lineOf(manager, revision.id, repo, lineId);
+      const line = await lineOfRevision(manager, revision.id, repo, lineId);
       if (dto.quantity !== undefined) line.quantity = dto.quantity;
-      if (dto.unitCost !== undefined && dto.unitCost !== null) {
-        line.unitCost = dto.unitCost;
-      }
       if (dto.note !== undefined) line.note = trimToNull(dto.note);
       await repo.save(line);
     });
@@ -184,57 +180,7 @@ export class EstimateEditService {
   ): Promise<EstimateRevisionView> {
     return this.edit(id, actor, async ({ manager, revision }) => {
       const repo = manager.getRepository(EstimateBomLine);
-      const line = await this.lineOf(manager, revision.id, repo, lineId);
-      await repo.delete({ id: line.id });
-    });
-  }
-
-  addCostLine(
-    id: number,
-    panelId: number,
-    dto: CreateCostLineDto,
-    actor: AuthUserPayload,
-  ): Promise<EstimateRevisionView> {
-    return this.edit(id, actor, async ({ manager, revision }) => {
-      const panel = await this.panelOf(manager, revision.id, panelId);
-      const repo = manager.getRepository(EstimateCostLine);
-      await repo.save(
-        repo.create({
-          panelId: panel.id,
-          category: dto.category,
-          description: trimToNull(dto.description),
-          amount: dto.amount,
-        }),
-      );
-    });
-  }
-
-  updateCostLine(
-    id: number,
-    lineId: number,
-    dto: UpdateCostLineDto,
-    actor: AuthUserPayload,
-  ): Promise<EstimateRevisionView> {
-    return this.edit(id, actor, async ({ manager, revision }) => {
-      const repo = manager.getRepository(EstimateCostLine);
-      const line = await this.lineOf(manager, revision.id, repo, lineId);
-      if (dto.category !== undefined) line.category = dto.category;
-      if (dto.description !== undefined) {
-        line.description = trimToNull(dto.description);
-      }
-      if (dto.amount !== undefined) line.amount = dto.amount;
-      await repo.save(line);
-    });
-  }
-
-  deleteCostLine(
-    id: number,
-    lineId: number,
-    actor: AuthUserPayload,
-  ): Promise<EstimateRevisionView> {
-    return this.edit(id, actor, async ({ manager, revision }) => {
-      const repo = manager.getRepository(EstimateCostLine);
-      const line = await this.lineOf(manager, revision.id, repo, lineId);
+      const line = await lineOfRevision(manager, revision.id, repo, lineId);
       await repo.delete({ id: line.id });
     });
   }
@@ -258,7 +204,10 @@ export class EstimateEditService {
       await work({ manager, revision });
 
       estimate.updatedBy = actor.userId;
-      return recalculateRevision(manager, revision, estimate);
+      return presentRevision(
+        await recalculateRevision(manager, revision, estimate),
+        actor,
+      );
     });
   }
 
@@ -316,36 +265,6 @@ export class EstimateEditService {
         ]) ?? error
       );
     }
-  }
-
-  private async panelOf(
-    manager: EntityManager,
-    revisionId: number,
-    panelId: number,
-  ): Promise<EstimatePanel> {
-    const panel = await manager
-      .getRepository(EstimatePanel)
-      .findOne({ where: { id: panelId, revisionId } });
-    if (!panel) throw new NotFoundException(`${PANEL_LABEL} not found`);
-    return panel;
-  }
-
-  /** A line counts only when its panel belongs to the draft being edited. */
-  private async lineOf<T extends EstimateBomLine | EstimateCostLine>(
-    manager: EntityManager,
-    revisionId: number,
-    repo: {
-      findOne: (options: { where: { id: number } }) => Promise<T | null>;
-    },
-    lineId: number,
-  ): Promise<T> {
-    const line = await repo.findOne({ where: { id: lineId } });
-    if (!line) throw new NotFoundException('Line not found');
-    const panel = await manager
-      .getRepository(EstimatePanel)
-      .findOne({ where: { id: line.panelId, revisionId } });
-    if (!panel) throw new NotFoundException('Line not found');
-    return line;
   }
 
   private async assertTagFree(

@@ -1,11 +1,12 @@
 import {
   buildEstimateFixture,
+  PRICER_SALES_A,
   type EstimateFixture,
 } from '@plugins/sales/estimate/estimate-fixture.helper-spec';
 import { RequestStatus } from '@plugins/sales/request/enums/request-status.enum';
 import { ENGINEER_A } from '@plugins/sales/request/request-fixture.helper-spec';
 
-/** A request with a draft estimate holding one panel (quantity 2) and one 3 × 1,000 line. */
+/** A request with a draft estimate holding one panel (quantity 2) and one 3 × 1,000 line, no cost line. */
 async function draftEstimate(fixture: EstimateFixture) {
   const request = fixture.requestAt(RequestStatus.ASSIGNED);
   const estimate = await fixture.service.create(
@@ -24,13 +25,22 @@ async function draftEstimate(fixture: EstimateFixture) {
     { itemId: item.id, quantity: 3 },
     ENGINEER_A,
   );
-  await fixture.editor.addCostLine(
-    estimate.id,
-    view.panels[0].id,
+  return { request, estimate, item, panelId: view.panels[0].id };
+}
+
+/** Sales adds the 500 labor cost line to the submitted revision and marks it priced. */
+async function price(
+  fixture: EstimateFixture,
+  estimateId: number,
+  panelId: number,
+) {
+  await fixture.pricing.addCostLine(
+    estimateId,
+    panelId,
     { category: 'labor' as never, amount: 500 },
-    ENGINEER_A,
+    PRICER_SALES_A,
   );
-  return { request, estimate, item };
+  await fixture.pricing.complete(estimateId, PRICER_SALES_A);
 }
 
 describe('EstimateReadPort', () => {
@@ -51,10 +61,24 @@ describe('EstimateReadPort', () => {
     await expect(read(fixture, request.id)).resolves.toBeNull();
   });
 
-  it('returns the submitted revision with panel totals, item snapshots and cost lines', async () => {
+  it('has nothing while the submitted revision is unpriced, and the revision once it is priced', async () => {
     const fixture = buildEstimateFixture();
-    const { request, estimate, item } = await draftEstimate(fixture);
+    const { request, estimate, panelId } = await draftEstimate(fixture);
     await fixture.service.submit(estimate.id, ENGINEER_A);
+
+    await expect(read(fixture, request.id)).resolves.toBeNull();
+
+    await price(fixture, estimate.id, panelId);
+    await expect(read(fixture, request.id)).resolves.toMatchObject({
+      revision: 1,
+    });
+  });
+
+  it('returns the priced revision with panel totals, item snapshots and cost lines', async () => {
+    const fixture = buildEstimateFixture();
+    const { request, estimate, item, panelId } = await draftEstimate(fixture);
+    await fixture.service.submit(estimate.id, ENGINEER_A);
+    await price(fixture, estimate.id, panelId);
 
     const submitted = await read(fixture, request.id);
 
@@ -89,10 +113,11 @@ describe('EstimateReadPort', () => {
     expect(submitted?.submittedAt).toBeInstanceOf(Date);
   });
 
-  it('keeps returning revision 1 while revision 2 is a draft, and revision 2 once submitted', async () => {
+  it('keeps returning revision 1 while revision 2 is a draft or unpriced, and revision 2 once priced', async () => {
     const fixture = buildEstimateFixture();
-    const { request, estimate } = await draftEstimate(fixture);
+    const { request, estimate, panelId } = await draftEstimate(fixture);
     await fixture.service.submit(estimate.id, ENGINEER_A);
+    await price(fixture, estimate.id, panelId);
     const revised = await fixture.service.revise(estimate.id, ENGINEER_A);
     await fixture.editor.updatePanel(
       estimate.id,
@@ -106,6 +131,11 @@ describe('EstimateReadPort', () => {
 
     await fixture.service.submit(estimate.id, ENGINEER_A);
 
+    // Revision 1 is superseded and revision 2 is not priced yet: nothing can be quoted.
+    await expect(read(fixture, request.id)).resolves.toBeNull();
+
+    await fixture.pricing.complete(estimate.id, PRICER_SALES_A);
+
     const latest = await read(fixture, request.id);
     expect(latest?.revision).toBe(2);
     expect(latest?.total).toBe(17500);
@@ -113,8 +143,9 @@ describe('EstimateReadPort', () => {
 
   it('holds the estimate row FOR SHARE only when asked to lock', async () => {
     const fixture = buildEstimateFixture();
-    const { request, estimate } = await draftEstimate(fixture);
+    const { request, estimate, panelId } = await draftEstimate(fixture);
     await fixture.service.submit(estimate.id, ENGINEER_A);
+    await price(fixture, estimate.id, panelId);
     fixture.estimates.findOne.mockClear();
 
     await fixture.readPort.getLatestSubmitted(

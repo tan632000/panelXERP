@@ -186,10 +186,11 @@ describeWithDatabase('Quotation versions against Postgres', () => {
       await db.editor.addBomLine(
         estimateId,
         detail.current.panels[detail.current.panels.length - 1].id,
-        { itemId: db.itemId, quantity: 1, unitCost: 10 },
+        { itemId: db.itemId, quantity: 1 },
         db.engineer,
       );
       await db.estimateService.submit(estimateId, db.engineer);
+      await db.pricing.complete(estimateId, db.manager);
 
       await expect(
         db.quotations.create(
@@ -208,11 +209,26 @@ describeWithDatabase('Quotation versions against Postgres', () => {
       expect(created.current.lines).toHaveLength(2);
     });
 
-    it('answers 409 for a request with no submitted estimate, and for a second quotation', async () => {
+    it('answers 409 until the submitted estimate is priced, then builds the quotation', async () => {
+      const { requestId, estimateId } = await db.estimatedRequest(undefined, {
+        priced: false,
+      });
+
+      await expect(
+        db.quotations.create({ requestId }, db.salesA),
+      ).rejects.toThrow('The request has no priced estimate to quote.');
+      expect(await requestStatus(requestId)).toBe('estimated');
+
+      await db.pricing.complete(estimateId, db.manager);
+      const created = await db.quotations.create({ requestId }, db.salesA);
+      expect(created.current.estimateRevision).toBe(1);
+    });
+
+    it('answers 409 for a request with no estimate, and for a second quotation', async () => {
       const unestimated = await db.requestAt('assigned');
       await expect(
         db.quotations.create({ requestId: unestimated }, db.salesA),
-      ).rejects.toBeInstanceOf(ConflictException);
+      ).rejects.toThrow('The request has no priced estimate to quote.');
 
       const { requestId } = await create();
       await expect(

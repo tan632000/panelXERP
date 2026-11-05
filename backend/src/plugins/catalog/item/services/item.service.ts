@@ -43,6 +43,7 @@ import {
   assertCodeNotABarcode,
   lockItemIdentifiers,
 } from '@plugins/catalog/item/utils/item-identifier.util';
+import { canReadReferencePrice } from '@plugins/catalog/item/utils/item-price-visibility.util';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 
@@ -123,7 +124,10 @@ export class ItemService {
       brand: trimToNull(dto.brand),
       group: dto.group,
       unit: requireText(dto.unit, 'Unit is required.'),
-      referencePrice: dto.referencePrice ?? null,
+      // Only a holder of the price scope sets a price; for anyone else it stays unset.
+      referencePrice: canReadReferencePrice(actor)
+        ? (dto.referencePrice ?? null)
+        : null,
       note: trimToNull(dto.note),
       createdBy: actor.userId,
       isDeleted: false,
@@ -169,7 +173,7 @@ export class ItemService {
     if (dto.unit !== undefined) {
       item.unit = requireText(dto.unit, 'Unit is required.');
     }
-    if (dto.referencePrice !== undefined) {
+    if (dto.referencePrice !== undefined && canReadReferencePrice(actor)) {
       item.referencePrice = dto.referencePrice;
     }
     if (dto.note !== undefined) item.note = trimToNull(dto.note);

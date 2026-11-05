@@ -1,3 +1,5 @@
+import { seededRolePermissions } from '@kernel/core/database/seeds/seed-roles';
+
 import { DataScopeService } from '@shared/services/data-scope.service';
 
 import { ReferenceCheckRegistry } from '@plugins/catalog/_shared/gateways/reference-check-registry';
@@ -10,6 +12,7 @@ import { EstimateRevision } from '@plugins/sales/estimate/entities/estimate-revi
 import { Estimate } from '@plugins/sales/estimate/entities/estimate.entity';
 import { EstimateRevisionStatus } from '@plugins/sales/estimate/enums/estimate-revision-status.enum';
 import { EstimateEditService } from '@plugins/sales/estimate/services/estimate-edit.service';
+import { EstimatePricingService } from '@plugins/sales/estimate/services/estimate-pricing.service';
 import { EstimateService } from '@plugins/sales/estimate/services/estimate.service';
 import { SalesRequestActivity } from '@plugins/sales/request/entities/request-activity.entity';
 import { SalesRequest } from '@plugins/sales/request/entities/request.entity';
@@ -18,6 +21,7 @@ import {
   SalesFakeRepo,
 } from '@plugins/sales/request/request-fixture.helper-spec';
 
+import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 import type { FakeRow } from '@plugins/crm/_shared/crm-fake-repo.helper-spec';
 import type { RequestStatus } from '@plugins/sales/request/enums/request-status.enum';
 
@@ -29,6 +33,16 @@ import type { RequestStatus } from '@plugins/sales/request/enums/request-status.
  */
 
 type Row<T> = T & FakeRow;
+
+/** Holders of the price scope, with what the seeded roles grant: the actors that may price an estimate. */
+const pricer = (userId: number, role: string): AuthUserPayload => ({
+  userId,
+  role,
+  permissions: seededRolePermissions(role),
+});
+export const PRICER_SALES_A = pricer(11, 'sales');
+export const PRICER_SALES_B = pricer(12, 'sales');
+export const PRICER_MANAGER = pricer(20, 'salesManager');
 
 /** The catalog item columns the estimate reads; the catalog entity itself is not importable here. */
 interface ItemRow extends FakeRow {
@@ -229,6 +243,11 @@ export function buildEstimateFixture(
     registry,
   );
   const editor = new EstimateEditService(dataSource as never, service);
+  const pricing = new EstimatePricingService(
+    dataSource as never,
+    service,
+    dataScope,
+  );
   const readPort = new EstimateReadPort();
   // A Nest app calls this itself when it initialises the service, so it may opt out.
   if (options.registerReferenceChecks ?? true) service.onModuleInit();
@@ -266,6 +285,7 @@ export function buildEstimateFixture(
   return {
     service,
     editor,
+    pricing,
     readPort,
     statusPort,
     registry,

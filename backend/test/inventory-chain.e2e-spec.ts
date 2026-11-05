@@ -248,7 +248,8 @@ describe('Inventory chain (e2e)', () => {
             OR (payload->>'quotationId')::int = ANY($3)
             OR (payload->>'estimateId')::int = ANY($4)
             OR (event_type = '${STOCK_LOW_EVENT}' AND (payload->>'itemId')::int = ANY($5))
-            OR (payload->>'purchaseOrderId')::int = ANY($6)`;
+            OR (payload->>'purchaseOrderId')::int = ANY($6)
+            OR (payload->>'stocktakeId')::int = ANY($7)`;
       const noticeParams = [
         ids(created.orderId),
         ids(created.requestId),
@@ -256,6 +257,7 @@ describe('Inventory chain (e2e)', () => {
         ids(created.estimateId),
         itemIds,
         ids(created.purchaseOrderId),
+        ids(created.stocktakeId),
       ];
       await dataSource.query(
         `DELETE FROM notification_reads WHERE notification_id IN (${notices})`,
@@ -470,19 +472,36 @@ describe('Inventory chain (e2e)', () => {
         ).expect(201)
       ).body as { panels: Array<{ id: number }> }
     ).panels[0].id;
-    for (const [itemId, quantity, unitCost] of [
-      [created.x, 5, 100_000],
-      [created.y, 2, 50_000],
+    const bomLineIds: number[] = [];
+    for (const [itemId, quantity] of [
+      [created.x, 5],
+      [created.y, 2],
     ]) {
-      await post(
+      const withLine = await post(
         'engineer_a',
         `/sales/estimates/${created.estimateId}/panels/${panelId}/bom-lines`,
-        { itemId, quantity, unitCost },
+        { itemId, quantity },
       ).expect(201);
+      const lines = (
+        withLine.body as { panels: Array<{ bomLines: Array<{ id: number }> }> }
+      ).panels[0].bomLines;
+      bomLineIds.push(lines[lines.length - 1].id);
     }
     await post(
       'engineer_a',
       `/sales/estimates/${created.estimateId}/submit`,
+    ).expect(200);
+    // The engineer sends quantities only: sales fills the unit costs and marks the estimate priced.
+    for (const [index, unitCost] of [100_000, 50_000].entries()) {
+      await patch(
+        'sales_a',
+        `/sales/estimates/${created.estimateId}/bom-lines/${bomLineIds[index]}/unit-cost`,
+        { unitCost },
+      ).expect(200);
+    }
+    await post(
+      'sales_a',
+      `/sales/estimates/${created.estimateId}/price`,
     ).expect(200);
     created.quotationId = (
       (

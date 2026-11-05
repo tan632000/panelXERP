@@ -6,12 +6,23 @@ import ExcelJS from 'exceljs';
 import JSZip from 'jszip';
 import { QueryFailedError } from 'typeorm';
 
+import { seededRolePermissions } from '@kernel/core/database/seeds/seed-roles';
+
 import { Item } from '@plugins/catalog/item/entities/item.entity';
 import { ItemImportService } from '@plugins/catalog/item/services/item-import.service';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 
-const ACTOR: AuthUserPayload = { userId: 5, role: 'purchasing' };
+const ACTOR: AuthUserPayload = {
+  userId: 5,
+  role: 'purchasing',
+  permissions: seededRolePermissions('purchasing'),
+};
+const ENGINEERING_LEAD: AuthUserPayload = {
+  userId: 6,
+  role: 'engineeringLead',
+  permissions: seededRolePermissions('engineeringLead'),
+};
 const FIXTURES = join(__dirname, '__fixtures__');
 
 const fixture = (name: string) => ({
@@ -126,6 +137,28 @@ describe('ItemImportService', () => {
         referencePrice: 450000,
       });
       expect(persisted[2].referencePrice).toBeNull();
+    });
+
+    it('creates the rows with no price when the actor lacks reference_price:read, and stores them for purchasing', async () => {
+      const lead = build();
+      const leadResult = await lead.service.import(
+        fixture('items-import-sample.xlsx'),
+        ENGINEERING_LEAD,
+      );
+      const purchasing = build();
+      await purchasing.service.import(
+        fixture('items-import-sample.xlsx'),
+        ACTOR,
+      );
+
+      expect(leadResult.created).toBe(3);
+      expect(leadResult.errors.map((error) => error.row)).toEqual([4, 6]);
+      expect(lead.persisted.map((row) => row.referencePrice)).toEqual([
+        null,
+        null,
+        null,
+      ]);
+      expect(purchasing.persisted[0].referencePrice).toBe(450000);
     });
 
     it('validates every row before inserting: one INSERT with exactly the 3 valid rows', async () => {
@@ -270,6 +303,23 @@ describe('ItemImportService', () => {
       expect(persisted.map((row) => [row.code, row.group])).toEqual([
         ['A-1', 'cable'],
         ['A-5', 'other'],
+      ]);
+    });
+
+    it('ignores an invalid price cell for an actor without reference_price:read: the row is created with no price and no error', async () => {
+      const { service, persisted } = build();
+      const file = await workbookFile([
+        HEADER,
+        ['Negative', 'A-1', 'X', 'Cái', -5],
+        ['Text price', 'A-2', 'X', 'Cái', 'abc'],
+      ]);
+
+      const result = await service.import(file, ENGINEERING_LEAD);
+
+      expect(result).toEqual({ created: 2, errors: [] });
+      expect(persisted.map((row) => [row.code, row.referencePrice])).toEqual([
+        ['A-1', null],
+        ['A-2', null],
       ]);
     });
 

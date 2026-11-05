@@ -196,7 +196,7 @@ export class QuotationVersionService {
       );
       if (!latest) {
         throw new ConflictException(
-          'The request has no submitted estimate to quote.',
+          'The request has no priced estimate to quote.',
         );
       }
       if (latest.revisionId === version.estimateRevisionId) return;

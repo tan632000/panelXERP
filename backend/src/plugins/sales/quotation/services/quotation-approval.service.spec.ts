@@ -130,6 +130,62 @@ describeWithDatabase('Quotation approval against Postgres', () => {
       expect(await statusOf(id)).toEqual(['pending_approval']);
     });
 
+    it('approves a director submission at once: request quoted, owner and sales managers told, no submitted notice', async () => {
+      const { id, requestId } = await quote();
+
+      const detail = await db.approvals.submit(id, db.director);
+
+      expect(detail.current.status).toBe('approved');
+      expect(detail.request.status).toBe('quoted');
+      expect(await versionRows(id)).toEqual([
+        expect.objectContaining({
+          status: 'approved',
+          decided_by: db.director.userId,
+        }),
+      ]);
+      const activities = await db.dataSource.query<Array<{ action: string }>>(
+        `SELECT action FROM sales_request_activities
+          WHERE request_id = $1
+            AND action IN ('quotation_submitted', 'quotation_approved') ORDER BY id`,
+        [requestId],
+      );
+      expect(activities.map((row) => row.action)).toEqual([
+        'quotation_submitted',
+        'quotation_approved',
+      ]);
+      const events = (
+        db.notifications.emit.mock.calls as Array<[{ eventType: string }]>
+      ).map(([notice]) => notice);
+      expect(events.map((notice) => notice.eventType)).toEqual([
+        'sales.quotation.approved',
+        'sales.quotation.approved',
+      ]);
+      expect(events[0]).toMatchObject({
+        userIds: [db.salesA.userId],
+        requiredScope: 'quotation:read',
+      });
+      expect(events[1]).toMatchObject({
+        roleCodes: ['salesManager'],
+        requiredScope: 'quotation:read',
+        excludeUserIds: [db.director.userId, db.salesA.userId],
+      });
+    });
+
+    it('leaves the version draft and tells nobody when the request cannot become quoted on a director submission', async () => {
+      const { id, requestId } = await quote();
+      await db.dataSource.query(
+        `UPDATE sales_requests SET status = 'cancelled' WHERE id = $1`,
+        [requestId],
+      );
+
+      await expect(db.approvals.submit(id, db.director)).rejects.toBeInstanceOf(
+        ConflictException,
+      );
+
+      expect(await statusOf(id)).toEqual(['draft']);
+      expect(db.notifications.emit).not.toHaveBeenCalled();
+    });
+
     it('answers 403 to the owner who did not create the version, and 404 to another sales', async () => {
       const { id } = await quote(db.manager);
 
@@ -177,21 +233,35 @@ describeWithDatabase('Quotation approval against Postgres', () => {
   });
 
   describe('stale estimate', () => {
-    /** Revises and resubmits the estimate with one more panel, so the draft is behind. */
-    const reviseEstimate = async (estimateId: number) => {
+    /**
+     * Revises and resubmits the estimate with one more panel, so the draft is behind. The sales
+     * manager then prices the new panel at 2,000 and marks the revision priced, unless `priced`
+     * is false, which leaves the new revision submitted but unpriced.
+     */
+    const reviseEstimate = async (estimateId: number, priced = true) => {
       await db.estimateService.revise(estimateId, db.engineer);
       const view = await db.editor.addPanel(
         estimateId,
         { tag: 'NEW-01', quantity: 3 },
         db.engineer,
       );
-      await db.editor.addBomLine(
+      const withLine = await db.editor.addBomLine(
         estimateId,
         view.panels[view.panels.length - 1].id,
-        { itemId: db.itemId, quantity: 1, unitCost: 2000 },
+        { itemId: db.itemId, quantity: 1 },
         db.engineer,
       );
       await db.estimateService.submit(estimateId, db.engineer);
+      if (priced) {
+        const panel = withLine.panels[withLine.panels.length - 1];
+        await db.pricing.setUnitCost(
+          estimateId,
+          panel.bomLines[0].id,
+          { unitCost: 2000 },
+          db.manager,
+        );
+        await db.pricing.complete(estimateId, db.manager);
+      }
       db.notifications.emit.mockClear();
     };
 
@@ -237,6 +307,39 @@ describeWithDatabase('Quotation approval against Postgres', () => {
       // Totals follow the rebuilt lines: 1100×2 + 600×1 + 2000×3.
       expect(refreshed.current.subtotal).toBe(8800);
 
+      const detail = await db.approvals.submit(made.id, db.salesA);
+      expect(detail.current.status).toBe('pending_approval');
+    });
+
+    it('refuses to refresh or submit a draft while the new revision is unpriced, until it is priced', async () => {
+      const made = await quote();
+      await reviseEstimate(made.estimateId, false);
+
+      expect(
+        (await db.quotations.findOne(made.id, db.salesA)).estimateStale,
+      ).toBe(true);
+      await expect(
+        db.approvals.submit(made.id, db.salesA),
+      ).rejects.toBeInstanceOf(ConflictException);
+      await expect(
+        db.versions.refreshEstimate(made.id, db.salesA),
+      ).rejects.toThrow('The request has no priced estimate to quote.');
+      expect(db.notifications.emit).not.toHaveBeenCalled();
+
+      const unpriced = await db.estimateService.findOne(
+        made.estimateId,
+        db.manager,
+      );
+      await db.pricing.setUnitCost(
+        made.estimateId,
+        unpriced.current.panels[1].bomLines[0].id,
+        { unitCost: 2000 },
+        db.manager,
+      );
+      await db.pricing.complete(made.estimateId, db.manager);
+
+      const refreshed = await db.versions.refreshEstimate(made.id, db.salesA);
+      expect(refreshed.current.estimateRevision).toBe(2);
       const detail = await db.approvals.submit(made.id, db.salesA);
       expect(detail.current.status).toBe('pending_approval');
     });
@@ -291,12 +394,22 @@ describeWithDatabase('Quotation approval against Postgres', () => {
       expect(detail.request.status).toBe('quoted');
       const [row] = await versionRows(made.id);
       expect(row.decided_by).toBe(db.manager.userId);
-      expect(db.notifications.emit).toHaveBeenCalledTimes(1);
-      expect(db.notifications.emit).toHaveBeenCalledWith(
+      expect(db.notifications.emit).toHaveBeenCalledTimes(2);
+      expect(db.notifications.emit).toHaveBeenNthCalledWith(
+        1,
         expect.objectContaining({
           eventType: 'sales.quotation.approved',
           userIds: [db.salesA.userId],
           requiredScope: 'quotation:read',
+        }),
+      );
+      expect(db.notifications.emit).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          eventType: 'sales.quotation.approved',
+          roleCodes: ['salesManager'],
+          requiredScope: 'quotation:read',
+          excludeUserIds: [db.manager.userId, db.salesA.userId],
         }),
       );
     });
@@ -329,7 +442,8 @@ describeWithDatabase('Quotation approval against Postgres', () => {
       expect((failed as PromiseRejectedResult).reason).toBeInstanceOf(
         ConflictException,
       );
-      expect(db.notifications.emit).toHaveBeenCalledTimes(1);
+      // One approval, announced to the owner and to the sales managers.
+      expect(db.notifications.emit).toHaveBeenCalledTimes(2);
     });
 
     it('answers 403 to the approver who last edited the price, and lets another approver through', async () => {
@@ -354,10 +468,53 @@ describeWithDatabase('Quotation approval against Postgres', () => {
       expect(detail.current.lastEditedBy).toBe(db.manager.userId);
     });
 
+    it('keeps four-eyes for an admin: 403 to approve and reject a version they created or last edited', async () => {
+      // The director's user row acting with the admin role: four-eyes reads the role and the id only.
+      const admin: AuthUserPayload = {
+        userId: db.director.userId,
+        role: 'admin',
+      };
+      const edited = await quote();
+      await db.versions.updatePricing(
+        edited.id,
+        { vatRate: 10, terms: ['Edited by the admin'] },
+        admin,
+      );
+      await db.approvals.submit(edited.id, db.salesA);
+      const created = await quote(admin);
+      await db.approvals.submit(created.id, admin);
+
+      for (const { id } of [edited, created]) {
+        await expect(db.approvals.approve(id, admin)).rejects.toBeInstanceOf(
+          ForbiddenException,
+        );
+        await expect(
+          db.approvals.reject(id, { reason: 'No' }, admin),
+        ).rejects.toBeInstanceOf(ForbiddenException);
+        expect(await statusOf(id)).toEqual(['pending_approval']);
+      }
+    });
+
+    it('lets the director approve a version they last edited', async () => {
+      const made = await quote();
+      await db.versions.updatePricing(
+        made.id,
+        { vatRate: 10, terms: ['Edited by the director'] },
+        db.director,
+      );
+      await db.approvals.submit(made.id, db.salesA);
+
+      const detail = await db.approvals.approve(made.id, db.director);
+
+      expect(detail.current.status).toBe('approved');
+      expect(detail.current.lastEditedBy).toBe(db.director.userId);
+    });
+
     it('counts a refresh from the estimate as an edit', async () => {
       const made = await quote();
       await db.estimateService.revise(made.estimateId, db.engineer);
       await db.estimateService.submit(made.estimateId, db.engineer);
+      await db.pricing.complete(made.estimateId, db.manager);
       await db.versions.refreshEstimate(made.id, db.manager);
       await db.approvals.submit(made.id, db.salesA);
 

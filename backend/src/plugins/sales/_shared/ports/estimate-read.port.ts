@@ -41,9 +41,10 @@ export interface GetLatestSubmittedOptions {
 @Injectable()
 export class EstimateReadPort {
   /**
-   * The revision of the request's estimate that is currently submitted, or `null` when the
-   * request has none yet (never estimated, or only a draft so far). A draft never shows here,
-   * so a quotation cannot be built on figures still being edited.
+   * The revision of the request's estimate that is currently submitted and priced, or `null`
+   * when the request has none yet (never estimated, only a draft so far, or submitted but not
+   * priced by sales). A draft or an unpriced revision never shows here, so a quotation cannot be
+   * built on figures still being edited or still missing their costs.
    */
   async getLatestSubmitted(
     manager: EntityManager,
@@ -62,7 +63,7 @@ export class EstimateReadPort {
         status: EstimateRevisionStatus.SUBMITTED,
       },
     });
-    if (!revision) return null;
+    if (!revision?.pricedAt) return null;
 
     const view = await loadRevisionView(manager, revision);
     return {

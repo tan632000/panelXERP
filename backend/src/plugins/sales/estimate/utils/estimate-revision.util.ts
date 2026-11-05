@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { In } from 'typeorm';
 
 import { MAX_ESTIMATE_AMOUNT } from '@plugins/sales/estimate/constants/estimate.constant';
@@ -52,6 +52,9 @@ export interface EstimateRevisionView {
   total: number;
   submittedAt: Date | null;
   submittedBy: number | null;
+  /** When sales marked the revision priced; null while it is a draft or awaits pricing. */
+  pricedAt: Date | null;
+  pricedBy: number | null;
   createdAt: Date;
   panels: EstimatePanelView[];
 }
@@ -96,6 +99,39 @@ export async function loadRevisionTree(
   };
 }
 
+/** A panel counts only when it belongs to the revision being worked on. */
+export async function panelOfRevision(
+  manager: EntityManager,
+  revisionId: number,
+  panelId: number,
+): Promise<EstimatePanel> {
+  const panel = await manager
+    .getRepository(EstimatePanel)
+    .findOne({ where: { id: panelId, revisionId } });
+  if (!panel) throw new NotFoundException('Panel not found');
+  return panel;
+}
+
+/** A line counts only when its panel belongs to the revision being worked on. */
+export async function lineOfRevision<
+  T extends EstimateBomLine | EstimateCostLine,
+>(
+  manager: EntityManager,
+  revisionId: number,
+  repo: {
+    findOne: (options: { where: { id: number } }) => Promise<T | null>;
+  },
+  lineId: number,
+): Promise<T> {
+  const line = await repo.findOne({ where: { id: lineId } });
+  if (!line) throw new NotFoundException('Line not found');
+  const panel = await manager
+    .getRepository(EstimatePanel)
+    .findOne({ where: { id: line.panelId, revisionId } });
+  if (!panel) throw new NotFoundException('Line not found');
+  return line;
+}
+
 export function toRevisionView(
   revision: EstimateRevision,
   tree: RevisionTree,
@@ -108,6 +144,8 @@ export function toRevisionView(
     total: revision.total,
     submittedAt: revision.submittedAt ?? null,
     submittedBy: revision.submittedBy ?? null,
+    pricedAt: revision.pricedAt ?? null,
+    pricedBy: revision.pricedBy ?? null,
     createdAt: revision.createdAt,
     panels: tree.panels.map(({ panel, bomLines, costLines }) => ({
       id: panel.id,

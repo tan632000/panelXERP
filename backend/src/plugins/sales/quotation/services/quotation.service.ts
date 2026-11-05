@@ -261,7 +261,7 @@ export class QuotationService {
         );
         if (!estimate) {
           throw new ConflictException(
-            'The request has no submitted estimate to quote.',
+            'The request has no priced estimate to quote.',
           );
         }
         if (
