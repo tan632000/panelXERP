@@ -205,6 +205,7 @@
     "lot_qr": "Generate lot QR codes",
     "manage_any": "Handle others' records",
     "notify": "Receive product data completion notices",
+    "price": "Fill in prices",
     "price:delete": "Delete price",
     "price:export": "Export prices to Excel",
     "price:import": "Import prices from Excel",

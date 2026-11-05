@@ -9,6 +9,7 @@ export const EstimatePermission = {
   create: "estimate:create",
   update: "estimate:update",
   submit: "estimate:submit",
+  price: "estimate:price",
 } as const;
 
 export type EstimatePermissionKey =

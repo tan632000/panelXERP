@@ -755,6 +755,23 @@ describe('AuthService', () => {
       );
     });
 
+    it('stores the director signature directly, without a review request', async () => {
+      const { service, userRepo, s3, signatureReview } = await buildService(
+        'director',
+        ['*:*'],
+      );
+      s3.uploadFile.mockResolvedValue({ key: 'signatures/director.png' });
+
+      const result = await service.updateSignature(USER.id, file);
+
+      const [savedUser] = userRepo.save.mock.calls[0] as [User];
+      expect(savedUser.signatureUrl).toBe('signatures/director.png');
+      expect(result.user.signatureUrl).toBe(
+        'https://files.example.com/signatures/director.png?signed',
+      );
+      expect(signatureReview.submit).not.toHaveBeenCalled();
+    });
+
     it('stores the object key under its own prefix and signs a URL for the session', async () => {
       const { service, userRepo, s3 } = await buildService('admin', ['*:*']);
       s3.uploadFile.mockResolvedValue({ key: 'signatures/new.png' });

@@ -45,16 +45,6 @@ const QUOTATION_SALES = [
 ];
 const ORDER_SALES = ['order:read', 'order:create', 'order:update'];
 
-/** Every sales-chain module, granted whole to the roles that run the business. */
-const SALES_CHAIN_ALL = [
-  ...CUSTOMER_ALL,
-  ...ITEM_ALL,
-  'request:*',
-  'estimate:*',
-  'quotation:*',
-  'order:*',
-];
-
 /** What every role that sees stock may read: availability, the on-hand figures and the ledger. */
 const STOCK_VIEW = ['stock:availability', 'stock:read', 'stock:ledger'];
 const PURCHASE_REQUEST_RAISE = [
@@ -69,30 +59,9 @@ const PRODUCTION_VIEW = [
   'production_issue:read',
 ];
 
-/** The director reads every estimate but never writes one: that is the engineers' work. */
-const DIRECTOR_GRANTS = [
-  ...SALES_CHAIN_ALL.map((scope) =>
-    scope === 'estimate:*' ? 'estimate:read' : scope,
-  ),
-  'reference_price:read',
-  'purchase_price:read',
-  'supplier:*',
-  'location:read',
-  'purchase_request:read',
-  'purchase_order:*',
-  ...STOCK_VIEW,
-  'material:read',
-  'stock_receipt:read',
-  'stock_issue:read',
-  'stock_return:read',
-  'stocktake:read',
-  'stocktake:approve',
-  ...PRODUCTION_VIEW,
-];
-
 /**
  * [name, code, description, permissions] in seed order (D-11, D-12). Kernel file routes
- * (`file:read`, `file:write`) sign any stored key, so only the administrator holds them;
+ * (`file:read`, `file:write`) sign any stored key, so only the full-access roles hold them;
  * business attachments go through their feature's own endpoints.
  */
 const ROLES: ReadonlyArray<
@@ -102,8 +71,8 @@ const ROLES: ReadonlyArray<
   [
     'Director',
     'director',
-    'Runs the business: every sales-chain module, quotation approval included; reads estimates but does not write them',
-    DIRECTOR_GRANTS,
+    'Runs the business with full access to every module',
+    ['*:*'],
   ],
   [
     'Sales Manager',
@@ -114,6 +83,7 @@ const ROLES: ReadonlyArray<
       'item:read',
       'request:*',
       'estimate:read',
+      'estimate:price',
       'quotation:*',
       'order:*',
       'reference_price:read',
@@ -132,6 +102,7 @@ const ROLES: ReadonlyArray<
       'item:read',
       ...REQUEST_SALES,
       'estimate:read',
+      'estimate:price',
       ...QUOTATION_SALES,
       ...ORDER_SALES,
       'reference_price:read',
@@ -151,8 +122,8 @@ const ROLES: ReadonlyArray<
       ...ITEM_ALL,
       'request:read',
       'request:assign',
-      'estimate:*',
-      'reference_price:read',
+      // Explicit actions, not `estimate:*`: pricing an estimate belongs to sales.
+      ...ESTIMATE_WRITE,
       'stock:availability',
       'material:read',
       ...PURCHASE_REQUEST_RAISE,
@@ -168,7 +139,6 @@ const ROLES: ReadonlyArray<
       'item:read',
       'request:read',
       ...ESTIMATE_WRITE,
-      'reference_price:read',
       'stock:availability',
       ...PURCHASE_REQUEST_RAISE,
     ],

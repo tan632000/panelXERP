@@ -119,28 +119,34 @@ describe('panel-shop role matrix', () => {
     expect(cancellers).toEqual(['admin', 'director', 'salesManager']);
   });
 
-  it('lets the engineering lead write estimates, and the director only read them', () => {
+  it('lets the engineering lead write estimates but not price them, and the director do both', () => {
     const lead = grantsOf('engineeringLead');
     const director = grantsOf('director');
     for (const action of ['read', 'create', 'update', 'submit']) {
       expect(holds(lead, `estimate:${action}`)).toBe(true);
     }
-    expect(holds(director, 'estimate:read')).toBe(true);
-    for (const action of ['create', 'update', 'submit']) {
-      expect(holds(director, `estimate:${action}`)).toBe(false);
+    expect(holds(lead, 'estimate:price')).toBe(false);
+    for (const action of ['read', 'create', 'update', 'submit', 'price']) {
+      expect(holds(director, `estimate:${action}`)).toBe(true);
     }
-    // The rest of the director's business grants are unchanged.
     expect(holds(director, 'quotation:approve')).toBe(true);
     expect(holds(director, 'order:create')).toBe(true);
   });
 
-  it('grants kernel file routes to the administrator alone', () => {
+  it('lets sales and the sales manager price estimates', () => {
+    const pricers = PANEL_ROLES.filter((role) =>
+      holds(grantsOf(role), 'estimate:price'),
+    );
+    expect(pricers).toEqual(['admin', 'director', 'salesManager', 'sales']);
+  });
+
+  it('grants kernel file routes to the full-access roles alone', () => {
     const holders = PANEL_ROLES.filter(
       (role) =>
         holds(grantsOf(role), 'file:read') ||
         holds(grantsOf(role), 'file:write'),
     );
-    expect(holders).toEqual(['admin']);
+    expect(holders).toEqual(['admin', 'director']);
   });
 
   it('lets purchasing and the engineering lead maintain items, sales only read them', () => {
@@ -284,7 +290,7 @@ describe('panel-shop role matrix', () => {
     );
   });
 
-  it('lets managers and sales follow production without running it', () => {
+  it('lets the sales manager and sales follow production without running it, and the director run it', () => {
     for (const role of ['director', 'salesManager']) {
       for (const scope of [
         'production_order:read',
@@ -293,8 +299,12 @@ describe('panel-shop role matrix', () => {
       ]) {
         expect(holds(grantsOf(role), scope)).toBe(true);
       }
-      expect(holds(grantsOf(role), 'production_order:create')).toBe(false);
     }
+    expect(holds(grantsOf('salesManager'), 'production_order:create')).toBe(
+      false,
+    );
+    // The director holds full access, production included.
+    expect(holds(grantsOf('director'), 'production_order:create')).toBe(true);
     const sales = grantsOf('sales');
     expect(holds(sales, 'production_order:read')).toBe(true);
     expect(holds(sales, 'production_progress:read')).toBe(true);

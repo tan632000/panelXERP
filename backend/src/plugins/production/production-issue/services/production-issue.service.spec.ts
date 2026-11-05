@@ -149,7 +149,8 @@ describeWithDatabase('Production issues (real Postgres)', () => {
       const { unitId } = await cabinet();
 
       await open(unitId, 'techB').expect(404);
-      await open(unitId, 'director').expect(403);
+      // The director holds full access and may open an issue on any cabinet.
+      await open(unitId, 'director').expect(201);
       await open(unitId, 'salesA').expect(403);
     });
 

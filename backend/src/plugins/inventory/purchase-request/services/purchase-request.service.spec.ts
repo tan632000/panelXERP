@@ -246,9 +246,10 @@ describeWithDatabase('PurchaseRequestService (real Postgres)', () => {
         manual,
       )
       .expect(403);
+    // The director holds full access and may raise one too.
     await h
       .post(h.DIRECTOR, '/inventory/purchase-requests', manual)
-      .expect(403);
+      .expect(201);
     for (const token of [h.STOREKEEPER, await h.as('engineer_a', 'engineer')]) {
       const raised = requestOf(
         await h.post(token, '/inventory/purchase-requests', manual).expect(201),

@@ -205,6 +205,7 @@
     "lot_qr": "Sinh QR code từng lô",
     "manage_any": "Xử lý phiếu của người khác",
     "notify": "Nhận thông báo hoàn thiện dữ liệu SP",
+    "price": "Điền giá",
     "price:delete": "Xoá giá",
     "price:export": "Xuất Excel giá",
     "price:import": "Import Excel giá",

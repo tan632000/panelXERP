@@ -127,8 +127,6 @@ const MATRIX: Record<string, { granted: string[]; refused: string[] }> = {
       'stock_issue:read',
       'stock_return:read',
       ...scopes('stocktake', ['read', 'approve']),
-    ],
-    refused: [
       'purchase_request:create',
       'purchase_request:update',
       'location:create',
@@ -138,6 +136,7 @@ const MATRIX: Record<string, { granted: string[]; refused: string[] }> = {
       'stocktake:create',
       'stocktake:submit',
     ],
+    refused: [],
   },
   salesManager: {
     granted: [
@@ -171,12 +170,13 @@ const MATRIX: Record<string, { granted: string[]; refused: string[] }> = {
     granted: [
       'item:create',
       'item:stock_settings',
-      'reference_price:read',
       'stock:availability',
       'material:read',
       ...scopes('purchase_request', ['read', 'create']),
     ],
     refused: [
+      'reference_price:read',
+      'estimate:price',
       'purchase_price:read',
       'stock:read',
       'stock:ledger',
@@ -187,11 +187,12 @@ const MATRIX: Record<string, { granted: string[]; refused: string[] }> = {
   },
   engineer: {
     granted: [
-      'reference_price:read',
       'stock:availability',
       ...scopes('purchase_request', ['read', 'create']),
     ],
     refused: [
+      'reference_price:read',
+      'estimate:price',
       'purchase_price:read',
       'stock:read',
       'stock:ledger',

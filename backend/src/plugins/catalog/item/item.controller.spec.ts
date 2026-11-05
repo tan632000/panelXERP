@@ -430,10 +430,20 @@ describe('ItemController', () => {
       expect(items.rows[0].referencePrice).toBe(450000);
     });
 
-    it('still shows the reference price to sales, engineers and purchasing', async () => {
+    it('shows the reference price to sales and purchasing, never to an engineer', async () => {
       const created = bodyOf(await createPriced('LC1D09M7'));
 
-      for (const token of [SALES, ENGINEER, PURCHASING]) {
+      const engineerDetail = await request(app.getHttpServer())
+        .get(`/items/${created.id}`)
+        .set(as(ENGINEER));
+      const engineerList = await request(app.getHttpServer())
+        .get('/items')
+        .set(as(ENGINEER));
+      expect(engineerDetail.status).toBe(200);
+      expect(engineerDetail.body).not.toHaveProperty('referencePrice');
+      expect(bodyOf(engineerList).data[0]).not.toHaveProperty('referencePrice');
+
+      for (const token of [SALES, PURCHASING]) {
         const detail = await request(app.getHttpServer())
           .get(`/items/${created.id}`)
           .set(as(token));
