@@ -4,6 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
+import { Notification } from '@kernel/core/audit/notification.entity';
+import { NotificationService } from '@kernel/core/audit/notification.service';
+
 import { DataScopeService } from '@shared/services/data-scope.service';
 
 import { Item } from '@plugins/catalog/item/entities/item.entity';
@@ -11,7 +14,9 @@ import { Contact } from '@plugins/crm/contact/entities/contact.entity';
 import { Customer } from '@plugins/crm/customer/entities/customer.entity';
 import { Project } from '@plugins/crm/project/entities/project.entity';
 import { OrderLifecycleRegistry } from '@plugins/sales/_shared/ports/order-lifecycle-registry';
+import { OrderMaterialReadPort } from '@plugins/sales/_shared/ports/order-material-read.port';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
+import { OrderFollowerNotifier } from '@plugins/sales/_shared/services/order-follower-notifier';
 import { Estimate } from '@plugins/sales/estimate/entities/estimate.entity';
 import { SalesOrderBomLine } from '@plugins/sales/order/entities/order-bom-line.entity';
 import { SalesOrderLine } from '@plugins/sales/order/entities/order-line.entity';
@@ -58,6 +63,7 @@ describeWithDatabase('Order conversion against Postgres', () => {
       Project,
       Contact,
       Item,
+      Notification,
       SalesOrder,
       SalesOrderLine,
       SalesOrderBomLine,
@@ -127,6 +133,16 @@ describeWithDatabase('Order conversion against Postgres', () => {
       orders,
       statusPort,
       lifecycle,
+      // Emit uses only the notification table.
+      new OrderFollowerNotifier(
+        new NotificationService(
+          db.dataSource.getRepository(Notification),
+          null as never,
+          null as never,
+        ),
+        new OrderMaterialReadPort(),
+        db.dataSource,
+      ),
     );
   });
   beforeEach(() => {
@@ -134,6 +150,12 @@ describeWithDatabase('Order conversion against Postgres', () => {
   });
   afterEach(async () => {
     jest.restoreAllMocks();
+    // The edits and cancels of this suite notify the followers of real orders.
+    await db.dataSource.query(
+      `DELETE FROM notifications WHERE event_type = 'sales.order.updated'
+          AND (payload->>'orderId')::int IN (SELECT id FROM sales_orders WHERE customer_id = $1)`,
+      [db.customerId],
+    );
     await db.cleanup();
   });
   afterAll(async () => {

@@ -5,6 +5,7 @@ import { DataScopeService } from '@shared/services/data-scope.service';
 
 import { OrderLifecycleRegistry } from '@plugins/sales/_shared/ports/order-lifecycle-registry';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
+import { OrderFollowerNotifier } from '@plugins/sales/_shared/services/order-follower-notifier';
 import { recordRequestActivity } from '@plugins/sales/_shared/utils/request-activity.util';
 import {
   requireText,
@@ -38,6 +39,7 @@ export class OrderEditService {
     private readonly orders: OrderService,
     private readonly statusPort: RequestStatusPort,
     private readonly lifecycle: OrderLifecycleRegistry,
+    private readonly followers: OrderFollowerNotifier,
   ) {}
 
   async update(
@@ -45,7 +47,7 @@ export class OrderEditService {
     dto: UpdateOrderDto,
     actor: AuthUserPayload,
   ): Promise<OrderDetail> {
-    await this.dataSource.transaction(async (manager) => {
+    const changed = await this.dataSource.transaction(async (manager) => {
       const { order, request } = await lockOrder(
         manager,
         this.dataScope,
@@ -60,11 +62,11 @@ export class OrderEditService {
       }
       if (dto.contractDate !== undefined) patch.contractDate = dto.contractDate;
       if (dto.deliveryDate !== undefined) patch.deliveryDate = dto.deliveryDate;
-      const changed = (Object.keys(patch) as Array<keyof typeof patch>).some(
+      const differs = (Object.keys(patch) as Array<keyof typeof patch>).some(
         (key) => (patch[key] ?? null) !== (order[key] ?? null),
       );
-      // A save that changes nothing leaves no trace on the request's timeline.
-      if (!changed) return;
+      // A save that changes nothing leaves no trace on the request's timeline and tells no one.
+      if (!differs) return false;
 
       await this.moveOpenOrder(manager, order, 'edited', {
         ...patch,
@@ -76,7 +78,9 @@ export class OrderEditService {
         actorId: actor.userId,
         note: order.code,
       });
+      return true;
     });
+    if (changed) await this.followers.notify(id, 'edited', actor.userId);
     return this.orders.findOne(id, actor);
   }
 
@@ -129,6 +133,9 @@ export class OrderEditService {
       });
     });
     await pending.afterCommit();
+    await this.followers.notify(id, 'cancelled', actor.userId, {
+      extra: { reason },
+    });
     return this.orders.findOne(id, actor);
   }
 

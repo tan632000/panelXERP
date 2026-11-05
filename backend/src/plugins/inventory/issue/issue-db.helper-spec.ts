@@ -9,6 +9,8 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 
+import { Notification } from '@kernel/core/audit/notification.entity';
+import { NotificationService } from '@kernel/core/audit/notification.service';
 import { RolesGuard } from '@kernel/core/auth/guards/roles.guard';
 import { seededRolePermissions } from '@kernel/core/database/seeds/seed-roles';
 
@@ -32,6 +34,7 @@ import { ShortageAlertService } from '@plugins/inventory/material/services/short
 import { StockMovementType } from '@plugins/inventory/stock/enums/stock-movement-type.enum';
 import { StockPostingService } from '@plugins/inventory/stock/services/stock-posting.service';
 import { OrderMaterialReadPort } from '@plugins/sales/_shared/ports/order-material-read.port';
+import { OrderFollowerNotifier } from '@plugins/sales/_shared/services/order-follower-notifier';
 
 import type { App } from 'supertest/types';
 
@@ -95,6 +98,12 @@ export async function openIssueHarness(): Promise<IssueHarness> {
     JSON.stringify({ userId, role, permissions: seededRolePermissions(role) });
   const STOREKEEPER = actor(await db.userId('storekeeper'), 'storekeeper');
   const PURCHASING = actor(await db.userId('purchasing'), 'purchasing');
+  // Emit uses only the notification table.
+  const notifications = new NotificationService(
+    db.dataSource.getRepository(Notification),
+    null as never,
+    null as never,
+  );
 
   const moduleRef = await Test.createTestingModule({
     controllers: [StockIssueController, WorkshopReturnController],
@@ -103,7 +112,9 @@ export async function openIssueHarness(): Promise<IssueHarness> {
       WorkshopReturnService,
       OrderStockDocumentReader,
       OrderMaterialReadPort,
+      OrderFollowerNotifier,
       DataScopeService,
+      { provide: NotificationService, useValue: notifications },
       { provide: StockPostingService, useValue: db.posting },
       { provide: ReservationService, useValue: kit.reservations },
       { provide: ShortageAlertService, useValue: kit.alerts },
@@ -205,6 +216,11 @@ export async function openIssueHarness(): Promise<IssueHarness> {
       );
       await db.dataSource.query(
         `DELETE FROM stock_workshop_returns WHERE order_id = ANY($1::int[])`,
+        [ids],
+      );
+      await db.dataSource.query(
+        `DELETE FROM notifications WHERE event_type = 'sales.order.updated'
+            AND (payload->>'orderId')::int = ANY($1::int[])`,
         [ids],
       );
       await kit.cleanup();

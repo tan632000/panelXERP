@@ -12,6 +12,7 @@ import {
   type ProductionHarness,
 } from '@plugins/production/production-order/production-db.helper-spec';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
+import { OrderFollowerNotifier } from '@plugins/sales/_shared/services/order-follower-notifier';
 import { SalesOrder } from '@plugins/sales/order/entities/order.entity';
 import { OrderEditService } from '@plugins/sales/order/services/order-edit.service';
 import { SalesRequestActivity } from '@plugins/sales/request/entities/request-activity.entity';
@@ -46,6 +47,7 @@ describeWithDatabase('Production order races (real Postgres)', () => {
       { findOne: () => Promise.resolve({}) } as never,
       new RequestStatusPort(),
       h.lifecycle,
+      h.app.get(OrderFollowerNotifier),
     );
   });
 

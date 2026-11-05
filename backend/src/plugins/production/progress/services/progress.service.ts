@@ -22,6 +22,7 @@ import {
 } from '@plugins/production/production-order/utils/production-order-lock.util';
 import { mayWorkUnit } from '@plugins/production/production-order/utils/production-scope.util';
 import { ProgressQueryService } from '@plugins/production/progress/services/progress-query.service';
+import { OrderFollowerNotifier } from '@plugins/sales/_shared/services/order-follower-notifier';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 import type { ProductionOrder } from '@plugins/production/production-order/entities/production-order.entity';
@@ -46,6 +47,7 @@ export class ProgressService {
     private readonly dataScope: DataScopeService,
     private readonly queries: ProgressQueryService,
     private readonly notifier: ProductionOrderNotifier,
+    private readonly followers: OrderFollowerNotifier,
   ) {}
 
   start(unitId: number, stage: ProductionStage, actor: AuthUserPayload) {
@@ -158,7 +160,20 @@ export class ProgressService {
       }
     });
 
-    if (completed) await this.notifier.completed(completed, actor.userId);
+    if (completed) {
+      await this.notifier.completed(completed, actor.userId);
+      // The production notice already told the owner and the production managers.
+      await this.followers.notify(
+        completed.orderId,
+        'production_completed',
+        actor.userId,
+        {
+          extra: { productionOrderCode: completed.code },
+          skipOwner: true,
+          skipRoles: ['productionManager'],
+        },
+      );
+    }
     return this.queries.findOne(unitId, actor);
   }
 

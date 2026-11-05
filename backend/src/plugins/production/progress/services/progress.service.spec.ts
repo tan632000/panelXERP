@@ -210,6 +210,23 @@ describeWithDatabase('Stage tracking (real Postgres)', () => {
     expect(await completed('techA')).toEqual([]);
     expect(await completed('salesB')).toEqual([]);
 
+    // The follower departments hear of the completion too, except the ones the production
+    // notice already told: the production managers and the owner.
+    const updates = async (as: Parameters<ProductionHarness['notices']>[0]) =>
+      (await h.notices(as, orderId))
+        .filter((notice) => notice.eventType === 'sales.order.updated')
+        .map((notice) => notice.payload.change)
+        .sort();
+    for (const follower of ['purchasing', 'storekeeper', 'salesMgr'] as const) {
+      expect(await updates(follower)).toEqual([
+        'production_completed',
+        'production_released',
+      ]);
+    }
+    expect(await updates('manager')).toEqual([]);
+    expect(await updates('salesA')).toEqual([]);
+    expect(await updates('techA')).toEqual([]);
+
     // Nothing moves once it is completed.
     await h
       .post(

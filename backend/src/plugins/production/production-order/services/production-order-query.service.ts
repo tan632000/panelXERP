@@ -84,7 +84,7 @@ export interface ProductionOrderDetail extends ProductionOrderRow {
   cancelledAt: Date | null;
   completedAt: Date | null;
   units: ProductionUnitView[];
-  /** Present for a production manager or an admin only; absent for every other reader. */
+  /** Present for a production manager, the director or an admin only; absent for every other reader. */
   events?: ProductionOrderEventView[];
 }
 
@@ -96,7 +96,11 @@ export interface OpenOrderOption {
 }
 
 /** The roles that read a production order's history. */
-const HISTORY_ROLES: readonly string[] = [PRODUCTION_MANAGER_ROLE, 'admin'];
+const HISTORY_ROLES: readonly string[] = [
+  PRODUCTION_MANAGER_ROLE,
+  'director',
+  'admin',
+];
 
 type RawRow = Record<string, unknown>;
 

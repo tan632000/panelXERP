@@ -8,6 +8,7 @@ import {
   NotificationStatus,
 } from '@kernel/core/audit/notification.entity';
 import { NotificationService } from '@kernel/core/audit/notification.service';
+import { matchesPermission } from '@kernel/core/auth/utils/permission-match.util';
 import { UserRole } from '@kernel/core/users/entities/user-role.entity';
 
 import type { FindManyOptions, FindOptionsWhere } from 'typeorm';
@@ -24,6 +25,115 @@ describe('NotificationService', () => {
   let nextNotificationId: number;
   let nextReadId: number;
 
+  type Branch = FindOptionsWhere<Notification> & {
+    roleCodes?: { objectLiteralParameters?: { roleCodes?: string[] } };
+    userIds?: { objectLiteralParameters?: { recipientId?: string } };
+    excludeUserIds?: { objectLiteralParameters?: { excludedId?: string } };
+    createdBy?: { objectLiteralParameters?: { creatorId?: number } };
+    requiredScope?: { objectLiteralParameters?: { permissions?: string[] } };
+    id?: {
+      value?: unknown;
+      objectLiteralParameters?: { readerId?: number };
+    };
+    eventType?: { value?: string[] };
+  };
+
+  const matchesBranch = (row: Notification, where: Branch): boolean => {
+    // Honour the SQL-side role filter so the stand-in cannot pass rows that the
+    // real jsonb `?|` predicate would exclude.
+    const requestedRoles =
+      where.roleCodes?.objectLiteralParameters?.roleCodes ?? null;
+    // Honour the keyset anchor and the batch size too, so a paging bug cannot hide
+    // behind a stand-in that always returns the whole table.
+    const beforeId =
+      typeof where.id?.value === 'number' ? where.id.value : null;
+    const recipientId = where.userIds?.objectLiteralParameters?.recipientId;
+    const namedRecipient =
+      recipientId === undefined
+        ? null
+        : (JSON.parse(recipientId) as number[])[0];
+
+    if (where.isDeleted !== undefined && row.isDeleted !== where.isDeleted) {
+      return false;
+    }
+    if (where.status !== undefined && row.status !== where.status) {
+      return false;
+    }
+    if (beforeId !== null && row.id >= beforeId) return false;
+
+    // The unread and scope conditions the count and mark-all statements add.
+    const readerId = where.id?.objectLiteralParameters?.readerId;
+    if (
+      readerId !== undefined &&
+      reads.some(
+        (read) => read.userId === readerId && read.notificationId === row.id,
+      )
+    ) {
+      return false;
+    }
+    const permissions =
+      where.requiredScope?.objectLiteralParameters?.permissions;
+    if (
+      permissions !== undefined &&
+      row.requiredScope &&
+      !matchesPermission(permissions, row.requiredScope)
+    ) {
+      return false;
+    }
+
+    // The user branch names a reader; the role branch applies only to records that name
+    // none, so a user-addressed record never reaches the rest of its creator's role.
+    if (namedRecipient !== null) {
+      return (row.userIds ?? []).includes(namedRecipient);
+    }
+
+    // A role broadcast withholds itself from the users it names as excluded.
+    const excludedId =
+      where.excludeUserIds?.objectLiteralParameters?.excludedId;
+    if (
+      excludedId !== undefined &&
+      (row.excludeUserIds ?? []).includes(
+        (JSON.parse(excludedId) as number[])[0],
+      )
+    ) {
+      return false;
+    }
+
+    // The director branches: any role broadcast, or an allowlisted event with named
+    // recipients, in both cases not raised by the reader.
+    const creatorId = where.createdBy?.objectLiteralParameters?.creatorId;
+    if (creatorId !== undefined) {
+      if (row.createdBy === creatorId) return false;
+      const allowedEvents = where.eventType?.value;
+      return allowedEvents
+        ? (row.userIds ?? []).length > 0 &&
+            allowedEvents.includes(row.eventType)
+        : (row.userIds ?? []).length === 0;
+    }
+    if ((row.userIds ?? []).length > 0) return false;
+
+    return (
+      requestedRoles === null ||
+      (row.roleCodes ?? []).some((code) => requestedRoles.includes(code))
+    );
+  };
+
+  const findRows = (
+    options?: FindManyOptions<Notification>,
+  ): Notification[] => {
+    // The service addresses a reader through OR'd branches — records naming them, and
+    // role-addressed records naming nobody — so the stand-in matches a row when any branch
+    // accepts it, exactly as the real disjunction does.
+    const branches = (
+      Array.isArray(options?.where) ? options.where : [options?.where ?? {}]
+    ) as Branch[];
+    const rows = notifications.filter((row) =>
+      branches.some((branch) => matchesBranch(row, branch)),
+    );
+    const ordered = [...rows].sort((a, b) => b.id - a.id);
+    return options?.take ? ordered.slice(0, options.take) : ordered;
+  };
+
   const notificationRepo = {
     create: (value: Partial<Notification>) => ({ ...value }) as Notification,
     save: (value: Notification) => {
@@ -35,83 +145,23 @@ describe('NotificationService', () => {
       notifications.push(row);
       return Promise.resolve(row);
     },
-    find: (options?: FindManyOptions<Notification>) => {
-      // The service addresses a reader through two OR'd branches — records naming them, and
-      // role-addressed records naming nobody — so the stand-in matches a row when any branch
-      // accepts it, exactly as the real disjunction does.
-      const branches = (
-        Array.isArray(options?.where) ? options.where : [options?.where ?? {}]
-      ) as Array<
-        FindOptionsWhere<Notification> & {
-          roleCodes?: { objectLiteralParameters?: { roleCodes?: string[] } };
-          userIds?: { objectLiteralParameters?: { recipientId?: string } };
-          excludeUserIds?: {
-            objectLiteralParameters?: { excludedId?: string };
-          };
-          id?: { value?: number };
-        }
-      >;
-
-      const matchesBranch = (
-        row: Notification,
-        where: (typeof branches)[number],
-      ): boolean => {
-        // Honour the SQL-side role filter so the stand-in cannot pass rows that the
-        // real jsonb `?|` predicate would exclude.
-        const requestedRoles =
-          where.roleCodes?.objectLiteralParameters?.roleCodes ?? null;
-        // Honour the keyset anchor and the batch size too, so a paging bug cannot hide
-        // behind a stand-in that always returns the whole table.
-        const beforeId = where.id?.value ?? null;
-        const recipientId = where.userIds?.objectLiteralParameters?.recipientId;
-        const namedRecipient =
-          recipientId === undefined
-            ? null
-            : (JSON.parse(recipientId) as number[])[0];
-
-        if (
-          where.isDeleted !== undefined &&
-          row.isDeleted !== where.isDeleted
-        ) {
-          return false;
-        }
-        if (where.status !== undefined && row.status !== where.status) {
-          return false;
-        }
-        if (beforeId !== null && row.id >= beforeId) return false;
-
-        // The user branch names a reader; the role branch applies only to records that name
-        // none, so a user-addressed record never reaches the rest of its creator's role.
-        if (namedRecipient !== null) {
-          return (row.userIds ?? []).includes(namedRecipient);
-        }
-        if ((row.userIds ?? []).length > 0) return false;
-
-        // A role broadcast withholds itself from the users it names as excluded.
-        const excludedId =
-          where.excludeUserIds?.objectLiteralParameters?.excludedId;
-        if (
-          excludedId !== undefined &&
-          (row.excludeUserIds ?? []).includes(
-            (JSON.parse(excludedId) as number[])[0],
-          )
-        ) {
-          return false;
-        }
-
-        return (
-          requestedRoles === null ||
-          (row.roleCodes ?? []).some((code) => requestedRoles.includes(code))
-        );
+    find: (options?: FindManyOptions<Notification>) =>
+      Promise.resolve(findRows(options)),
+    // The service counts and marks through one statement built from the same `where`
+    // branches; the stand-in answers it from the rows those branches accept.
+    createQueryBuilder: () => {
+      let where: FindManyOptions<Notification>['where'];
+      const accepted = () => findRows({ where });
+      const builder = {
+        setFindOptions: (options: FindManyOptions<Notification>) => {
+          where = options.where;
+          return builder;
+        },
+        getCount: () => Promise.resolve(accepted().length),
+        getQueryAndParameters: () =>
+          ['SELECT', accepted().map((row) => row.id)] as const,
       };
-
-      const rows = notifications.filter((row) =>
-        branches.some((branch) => matchesBranch(row, branch)),
-      );
-      const ordered = [...rows].sort((a, b) => b.id - a.id);
-      return Promise.resolve(
-        options?.take ? ordered.slice(0, options.take) : ordered,
-      );
+      return builder;
     },
     update: (criteria: Partial<Notification>, patch: Partial<Notification>) => {
       const matched = notifications.filter((row) =>
@@ -130,6 +180,27 @@ describe('NotificationService', () => {
     save: (rows: NotificationRead[]) => {
       for (const row of rows) reads.push({ ...row, id: nextReadId++ });
       return Promise.resolve(rows);
+    },
+    // The mark-all statement: the stand-in receives the selected ids and the reader last,
+    // and returns one row per marker it inserted, as `RETURNING` does.
+    query: (_sql: string, params: number[]) => {
+      const readerId = params[params.length - 1];
+      const inserted: Array<{ id: number }> = [];
+      for (const notificationId of params.slice(0, -1)) {
+        const known = reads.some(
+          (row) =>
+            row.userId === readerId && row.notificationId === notificationId,
+        );
+        if (known) continue;
+        const id = nextReadId++;
+        reads.push({
+          id,
+          userId: readerId,
+          notificationId,
+        } as NotificationRead);
+        inserted.push({ id });
+      }
+      return Promise.resolve(inserted);
     },
     find: (options?: FindManyOptions<NotificationRead>) => {
       const where = (options?.where ?? {}) as {
@@ -226,17 +297,19 @@ describe('NotificationService', () => {
     expect(stored?.dedupeKey).toBe('7');
   });
 
-  it('counts and marks read on ids and scopes only, never on whole records', async () => {
+  it('counts and marks read without loading the readable records', async () => {
     await emitTechnicalNotification('7');
     await emitTechnicalNotification('8');
     const find = jest.spyOn(notificationRepo, 'find');
 
     expect(await service.unreadCountForActor(technicalManager)).toBe(2);
+    expect((await service.markAllRead(technicalStaff)).marked).toBe(2);
+    expect(find).not.toHaveBeenCalled();
+
+    await service.markRead(technicalManager, 2);
     expect(find.mock.calls.at(-1)?.[0]).toMatchObject({
       select: { id: true, requiredScope: true },
     });
-
-    await service.markRead(technicalManager, 2);
     const markReadWhere = find.mock.calls.at(-1)?.[0]?.where as Array<{
       id?: number;
     }>;
@@ -312,15 +385,61 @@ describe('NotificationService', () => {
       0,
     );
 
-    // A wildcard scope holder still needs an addressed role.
-    expect((await service.listForActor(director)).data).toHaveLength(0);
-
-    // No role assignment at all.
+    // A wildcard scope without the director role needs an addressed role: no role assignment
+    // at all sees nothing.
     expect(
       (await service.listForActor({ userId: 6, permissions: ['*:*'] })).data,
     ).toHaveLength(0);
 
     expect((await service.listForActor(technicalStaff)).data).toHaveLength(1);
+  });
+
+  it('shows the director every role broadcast raised by someone else', async () => {
+    await emitTechnicalNotification('7');
+
+    const page = await service.listForActor(director);
+
+    expect(page.data.map((row) => row.payload.sfgCode)).toEqual(['FG_7']);
+    expect(await service.unreadCountForActor(director)).toBe(1);
+  });
+
+  it('withholds from the director a broadcast it raised or is excluded from', async () => {
+    await service.emit({
+      eventType: 'sp_can_bo_sung_ky_thuat',
+      roleCodes: TECHNICAL_ROLES,
+      createdBy: director.userId,
+    });
+    await service.emit({
+      eventType: 'sp_can_bo_sung_ky_thuat',
+      roleCodes: TECHNICAL_ROLES,
+      excludeUserIds: [director.userId],
+      createdBy: 9,
+    });
+
+    expect((await service.listForActor(director)).data).toHaveLength(0);
+    expect(await service.unreadCountForActor(director)).toBe(0);
+  });
+
+  it('shows the director an allowlisted personal event and no other', async () => {
+    await service.emit({
+      eventType: 'production.issue.resolved',
+      roleCodes: [],
+      userIds: [technicalStaff.userId],
+      createdBy: 9,
+    });
+    await service.emit({
+      eventType: 'signature_review_rejected',
+      roleCodes: [],
+      userIds: [salesStaff.userId],
+      createdBy: 9,
+    });
+
+    const page = await service.listForActor(director);
+
+    expect(page.data.map((row) => row.eventType)).toEqual([
+      'production.issue.resolved',
+    ]);
+    expect((await service.listForActor(salesStaff)).data).toHaveLength(1);
   });
 
   /**
@@ -341,8 +460,12 @@ describe('NotificationService', () => {
     expect((await service.listForActor(technicalStaff)).data).toHaveLength(1);
     // Same role, not named: the record stays out of their bell.
     expect((await service.listForActor(technicalManager)).data).toHaveLength(0);
-    // A wildcard scope does not substitute for being addressed.
+    // The director does not read a personal notice that is not on the allowlist, and a
+    // wildcard scope without the director role does not substitute for being addressed.
     expect((await service.listForActor(director)).data).toHaveLength(0);
+    expect(
+      (await service.listForActor({ userId: 6, permissions: ['*:*'] })).data,
+    ).toHaveLength(0);
   });
 
   /** A broadcast withholds itself from whoever raised it — they already saw the result. */

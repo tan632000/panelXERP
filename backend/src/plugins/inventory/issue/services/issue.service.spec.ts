@@ -144,6 +144,71 @@ describeWithDatabase('StockIssueService (real Postgres)', () => {
     expect(other.body).toMatchObject({ data: [], meta: { total: 0 } });
   });
 
+  it('tells the follower departments and the sales owner of an issue, never the issuing storekeeper', async () => {
+    const x = await h.db.createItem();
+    await h.stockOf(x, '4', 1000);
+    const mine = (
+      await h.kit.createOrder({ bom: [{ itemId: x, perPanel: '2' }] })
+    ).orderId;
+    // A second order holding a reservation of the same item must hear nothing.
+    const other = (
+      await h.kit.createOrder({ bom: [{ itemId: x, perPanel: '2' }] })
+    ).orderId;
+    const posted = await h
+      .issue(mine, [{ itemId: x, quantity: 1 }])
+      .expect(201);
+
+    interface UpdateRow {
+      role_codes: string[];
+      user_ids: number[];
+      exclude_user_ids: number[];
+      required_scope: string;
+      link: string;
+      payload: Record<string, unknown>;
+    }
+    const updatesOf = (orderId: number) =>
+      h.db.dataSource.query<UpdateRow[]>(
+        `SELECT role_codes, user_ids, exclude_user_ids, required_scope, link, payload
+           FROM notifications
+          WHERE event_type = 'sales.order.updated' AND (payload->>'orderId')::int = $1`,
+        [orderId],
+      );
+    const rows = await updatesOf(mine);
+    expect(rows).toHaveLength(2);
+    const ownerId = await h.db.userId('sales_a');
+    const storekeeperId = await h.db.userId('storekeeper');
+
+    const broadcast = rows.find((row) => row.user_ids.length === 0);
+    expect([...(broadcast?.role_codes ?? [])].sort()).toEqual([
+      'productionManager',
+      'purchasing',
+      'salesManager',
+      'storekeeper',
+    ]);
+    expect(broadcast?.exclude_user_ids.sort()).toEqual(
+      [ownerId, storekeeperId].sort(),
+    );
+    expect(broadcast).toMatchObject({
+      required_scope: 'material:read',
+      link: `/inventory/materials/${mine}`,
+    });
+    const owner = rows.find((row) => row.user_ids.length > 0);
+    expect(owner).toMatchObject({
+      role_codes: [],
+      user_ids: [ownerId],
+      required_scope: 'order:read',
+      link: `/sales/orders/${mine}`,
+    });
+    for (const row of rows) {
+      expect(row.payload).toMatchObject({
+        orderId: mine,
+        change: 'stock_issued',
+        issueCode: bodyOf(posted).code,
+      });
+    }
+    expect(await updatesOf(other)).toEqual([]);
+  });
+
   it('serves the storekeeper no money key, and purchasing the line cost', async () => {
     const x = await h.db.createItem();
     await h.stockOf(x, '4', 25000);

@@ -32,6 +32,7 @@ import { ShortageAlertService } from '@plugins/inventory/material/services/short
 import { StockMovementType } from '@plugins/inventory/stock/enums/stock-movement-type.enum';
 import { StockPostingService } from '@plugins/inventory/stock/services/stock-posting.service';
 import { OrderMaterialReadPort } from '@plugins/sales/_shared/ports/order-material-read.port';
+import { OrderFollowerNotifier } from '@plugins/sales/_shared/services/order-follower-notifier';
 import { createWithDocumentCode } from '@plugins/sales/_shared/utils/sales-document-code.util';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
@@ -46,6 +47,7 @@ export interface StockIssuePostResult {
 
 interface Posted {
   id: number;
+  code: string;
   orderIds: number[];
   itemIds: number[];
 }
@@ -66,6 +68,7 @@ export class StockIssueService {
     private readonly dataScope: DataScopeService,
     private readonly shortageAlerts: ShortageAlertService,
     private readonly reader: OrderStockDocumentReader,
+    private readonly followers: OrderFollowerNotifier,
   ) {}
 
   findAll(query: OrderStockDocumentFilterDto, actor: AuthUserPayload) {
@@ -119,6 +122,10 @@ export class StockIssueService {
     }
 
     await this.shortageAlerts.afterCommit(posted.orderIds, posted.itemIds);
+    // `orderIds` also lists orders whose reservations moved; the notice is for the issue's own.
+    await this.followers.notify(dto.orderId, 'stock_issued', actor.userId, {
+      extra: { issueCode: posted.code },
+    });
     return { created: true, issue: await this.findOne(posted.id, actor) };
   }
 
@@ -227,6 +234,7 @@ export class StockIssueService {
     );
     return {
       id: issueId,
+      code,
       // The order itself is evaluated even when it held no reservation of the items.
       orderIds: [...new Set([order.id, ...result.changedOrderIds])],
       itemIds: result.itemIds,

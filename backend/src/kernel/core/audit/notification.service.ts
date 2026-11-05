@@ -1,6 +1,13 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, In, LessThan, Raw, Repository } from 'typeorm';
+import {
+  EntityManager,
+  In,
+  LessThan,
+  Raw,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 
 import { NotificationRead } from '@kernel/core/audit/notification-read.entity';
 import {
@@ -71,6 +78,21 @@ export const DEFAULT_NOTIFICATION_PAGE_SIZE = 20;
  */
 const CANDIDATE_BATCH_SIZE = 50;
 
+/**
+ * Business events the director reads although they name their recipients. Each is a
+ * third-person fact about someone else's work with no role broadcast of its own; a notice
+ * addressed to one colleague in the second person (a rejected signature, an assignment)
+ * stays out, so the bell never turns into a copy of everyone's inbox.
+ */
+export const DIRECTOR_VISIBLE_PERSONAL_EVENTS: readonly string[] = [
+  'sales.estimate.submitted',
+  'sales.quotation.rejected',
+  'inventory.purchase_order.rejected',
+  'production.issue.resolved',
+];
+
+const DIRECTOR_ROLE = 'director';
+
 /** Actor identity a caller must supply to read or mark notifications. */
 export interface NotificationActor {
   userId: number;
@@ -83,7 +105,8 @@ export interface NotificationActor {
  *
  * Two independent conditions gate a read — the record must be addressed to the caller
  * (named in `userIds`, or, when it names nobody, matching one of their roles and not naming
- * them in `excludeUserIds`), and the caller must hold the record's required scope. Read state is
+ * them in `excludeUserIds`; the director also reads every role broadcast and the allowlisted
+ * events, see {@link DIRECTOR_VISIBLE_PERSONAL_EVENTS}), and the caller must hold the record's required scope. Read state is
  * always per user and never touches the shared `status`, which changes only when the
  * subject work completes.
  */
@@ -255,14 +278,8 @@ export class NotificationService {
 
   /** Records addressed to the actor that are neither read by the actor nor closed. */
   async unreadCountForActor(actor: NotificationActor): Promise<number> {
-    const open = await this.readableRefsForActor(actor);
-    if (!open.length) return 0;
-
-    const readIds = await this.readIdsForActor(
-      actor.userId,
-      open.map((item) => item.id),
-    );
-    return open.filter((item) => !readIds.has(item.id)).length;
+    const unread = await this.unreadQueryForActor(actor);
+    return unread.getCount();
   }
 
   /** Marks one record read for this actor only. */
@@ -287,14 +304,21 @@ export class NotificationService {
 
   /** Marks every record currently addressed to this actor read, for this actor only. */
   async markAllRead(actor: NotificationActor): Promise<{ marked: number }> {
-    const readable = await this.readableRefsForActor(actor);
-    if (!readable.length) return { marked: 0 };
+    const unread = await this.unreadQueryForActor(actor);
 
-    const ids = readable.map((item) => item.id);
-    const already = await this.readIdsForActor(actor.userId, ids);
-    const pendingIds = ids.filter((id) => !already.has(id));
-    await this.recordRead(actor.userId, pendingIds);
-    return { marked: pendingIds.length };
+    // One statement however many records are unread: the ids never travel through the
+    // application, so the bind-parameter count does not grow with the table. The unique
+    // pair makes a concurrent mark-all or a single mark-read a no-op rather than an error.
+    const [selectUnread, selectParams] = unread.getQueryAndParameters();
+    const params: unknown[] = selectParams;
+    const inserted: unknown[] = await this.readRepo.query(
+      `INSERT INTO notification_reads (notification_id, user_id)
+       SELECT unread.n_id, $${params.length + 1} FROM (${selectUnread}) AS unread
+       ON CONFLICT (notification_id, user_id) DO NOTHING
+       RETURNING id`,
+      [...params, actor.userId],
+    );
+    return { marked: inserted.length };
   }
 
   /** Role codes the user currently holds, resolved from assignments rather than the token,
@@ -310,12 +334,43 @@ export class NotificationService {
   }
 
   /**
+   * The records addressed to the actor that are open, in scope and not yet read by them, as
+   * one query the database counts or marks without handing the ids back.
+   *
+   * The scope rule is the SQL twin of {@link matchesPermission}: exact, module wildcard,
+   * action wildcard or full wildcard.
+   */
+  private async unreadQueryForActor(
+    actor: NotificationActor,
+  ): Promise<SelectQueryBuilder<Notification>> {
+    const branches = await this.addressedToActor(actor.userId);
+
+    const permissions = actor.permissions ?? [];
+    return this.notificationRepo.createQueryBuilder('n').setFindOptions({
+      select: { id: true },
+      where: branches.map((branch) => ({
+        ...branch,
+        id: Raw(
+          (alias: string) =>
+            `NOT EXISTS (SELECT 1 FROM notification_reads r WHERE r.notification_id = ${alias} AND r.user_id = :readerId)`,
+          { readerId: actor.userId },
+        ),
+        requiredScope: Raw(
+          (alias: string) =>
+            `(NULLIF(${alias}, '') IS NULL OR '*:*' = ANY(:permissions::text[]) OR ${alias} = ANY(:permissions::text[]) OR (split_part(${alias}, ':', 1) || ':*') = ANY(:permissions::text[]) OR (split_part(${alias}, ':', 2) <> '' AND ('*:' || split_part(${alias}, ':', 2)) = ANY(:permissions::text[])))`,
+          { permissions },
+        ),
+      })),
+    });
+  }
+
+  /**
    * Ids of the records the actor may read: addressed to one of their roles and covered by a
    * scope they hold. Closed records are left out unless asked for; `id` narrows the read to
    * the one record a caller is about to touch.
    *
-   * Only the id and the scope are selected: the bell's count and the mark-all pass run on
-   * every open record, and loading each one's message and payload for that was the cost.
+   * Only the id and the scope are selected, so a single mark-read never loads message and
+   * payload. The bell's count and mark-all do not use this; they run as one SQL statement.
    */
   private async readableRefsForActor(
     actor: NotificationActor,
@@ -348,7 +403,9 @@ export class NotificationService {
    * roles and not naming them as excluded. A record with named recipients is deliberately
    * invisible to the rest of the role; a role broadcast is invisible to whoever raised it.
    * A closed record "leaves the bell" for everyone, read or not, so only open ones match
-   * unless `includeClosed` is set.
+   * unless `includeClosed` is set. A director also matches two branches, under the same open
+   * rule, over records not raised by them and not excluding them: any role broadcast, and the
+   * allowlisted events that name recipients.
    */
   private async addressedToActor(
     userId: number,
@@ -383,7 +440,49 @@ export class NotificationService {
       });
     }
 
+    if (roleCodes.includes(DIRECTOR_ROLE)) {
+      branches.push(...this.directorBranches(userId, self, open));
+    }
+
     return branches;
+  }
+
+  /**
+   * What the director reads on top of their own addressing: every role broadcast whatever
+   * its role set, and the allowlisted business events that name recipients — in both cases
+   * not raised by the director and not excluding them. The creator test compares the integer
+   * id; `self` is the jsonb text used against the recipient lists and would not bind there.
+   */
+  private directorBranches(
+    userId: number,
+    self: string,
+    open: Record<string, unknown>,
+  ): Array<Record<string, unknown>> {
+    const notExcluded = Raw(
+      (alias: string) => `NOT (${alias} @> :excludedId::jsonb)`,
+      { excludedId: self },
+    );
+    const notRaisedBy = Raw(
+      (alias: string) => `${alias} IS DISTINCT FROM :creatorId`,
+      { creatorId: userId },
+    );
+    const base = {
+      isDeleted: false,
+      ...open,
+      excludeUserIds: notExcluded,
+      createdBy: notRaisedBy,
+    };
+    return [
+      {
+        ...base,
+        userIds: Raw((alias: string) => `jsonb_array_length(${alias}) = 0`),
+      },
+      {
+        ...base,
+        eventType: In([...DIRECTOR_VISIBLE_PERSONAL_EVENTS]),
+        userIds: Raw((alias: string) => `jsonb_array_length(${alias}) > 0`),
+      },
+    ];
   }
 
   /**

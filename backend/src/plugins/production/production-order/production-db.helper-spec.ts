@@ -43,6 +43,7 @@ import { OrderLifecycleRegistry } from '@plugins/sales/_shared/ports/order-lifec
 import { orderMaterialFixture } from '@plugins/sales/_shared/ports/order-material-fixture.helper-spec';
 import { OrderMaterialReadPort } from '@plugins/sales/_shared/ports/order-material-read.port';
 import { OrderProductionPort } from '@plugins/sales/_shared/ports/order-production.port';
+import { OrderFollowerNotifier } from '@plugins/sales/_shared/services/order-follower-notifier';
 import { SalesUserLookup } from '@plugins/sales/_shared/services/sales-user-lookup.service';
 
 import type { FixtureBomLine } from '@plugins/sales/_shared/ports/order-material-fixture.helper-spec';
@@ -79,6 +80,7 @@ const ACTORS = {
   salesA: { username: 'sales_a', role: 'sales' },
   salesB: { username: 'sales_b', role: 'sales' },
   storekeeper: { username: 'storekeeper', role: 'storekeeper' },
+  purchasing: { username: 'purchasing', role: 'purchasing' },
   salesMgr: { username: 'sales_mgr', role: 'salesManager' },
   director: { username: 'director', role: 'director' },
   admin: { username: 'admin', role: 'admin' },
@@ -207,6 +209,7 @@ export async function openProductionHarness(
       ProductionOrderReleaseService,
       ProductionOrderUnitService,
       ProductionOrderNotifier,
+      OrderFollowerNotifier,
       ...(extras.providers ?? []),
       OrderProductionPort,
       OrderMaterialReadPort,
@@ -316,7 +319,8 @@ export async function openProductionHarness(
       await app.close();
       if (orderIds.length > 0) {
         await dataSource.query(
-          `DELETE FROM notifications WHERE event_type LIKE 'production.%'
+          `DELETE FROM notifications
+            WHERE (event_type LIKE 'production.%' OR event_type = 'sales.order.updated')
              AND (payload->>'orderId')::int = ANY($1)`,
           [orderIds],
         );

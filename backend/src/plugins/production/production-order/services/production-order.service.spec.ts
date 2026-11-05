@@ -10,6 +10,7 @@ import {
   type ProductionHarness,
 } from '@plugins/production/production-order/production-db.helper-spec';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
+import { OrderFollowerNotifier } from '@plugins/sales/_shared/services/order-follower-notifier';
 import { SalesOrder } from '@plugins/sales/order/entities/order.entity';
 import { OrderEditService } from '@plugins/sales/order/services/order-edit.service';
 import { SalesRequestActivity } from '@plugins/sales/request/entities/request-activity.entity';
@@ -66,6 +67,7 @@ describeWithDatabase('Production orders (real Postgres)', () => {
       { findOne: () => Promise.resolve({}) } as never,
       new RequestStatusPort(),
       h.lifecycle,
+      h.app.get(OrderFollowerNotifier),
     );
   });
 
@@ -347,20 +349,20 @@ describeWithDatabase('Production orders (real Postgres)', () => {
     }
   });
 
-  it('returns the history only to a production manager or an admin', async () => {
+  it('returns the history only to a production manager, a director or an admin', async () => {
     const { id } = await draftFor();
 
-    for (const as of ['manager', 'admin'] as const) {
+    for (const as of ['manager', 'director', 'admin'] as const) {
       const read = detail(
         await h.get(`/production/orders/${id}`, as).expect(200),
       );
       expect(read.events?.map((entry) => entry.event)).toEqual(['created']);
     }
 
-    // The sales owner, the sales manager, the director and a technician read the order, not
-    // its history; a storekeeper is refused the order altogether.
+    // The sales owner, the sales manager and a technician read the order, not its history; a
+    // storekeeper is refused the order altogether.
     await h.prepare(id);
-    for (const as of ['salesA', 'salesMgr', 'director', 'techA'] as const) {
+    for (const as of ['salesA', 'salesMgr', 'techA'] as const) {
       const read = await h.get(`/production/orders/${id}`, as).expect(200);
       expect(read.body).not.toHaveProperty('events');
     }
@@ -457,7 +459,8 @@ describeWithDatabase('Production orders (real Postgres)', () => {
     expect(await types('salesA')).toEqual(['production.order.released.owner']);
     expect(await types('techB')).toEqual([]);
     expect(await types('salesB')).toEqual([]);
-    expect(await types('storekeeper')).toEqual([]);
+    // The storekeeper follows the order, not the workshop.
+    expect(await types('storekeeper')).toEqual(['sales.order.updated']);
 
     // A cabinet handed to another technician tells only that technician.
     const [first] = await h.units(id);
@@ -504,6 +507,63 @@ describeWithDatabase('Production orders (real Postgres)', () => {
     expect((found.body as PageBody).data).toMatchObject([
       { id, status: 'cancelled' },
     ]);
+  });
+
+  it('tells the follower departments of a release and a cancel after release, not the actor, and the owner only by the production notice', async () => {
+    const { orderId, id, created } = await draftFor();
+    await h.prepare(id);
+    const updates = async (as: Parameters<ProductionHarness['notices']>[0]) =>
+      (await h.notices(as, orderId))
+        .filter((notice) => notice.eventType === 'sales.order.updated')
+        .sort((a, b) => a.id - b.id);
+
+    await h.post(`/production/orders/${id}/release`, {}).expect(200);
+    for (const follower of ['purchasing', 'storekeeper', 'salesMgr'] as const) {
+      const notices = await updates(follower);
+      expect(notices).toHaveLength(1);
+      expect(notices[0].payload).toMatchObject({
+        orderId,
+        change: 'production_released',
+        productionOrderCode: created.code,
+      });
+    }
+    // The owner has the production notice; the actor and the workshop have none of the follower's.
+    expect(await updates('salesA')).toEqual([]);
+    expect(
+      (await h.notices('salesA', orderId)).map((notice) => notice.eventType),
+    ).toEqual(['production.order.released.owner']);
+    expect(await updates('manager')).toEqual([]);
+    expect(await updates('techA')).toEqual([]);
+    expect(await updates('salesB')).toEqual([]);
+
+    await h
+      .post(`/production/orders/${id}/cancel`, { reason: 'Redesign' })
+      .expect(200);
+    const afterCancel = await updates('purchasing');
+    expect(afterCancel.map((notice) => notice.payload.change)).toEqual([
+      'production_released',
+      'production_cancelled',
+    ]);
+    expect(afterCancel[1].payload).toMatchObject({ reason: 'Redesign' });
+    expect(await updates('storekeeper')).toHaveLength(2);
+    expect(await updates('salesMgr')).toHaveLength(2);
+    expect(await updates('salesA')).toEqual([]);
+    expect(await updates('manager')).toEqual([]);
+  });
+
+  it('tells no follower of a draft production order that is cancelled', async () => {
+    const { orderId, id } = await draftFor();
+    await h
+      .post(`/production/orders/${id}/cancel`, { reason: 'Wrong panels' })
+      .expect(200);
+    for (const as of [
+      'purchasing',
+      'storekeeper',
+      'salesMgr',
+      'salesA',
+    ] as const) {
+      expect(await h.notices(as, orderId)).toEqual([]);
+    }
   });
 
   it('finds the live production order of a sales order next to a cancelled one', async () => {

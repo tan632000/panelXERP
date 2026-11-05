@@ -19,6 +19,7 @@ import {
   recordProductionEvent,
 } from '@plugins/production/production-order/utils/production-order-lock.util';
 import { OrderProductionPort } from '@plugins/sales/_shared/ports/order-production.port';
+import { OrderFollowerNotifier } from '@plugins/sales/_shared/services/order-follower-notifier';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
 import type { EntityManager } from 'typeorm';
@@ -38,6 +39,7 @@ export class ProductionOrderReleaseService {
     private readonly orders: OrderProductionPort,
     private readonly queries: ProductionOrderQueryService,
     private readonly notifier: ProductionOrderNotifier,
+    private readonly followers: OrderFollowerNotifier,
   ) {}
 
   /**
@@ -91,6 +93,13 @@ export class ProductionOrderReleaseService {
     );
 
     await this.notifier.released(order, assigneeIds, actor.userId);
+    // The production notice already told the owner.
+    await this.followers.notify(
+      order.orderId,
+      'production_released',
+      actor.userId,
+      { extra: { productionOrderCode: order.code }, skipOwner: true },
+    );
     return this.queries.findOne(id, actor);
   }
 
@@ -156,6 +165,15 @@ export class ProductionOrderReleaseService {
         outcome.assigneeIds,
         actor.userId,
         reason,
+      );
+      await this.followers.notify(
+        outcome.order.orderId,
+        'production_cancelled',
+        actor.userId,
+        {
+          extra: { productionOrderCode: outcome.order.code, reason },
+          skipOwner: true,
+        },
       );
     }
     return this.queries.findOne(id, actor);
