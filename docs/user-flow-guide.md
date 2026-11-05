@@ -290,7 +290,6 @@ Mở một tủ (`/production/units/…`):
 - Mỗi ngày lúc 07:00 (và mỗi lần hệ thống khởi động), tủ nào đã qua Hạn hoàn thành mà chưa xong sẽ sinh thông báo cho QL sản xuất và kỹ thuật viên được giao. Ví dụ: "Tủ MSB-01-1 của lệnh sản xuất LSX_2026_0001 đã quá hạn hoàn thành (dự kiến 20/11/2026)."
 - Thông báo quá hạn tự mất khi tủ xong công đoạn cuối, khi hạn được dời sang ngày chưa qua, hoặc khi lệnh bị huỷ.
 - Mục **"Lịch sử"** trên trang lệnh ghi lại: tạo, phát hành, huỷ, cập nhật tủ, bắt đầu/hoàn thành/hoàn tác công đoạn, hoàn thành lệnh, báo và giải quyết sự cố. Chỉ QL sản xuất và admin thấy mục này.
-  - *Hạn chế hiện tại:* các dòng công đoạn còn hiện mã (`finishing`, `material_prep`…), và dòng cập nhật tủ còn hiện "planned end: 2026-11-20". Lỗi này đang được sửa (task-08, task-09 của `specs/p3-followups`).
 
 ---
 
