@@ -73,6 +73,8 @@
       "sales_quotation_approved": "Báo giá {code} của yêu cầu {requestCode} đã được duyệt.",
       "sales_quotation_rejected": "Báo giá {code} của yêu cầu {requestCode} bị từ chối — Lý do: {reason}.",
       "sales_order_created": "Đơn hàng {code} đã được tạo từ báo giá {quotationCode} của yêu cầu {requestCode}.",
+      "sales_order_updated": "{change, select, edited {Đơn hàng {code} vừa được chỉnh sửa.} cancelled {Đơn hàng {code} đã bị huỷ. Lý do: {reason}} production_released {Đơn hàng {code} đã được phát lệnh sản xuất {productionOrderCode}.} production_cancelled {Lệnh sản xuất {productionOrderCode} của đơn hàng {code} đã bị huỷ. Lý do: {reason}} production_completed {Lệnh sản xuất {productionOrderCode} của đơn hàng {code} đã hoàn thành.} stock_issued {Đơn hàng {code} vừa được xuất kho theo phiếu {issueCode}.} other {Đơn hàng {code} vừa có thay đổi.}}",
+      "inventory_stocktake_approved": "Phiếu kiểm kê {code} đã được duyệt, chênh lệch đã được ghi vào tồn kho.",
       "inventory_stock_low": "Vật tư {code} — {name} chỉ còn {available} {unit} khả dụng, dưới tồn tối thiểu {minStock}.",
       "sp_can_bo_sung_ky_thuat": "Sản phẩm {sfgCode} — {productName} cần bổ sung thông tin kỹ thuật.",
       "purchaseRequestAwaitingReceipt": "Yêu cầu mua hàng {prId} ({department, select, sales {Sales} purchasing {Mua hàng} mechanical {Cơ khí} surfaceTreatment {XLBM} warehouse {Kho} packaging {Đóng gói} accounting {Kế toán} hr {HR} technical {Kỹ thuật} qc {QC} lab {Lab} housekeeping {Tạp vụ} security {Bảo vệ} it {IT} other {{department}}}) đang chờ tiếp nhận.",

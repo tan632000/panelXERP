@@ -132,6 +132,7 @@ const INVENTORY_EVENT_MESSAGE_KEYS: Readonly<Record<string, string>> = {
     "events.inventory_purchase_order_rejected",
   "inventory.order.short": "events.inventory_order_short",
   "inventory.order.short.owner": "events.inventory_order_short_owner",
+  "inventory.stocktake.approved": "events.inventory_stocktake_approved",
 };
 
 /** The production order events the bell phrases, with their message keys. */
@@ -165,7 +166,9 @@ export const NOTIFICATION_EVENT_KEYS = [
   "sales.quotation.approved",
   "sales.quotation.rejected",
   "sales.order.created",
+  "sales.order.updated",
   "inventory.stock.low",
+  "inventory.stocktake.approved",
   "inventory.purchase_order.submitted",
   "inventory.purchase_order.approved",
   "inventory.purchase_order.rejected",
@@ -1254,6 +1257,20 @@ export function resolveNotificationMessage(
           code: field(payload.code),
           quotationCode: field(payload.quotationCode),
           requestCode: field(payload.requestCode),
+        },
+      };
+    }
+
+    if (item.eventType === "sales.order.updated") {
+      return {
+        kind: "key",
+        key: "events.sales_order_updated",
+        values: {
+          code: field(payload.code),
+          change: String(payload.change ?? "").trim(),
+          reason: field(payload.reason),
+          productionOrderCode: field(payload.productionOrderCode),
+          issueCode: field(payload.issueCode),
         },
       };
     }

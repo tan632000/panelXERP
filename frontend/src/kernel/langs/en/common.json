@@ -73,6 +73,8 @@
       "sales_quotation_approved": "Quotation {code} for request {requestCode} has been approved.",
       "sales_quotation_rejected": "Quotation {code} for request {requestCode} was rejected — Reason: {reason}.",
       "sales_order_created": "Order {code} was created from quotation {quotationCode} of request {requestCode}.",
+      "sales_order_updated": "{change, select, edited {Order {code} was edited.} cancelled {Order {code} was cancelled. Reason: {reason}} production_released {Order {code} was released to production as {productionOrderCode}.} production_cancelled {Production order {productionOrderCode} of order {code} was cancelled. Reason: {reason}} production_completed {Production order {productionOrderCode} of order {code} is complete.} stock_issued {Order {code} had stock issued on note {issueCode}.} other {Order {code} was changed.}}",
+      "inventory_stocktake_approved": "Stock count {code} was approved and its differences were posted to stock.",
       "inventory_stock_low": "Item {code} — {name} is down to {available} {unit} available, below its minimum of {minStock}.",
       "sp_can_bo_sung_ky_thuat": "Product {sfgCode} — {productName} needs technical information.",
       "purchaseRequestAwaitingReceipt": "Purchase request {prId} ({department, select, sales {Sales} purchasing {Purchasing} mechanical {Mechanical} surfaceTreatment {Surface Treatment} warehouse {Warehouse} packaging {Packaging} accounting {Accounting} hr {HR} technical {Technical} qc {QC} lab {Lab} housekeeping {Housekeeping} security {Security} it {IT} other {{department}}}) is awaiting receipt.",
