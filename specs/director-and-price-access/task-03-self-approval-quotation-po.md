@@ -1,6 +1,6 @@
 # Task 03 — Director self-approval: quotation and purchase order
 
-Status: pending
+Status: done
 
 ## Outcome
 A quotation version or purchase order submitted by the director is approved in the same request, its approved notices reach the D-04 audience, and the director is never refused by four-eyes; everyone else keeps today's flow.
@@ -53,3 +53,31 @@ A quotation version or purchase order submitted by the director is approved in t
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm test -- --ci src/plugins/sales/quotation src/plugins/inventory/purchase-order"
+Exit: 0
+Base: a942a6ce71865a539ec305b4b1e28876f376e9b4
+Head: b9a1c4d4c9f280c751478cd8932a786eb3932567e215d4658f82d36420fa8457
+```text
+$ docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm test -- --ci src/plugins/sales/quotation src/plugins/inventory/purchase-order"
+> panelxerp-backend@0.0.1 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
+> panelxerp-backend@0.0.1 typecheck
+> tsc --noEmit -p tsconfig.build.json
+> panelxerp-backend@0.0.1 test
+> node scripts/run-tests.js --ci src/plugins/sales/quotation src/plugins/inventory/purchase-order
+PASS src/plugins/sales/quotation/services/quotation-approval.service.spec.ts (22.03 s)
+PASS src/plugins/inventory/purchase-order/services/purchase-order-approval.service.spec.ts (22.218 s)
+Test Suites: 11 passed, 11 total
+Tests:       197 passed, 197 total
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+VERIFY_EXIT=0
+```
+
+This run started after the last edit; 0 skipped. Named probes: `quotation-approval.service.spec.ts` (director submit approves at once with request `quoted`, owner record and sales-manager broadcast, no submitted notice; rollback when the request cannot become quoted; director approves a version they last edited; salesManager and admin four-eyes 403 on approve and reject), `purchase-order-approval.service.spec.ts` (director creates and submits → 200 `approved`, events `[submitted, approved]`, only the purchasing/storekeeper broadcast; purchasing submits, director approves → creator record plus broadcast; admin creator, submitter, editor and earlier submitter refused 403).
+
+Pre-change run (specs first): exit 1, 7 failed, all on the unmet acceptance, no cascade (quotation: director submit, director-submit rollback, approve notice count, director approves own edit; PO: uninvolved director approve notices, director submit, director approves after editing). The rewritten admin 403 cases passed before the change, as admin was never exempt. Counterexamples (each restored, `cmp` equal): no `held.status` update before the second move fails the PO director submit with 409; approving in a second transaction fails the rollback probe; exempting admin in `assertUninvolved` fails the four PO admin cases; a director submit that still sends the submitted notice fails the quotation director submit; exempting admin in the quotation `assertApprover` fails `keeps four-eyes for an admin: 403 to approve and reject a version they created or last edited` (added after this mutation first survived).
+
+Assertions changed outside the listed ones: `lets exactly one of two concurrent approvals through` counts 2 emits (owner record and broadcast) for the one approval. `notifyCreator` now skips the creator when they are the actor, on reject too; only the director can reach that path. Review: PASS (code-auditor); Lows 1, 3 and 4 fixed (approve doc comment, a test name, a spec comment). Open Low: the quotation owner record is sent even when the owner is the approver (unchanged behavior, D-04 "as today"), unlike the PO creator record. Open for GATE-DONE: AC-05 says "created, edited or submitted", while quotation four-eyes checks only the creator and the last editor, as before (D-03 keeps the existing checks for other roles); covering the submitter would be a behavior change needing a stored submitter. The quotation spec file's working copy has CRLF line endings that `prettier --check` flags as a whole-file change; `npm run lint` passes and `.gitattributes` normalizes to LF on commit.

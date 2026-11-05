@@ -1,6 +1,6 @@
 # Task 05 — Order follower notices
 
-Status: pending
+Status: done
 
 ## Outcome
 Every update of a sales order — contract/delivery edit, cancel, production release, cancel after release or completion, stock issue — notifies its followers once each, never the actor (D-05).
@@ -51,3 +51,42 @@ Every update of a sales order — contract/delivery edit, cancel, production rel
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm test -- --ci src/plugins/sales/order src/plugins/sales/_shared src/plugins/production src/plugins/inventory/issue && npm run test:e2e -- --ci"
+Exit: 0
+Base: a942a6ce71865a539ec305b4b1e28876f376e9b4
+Head: a0ea77c3fc621085a055f6fd05771dd07b6031e0bc1fd9da0653eba279285957
+```text
+$ docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm test -- --ci src/plugins/sales/order src/plugins/sales/_shared src/plugins/production src/plugins/inventory/issue && npm run test:e2e -- --ci"
+> panelxerp-backend@0.0.1 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
+> panelxerp-backend@0.0.1 typecheck
+> tsc --noEmit -p tsconfig.build.json
+> panelxerp-backend@0.0.1 test
+> node scripts/run-tests.js --ci src/plugins/sales/order src/plugins/sales/_shared src/plugins/production src/plugins/inventory/issue
+PASS src/plugins/production/production-order/services/production-order.service.spec.ts (23.118 s)
+PASS src/plugins/production/progress/services/progress.service.spec.ts (23.269 s)
+PASS src/plugins/production/production-issue/services/production-issue.service.spec.ts (9.585 s)
+PASS src/plugins/inventory/issue/services/issue.service.spec.ts (33.639 s)
+PASS src/plugins/sales/order/services/order-edit.service.spec.ts
+Test Suites: 26 passed, 26 total
+Tests:       278 passed, 278 total
+Test Suites: 2 passed, 2 total
+Tests:       14 passed, 14 total
+> panelxerp-backend@0.0.1 test:e2e
+> jest --config ./test/jest-e2e.json --ci
+PASS test/sales-chain.e2e-spec.ts (29.268 s)
+PASS test/app.e2e-spec.ts (29.825 s)
+PASS test/inventory-chain.e2e-spec.ts (30.413 s)
+PASS test/production-chain.e2e-spec.ts (34.845 s)
+Test Suites: 4 passed, 4 total
+Tests:       4 passed, 4 total
+VERIFY_EXIT=0
+```
+
+This run started after the last edit; 0 skipped; on the host the Command was wrapped in `timeout 1500` (the command run in the container is the one above). Named probes: `order-edit.service.spec.ts` (owner edit → one follower broadcast, roles exactly salesManager, purchasing, storekeeper, productionManager with `material:read`, no owner record; another user's edit adds the owner record; an unchanged save sends nothing; cancel carries the reason; a hook failing inside the cancel rolls back with 0 notices), `production-order.service.spec.ts` (release and cancel-after-release reach purchasing, storekeeper and salesMgr once, the owner only through the production notice, the actor nothing; a draft cancel sends nothing), `progress.service.spec.ts` (completion: no follower notice to production managers or the owner), `issue.service.spec.ts` (the owner and the four roles told, the issuing storekeeper not; another order holding a reservation of the same item gets nothing). E2E 4/4 including the full `AppModule` boot. After the runs the database held 0 `sales.order.updated` notices and 0 read markers for them.
+
+Pre-change run (specs and harnesses first, the notifier file absent): exit 1 at lint, `Unsafe construction of a type that could not be resolved` at the two `new OrderFollowerNotifier(...)` spec sites; jest alone failed 14 suites on the missing module (4 direct importers, the rest through the production, progress and issue harnesses), 12 suites passing. Counterexamples (each restored, `cmp` equal): notifying inside the cancel transaction fails the rollback case; no `skipOwner` on release gives the owner a second notice and fails two cases; notifying on an unchanged save fails the no-op case. The `orderIds[0]` counterexample is an equivalent mutant: `lockVisibleOrder` locks `dto.orderId`, every posting line carries that order, and `consumeReservations` only returns the lines' own order, so `orderIds[0]` always equals `dto.orderId` (confirmed independently by the reviewer); the code uses `dto.orderId` and `posted.code`. Own mutations, all caught: actor not excluded, `purchasing` missing, owner record to the acting owner, draft cancel notifying, completion notifying production managers or the owner, cancel without reason, production cancel to the owner, broadcast without scope, issue id in place of its code, owner not excluded from the broadcast, cancel never notifying.
+
+Assertion changed outside the listed ones: the release notification case now expects the storekeeper to read `['sales.order.updated']` (it is a follower role). `Posted` gained only `code`; the Scope named `orderId` too, which the notice does not need because it uses `dto.orderId`. Review: PASS (code-auditor); Low fixed (the comment on who tells the owner). Open Low: on completion the director's bell shows both `production.order.completed` and `sales.order.updated` (merging duplicates is out of scope, D-01 break signal).

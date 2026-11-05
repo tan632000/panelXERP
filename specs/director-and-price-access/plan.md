@@ -67,12 +67,12 @@ Specs-Contract: process-first-ready-v1
 ## Tasks
 | # | Task | Priority | Criteria | Primary ownership | Dependencies | Status |
 |---|---|---|---|---|---|---|
-| 01 | Role grants | P1 | AC-01, AC-03 | `seed-roles.ts`, `estimate.permissions.ts`, seed and grant-encoding specs | - | pending |
-| 02 | Director bell and role-code gates | P1 | AC-02, AC-03 | `notification.service.ts`, `notification-director.db.spec.ts`, `production-order-query.service.ts`, `estimate.service.ts` | task-01 | pending |
-| 03 | Director self-approval: quotation and purchase order | P1 | AC-04, AC-05 | `quotation-approval.service.ts`, `purchase-order-approval.service.ts` | task-02 | pending |
-| 04 | Director self-approval: stocktake | P1 | AC-05, AC-06 | `stocktake-approval.service.ts`, stocktake module/constant/harness | task-03 | pending |
-| 05 | Order follower notices | P2 | AC-07 | `order-follower-notifier.ts`, `order-edit.service.ts`, release/progress/issue services and their harnesses | task-02 | pending |
-| 06 | Engineering receives no money | P1 | AC-08 | estimate price util, `estimate.service.ts`, `estimate-edit.service.ts`, item services | task-02 | pending |
+| 01 | Role grants | P1 | AC-01, AC-03 | `seed-roles.ts`, `estimate.permissions.ts`, seed and grant-encoding specs | - | done |
+| 02 | Director bell and role-code gates | P1 | AC-02, AC-03 | `notification.service.ts`, `notification-director.db.spec.ts`, `production-order-query.service.ts`, `estimate.service.ts` | task-01 | done |
+| 03 | Director self-approval: quotation and purchase order | P1 | AC-04, AC-05 | `quotation-approval.service.ts`, `purchase-order-approval.service.ts` | task-02 | done |
+| 04 | Director self-approval: stocktake | P1 | AC-05, AC-06 | `stocktake-approval.service.ts`, stocktake module/constant/harness | task-03 | done |
+| 05 | Order follower notices | P2 | AC-07 | `order-follower-notifier.ts`, `order-edit.service.ts`, release/progress/issue services and their harnesses | task-02 | done |
+| 06 | Engineering receives no money | P1 | AC-08 | estimate price util, `estimate.service.ts`, `estimate-edit.service.ts`, item services | task-02 | done |
 | 07 | Estimate pricing step and quotation gate | P1 | AC-01 (live), AC-09..11 | migration, pricing service, controller, read port, three e2e specs | task-06 | pending |
 | 08 | Bell phrases the new events | P2 | AC-12 | `useNotifications.ts`, `common.json` | task-04, task-05 | pending |
 | 09 | Estimate UI without prices for engineering | P2 | AC-13 | estimate components, `estimate-writer.ts`, `estimate-drafts.ts`, `estimate-totals.ts` | task-06 | pending |

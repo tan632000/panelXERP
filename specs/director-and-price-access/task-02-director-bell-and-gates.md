@@ -1,6 +1,6 @@
 # Task 02 — Director bell and role-code gates
 
-Status: pending
+Status: done
 
 ## Outcome
 The director reads every business notification (role broadcasts plus the D-01 allowlist) not raised by them and never a colleague's personal notice, with an unread count that does not grow with one query parameter per record; the director writes estimates like an engineering lead and reads production order history.
@@ -49,3 +49,34 @@ The director reads every business notification (role broadcasts plus the D-01 al
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm test -- --ci src/kernel/core/audit src/plugins/production/production-order src/plugins/sales/estimate"
+Exit: 0
+Base: a942a6ce71865a539ec305b4b1e28876f376e9b4
+Head: 26c257ca7651523ed93d8895c576c401c6f07ec17491b9f4a0929711024fd7ac
+```text
+$ docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm test -- --ci src/kernel/core/audit src/plugins/production/production-order src/plugins/sales/estimate"
+> panelxerp-backend@0.0.1 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
+> panelxerp-backend@0.0.1 typecheck
+> tsc --noEmit -p tsconfig.build.json
+> panelxerp-backend@0.0.1 test
+> node scripts/run-tests.js --ci src/kernel/core/audit src/plugins/production/production-order src/plugins/sales/estimate
+PASS src/plugins/sales/estimate/estimate.controller.spec.ts (22.426 s)
+PASS src/plugins/sales/estimate/services/estimate.service.spec.ts
+PASS src/kernel/core/audit/notification.service.spec.ts
+PASS src/plugins/production/production-order/services/production-order.service.spec.ts (32.749 s)
+PASS src/kernel/core/audit/notification-director.db.spec.ts (33.012 s)
+Test Suites: 12 passed, 12 total
+Tests:       160 passed, 160 total
+VERIFY_EXIT=0
+```
+
+This run started after the last edit; 0 skipped. Named probes: `notification-director.db.spec.ts` (allowlist and personal exclusion; own and excluded broadcasts withheld; the scope rule of the count and mark-all over exact, `module:*`, `*:action`, empty and missing scopes with exact count deltas; 70 000 open broadcasts counted and marked in one statement each), `notification.service.spec.ts`, `production-order.service.spec.ts` (history readers incl. the director), `estimate.service.spec.ts` (director writes, admin 404), `estimate.controller.spec.ts` (director 200, admin 404). After the runs the database held 0 probe notifications and 0 read markers for the director and `technician_a`.
+
+Pre-change run (specs first): exit 1, 10 failed, all on the unmet acceptance (director DB spec 2, notification stand-in 3, estimate service 2, estimate controller 1, history 1) plus one cascade, `answers the open subjects of many dedupe keys with one read`, from a `find` spy left unrestored by the failing count case. Counterexamples (each restored, `cmp` equal): a second director branch without the allowlist fails the DB list case and `shows the director an allowlisted personal event and no other`; the director branches for every user fail the user-6 `*:*` case; `self` bound to `creatorId` fails the DB spec with `invalid input syntax for type integer`; counting through `In(ids)` fails the 70 000-row case (bind message parameter error); no `created_by` condition lists the director's own broadcast; dropping the `module:*` SQL branch fails the scope case (5 expected, 4 received).
+
+Count and mark-all now run as one statement each (`getCount()` over the addressed branches with `NOT EXISTS` on `notification_reads` and the SQL form of `matchesPermission`; `INSERT … SELECT … ON CONFLICT (notification_id, user_id) DO NOTHING RETURNING id`); the list and `markRead` keep the in-code scope filter. Assertion changed outside the listed ones: `counts and marks read on ids and scopes only, never on whole records` → `counts and marks read without loading the readable records` (count and mark-all never call `find`; `markRead` still selects `{id, requiredScope}`). The DB spec runs `ANALYZE notifications` after the bulk insert so the FK check uses a fresh plan.
+
+Review (code-auditor), three rounds: round 1 PASS_WITH_WARNINGS (SQL scope rule untested, `>=` counts, `''` scope mismatch, stale comments, `afterAll` guard) → fixed; round 2 FAIL (the new case left read markers on `technician_a`'s real records; `afterAll` cleaned the director's only) → cleanup extended to both users; round 3 PASS. Open Lows: the scope rule exists twice (code and SQL), now pinned by the DB case; exact count deltas could flake if another DB spec broadcasts to `technician` or `productionManager` between the two counts; cleanup removes the director's and `technician_a`'s read markers created during the run, including any a person makes through the UI meanwhile.

@@ -1,6 +1,6 @@
 # Task 01 — Role grants
 
-Status: pending
+Status: done
 
 ## Outcome
 The seeded roles carry the new policy: director `*:*`, engineering without any price scope, sales and salesManager able to price estimates, engineeringLead not.
@@ -53,3 +53,51 @@ The seeded roles carry the new policy: director `*:*`, engineering without any p
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm test -- --ci" && docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npx vitest run src/kernel/langs/tests/permission-labels.test.ts"
+Exit: 0
+Base: a942a6ce71865a539ec305b4b1e28876f376e9b4
+Head: 26c257ca7651523ed93d8895c576c401c6f07ec17491b9f4a0929711024fd7ac
+```text
+$ docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm test -- --ci" && docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npx vitest run src/kernel/langs/tests/permission-labels.test.ts"
+> panelxerp-backend@0.0.1 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
+> panelxerp-backend@0.0.1 typecheck
+> tsc --noEmit -p tsconfig.build.json
+> panelxerp-backend@0.0.1 test
+> node scripts/run-tests.js --ci
+PASS src/plugins/production/production-issue/services/production-issue.service.spec.ts (31.511 s)
+PASS src/plugins/inventory/purchase-request/services/purchase-request.service.spec.ts (8.168 s)
+PASS src/plugins/sales/estimate/estimate.controller.spec.ts (7.703 s)
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts (6.897 s)
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts (6.79 s)
+PASS src/plugins/catalog/item/item.controller.spec.ts (8.139 s)
+PASS src/plugins/inventory/stocktake/services/stocktake-approval.service.spec.ts (7.756 s)
+PASS src/kernel/core/auth/auth.service.spec.ts
+PASS src/kernel/core/roles/roles.service.spec.ts
+Test Suites: 150 passed, 150 total
+Tests:       1735 passed, 1735 total
+Test Suites: 3 passed, 3 total
+Tests:       20 passed, 20 total
+> panelxerp-frontend@0.1.0 lint
+> eslint . --max-warnings=0 && npm run lint:i18n
+> panelxerp-frontend@0.1.0 lint:i18n
+> node scripts/check-i18n-enum-conformance.mjs
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+> tsc --noEmit
+ ↓ src/kernel/langs/tests/permission-labels.test.ts (6 tests | 6 skipped)
+ Test Files  1 skipped (1)
+      Tests  6 skipped (6)
+VERIFY_EXIT=0
+```
+
+This run started after the last edit. Backend: 0 skipped. The frontend label test skips its 6 cross-package cases in the frontend container, as the Reachability line states; the backend suite is the proof for the scope list. Named probes: `seed-roles.panel.spec.ts`, `seed-roles.inventory.spec.ts`, `item.controller.spec.ts` (the engineer detail and list carry no `referencePrice` key), `roles.service.spec.ts` (`leaves the full-access role alone`, kept unchanged), `auth.service.spec.ts` (new case: director signature stored without review; it passes on the old code too because the branch reads `*:*`, so it pins the accepted consequence rather than probing the change).
+
+Pre-change run (specs changed, seed old): exit 1, 11 failed in the edited specs (seed panel 3, seed inventory 3, item 1, estimate controller 1, stocktake 3: `:134` plus two cascades because the aborted case left its count open). Counterexamples (each restored, `cmp` equal): engineeringLead on `estimate:*` fails the two `estimate:price` cases of the panel seed spec; `reference_price:read` back on the engineer fails the item case; `ESTIMATE_PRICE` removed from `estimatePermissions` fails `grants an undeclared scope only while its scope or module is still pending`.
+
+Step 3, assertions outside the listed ones that encoded the director's old grant set, changed: `seed-roles.panel.spec.ts` production-follow case (director now holds `production_order:create`; renamed); `production-issue.service.spec.ts:152` director opens an issue → 201 (observed); `purchase-request.service.spec.ts:251` director raises a purchase request → 201 (repair round 1: the first final run failed there, 403 expected, 201 received). Review: PASS (code-auditor); Lows 1-2 fixed (file-route comment in `seed-roles.ts`, test name). Open Lows: the `directorWhoCounts` setup in `stocktake-approval.service.spec.ts:135-143` is now redundant (task-04 owns that test); the engineer item list check reads `referencePrice` only, not `expectNoMoneyKeys`.
+
+Rebound: the output above is a rerun of the Command after task-02 changed the notification, history and estimate-writer code; the task's own files did not change.

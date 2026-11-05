@@ -1,6 +1,6 @@
 # Task 07 — Estimate pricing step and quotation gate
 
-Status: pending
+Status: in_progress
 
 ## Outcome
 Engineers submit quantities only; an `estimate:price` holder fills unit costs and cost lines on the submitted revision and marks it priced; a quotation can only be built on a priced estimate; existing estimates stay quotable (D-07, D-08).

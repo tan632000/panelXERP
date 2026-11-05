@@ -1,6 +1,6 @@
 # Task 04 — Director self-approval: stocktake
 
-Status: pending
+Status: done
 
 ## Outcome
 A stocktake submitted by the director is approved and posted in the same transaction; every approved stocktake notifies storekeeper and purchasing; the director is never refused by four-eyes, and admin still is.
@@ -48,3 +48,37 @@ A stocktake submitted by the director is approved and posted in the same transac
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm test -- --ci src/plugins/inventory/stocktake && npm run test:e2e -- --ci"
+Exit: 0
+Base: a942a6ce71865a539ec305b4b1e28876f376e9b4
+Head: ec178092f36a81d0386f0c2862323015184574c81dc110b8975a264a17961fdd
+```text
+$ docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm test -- --ci src/plugins/inventory/stocktake && npm run test:e2e -- --ci"
+> panelxerp-backend@0.0.1 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
+> panelxerp-backend@0.0.1 typecheck
+> tsc --noEmit -p tsconfig.build.json
+> panelxerp-backend@0.0.1 test
+> node scripts/run-tests.js --ci src/plugins/inventory/stocktake
+PASS src/plugins/inventory/stocktake/services/stocktake-approval.service.spec.ts (14.876 s)
+PASS src/plugins/inventory/stocktake/services/stocktake-race.spec.ts (15.191 s)
+Test Suites: 2 passed, 2 total
+Tests:       14 passed, 14 total
+> panelxerp-backend@0.0.1 test:e2e
+> jest --config ./test/jest-e2e.json --ci
+PASS test/app.e2e-spec.ts (25.591 s)
+PASS test/sales-chain.e2e-spec.ts (28.473 s)
+PASS test/inventory-chain.e2e-spec.ts (31.038 s)
+PASS test/production-chain.e2e-spec.ts (31.578 s)
+Test Suites: 4 passed, 4 total
+Tests:       4 passed, 4 total
+VERIFY_EXIT=0
+```
+
+This run started after the last edit, on an idle container; 0 skipped. On the host the Command was wrapped in `timeout 1500` so a hung jest could not block forever; the command run in the container is the one above. Named probes: `stocktake-approval.service.spec.ts` (director opens, counts and submits → 200 `approved`, one count-adjustment movement per changed line, `approved_by` = director, one `inventory.stocktake.approved` row for storekeeper and purchasing excluding the director; a below-zero count submitted by the director → 409, still `counting`, no movement, no notice; the notice is emitted only after the transaction resolved; a cancel committed first → 409 and no notice; admin who counted refused 403, the director who counted approves; `tells the stores when someone other than the director approves`; `keeps the approval when the notice cannot be sent`), `inventory-chain.e2e-spec.ts` (cleanup now also removes stocktake notices).
+
+Pre-change run (specs and harness first): exit 1, 7 failed: the director self-approval case (`approved` expected, `submitted` received) plus six cascades, because that count stayed `submitted` and every later `open` answered 409. The harness already provided `NotificationService`, so no DI failure appeared; e2e did not run (the unit step failed first). An earlier attempt stopped at lint on the new spec's formatting and was not counted as the pre-run. Counterexamples (each restored, `cmp` equal): no `held.status` update before the second move fails the self-approval case with 409; posting in a second transaction fails the below-zero case (count left `submitted`); emitting inside the transaction fails the after-commit case. Own mutations: admin exempt in `assertUninvolved` fails three four-eyes cases; no `excludeUserIds` fails two cases; no try/catch around the emit fails the notice-failure case; `purchasing` dropped from the roles fails the self-approval case; a notice sent only on self-approval first survived, then the case `tells the stores when someone other than the director approves` was added and catches it.
+
+Assertions changed outside the listed ones: the four-eyes cases now use admin-role actors, and the `directorWhoCounts` setup that added `stocktake:update` by hand was removed (the director now holds it). Review: PASS (code-auditor). Open Lows: the cancel-first case gets its 409 from the status assert under the row lock, not from the guarded move (the guarded move is proven by the self-approval case); the notice-failure case covers `approve`, not the self-approval path that shares `afterApproval`. Flaky, outside this task: `test/app.e2e-spec.ts` boots `AppModule` inside a `beforeEach` with jest's default 5 s hook timeout; under load (dev server reload, other runs) it timed out in the implementer's run and once hung without exiting, while on an idle container it passed in 25-43 s total. The Command and the timeout were not changed.
