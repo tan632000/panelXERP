@@ -48,8 +48,8 @@ On a failed Step or Verification Plan run: stop; do not widen scope, change the 
 Verification: PASS
 Command: docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm run validate:migrations && npm run migration:run && npm run seed && npx jest --ci src/plugins/production"
 Exit: 0
-Base: 0559f7873dcc595a76f11f43ca301522728150d6
-Head: ebe24559b0b32e245df5e14844c5e678115f4331ce3be355ec9289dab5b6b663
+Base: e088f943fce05d0378c3b55024899c6ce23f39cc
+Head: 78fd084bec77c3f935e1c2749a50ae33cda596e69b6c94ad00412b4cfe866592
 ```text
 $ docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm run validate:migrations && npm run migration:run && npm run seed && npx jest --ci src/plugins/production"
 > panelxerp-backend@0.0.1 lint
@@ -64,8 +64,8 @@ $ docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm
 > ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js migration:run -d src/kernel/core/database/data-source.ts
 > panelxerp-backend@0.0.1 seed
 > ts-node -r tsconfig-paths/register src/kernel/core/database/seeds/seed-runner.ts
-Test Suites: 13 passed, 13 total
-Tests:       131 passed, 131 total
+Test Suites: 14 passed, 14 total
+Tests:       135 passed, 135 total
 VERIFY_EXIT=0
 ```
 

@@ -48,8 +48,8 @@ On a failed Step or Verification Plan run: stop; do not widen scope, change the 
 Verification: PASS
 Command: docker compose exec -T frontend sh -c "test -f src/kernel/core/components/ui/tests/date-input.test.tsx && npm run lint && npm run typecheck && npx vitest run src/kernel/core src/plugins/sales src/plugins/inventory src/plugins/production"
 Exit: 0
-Base: 0559f7873dcc595a76f11f43ca301522728150d6
-Head: ebe24559b0b32e245df5e14844c5e678115f4331ce3be355ec9289dab5b6b663
+Base: e088f943fce05d0378c3b55024899c6ce23f39cc
+Head: 78fd084bec77c3f935e1c2749a50ae33cda596e69b6c94ad00412b4cfe866592
 ```text
 $ docker compose exec -T frontend sh -c "test -f src/kernel/core/components/ui/tests/date-input.test.tsx && npm run lint && npm run typecheck && npx vitest run src/kernel/core src/plugins/sales src/plugins/inventory src/plugins/production"
 > panelxerp-frontend@0.1.0 lint
@@ -60,12 +60,12 @@ $ docker compose exec -T frontend sh -c "test -f src/kernel/core/components/ui/t
       Tests  7 passed (7)
 > panelxerp-frontend@0.1.0 typecheck
 > tsc --noEmit
- ✓ src/kernel/core/components/ui/tests/date-input.test.tsx (3 tests) 597ms
- ✓ src/plugins/production/production-order/tests/production-order-detail.test.tsx (31 tests) 3720ms
- ✓ src/plugins/sales/quotation/tests/quotation-feedback-log.test.tsx (4 tests) 837ms
- ✓ src/kernel/core/tests/line-invoices-action.test.tsx (7 tests) 598ms
+ ✓ src/plugins/production/production-order/tests/production-order-detail.test.tsx (35 tests) 8946ms
+ ✓ src/kernel/core/components/ui/tests/date-input.test.tsx (3 tests) 855ms
+ ✓ src/plugins/sales/quotation/tests/quotation-feedback-log.test.tsx (4 tests) 790ms
+ ✓ src/kernel/core/tests/line-invoices-action.test.tsx (7 tests) 444ms
  Test Files  146 passed (146)
-      Tests  1093 passed (1093)
+      Tests  1097 passed (1097)
 VERIFY_EXIT=0
 ```
 

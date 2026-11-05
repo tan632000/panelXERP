@@ -43,8 +43,8 @@ On a failed Step or Verification Plan run: stop; do not widen scope, change the 
 Verification: PASS
 Command: docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npx vitest run src/plugins/production src/kernel/langs"
 Exit: 0
-Base: 0559f7873dcc595a76f11f43ca301522728150d6
-Head: ebe24559b0b32e245df5e14844c5e678115f4331ce3be355ec9289dab5b6b663
+Base: e088f943fce05d0378c3b55024899c6ce23f39cc
+Head: 78fd084bec77c3f935e1c2749a50ae33cda596e69b6c94ad00412b4cfe866592
 ```text
 $ docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npx vitest run src/plugins/production src/kernel/langs"
 > panelxerp-frontend@0.1.0 lint
@@ -55,9 +55,9 @@ $ docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && np
       Tests  7 passed (7)
 > panelxerp-frontend@0.1.0 typecheck
 > tsc --noEmit
- ✓ src/plugins/production/production-order/tests/production-order-detail.test.tsx (31 tests) 5145ms
+ ✓ src/plugins/production/production-order/tests/production-order-detail.test.tsx (35 tests) 3778ms
  Test Files  8 passed | 1 skipped (9)
-      Tests  72 passed | 6 skipped (78)
+      Tests  76 passed | 6 skipped (82)
 VERIFY_EXIT=0
 ```
 
