@@ -138,14 +138,10 @@ export class ProductionOrderUnitService {
           actor.userId,
           {
             unitCode: unit.code,
-            reason: [
-              assigneeChanged
-                ? `assignee: ${assigneeName ?? dto.assigneeId}`
-                : null,
-              planChanged ? `planned end: ${dto.plannedEndDate}` : null,
-            ]
-              .filter(Boolean)
-              .join('; '),
+            ...(assigneeChanged
+              ? { assigneeName: assigneeName ?? String(dto.assigneeId) }
+              : {}),
+            ...(planChanged ? { plannedEndDate: dto.plannedEndDate } : {}),
           },
         );
       }

@@ -120,6 +120,8 @@ export async function recordProductionEvent(
     stage?: string;
     severity?: string;
     reason?: string;
+    assigneeName?: string;
+    plannedEndDate?: string;
   } = {},
 ): Promise<void> {
   await manager.getRepository(ProductionOrderEvent).insert({
@@ -130,5 +132,7 @@ export async function recordProductionEvent(
     stage: detail.stage ?? null,
     severity: detail.severity ?? null,
     reason: detail.reason ?? null,
+    assigneeName: detail.assigneeName ?? null,
+    plannedEndDate: detail.plannedEndDate ?? null,
   });
 }

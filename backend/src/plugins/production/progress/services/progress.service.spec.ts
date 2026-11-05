@@ -294,6 +294,37 @@ describeWithDatabase('Stage tracking (real Postgres)', () => {
     expect(await eventCount(id, 'stage_undone')).toBe(1);
   });
 
+  it('records the stage of a start, a finish and an undo in its own column, with only a typed reason', async () => {
+    const { id, units } = await releasedOrder(h);
+    const [first] = units;
+    const as = (action: 'start' | 'finish' | 'undo', body: object = {}) =>
+      h
+        .post(
+          stagePath(first.id, ProductionStage.MATERIAL_PREP, action),
+          body,
+          action === 'undo' ? 'manager' : 'techA',
+        )
+        .expect(200);
+    await as('start');
+    await as('finish');
+    await as('undo', { reason: 'Wrong: panel' });
+
+    const events: Array<{
+      event: string;
+      stage: string | null;
+      reason: string | null;
+    }> = await h.dataSource.query(
+      `SELECT event, stage, reason FROM production_order_events
+          WHERE production_order_id = $1 AND event::text LIKE 'stage_%' ORDER BY id`,
+      [id],
+    );
+    expect(events).toEqual([
+      { event: 'stage_started', stage: 'material_prep', reason: null },
+      { event: 'stage_finished', stage: 'material_prep', reason: null },
+      { event: 'stage_undone', stage: 'material_prep', reason: 'Wrong: panel' },
+    ]);
+  });
+
   it('refuses an undo and any stage work once the production order is completed or cancelled', async () => {
     const finished = await releasedOrder(h);
     await runStages(h, finished.units[0].id);

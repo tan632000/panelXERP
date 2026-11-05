@@ -130,6 +130,8 @@
   "history": {
     "title": "History",
     "empty": "No history yet",
+    "technician": "Technician: {name}",
+    "plannedEnd": "Planned end: {date}",
     "events": {
       "created": "Order created",
       "released": "Order released",

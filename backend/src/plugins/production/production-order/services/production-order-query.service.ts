@@ -68,10 +68,14 @@ export interface ProductionOrderEventView {
   actorId: number;
   actorName: string | null;
   unitCode: string | null;
-  /** Stage and severity codes of an issue event; null for every other event. */
+  /** Stage code of a stage or issue event; null for every other event. */
   stage: string | null;
+  /** Severity code of an issue event. */
   severity: string | null;
   reason: string | null;
+  /** What a cabinet update set: the assignee name and the planned end date (`YYYY-MM-DD`). */
+  assigneeName: string | null;
+  plannedEndDate: string | null;
   createdAt: Date;
 }
 
@@ -215,7 +219,8 @@ export class ProductionOrderQueryService {
       actor.role !== undefined && HISTORY_ROLES.includes(actor.role)
         ? await this.dataSource.query(
             `SELECT e.id, e.event, e.actor_id, actor.full_name AS actor_name, e.unit_code,
-                    e.stage, e.severity, e.reason, e.created_at
+                    e.stage, e.severity, e.reason, e.assignee_name, e.planned_end_date::text AS planned_end_date,
+                    e.created_at
                FROM production_order_events e
                LEFT JOIN users actor ON actor.id = e.actor_id
               WHERE e.production_order_id = $1
@@ -253,6 +258,8 @@ export class ProductionOrderQueryService {
           stage: textOrNull(event.stage),
           severity: textOrNull(event.severity),
           reason: textOrNull(event.reason),
+          assigneeName: textOrNull(event.assignee_name),
+          plannedEndDate: dateOnly(event.planned_end_date),
           createdAt: event.created_at as Date,
         })),
       }),

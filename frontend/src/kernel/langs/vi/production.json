@@ -130,6 +130,8 @@
   "history": {
     "title": "Lịch sử",
     "empty": "Chưa có lịch sử nào",
+    "technician": "Kỹ thuật viên: {name}",
+    "plannedEnd": "Hoàn thành dự kiến: {date}",
     "events": {
       "created": "Tạo lệnh",
       "released": "Phát hành lệnh",

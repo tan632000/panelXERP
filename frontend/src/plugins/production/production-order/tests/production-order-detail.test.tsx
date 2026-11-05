@@ -740,6 +740,8 @@ describe("ProductionOrderDetailPage history", () => {
       stage: null,
       severity: null,
       reason: null,
+      assigneeName: null,
+      plannedEndDate: null,
       createdAt: "2026-10-30T08:00:00.000Z",
     },
     {
@@ -751,6 +753,8 @@ describe("ProductionOrderDetailPage history", () => {
       stage: "wiring",
       severity: "high",
       reason: "Thiếu dây cáp",
+      assigneeName: null,
+      plannedEndDate: null,
       createdAt: "2026-10-31T09:30:00.000Z",
     },
   ];
@@ -779,6 +783,64 @@ describe("ProductionOrderDetailPage history", () => {
 
     expect(rows[1]).toHaveTextContent("Quản lý SX");
     expect(rows[1]).toHaveTextContent(viProduction.history.events.created);
+  });
+
+  it("shows the technician and the planned end date of a cabinet update", async () => {
+    const events = history() ?? [];
+    events.push({
+      id: 3,
+      event: "unit_updated",
+      actorId: 50,
+      actorName: "Quản lý SX",
+      unitCode: "MSB-01-1",
+      stage: null,
+      severity: null,
+      reason: null,
+      assigneeName: "Kỹ thuật C",
+      plannedEndDate: "2026-12-05",
+      createdAt: "2026-11-01T10:00:00.000Z",
+    });
+    respond(order({ events }));
+    renderPage();
+
+    const list = await screen.findByRole("list", {
+      name: viProduction.history.title,
+    });
+    const row = within(list).getAllByRole("listitem")[0];
+    expect(row).toHaveTextContent(viProduction.history.events.unit_updated);
+    expect(row).toHaveTextContent(
+      viProduction.history.technician.replace("{name}", "Kỹ thuật C"),
+    );
+    expect(row).toHaveTextContent(
+      viProduction.history.plannedEnd.replace("{date}", "05/12/2026"),
+    );
+    expect(row).not.toHaveTextContent("2026-12-05");
+  });
+
+  it("shows the stage label of a finished stage, not its code", async () => {
+    const events = history() ?? [];
+    events.push({
+      id: 3,
+      event: "stage_finished",
+      actorId: 61,
+      actorName: "Kỹ thuật A",
+      unitCode: "MSB-01-1",
+      stage: "finishing",
+      severity: null,
+      reason: null,
+      assigneeName: null,
+      plannedEndDate: null,
+      createdAt: "2026-11-01T10:00:00.000Z",
+    });
+    respond(order({ events }));
+    renderPage();
+
+    const list = await screen.findByRole("list", {
+      name: viProduction.history.title,
+    });
+    const row = within(list).getAllByRole("listitem")[0];
+    expect(row).toHaveTextContent(viProduction.stages.finishing);
+    expect(row).not.toHaveTextContent(/finishing/);
   });
 
   it("shows no history section when the response has no events", async () => {
@@ -818,4 +880,15 @@ describe("production order event labels", () => {
       ).toBeTruthy();
     }
   });
+
+  it.each([
+    ["vi", viProduction],
+    ["en", enProduction],
+  ])(
+    "has a %s label for the technician and the planned end",
+    (_l, messages) => {
+      expect(messages.history.technician).toContain("{name}");
+      expect(messages.history.plannedEnd).toContain("{date}");
+    },
+  );
 });

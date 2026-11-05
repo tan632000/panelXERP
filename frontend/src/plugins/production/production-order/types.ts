@@ -39,6 +39,8 @@ export interface ProductionOrderEvent {
   stage: ProductionStage | null;
   severity: string | null;
   reason: string | null;
+  assigneeName: string | null;
+  plannedEndDate: string | null;
   createdAt: string;
 }
 

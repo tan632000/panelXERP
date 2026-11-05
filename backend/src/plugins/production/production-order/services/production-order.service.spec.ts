@@ -27,7 +27,13 @@ interface DetailBody {
   status: string;
   orderId: number;
   units: UnitBody[];
-  events?: Array<{ event: string; unitCode: string | null }>;
+  events?: Array<{
+    event: string;
+    unitCode: string | null;
+    reason: string | null;
+    assigneeName: string | null;
+    plannedEndDate: string | null;
+  }>;
 }
 interface PageBody {
   data: Array<{ id: number; status: string; unitCount: number }>;
@@ -359,6 +365,48 @@ describeWithDatabase('Production orders (real Postgres)', () => {
       expect(read.body).not.toHaveProperty('events');
     }
     await h.get(`/production/orders/${id}`, 'storekeeper').expect(403);
+  });
+
+  it('records a cabinet update with the assignee name and the planned end date, not as a sentence', async () => {
+    const { id, created } = await draftFor();
+    const [first] = created.units;
+    const [{ full_name: name }]: Array<{ full_name: string }> =
+      await h.dataSource.query(`SELECT full_name FROM users WHERE id = $1`, [
+        h.actors.techA.userId,
+      ]);
+
+    await h
+      .assign(id, first.id, {
+        assigneeId: h.actors.techA.userId,
+        plannedEndDate: '2026-11-20',
+      })
+      .expect(200);
+
+    const read = detail(
+      await h.get(`/production/orders/${id}`, 'manager').expect(200),
+    );
+    const updates = read.events?.filter((e) => e.event === 'unit_updated');
+    expect(updates).toEqual([
+      expect.objectContaining({
+        unitCode: first.code,
+        reason: null,
+        assigneeName: name,
+        plannedEndDate: '2026-11-20',
+      }),
+    ]);
+
+    // A date alone leaves the assignee out.
+    await h.assign(id, first.id, { plannedEndDate: '2026-12-01' }).expect(200);
+    const later = detail(
+      await h.get(`/production/orders/${id}`, 'manager').expect(200),
+    );
+    expect(later.events?.filter((e) => e.event === 'unit_updated')[1]).toEqual(
+      expect.objectContaining({
+        reason: null,
+        assigneeName: null,
+        plannedEndDate: '2026-12-01',
+      }),
+    );
   });
 
   it('lists the open orders still without production and the technicians to assign', async () => {

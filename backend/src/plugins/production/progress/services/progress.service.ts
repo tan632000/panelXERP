@@ -113,7 +113,7 @@ export class ProgressService {
             order.id,
             ProductionOrderEventType.STAGE_STARTED,
             actor.userId,
-            { unitCode: unit.code, reason: stage },
+            { unitCode: unit.code, stage },
           );
           return null;
         case 'finish':
@@ -129,7 +129,7 @@ export class ProgressService {
             order.id,
             ProductionOrderEventType.STAGE_FINISHED,
             actor.userId,
-            { unitCode: unit.code, reason: stage },
+            { unitCode: unit.code, stage },
           );
           if (stage !== ProductionStage.FINISHING) return null;
           await this.notifier.clearOverdue(manager, [unit.id]);
@@ -152,7 +152,7 @@ export class ProgressService {
             order.id,
             ProductionOrderEventType.STAGE_UNDONE,
             actor.userId,
-            { unitCode: unit.code, reason: `${stage}: ${reason ?? ''}` },
+            { unitCode: unit.code, stage, reason },
           );
           return null;
       }

@@ -207,6 +207,20 @@ export function ProductionOrderDetailPage() {
                       {event.severity ? (
                         <span>{t(`issues.severities.${event.severity}`)}</span>
                       ) : null}
+                      {event.assigneeName ? (
+                        <span>
+                          {t("history.technician", {
+                            name: event.assigneeName,
+                          })}
+                        </span>
+                      ) : null}
+                      {event.plannedEndDate ? (
+                        <span>
+                          {t("history.plannedEnd", {
+                            date: formatIsoDate(event.plannedEndDate),
+                          })}
+                        </span>
+                      ) : null}
                     </div>
                     {event.reason ? (
                       <p className="mt-1 whitespace-pre-wrap">{event.reason}</p>

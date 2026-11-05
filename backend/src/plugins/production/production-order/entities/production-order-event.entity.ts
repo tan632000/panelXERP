@@ -30,7 +30,7 @@ export class ProductionOrderEvent {
   @Column({ type: 'varchar', length: 60, name: 'unit_code', nullable: true })
   unitCode?: string | null;
 
-  /** The stage code an issue event is about. */
+  /** The stage code a stage or issue event is about. */
   @Column({ type: 'varchar', length: 40, nullable: true })
   stage?: string | null;
 
@@ -40,6 +40,19 @@ export class ProductionOrderEvent {
 
   @Column({ type: 'text', nullable: true })
   reason?: string | null;
+
+  /** The assignee a cabinet update event set: the name, or the id as text when none was found. */
+  @Column({
+    type: 'varchar',
+    length: 100,
+    name: 'assignee_name',
+    nullable: true,
+  })
+  assigneeName?: string | null;
+
+  /** The planned end date a cabinet update event set, as `YYYY-MM-DD`. */
+  @Column({ type: 'date', name: 'planned_end_date', nullable: true })
+  plannedEndDate?: string | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
