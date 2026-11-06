@@ -1,6 +1,6 @@
 # Task 09 — Estimate UI without prices for engineering
 
-Status: pending
+Status: done
 
 ## Outcome
 A user without `reference_price:read` sees no unit cost, amount, total or cost line anywhere in the estimate screens, and draft BOM rows have no unit cost input for anyone; the director sees the estimate write controls.
@@ -45,3 +45,33 @@ A user without `reference_price:read` sees no unit cost, amount, total or cost l
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npx vitest run src/plugins/sales/estimate"
+Exit: 0
+Base: 10591c9087f4f7ee49fd7b1dbcee5f7835621906
+Head: 53eb13a79ef93f98ebf018879fd7cbdbc686e6f0015c8377d87832a0ceffb3f9
+```text
+$ docker compose exec -T frontend sh -c "npm run lint && npm run typecheck && npx vitest run src/plugins/sales/estimate"
+> panelxerp-frontend@0.1.0 lint
+> eslint . --max-warnings=0 && npm run lint:i18n
+> panelxerp-frontend@0.1.0 lint:i18n
+> node scripts/check-i18n-enum-conformance.mjs
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+> tsc --noEmit
+ ✓ src/plugins/sales/estimate/tests/estimate-totals.test.ts (4 tests) 24ms
+ ✓ src/plugins/sales/estimate/tests/estimate-stock-columns.test.tsx (5 tests) 178ms
+ ✓ src/plugins/sales/estimate/tests/request-estimate-section.test.tsx (10 tests) 250ms
+ ✓ src/plugins/sales/estimate/tests/estimate-editor.test.tsx (23 tests) 1733ms
+ Test Files  4 passed (4)
+      Tests  42 passed (42)
+VERIFY_EXIT=0
+```
+
+This run started after the last edit; 0 skipped; on the host the Command was wrapped in `timeout 900`; ANSI colour codes were stripped from the output above. Named probes: `estimate-editor.test.tsx` (an assigned engineer, the engineering lead and an engineer on a submitted revision, each with a response that lacks every money key: no `₫`, `NaN`, money test id, money column header, `estimate.total` label, cost-line add control or unit cost input, and no stray `0` for the assigned engineer, each asserted after a readiness signal; the director edits and submits a draft; an administrator still sees it read-only; a draft row has no unit cost input; a draft's cost lines show read-only to the director), `request-estimate-section.test.tsx` (the total shows to a price reader and is absent, with no `₫`, `NaN` or `0`, from a response without it; the list's total column present or absent). The default actor of `estimate-editor.test.tsx` moved from the engineer to the director holding `reference_price:read`: the totals, live-totals, deleting and cost-line cases keep every assertion; two read-only cases gained `reference_price:read` so their `revision-total` readiness signal still renders.
+
+Pre-change run (tests first): exit 1; lint and typecheck passed; vitest failed only the 16 new or changed cases. Counterexamples (each restored, `cmp` equal): an ungated `costLines.map` with ungated totals throws in the three engineer cases; gating on `estimate:update` fails the engineering-lead case; `total ?? 0` in the request section fails the no-`0` case; the director not a writer, a unit cost input back on draft rows, the list total, the BOM money columns or the cost-line section ungated, and admin as a writer are each caught; the detail page's total ungated first survived and is now caught by the `estimate.total` header assertion; the draft cost lines editable again fails the read-only cost-line case.
+
+Review (code-auditor): PASS_WITH_WARNINGS with one Medium, the director (the only writer who reads prices) still saw the cost-line editor on a draft, whose routes now answer 409 off a submitted unpriced revision. Fixed by the controller: the draft passes `editable={false}` to the cost lines; the old draft case "takes whole VND only for a cost line" became the read-only cost-line case, and the whole-VND amount check moves to the pricing mode of task-10 (its cost-line editor). Open Lows: the engineering-lead and unassigned-engineer writer cases run with the default price-reading grant (the lead without prices has its own case); `line.unitCost ?? 0` remains only inside the price-reader branch.

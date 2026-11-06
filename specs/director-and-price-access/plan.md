@@ -75,8 +75,8 @@ Specs-Contract: process-first-ready-v1
 | 06 | Engineering receives no money | P1 | AC-08 | estimate price util, `estimate.service.ts`, `estimate-edit.service.ts`, item services | task-02 | done |
 | 07 | Estimate pricing step and quotation gate | P1 | AC-01 (live), AC-09..11 | migration, pricing service, controller, read port, three e2e specs | task-06 | done |
 | 08 | Bell phrases the new events | P2 | AC-12 | `useNotifications.ts`, `common.json` | task-04, task-05 | done |
-| 09 | Estimate UI without prices for engineering | P2 | AC-13 | estimate components, `estimate-writer.ts`, `estimate-drafts.ts`, `estimate-totals.ts` | task-06 | pending |
-| 10 | Pricing UI | P2 | AC-14 | `EstimateDetailPage.tsx`, `EstimateEditor.tsx`, `useEstimateEditor.ts`, BOM grid, cost lines, estimate api | task-07, task-09 | pending |
+| 09 | Estimate UI without prices for engineering | P2 | AC-13 | estimate components, `estimate-writer.ts`, `estimate-drafts.ts`, `estimate-totals.ts` | task-06 | done |
+| 10 | Pricing UI | P2 | AC-14 | `EstimateDetailPage.tsx`, `EstimateEditor.tsx`, `useEstimateEditor.ts`, BOM grid, cost lines, estimate api | task-07, task-09 | done |
 | 11 | Docs | P3 | AC-15 | `role-matrix.md`, `user-flow-guide.md`, `role-matrix-doc.spec.ts` | task-08, task-10 | pending |
 
 Tasks run one at a time: every backend task shares the backend container's Postgres, and tasks 09-10 share the estimate components. Task-01 changes grants that many specs read through `seededRolePermissions`, so it runs the whole backend suite.
