@@ -34,6 +34,15 @@
   },
   "olderRevision": "This is an older revision, view only.",
   "readOnlyNoRights": "You can only view this estimate.",
+  "pricing": {
+    "awaiting": "Awaiting pricing",
+    "priced": "Priced",
+    "complete": "Complete pricing",
+    "hint": "Fill in the unit cost of every BOM line and the other costs, then press \"Complete pricing\" so a quotation can be made.",
+    "confirmTitle": "Complete pricing of {code}",
+    "confirmDescription": "Once completed, the prices of this revision can no longer be edited and the request can be quoted. To change a price the engineer must open a new revision.",
+    "blocked": "Saving changes, please wait."
+  },
   "readOnlySubmitted": "This revision is submitted and cannot be edited. Use \"New revision\" to change it.",
   "filters": {
     "status": "Status",
@@ -131,6 +140,8 @@
     "createSuccess": "Estimate created.",
     "submitSuccess": "Estimate submitted.",
     "reviseSuccess": "New estimate revision created.",
+    "priceSuccess": "Estimate pricing completed.",
+    "zeroCost": "Every BOM line needs a unit cost before pricing is completed; no cost for: {codes}.",
     "draftOpen": "A draft is already open; submit it before starting a new revision.",
     "readOnly": "The estimate is submitted and cannot be edited.",
     "requestState": "The request's current status does not allow this action.",

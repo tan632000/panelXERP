@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 
+import { useAuth } from "@/kernel/core/auth/AuthContext";
 import { ConfirmDialog } from "@/kernel/core/components/ui/ConfirmDialog";
 import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
 import { EmptyState } from "@/kernel/core/components/ui/EmptyState";
@@ -11,6 +12,7 @@ import { NumberInput } from "@/kernel/core/components/ui/NumberInput";
 import { Tabs } from "@/kernel/core/components/ui/Tabs";
 import { formatCurrency, formatNumber } from "@/kernel/core/lib/formatters";
 
+import { ItemPermission } from "@plugins/catalog/item/permissions/item-permission.keys";
 import { ESTIMATE_PANEL_QUANTITY_MAX } from "@plugins/sales/estimate/constants";
 import {
   draftKey,
@@ -33,6 +35,8 @@ interface EstimateEditorProps {
   editor: EstimateEditorState;
   /** False for a submitted or superseded revision, or a reader without edit rights. */
   editable: boolean;
+  /** True while sales prices the submitted revision: unit costs and cost lines are live. */
+  pricing: boolean;
 }
 
 /**
@@ -44,9 +48,12 @@ export function EstimateEditor({
   revision,
   editor,
   editable,
+  pricing,
 }: EstimateEditorProps) {
   const t = useTranslations("estimate");
   const tCommon = useTranslations("common");
+  const { can } = useAuth();
+  const canSeePrice = can(ItemPermission.referencePriceRead);
   const { drafts, setDraft, commit, edits } = editor;
 
   const [chosenPanelId, setChosenPanelId] = useState<number | null>(null);
@@ -58,14 +65,17 @@ export function EstimateEditor({
   const panel =
     panels.find((entry) => entry.id === chosenPanelId) ?? panels[0] ?? null;
 
-  const liveTotals = panels.map((entry) =>
-    computePanelTotals(panelFigures(entry, drafts)),
-  );
-  const revisionTotal = computeRevisionTotal(
-    panels.map((entry) => panelFigures(entry, drafts)),
-  );
+  // Without `reference_price:read` the response carries no money, so nothing is computed.
+  const liveTotals = canSeePrice
+    ? panels.map((entry) => computePanelTotals(panelFigures(entry, drafts)))
+    : [];
+  const revisionTotal = canSeePrice
+    ? computeRevisionTotal(panels.map((entry) => panelFigures(entry, drafts)))
+    : 0;
 
-  const activeTotals = panel ? liveTotals[panels.indexOf(panel)] : null;
+  const activeTotals = panel
+    ? (liveTotals[panels.indexOf(panel)] ?? null)
+    : null;
   const quantityField = panel
     ? ({ kind: "panel", id: panel.id, field: "quantity" } as const)
     : null;
@@ -87,7 +97,7 @@ export function EstimateEditor({
           ) : null
         }
       >
-        {panel && activeTotals && quantityField ? (
+        {panel && quantityField ? (
           <div className="flex flex-col gap-4">
             <Tabs
               aria-label={t("panels")}
@@ -130,28 +140,32 @@ export function EstimateEditor({
                   <div className="text-sm font-semibold">{panel.quantity}</div>
                 )}
               </div>
-              <div className="text-right">
-                <div className="text-xs font-semibold uppercase text-text-tertiary">
-                  {t("panel.unitCost")}
-                </div>
-                <div
-                  className="text-sm font-semibold tabular-nums"
-                  data-testid="panel-unit-cost"
-                >
-                  {formatCurrency(activeTotals.unitCost)}
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-xs font-semibold uppercase text-text-tertiary">
-                  {t("panel.total")}
-                </div>
-                <div
-                  className="text-sm font-bold tabular-nums"
-                  data-testid="panel-total"
-                >
-                  {formatCurrency(activeTotals.total)}
-                </div>
-              </div>
+              {activeTotals ? (
+                <>
+                  <div className="text-right">
+                    <div className="text-xs font-semibold uppercase text-text-tertiary">
+                      {t("panel.unitCost")}
+                    </div>
+                    <div
+                      className="text-sm font-semibold tabular-nums"
+                      data-testid="panel-unit-cost"
+                    >
+                      {formatCurrency(activeTotals.unitCost)}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-semibold uppercase text-text-tertiary">
+                      {t("panel.total")}
+                    </div>
+                    <div
+                      className="text-sm font-bold tabular-nums"
+                      data-testid="panel-total"
+                    >
+                      {formatCurrency(activeTotals.total)}
+                    </div>
+                  </div>
+                </>
+              ) : null}
               {editable ? (
                 <div className="flex gap-2">
                   <button
@@ -185,20 +199,24 @@ export function EstimateEditor({
                 revisionPanels={panels}
                 editor={editor}
                 editable={editable}
+                pricing={pricing}
               />
             </div>
 
-            <div className="flex flex-col gap-2">
-              <h5 className="text-sm font-semibold text-brand">
-                {t("cost.title")}
-              </h5>
-              <EstimateCostLines
-                panel={panel}
-                editor={editor}
-                editable={editable}
-              />
-              <p className="text-xs text-text-tertiary">{t("cost.hint")}</p>
-            </div>
+            {canSeePrice ? (
+              <div className="flex flex-col gap-2">
+                <h5 className="text-sm font-semibold text-brand">
+                  {t("cost.title")}
+                </h5>
+                {/* Cost lines are priced on the submitted revision, never on a draft. */}
+                <EstimateCostLines
+                  panel={panel}
+                  editor={editor}
+                  editable={pricing}
+                />
+                <p className="text-xs text-text-tertiary">{t("cost.hint")}</p>
+              </div>
+            ) : null}
           </div>
         ) : (
           <EmptyState bordered={false} icon="package" message={t("noPanels")} />
@@ -212,8 +230,14 @@ export function EstimateEditor({
               <tr className="bg-surface-secondary text-left text-xs font-semibold uppercase text-text-tertiary">
                 <th className="px-3 py-2">{t("panel.tag")}</th>
                 <th className="px-3 py-2 text-right">{t("panel.quantity")}</th>
-                <th className="px-3 py-2 text-right">{t("panel.unitCost")}</th>
-                <th className="px-3 py-2 text-right">{t("panel.total")}</th>
+                {canSeePrice ? (
+                  <>
+                    <th className="px-3 py-2 text-right">
+                      {t("panel.unitCost")}
+                    </th>
+                    <th className="px-3 py-2 text-right">{t("panel.total")}</th>
+                  </>
+                ) : null}
               </tr>
             </thead>
             <tbody>
@@ -229,34 +253,42 @@ export function EstimateEditor({
                       ) || 0,
                     )}
                   </td>
-                  <td className="border-t border-border-secondary px-3 py-2 text-right tabular-nums">
-                    {formatCurrency(liveTotals[index].unitCost)}
-                  </td>
-                  <td className="border-t border-border-secondary px-3 py-2 text-right tabular-nums">
-                    {formatCurrency(liveTotals[index].total)}
-                  </td>
+                  {canSeePrice ? (
+                    <>
+                      <td className="border-t border-border-secondary px-3 py-2 text-right tabular-nums">
+                        {formatCurrency(liveTotals[index].unitCost)}
+                      </td>
+                      <td className="border-t border-border-secondary px-3 py-2 text-right tabular-nums">
+                        {formatCurrency(liveTotals[index].total)}
+                      </td>
+                    </>
+                  ) : null}
                 </tr>
               ))}
             </tbody>
-            <tfoot>
-              <tr>
-                <td
-                  colSpan={3}
-                  className="border-t border-border-secondary px-3 py-2 text-right font-semibold"
-                >
-                  {t("summary.total")}
-                </td>
-                <td
-                  className="border-t border-border-secondary px-3 py-2 text-right text-base font-bold tabular-nums"
-                  data-testid="revision-total"
-                >
-                  {formatCurrency(revisionTotal)}
-                </td>
-              </tr>
-            </tfoot>
+            {canSeePrice ? (
+              <tfoot>
+                <tr>
+                  <td
+                    colSpan={3}
+                    className="border-t border-border-secondary px-3 py-2 text-right font-semibold"
+                  >
+                    {t("summary.total")}
+                  </td>
+                  <td
+                    className="border-t border-border-secondary px-3 py-2 text-right text-base font-bold tabular-nums"
+                    data-testid="revision-total"
+                  >
+                    {formatCurrency(revisionTotal)}
+                  </td>
+                </tr>
+              </tfoot>
+            ) : null}
           </table>
         </div>
-        <p className="mt-2 text-xs text-text-tertiary">{t("summary.hint")}</p>
+        {canSeePrice ? (
+          <p className="mt-2 text-xs text-text-tertiary">{t("summary.hint")}</p>
+        ) : null}
       </DetailSection>
 
       <EstimatePanelModal

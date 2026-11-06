@@ -89,7 +89,7 @@
     "saveSuccess": "Changes saved.",
     "readOnly": "This version cannot be edited; only a draft can.",
     "alreadyExists": "This request already has a quotation.",
-    "noEstimate": "This request has no submitted estimate to quote.",
+    "noEstimate": "The estimate of this request has not been priced yet, so it cannot be quoted.",
     "staleRevision": "The estimate has a newer submitted revision; reload and try again.",
     "requestState": "The request's current status does not allow a quotation.",
     "discountTooLarge": "The discount cannot exceed the subtotal.",

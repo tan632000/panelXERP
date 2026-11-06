@@ -45,6 +45,7 @@ export function EstimateCostLines({
   const [lineToRemove, setLineToRemove] = useState<EstimateCostLine | null>(
     null,
   );
+  const costLines = panel.costLines ?? [];
   const categoryOptions = COST_CATEGORIES.map((value) => ({
     value,
     label: t(`categories.${value}`),
@@ -64,7 +65,7 @@ export function EstimateCostLines({
               </tr>
             </thead>
             <tbody>
-              {panel.costLines.length === 0 ? (
+              {costLines.length === 0 ? (
                 <tr>
                   <td
                     colSpan={editable ? 4 : 3}
@@ -74,7 +75,7 @@ export function EstimateCostLines({
                   </td>
                 </tr>
               ) : null}
-              {panel.costLines.map((line) => {
+              {costLines.map((line) => {
                 const amountField = {
                   kind: "cost",
                   id: line.id,

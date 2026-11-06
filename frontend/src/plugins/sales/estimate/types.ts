@@ -23,7 +23,10 @@ export interface EstimateListItem {
   requestId: number;
   status: EstimateListStatus;
   latestRevision: number;
-  total: number;
+  /** When sales completed the pricing of the latest revision; null while it awaits pricing. */
+  latestPricedAt?: string | null;
+  /** Absent for an actor without `reference_price:read`; so is every money field below. */
+  total?: number;
   updatedAt?: string;
   request: EstimateRequestSummary | null;
 }
@@ -36,8 +39,8 @@ export interface EstimateBomLine {
   itemBrand?: string | null;
   itemUnit: string;
   quantity: number;
-  unitCost: number;
-  amount: number;
+  unitCost?: number;
+  amount?: number;
   note?: string | null;
 }
 
@@ -55,11 +58,12 @@ export interface EstimatePanel {
   description?: string | null;
   quantity: number;
   /** Cost of one panel. */
-  unitCost: number;
+  unitCost?: number;
   /** `unitCost × quantity`. */
-  total: number;
+  total?: number;
   bomLines: EstimateBomLine[];
-  costLines: EstimateCostLine[];
+  /** The whole array is absent without `reference_price:read`. */
+  costLines?: EstimateCostLine[];
 }
 
 export interface EstimateRevision {
@@ -67,9 +71,12 @@ export interface EstimateRevision {
   estimateId: number;
   revision: number;
   status: RevisionStatus;
-  total: number;
+  total?: number;
   submittedAt?: string | null;
   submittedBy?: number | null;
+  /** Set once sales completes the pricing; a submitted revision without it awaits pricing. */
+  pricedAt?: string | null;
+  pricedBy?: number | null;
   createdAt?: string;
   panels: EstimatePanel[];
 }
@@ -77,7 +84,7 @@ export interface EstimateRevision {
 export interface EstimateRevisionSummary {
   revision: number;
   status: RevisionStatus;
-  total: number;
+  total?: number;
   submittedAt?: string | null;
 }
 
@@ -107,11 +114,15 @@ export type UpdatePanelDto = Partial<CreatePanelDto>;
 export interface CreateBomLineDto {
   itemId: number;
   quantity: number;
-  unitCost?: number;
   note?: string | null;
 }
 /** The item of a line is fixed. */
 export type UpdateBomLineDto = Partial<Omit<CreateBomLineDto, "itemId">>;
+
+/** The unit cost sales sets on a BOM line while the submitted revision awaits pricing. */
+export interface PriceBomLineDto {
+  unitCost: number;
+}
 
 export interface CreateCostLineDto {
   category: CostCategory;

@@ -16,6 +16,7 @@ import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
 import { EmptyState } from "@/kernel/core/components/ui/EmptyState";
 import { LoadingState } from "@/kernel/core/components/ui/LoadingState";
 import { SegmentedTabs } from "@/kernel/core/components/ui/SegmentedTabs";
+import { StatusBadge } from "@/kernel/core/components/ui/StatusBadge";
 import { useEntityIdParam } from "@/kernel/core/hooks/useEntityIdParam";
 import { isNotFoundError } from "@/kernel/core/lib/api-error-mapping";
 import {
@@ -24,10 +25,12 @@ import {
 } from "@/kernel/core/lib/formatters";
 import { Link } from "@/kernel/i18n/navigation";
 
+import { ItemPermission } from "@plugins/catalog/item/permissions/item-permission.keys";
 import { estimatePageRoutes } from "@plugins/sales/estimate/constants";
 import { estimateFeature } from "@plugins/sales/estimate/estimate.feature";
 import {
   useEstimate,
+  usePriceEstimate,
   useReviseEstimate,
   useSubmitEstimate,
 } from "@plugins/sales/estimate/hooks/api/useEstimate";
@@ -50,12 +53,15 @@ export function EstimateDetailPage() {
 
   /** `undefined` follows the latest revision; a number pins an older one. */
   const [pinnedRevision, setPinnedRevision] = useState<number | undefined>();
-  const [confirm, setConfirm] = useState<"submit" | "revise" | null>(null);
+  const [confirm, setConfirm] = useState<"submit" | "revise" | "price" | null>(
+    null,
+  );
 
   const estimateQuery = useEstimate(estimateId, pinnedRevision);
   const editor = useEstimateEditor(estimateId ?? 0, pinnedRevision);
   const submit = useSubmitEstimate();
   const revise = useReviseEstimate();
+  const price = usePriceEstimate();
 
   const estimate = estimateQuery.data;
   const icon = estimateFeature.items[0]?.icon ?? "calculator";
@@ -137,6 +143,15 @@ export function EstimateDetailPage() {
     isLatest &&
     writable;
 
+  // Sales prices the latest submitted revision while the request still waits at "estimated".
+  const isSubmitted = revision.status === "submitted";
+  const pricing =
+    can(EstimatePermission.price) &&
+    isSubmitted &&
+    isLatest &&
+    revision.pricedAt == null &&
+    estimate.request.status === "estimated";
+
   const pinRevision = (key: string) => {
     const next = Number(key);
     setPinnedRevision(next === estimate.latestRevision ? undefined : next);
@@ -159,6 +174,16 @@ export function EstimateDetailPage() {
                 disabled={submitBlocker !== null || submit.isPending}
                 title={submitBlocker ?? undefined}
                 onClick={() => setConfirm("submit")}
+              />
+            ) : null}
+            {pricing ? (
+              <DetailPanelActionButton
+                variant="primary"
+                icon="check"
+                label={t("pricing.complete")}
+                disabled={editor.unsaved || price.isPending}
+                title={editor.unsaved ? t("pricing.blocked") : undefined}
+                onClick={() => setConfirm("price")}
               />
             ) : null}
             {canRevise ? (
@@ -184,6 +209,14 @@ export function EstimateDetailPage() {
               <span className="inline-flex items-center gap-2">
                 {`#${revision.revision}`}
                 <EstimateStatusBadge status={revision.status} />
+                {isSubmitted ? (
+                  <StatusBadge
+                    status={revision.pricedAt ? "completed" : "pending"}
+                    label={t(
+                      revision.pricedAt ? "pricing.priced" : "pricing.awaiting",
+                    )}
+                  />
+                ) : null}
               </span>
             </DetailField>
             <DetailField label={t("request")}>
@@ -200,11 +233,13 @@ export function EstimateDetailPage() {
             <DetailField label={t("salesOwner")}>
               {estimate.request.salesOwnerName || t("emptyValue")}
             </DetailField>
-            <DetailField label={t("total")}>
-              <span className="font-semibold tabular-nums">
-                {formatCurrency(revision.total)}
-              </span>
-            </DetailField>
+            {can(ItemPermission.referencePriceRead) ? (
+              <DetailField label={t("total")}>
+                <span className="font-semibold tabular-nums">
+                  {formatCurrency(revision.total)}
+                </span>
+              </DetailField>
+            ) : null}
             {revision.submittedAt ? (
               <DetailField label={t("submittedAt")}>
                 {formatIsoDateTime(revision.submittedAt)}
@@ -234,9 +269,9 @@ export function EstimateDetailPage() {
               {t("readOnlyNoRights")}
             </p>
           ) : null}
-          {revision.status === "submitted" ? (
+          {isSubmitted ? (
             <p className="mt-2 text-sm text-text-secondary">
-              {t("readOnlySubmitted")}
+              {pricing ? t("pricing.hint") : t("readOnlySubmitted")}
             </p>
           ) : null}
           {canSubmit && submitBlocker ? (
@@ -249,6 +284,7 @@ export function EstimateDetailPage() {
           revision={revision}
           editor={editor}
           editable={editable}
+          pricing={pricing}
         />
       </DetailPageLayout>
 
@@ -264,6 +300,22 @@ export function EstimateDetailPage() {
         onCancel={() => setConfirm(null)}
         onConfirm={() =>
           submit.mutate(estimate.id, {
+            onSettled: () => setConfirm(null),
+          })
+        }
+      />
+      <ConfirmDialog
+        open={confirm === "price"}
+        variant="default"
+        icon="check"
+        title={t("pricing.confirmTitle", { code: estimate.code })}
+        description={t("pricing.confirmDescription")}
+        confirmLabel={t("pricing.complete")}
+        cancelLabel={tCommon("cancel")}
+        pending={price.isPending}
+        onCancel={() => setConfirm(null)}
+        onConfirm={() =>
+          price.mutate(estimate.id, {
             onSettled: () => setConfirm(null),
           })
         }

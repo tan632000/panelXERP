@@ -14,6 +14,8 @@ import viCommon from "@/kernel/langs/vi/common.json";
 import viEstimate from "@/kernel/langs/vi/estimate.json";
 import viStatus from "@/kernel/langs/vi/status.json";
 
+import { ItemPermission } from "@plugins/catalog/item/permissions/item-permission.keys";
+import { EstimateTable } from "@plugins/sales/estimate/components/EstimateTable";
 import { RequestEstimateSection } from "@plugins/sales/estimate/components/RequestEstimateSection";
 import { EstimatePermission } from "@plugins/sales/estimate/permissions/estimate-permission.keys";
 
@@ -100,6 +102,31 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("RequestEstimateSection", () => {
+  it("shows the total to a reader of prices", async () => {
+    granted.value = new Set([
+      EstimatePermission.read,
+      ItemPermission.referencePriceRead,
+    ]);
+    respondWith([ESTIMATE]);
+    renderSection("estimating");
+
+    await screen.findByText("DT_2027_0001");
+    expect(screen.getByText(viEstimate.total)).toBeInTheDocument();
+    expect(screen.getByText(/5\.000\.000/)).toBeInTheDocument();
+  });
+
+  it("shows no total, no figure and no zero when the response has none", async () => {
+    const { total: _total, ...unpriced } = ESTIMATE;
+    respondWith([unpriced]);
+    const { container } = renderSection("estimating");
+
+    await screen.findByText("DT_2027_0001");
+    expect(screen.queryByText(viEstimate.total)).not.toBeInTheDocument();
+    expect(container.textContent).not.toContain("₫");
+    expect(container.textContent).not.toContain("NaN");
+    expect(screen.queryByText("0")).not.toBeInTheDocument();
+  });
+
   it("hides the start button from a holder of the permission who is neither the assigned engineer nor a lead", async () => {
     // An administrator holds every permission, yet the server refuses the write with 404.
     signedIn.user = { id: 1, role: "admin" };
@@ -160,5 +187,41 @@ describe("RequestEstimateSection", () => {
 
     expect(container).toBeEmptyDOMElement();
     expect(apiGet).not.toHaveBeenCalled();
+  });
+});
+
+describe("EstimateTable", () => {
+  function renderTable(row: object) {
+    return render(
+      <NextIntlClientProvider
+        locale="vi"
+        messages={{ common: viCommon, estimate: viEstimate, status: viStatus }}
+      >
+        <EstimateTable
+          data={[row as Parameters<typeof EstimateTable>[0]["data"][number]]}
+          onOpen={vi.fn()}
+        />
+      </NextIntlClientProvider>,
+    );
+  }
+
+  it("shows the total column to a reader of prices", () => {
+    granted.value = new Set([
+      EstimatePermission.read,
+      ItemPermission.referencePriceRead,
+    ]);
+    renderTable(ESTIMATE);
+
+    expect(screen.getAllByText(viEstimate.total).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/5\.000\.000/).length).toBeGreaterThan(0);
+  });
+
+  it("drops the total column and any figure without prices", () => {
+    const { total: _total, ...unpriced } = ESTIMATE;
+    const { container } = renderTable(unpriced);
+
+    expect(screen.queryByText(viEstimate.total)).not.toBeInTheDocument();
+    expect(container.textContent).not.toContain("₫");
+    expect(container.textContent).not.toContain("NaN");
   });
 });

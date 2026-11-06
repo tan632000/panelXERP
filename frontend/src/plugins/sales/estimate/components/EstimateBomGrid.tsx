@@ -11,12 +11,14 @@ import { LINE_TABLE_SCROLL_CLASS } from "@/kernel/core/components/ui/line-table-
 import { NumberInput } from "@/kernel/core/components/ui/NumberInput";
 import { formatNumber } from "@/kernel/core/lib/formatters";
 
+import { ItemPermission } from "@plugins/catalog/item/permissions/item-permission.keys";
 import { useStockAvailability } from "@plugins/inventory/stock/hooks/useStockAvailability";
 import { StockPermission } from "@plugins/inventory/stock/permissions/stock-permission.keys";
 import { EstimateItemPicker } from "@plugins/sales/estimate/components/EstimateItemPicker";
 import {
   BOM_QUANTITY_DECIMALS,
   ESTIMATE_NOTE_MAX,
+  ESTIMATE_UNIT_COST_MAX,
   MONEY_DECIMALS,
 } from "@plugins/sales/estimate/constants";
 import {
@@ -48,6 +50,8 @@ interface EstimateBomGridProps {
   editor: EstimateEditor;
   /** False for a submitted or superseded revision, or a reader without edit rights. */
   editable: boolean;
+  /** True while sales prices the submitted revision: the unit cost becomes an input. */
+  pricing?: boolean;
 }
 
 /**
@@ -82,6 +86,7 @@ export function EstimateBomGrid({
   revisionPanels,
   editor,
   editable,
+  pricing = false,
 }: EstimateBomGridProps) {
   const t = useTranslations("estimate");
   const tCommon = useTranslations("common");
@@ -94,6 +99,7 @@ export function EstimateBomGrid({
   const moneyDigits = { maximumFractionDigits: MONEY_DECIMALS };
 
   const showStock = can(StockPermission.availability);
+  const canSeePrice = can(ItemPermission.referencePriceRead);
   // One read for the whole revision, so switching panel tabs reuses the cached answer.
   const revisionItemIds = useMemo(
     () =>
@@ -104,7 +110,8 @@ export function EstimateBomGrid({
   );
   const stock = useStockAvailability(revisionItemIds, showStock);
   const required = requiredByItem(revisionPanels, drafts);
-  const columnCount = 8 + (showStock ? 3 : 0) + (editable ? 1 : 0);
+  const columnCount =
+    6 + (canSeePrice ? 2 : 0) + (showStock ? 3 : 0) + (editable ? 1 : 0);
 
   /** On hand, available and short of one item; a failed read shows a dash and blocks nothing. */
   const stockCells = (line: EstimateBomLine) => {
@@ -160,8 +167,14 @@ export function EstimateBomGrid({
                     <th className={`${HEAD} text-right`}>{t("bom.short")}</th>
                   </>
                 ) : null}
-                <th className={`${HEAD} text-right`}>{t("bom.unitCost")}</th>
-                <th className={`${HEAD} text-right`}>{t("bom.amount")}</th>
+                {canSeePrice ? (
+                  <>
+                    <th className={`${HEAD} text-right`}>
+                      {t("bom.unitCost")}
+                    </th>
+                    <th className={`${HEAD} text-right`}>{t("bom.amount")}</th>
+                  </>
+                ) : null}
                 <th className={HEAD}>{t("bom.note")}</th>
                 {editable ? <th className={`${HEAD} w-12`} /> : null}
               </tr>
@@ -183,14 +196,15 @@ export function EstimateBomGrid({
                   id: line.id,
                   field: "quantity",
                 } as const;
-                const costField = {
+                const quantity =
+                  drafts[draftKey(quantityField)] ?? line.quantity;
+                const unitCostField = {
                   kind: "bom",
                   id: line.id,
                   field: "unitCost",
                 } as const;
-                const quantity =
-                  drafts[draftKey(quantityField)] ?? line.quantity;
-                const unitCost = drafts[draftKey(costField)] ?? line.unitCost;
+                const unitCost =
+                  drafts[draftKey(unitCostField)] ?? line.unitCost ?? 0;
 
                 return (
                   <tr key={line.id}>
@@ -230,31 +244,38 @@ export function EstimateBomGrid({
                           </td>
                         ))
                       : null}
-                    <td className={NUMBER_CELL}>
-                      {editable ? (
-                        <NumberInput
-                          aria-label={t("bom.unitCostOf", {
-                            code: line.itemCode,
-                          })}
-                          className="w-36 text-right"
-                          value={unitCost}
-                          decimalScale={MONEY_DECIMALS}
-                          allowNegative={false}
-                          onChange={(event) =>
-                            setDraft(costField, event.target.value)
-                          }
-                          onBlur={() => commit(costField, line.unitCost)}
-                        />
-                      ) : (
-                        formatNumber(line.unitCost, moneyDigits)
-                      )}
-                    </td>
-                    <td
-                      className={`${NUMBER_CELL} font-semibold`}
-                      data-testid={`bom-amount-${line.id}`}
-                    >
-                      {formatNumber(bomLineAmount(quantity, unitCost))}
-                    </td>
+                    {canSeePrice ? (
+                      <>
+                        <td className={NUMBER_CELL}>
+                          {pricing ? (
+                            <NumberInput
+                              aria-label={t("bom.unitCostOf", {
+                                code: line.itemCode,
+                              })}
+                              className="w-32 text-right"
+                              value={unitCost}
+                              decimalScale={MONEY_DECIMALS}
+                              allowNegative={false}
+                              max={ESTIMATE_UNIT_COST_MAX}
+                              onChange={(event) =>
+                                setDraft(unitCostField, event.target.value)
+                              }
+                              onBlur={() =>
+                                commit(unitCostField, line.unitCost ?? 0)
+                              }
+                            />
+                          ) : (
+                            formatNumber(line.unitCost ?? 0, moneyDigits)
+                          )}
+                        </td>
+                        <td
+                          className={`${NUMBER_CELL} font-semibold`}
+                          data-testid={`bom-amount-${line.id}`}
+                        >
+                          {formatNumber(bomLineAmount(quantity, unitCost))}
+                        </td>
+                      </>
+                    ) : null}
                     <td className={CELL}>
                       {editable ? (
                         <input

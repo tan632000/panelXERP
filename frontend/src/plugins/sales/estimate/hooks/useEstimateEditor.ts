@@ -52,9 +52,15 @@ export function useEstimateEditor(estimateId: number, revisionKey?: number) {
         { panelId: field.id, data: { quantity: value } },
         settle,
       );
+    } else if (field.kind === "bom" && field.field === "unitCost") {
+      // Only the pricing route takes a unit cost; the draft BOM route refuses it.
+      edits.setUnitCost.mutate(
+        { lineId: field.id, data: { unitCost: value } },
+        settle,
+      );
     } else if (field.kind === "bom") {
       edits.updateBomLine.mutate(
-        { lineId: field.id, data: { [field.field]: value } },
+        { lineId: field.id, data: { quantity: value } },
         settle,
       );
     } else {

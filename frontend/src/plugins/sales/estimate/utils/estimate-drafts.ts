@@ -25,9 +25,9 @@ export function panelFigures(
     quantity: drafts[`panel:${panel.id}:quantity`] ?? panel.quantity,
     bomLines: panel.bomLines.map((line) => ({
       quantity: drafts[`bom:${line.id}:quantity`] ?? line.quantity,
-      unitCost: drafts[`bom:${line.id}:unitCost`] ?? line.unitCost,
+      unitCost: drafts[`bom:${line.id}:unitCost`] ?? line.unitCost ?? 0,
     })),
-    costLines: panel.costLines.map((line) => ({
+    costLines: (panel.costLines ?? []).map((line) => ({
       amount: drafts[`cost:${line.id}:amount`] ?? line.amount,
     })),
   };

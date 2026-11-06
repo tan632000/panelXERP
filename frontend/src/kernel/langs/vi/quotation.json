@@ -89,7 +89,7 @@
     "saveSuccess": "Đã lưu thay đổi.",
     "readOnly": "Phiên bản này không thể sửa; chỉ bản nháp mới sửa được.",
     "alreadyExists": "Yêu cầu này đã có báo giá.",
-    "noEstimate": "Yêu cầu này chưa có dự toán đã nộp để báo giá.",
+    "noEstimate": "Dự toán của yêu cầu này chưa được điền giá nên chưa thể báo giá.",
     "staleRevision": "Dự toán đã có bản nộp mới hơn; hãy tải lại rồi thử lại.",
     "requestState": "Trạng thái hiện tại của yêu cầu không cho phép tạo báo giá.",
     "discountTooLarge": "Chiết khấu không được vượt quá tiền hàng.",

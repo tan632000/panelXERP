@@ -34,6 +34,15 @@
   },
   "olderRevision": "Đây là bản cũ, chỉ để xem.",
   "readOnlyNoRights": "Bạn chỉ có quyền xem bản dự toán này.",
+  "pricing": {
+    "awaiting": "Chờ điền giá",
+    "priced": "Đã điền giá",
+    "complete": "Hoàn tất giá",
+    "hint": "Điền đơn giá của từng vật tư và các chi phí khác, rồi bấm \"Hoàn tất giá\" để có thể lập báo giá.",
+    "confirmTitle": "Hoàn tất giá {code}",
+    "confirmDescription": "Sau khi hoàn tất, giá của bản dự toán này không thể sửa nữa và yêu cầu có thể lập báo giá. Muốn đổi giá, kỹ sư phải lập bản mới.",
+    "blocked": "Đang lưu thay đổi, vui lòng chờ."
+  },
   "readOnlySubmitted": "Bản này đã gửi nên không thể sửa. Dùng \"Lập bản mới\" để chỉnh.",
   "filters": {
     "status": "Trạng thái",
@@ -131,6 +140,8 @@
     "createSuccess": "Đã tạo dự toán.",
     "submitSuccess": "Đã gửi dự toán.",
     "reviseSuccess": "Đã lập bản dự toán mới.",
+    "priceSuccess": "Đã hoàn tất giá dự toán.",
+    "zeroCost": "Mỗi vật tư cần có đơn giá trước khi hoàn tất; còn thiếu giá: {codes}.",
     "draftOpen": "Bản nháp đang mở, hãy gửi nó trước khi lập bản mới.",
     "readOnly": "Bản dự toán đã gửi nên không thể sửa.",
     "requestState": "Trạng thái hiện tại của yêu cầu không cho phép thao tác này.",

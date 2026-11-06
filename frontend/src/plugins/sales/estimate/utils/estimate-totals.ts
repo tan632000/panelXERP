@@ -21,7 +21,8 @@ export interface BomLineFigures {
 export interface PanelFigures {
   quantity: Numeric;
   bomLines: readonly BomLineFigures[];
-  costLines: ReadonlyArray<{ amount: Numeric }>;
+  /** Absent for an actor who cannot read prices; counts as none. */
+  costLines?: ReadonlyArray<{ amount: Numeric }>;
 }
 
 export interface PanelTotals {
@@ -55,7 +56,7 @@ export function computePanelTotals(panel: PanelFigures): PanelTotals {
   );
   const unitCost = [
     ...lineAmounts,
-    ...panel.costLines.map((line) =>
+    ...(panel.costLines ?? []).map((line) =>
       roundVnd(toDecimal(line.amount)).toNumber(),
     ),
   ].reduce((sum, amount) => sum.plus(amount), new Decimal(0));

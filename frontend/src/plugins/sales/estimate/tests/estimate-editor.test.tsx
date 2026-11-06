@@ -16,6 +16,7 @@ import viEstimate from "@/kernel/langs/vi/estimate.json";
 import viModal from "@/kernel/langs/vi/modal.json";
 import viStatus from "@/kernel/langs/vi/status.json";
 
+import { ItemPermission } from "@plugins/catalog/item/permissions/item-permission.keys";
 import { EstimateDetailPage } from "@plugins/sales/estimate/components/EstimateDetailPage";
 import { EstimatePermission } from "@plugins/sales/estimate/permissions/estimate-permission.keys";
 
@@ -177,6 +178,27 @@ function detail(options: DetailOptions = {}) {
   };
 }
 
+/** What the server sends an actor without `reference_price:read`: the money keys are absent. */
+function withoutMoney(body: ReturnType<typeof detail>) {
+  const { total: _total, ...header } = body;
+  const { total: _revisionTotal, ...current } = body.current;
+  return {
+    ...header,
+    revisions: body.revisions.map(({ total: _t, ...entry }) => entry),
+    current: {
+      ...current,
+      panels: body.current.panels.map(
+        ({ unitCost: _u, total: _pt, costLines: _c, ...panel }) => ({
+          ...panel,
+          bomLines: panel.bomLines.map(
+            ({ unitCost: _bu, amount: _a, ...bom }) => bom,
+          ),
+        }),
+      ),
+    },
+  };
+}
+
 function respond(body: object) {
   apiGet.mockImplementation((url: string) => {
     if (url === "/sales/estimates/7") return Promise.resolve({ data: body });
@@ -223,10 +245,13 @@ const ENGINEER = [
   EstimatePermission.create,
 ];
 
+/** Reads prices, so the figures render; the default actor is the director, who writes any draft. */
+const PRICE_READER = [...ENGINEER, ItemPermission.referencePriceRead];
+
 beforeEach(() => {
   vi.clearAllMocks();
-  actorUser.value = { id: 30, role: "engineer" };
-  grant(...ENGINEER);
+  actorUser.value = { id: 50, role: "director" };
+  grant(...PRICE_READER);
   respond(detail());
 });
 
@@ -328,7 +353,11 @@ describe("deleting lines", () => {
 
 describe("submit gating", () => {
   it("offers no submit button without estimate:submit", async () => {
-    grant(EstimatePermission.read, EstimatePermission.update);
+    grant(
+      EstimatePermission.read,
+      EstimatePermission.update,
+      ItemPermission.referencePriceRead,
+    );
     renderPage();
     await screen.findByTestId("revision-total");
 
@@ -385,8 +414,20 @@ describe("submit gating", () => {
 });
 
 describe("who may write", () => {
-  it("shows a draft read-only to a director holding every estimate permission", async () => {
+  it("lets the director edit and submit a draft", async () => {
     actorUser.value = { id: 50, role: "director" };
+    renderPage();
+    await screen.findByTestId("revision-total");
+
+    expect(screen.getByLabelText("Số lượng CB-3X4")).toBeInTheDocument();
+    expect(screen.getByText(viEstimate.panel.add)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: viEstimate.submit }),
+    ).toBeEnabled();
+  });
+
+  it("shows a draft read-only to an administrator holding every estimate permission", async () => {
+    actorUser.value = { id: 1, role: "admin" };
     renderPage();
     await screen.findByTestId("revision-total");
 
@@ -395,6 +436,15 @@ describe("who may write", () => {
     expect(
       screen.queryByRole("button", { name: viEstimate.submit }),
     ).not.toBeInTheDocument();
+  });
+
+  it("gives a draft row no unit cost input, only the stored figure", async () => {
+    renderPage();
+    await screen.findByTestId("revision-total");
+
+    expect(screen.getByLabelText("Số lượng CB-3X4")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Đơn giá CB-3X4")).not.toBeInTheDocument();
+    expect(screen.getByText("24.500")).toBeInTheDocument();
   });
 
   it("lets the engineering lead edit and submit someone else's draft", async () => {
@@ -427,22 +477,16 @@ describe("who may write", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("takes whole VND only for a cost line", async () => {
+  it("shows a draft's cost lines to the director without an edit control", async () => {
     renderPage();
     await screen.findByTestId("revision-total");
 
-    const amount = screen.getByLabelText("Số tiền Nhân công");
-    fireEvent.change(amount, { target: { value: "1000,5" } });
-    fireEvent.blur(amount);
-
-    // The mask drops the decimals, so what is saved is a whole number or nothing at all.
-    await waitFor(() => {
-      for (const call of apiPatch.mock.calls) {
-        expect(Number.isInteger((call[1] as { amount: number }).amount)).toBe(
-          true,
-        );
-      }
-    });
+    expect(screen.getByText(viEstimate.cost.title)).toBeInTheDocument();
+    expect(screen.getAllByText("Nhân công").length).toBeGreaterThan(0);
+    expect(screen.queryByLabelText("Số tiền Nhân công")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: viEstimate.cost.add }),
+    ).not.toBeInTheDocument();
   });
 });
 
@@ -482,7 +526,7 @@ describe("read-only revisions", () => {
   });
 
   it("treats a draft as read-only for a reader without estimate:update", async () => {
-    grant(EstimatePermission.read);
+    grant(EstimatePermission.read, ItemPermission.referencePriceRead);
     renderPage();
     await screen.findByTestId("revision-total");
 
@@ -503,5 +547,69 @@ describe("read-only revisions", () => {
     expect(
       screen.queryByRole("button", { name: viEstimate.submit }),
     ).not.toBeInTheDocument();
+  });
+});
+
+describe("without prices", () => {
+  const MONEY_HEADERS = [
+    viEstimate.total,
+    viEstimate.panel.unitCost,
+    viEstimate.panel.total,
+    viEstimate.bom.unitCost,
+    viEstimate.bom.amount,
+    viEstimate.cost.title,
+    viEstimate.cost.amount,
+    viEstimate.summary.total,
+  ];
+
+  function expectNoMoney() {
+    const text = document.body.textContent ?? "";
+    expect(text).not.toContain("₫");
+    expect(text).not.toContain("NaN");
+    expect(screen.queryByTestId("revision-total")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("panel-total")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("panel-unit-cost")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("bom-amount-11")).not.toBeInTheDocument();
+    for (const header of MONEY_HEADERS) {
+      expect(screen.queryByText(header)).not.toBeInTheDocument();
+    }
+    expect(screen.queryByText(viEstimate.cost.add)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Đơn giá CB-3X4")).not.toBeInTheDocument();
+  }
+
+  it("shows the assigned engineer the panels and quantities with no money", async () => {
+    actorUser.value = { id: 30, role: "engineer" };
+    grant(...ENGINEER);
+    respond(withoutMoney(detail()));
+    renderPage();
+
+    expect(await screen.findByLabelText("Số lượng CB-3X4")).toBeInTheDocument();
+    expect(screen.getAllByText("MSB-02").length).toBeGreaterThan(0);
+    expectNoMoney();
+    // A zero where a price would be is as much a leak as the price.
+    expect(screen.queryByText("0")).not.toBeInTheDocument();
+  });
+
+  it("keeps the engineering lead writing without any price", async () => {
+    actorUser.value = { id: 99, role: "engineeringLead" };
+    grant(...ENGINEER);
+    respond(withoutMoney(detail()));
+    renderPage();
+
+    expect(await screen.findByLabelText("Số lượng CB-3X4")).toBeInTheDocument();
+    expect(screen.getByText(viEstimate.panel.add)).toBeInTheDocument();
+    expectNoMoney();
+  });
+
+  it("shows a submitted revision to an engineer with no money", async () => {
+    actorUser.value = { id: 30, role: "engineer" };
+    grant(EstimatePermission.read);
+    respond(
+      withoutMoney(detail({ status: "submitted", requestStatus: "estimated" })),
+    );
+    renderPage();
+
+    expect((await screen.findAllByText("MSB-01")).length).toBeGreaterThan(0);
+    expectNoMoney();
   });
 });

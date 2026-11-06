@@ -11,6 +11,7 @@ import type {
   EstimateListItem,
   EstimateListParams,
   EstimateRevision,
+  PriceBomLineDto,
   UpdateBomLineDto,
   UpdateCostLineDto,
   UpdatePanelDto,
@@ -109,6 +110,27 @@ export async function updateBomLine(
   const { data } = await api.patch<EstimateRevision>(
     estimateApiRoutes.bomLine(id, lineId),
     payload,
+  );
+  return data;
+}
+
+export async function setBomLineUnitCost(
+  id: number,
+  lineId: number,
+  payload: PriceBomLineDto,
+): Promise<EstimateRevision> {
+  const { data } = await api.patch<EstimateRevision>(
+    estimateApiRoutes.unitCost(id, lineId),
+    payload,
+  );
+  return data;
+}
+
+export async function completeEstimatePricing(
+  id: number,
+): Promise<EstimateRevision> {
+  const { data } = await api.post<EstimateRevision>(
+    estimateApiRoutes.price(id),
   );
   return data;
 }

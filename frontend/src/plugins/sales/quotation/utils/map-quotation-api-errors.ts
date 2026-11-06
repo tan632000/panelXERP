@@ -21,7 +21,7 @@ export const resolveQuotationToastKey =
   createDeleteToastKeyResolver<QuotationToastKey>([
     [["read-only"], "readOnly"],
     [["already has a quotation"], "alreadyExists"],
-    [["no submitted estimate"], "noEstimate"],
+    [["no priced estimate", "no submitted estimate"], "noEstimate"],
     [["not the latest submitted"], "staleRevision"],
     [["cannot exceed the subtotal"], "discountTooLarge"],
     [["exceeds"], "amountTooLarge"],

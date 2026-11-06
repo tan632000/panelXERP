@@ -1,11 +1,13 @@
 "use client";
 
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { isAxiosError } from "axios";
 import { useTranslations } from "next-intl";
 
 import { DEFAULT_LIST_STALE_MS } from "@/kernel/core/constants/list-ui";
 import { useMutationFeedback } from "@/kernel/core/hooks/useMutationFeedback";
 import { useToastMutationFeedback } from "@/kernel/core/hooks/useToastMutationFeedback";
+import { extractApiErrorMessage } from "@/kernel/core/lib/errors";
 
 import { estimateQueryKeys } from "@plugins/sales/estimate/constants";
 import {
@@ -18,7 +20,9 @@ import {
   deletePanel,
   getEstimate,
   getEstimates,
+  completeEstimatePricing,
   reviseEstimate,
+  setBomLineUnitCost,
   submitEstimate,
   updateBomLine,
   updateCostLine,
@@ -34,6 +38,7 @@ import type {
   EstimateDetail,
   EstimateListParams,
   EstimateRevision,
+  PriceBomLineDto,
   UpdateBomLineDto,
   UpdateCostLineDto,
   UpdatePanelDto,
@@ -128,8 +133,33 @@ export function useReviseEstimate() {
   });
 }
 
+/** The item codes a refused completion names ("… no cost for: A, B."), or null for any other refusal. */
+function zeroCostCodes(error: unknown): string | null {
+  if (!isAxiosError(error) || error.response?.status !== 400) return null;
+  const message = extractApiErrorMessage(error.response.data);
+  return message?.match(/no cost for:\s*(.+?)\.?$/)?.[1] ?? null;
+}
+
+/** Marks the submitted revision priced; a refusal for zero-cost lines names their item codes. */
+export function usePriceEstimate() {
+  const { t, feedback } = useEstimateFeedback();
+  const invalidate = useInvalidateAfterTransition();
+  return useMutationFeedback({
+    mutationFn: (id: number) => completeEstimatePricing(id),
+    successMessage: t("priceSuccess"),
+    ...feedback,
+    resolveErrorMessage: (error: unknown) => {
+      const codes = zeroCostCodes(error);
+      return codes
+        ? t("zeroCost", { codes })
+        : feedback.resolveErrorMessage(error);
+    },
+    onSuccess: invalidate,
+  });
+}
+
 /**
- * The edits of one draft revision. Each answers with the revision as the server now computes
+ * The edits of one revision, a draft or one awaiting pricing. Each answers with the revision as the server now computes
  * it, which replaces the cached one at once, so the totals on screen are the stored ones.
  */
 export function useEstimateEdits(estimateId: number, revisionKey?: number) {
@@ -179,6 +209,11 @@ export function useEstimateEdits(estimateId: number, revisionKey?: number) {
     updateBomLine: useMutationFeedback({
       mutationFn: (input: { lineId: number; data: UpdateBomLineDto }) =>
         updateBomLine(estimateId, input.lineId, input.data),
+      ...options,
+    }),
+    setUnitCost: useMutationFeedback({
+      mutationFn: (input: { lineId: number; data: PriceBomLineDto }) =>
+        setBomLineUnitCost(estimateId, input.lineId, input.data),
       ...options,
     }),
     deleteBomLine: useMutationFeedback({

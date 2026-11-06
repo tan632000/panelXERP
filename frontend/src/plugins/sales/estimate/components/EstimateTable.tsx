@@ -3,11 +3,14 @@
 import { useTranslations } from "next-intl";
 import React, { useMemo } from "react";
 
+import { useAuth } from "@/kernel/core/auth/AuthContext";
 import { Table, type TableColumn } from "@/kernel/core/components/ui/Table";
 import {
   formatCurrency,
   formatIsoDateTime,
 } from "@/kernel/core/lib/formatters";
+
+import { ItemPermission } from "@plugins/catalog/item/permissions/item-permission.keys";
 
 import { EstimateStatusBadge } from "./EstimateStatusBadge";
 
@@ -20,6 +23,8 @@ export interface EstimateTableProps {
 
 export function EstimateTable({ data, onOpen }: EstimateTableProps) {
   const t = useTranslations("estimate");
+  const { can } = useAuth();
+  const canSeePrice = can(ItemPermission.referencePriceRead);
   const empty = t("emptyValue");
 
   const columns = useMemo(() => {
@@ -77,15 +82,21 @@ export function EstimateTable({ data, onOpen }: EstimateTableProps) {
         header: t("revision"),
         render: (_, estimate) => `#${estimate.latestRevision}`,
       },
-      {
-        ...base,
-        key: "total",
-        header: t("total"),
-        className: "text-right",
-        render: (_, estimate) => (
-          <span className="tabular-nums">{formatCurrency(estimate.total)}</span>
-        ),
-      },
+      ...(canSeePrice
+        ? [
+            {
+              ...base,
+              key: "total",
+              header: t("total"),
+              className: "text-right",
+              render: (_: unknown, estimate: EstimateListItem) => (
+                <span className="tabular-nums">
+                  {formatCurrency(estimate.total)}
+                </span>
+              ),
+            },
+          ]
+        : []),
       {
         ...base,
         key: "assignedEngineerName",
@@ -101,7 +112,7 @@ export function EstimateTable({ data, onOpen }: EstimateTableProps) {
       },
     ];
     return columns;
-  }, [empty, t]);
+  }, [canSeePrice, empty, t]);
 
   return (
     <Table
