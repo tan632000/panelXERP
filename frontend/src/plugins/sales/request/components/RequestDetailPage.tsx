@@ -151,7 +151,7 @@ export function RequestDetailPage() {
             {canCancel ? (
               <DetailPanelActionButton
                 variant="danger"
-                icon="x"
+                icon="ban"
                 label={t("cancelRequest")}
                 onClick={() => setCancelOpen(true)}
               />

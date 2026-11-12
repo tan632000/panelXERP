@@ -98,6 +98,7 @@ export function SupplierReturnForm() {
     return (
       <DetailPageLayout
         {...header}
+        hideClose
         breadcrumbs={[{ label: t("title") }]}
         title={t("title")}
       >
@@ -183,6 +184,7 @@ export function SupplierReturnForm() {
   return (
     <DetailPageLayout
       {...header}
+      hideClose
       breadcrumbs={[
         { label: order.code, href: purchaseOrderPageRoutes.detail(order.id) },
         { label: t("title") },

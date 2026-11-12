@@ -6,6 +6,7 @@ import {
 export type RequestToastKey =
   | "statusConflict"
   | "engineerInvalid"
+  | "assignBriefMissing"
   | "quotationConfirmed"
   | "attachmentLimit"
   | "attachmentTypeInvalid"
@@ -40,6 +41,7 @@ export const resolveRequestToastKey =
     [["confirmed by the customer"], "quotationConfirmed"],
     [["can no longer", "cannot become", "cannot be"], "statusConflict"],
     [["engineer must be"], "engineerInvalid"],
+    [["needs technical requirements"], "assignBriefMissing"],
     [["at most 20 files"], "attachmentLimit"],
     [["file type is not allowed"], "attachmentTypeInvalid"],
     [["file content is not"], "attachmentContentInvalid"],

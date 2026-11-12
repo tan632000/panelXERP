@@ -450,6 +450,7 @@ describe('Inventory chain (e2e)', () => {
           customerId: created.customerId,
           projectId: created.projectId,
           title: `E2E inventory request ${tag}`,
+          technicalRequirements: 'PIR 50mm',
         }).expect(201)
       ).body as { id: number }
     ).id;

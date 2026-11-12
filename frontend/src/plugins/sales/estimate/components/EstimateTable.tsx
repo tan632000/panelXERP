@@ -73,7 +73,11 @@ export function EstimateTable({ data, onOpen }: EstimateTableProps) {
         key: "status",
         header: t("status"),
         render: (_, estimate) => (
-          <EstimateStatusBadge status={estimate.status} size="sm" />
+          <EstimateStatusBadge
+            status={estimate.status}
+            pricedAt={estimate.latestPricedAt ?? null}
+            size="sm"
+          />
         ),
       },
       {

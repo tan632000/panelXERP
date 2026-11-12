@@ -20,6 +20,7 @@ export function PurchaseOrderCreatePage() {
 
   return (
     <DetailPageLayout
+      hideClose
       pageTitle={t("title")}
       pageDescription={t("description")}
       breadcrumbs={[

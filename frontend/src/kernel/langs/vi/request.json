@@ -6,7 +6,7 @@
   "code": "Mã yêu cầu",
   "titleField": "Tiêu đề",
   "customer": "Khách hàng",
-  "project": "Công trình",
+  "project": "Dự án",
   "contact": "Người liên hệ",
   "status": "Trạng thái",
   "salesOwner": "Nhân viên kinh doanh",
@@ -18,20 +18,20 @@
   "lostReason": "Lý do thất bại",
   "infoBasic": "Thông tin chung",
   "customerInfo": "Khách hàng",
-  "projectInfo": "Công trình",
+  "projectInfo": "Dự án",
   "contactInfo": "Người liên hệ",
   "customerCode": "Mã khách hàng",
   "customerName": "Tên khách hàng",
   "taxCode": "Mã số thuế",
   "address": "Địa chỉ",
-  "projectCode": "Mã công trình",
-  "projectName": "Tên công trình",
-  "siteAddress": "Địa chỉ công trình",
+  "projectCode": "Mã dự án",
+  "projectName": "Tên dự án",
+  "siteAddress": "Địa chỉ dự án",
   "contactName": "Họ tên",
   "contactPosition": "Chức vụ",
   "contactPhone": "Điện thoại",
   "contactEmail": "Email",
-  "noProject": "Không gắn công trình",
+  "noProject": "Không gắn dự án",
   "noContact": "Chưa chọn người liên hệ",
   "noRequirements": "Chưa có yêu cầu kỹ thuật",
   "addButton": "Tạo yêu cầu",
@@ -77,13 +77,13 @@
     "estimating": "Đang dự toán",
     "estimated": "Đã dự toán",
     "quoted": "Đã báo giá",
-    "won": "Thắng thầu",
+    "won": "Đã lên đơn hàng",
     "lost": "Thất bại",
     "cancelled": "Đã hủy"
   },
   "placeholders": {
     "customer": "Chọn khách hàng",
-    "project": "Chọn công trình (nếu có)",
+    "project": "Chọn dự án (nếu có)",
     "contact": "Chọn người liên hệ",
     "engineer": "Chọn kỹ sư",
     "title": "VD: Báo giá tủ điều khiển dây chuyền panel",
@@ -102,7 +102,9 @@
       "type": "Chỉ nhận tệp pdf, dwg, dxf, xlsx, png, jpg.",
       "size": "Tệp vượt quá giới hạn 20 MB.",
       "empty": "Tệp rỗng."
-    }
+    },
+    "pickAtCreate": "Tài liệu từ khách hàng (bản vẽ, mô tả kỹ thuật)",
+    "assignHint": "Cần nhập yêu cầu kỹ thuật hoặc đính kèm ít nhất 1 tài liệu trước khi phân công kỹ sư."
   },
   "timeline": {
     "title": "Lịch sử xử lý",
@@ -136,6 +138,7 @@
     "createSuccess": "Tạo yêu cầu báo giá thành công.",
     "updateSuccess": "Cập nhật yêu cầu thành công.",
     "assignSuccess": "Phân công kỹ sư thành công.",
+    "assignBriefMissing": "Cần nhập yêu cầu kỹ thuật hoặc đính kèm ít nhất 1 tài liệu trước khi phân công kỹ sư.",
     "cancelSuccess": "Đã hủy yêu cầu.",
     "lostSuccess": "Đã đánh dấu yêu cầu thất bại.",
     "uploadSuccess": "Đã thêm tài liệu.",
@@ -150,7 +153,8 @@
     "attachmentTooLarge": "Tệp vượt quá giới hạn 20 MB.",
     "attachmentGone": "Tệp không còn tồn tại.",
     "systemError": "Đã có lỗi xảy ra, vui lòng thử lại sau.",
-    "forbidden": "Bạn không có quyền thực hiện chức năng này."
+    "forbidden": "Bạn không có quyền thực hiện chức năng này.",
+    "uploadFailed": "Đã tạo yêu cầu nhưng chưa tải lên được: {names}. Hãy đính kèm lại trong chi tiết yêu cầu."
   },
   "validation": {
     "customerRequired": "Vui lòng chọn Khách hàng.",
@@ -158,7 +162,7 @@
     "titleMax": "Tiêu đề không được vượt quá 255 ký tự.",
     "requirementsMax": "Yêu cầu kỹ thuật không được vượt quá 10000 ký tự.",
     "dateInvalid": "Ngày không hợp lệ.",
-    "projectInvalid": "Công trình phải thuộc khách hàng đã chọn.",
+    "projectInvalid": "Dự án phải thuộc khách hàng đã chọn.",
     "contactInvalid": "Người liên hệ phải thuộc khách hàng đã chọn.",
     "engineerRequired": "Vui lòng chọn kỹ sư.",
     "engineerInvalid": "Kỹ sư được chọn không hợp lệ."

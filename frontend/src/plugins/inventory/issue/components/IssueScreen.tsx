@@ -100,6 +100,7 @@ export function IssueScreen() {
     return (
       <DetailPageLayout
         {...header}
+        hideClose
         breadcrumbs={[listCrumb, { label: t("issueScreen.title") }]}
         title={t("issueScreen.title")}
       >
@@ -263,6 +264,7 @@ export function IssueScreen() {
   return (
     <DetailPageLayout
       {...header}
+      hideClose
       breadcrumbs={[listCrumb, { label: detail.order.code }]}
       title={t("issueScreen.titleOf", { code: detail.order.code })}
       subtitle={detail.order.customerName}

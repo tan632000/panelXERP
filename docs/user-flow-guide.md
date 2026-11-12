@@ -23,7 +23,7 @@ Phạm vi: các giai đoạn đã hoàn thành P1 (bán hàng), P2 (mua hàng v�
 
 | Bước | Chứng từ | Mã | Người làm chính |
 |---|---|---|---|
-| 1 | Khách hàng, Công trình | `KH_0001`, `DA_0001` | Sales |
+| 1 | Khách hàng, Dự án | `KH_0001`, `DA_0001` | Sales |
 | 2 | Yêu cầu báo giá | `YC_2026_0001` | Sales |
 | 3 | Dự toán | `DT_2026_0001` | Kỹ sư được phân công |
 | 4 | Báo giá | `03-08092026/BG` | Sales soạn, Trưởng phòng KD / Giám đốc duyệt |
@@ -80,21 +80,22 @@ Trước khi chạy luồng bán hàng, cần có sẵn:
 
 ## 3. Bán hàng
 
-### 3.1 Tạo khách hàng và công trình (Sales)
+### 3.1 Tạo khách hàng và dự án (Sales)
 
 1. Vào **Khách hàng › Danh sách khách hàng**, bấm **"Thêm khách hàng"**.
    - Bắt buộc: Mã khách hàng (tự sinh `KH_0001`, sửa được) và Tên khách hàng.
    - "Nhân viên phụ trách" mặc định là bạn. Chỉ Trưởng phòng KD, Giám đốc và admin đổi được người phụ trách. Khi đổi, mọi yêu cầu, báo giá và đơn hàng của khách chuyển theo người mới.
 2. Mở chi tiết khách hàng, bấm **"Thêm người liên hệ"**. Có thể đánh dấu "Người liên hệ chính"; mỗi khách chỉ có một người chính.
-3. Vào **Khách hàng › Công trình**, bấm **"Thêm công trình"**: chọn Khách hàng, nhập Tên công trình (mã `DA_0001` tự sinh).
+3. Vào **Khách hàng › Dự án**, bấm **"Thêm dự án"**: chọn Khách hàng, nhập Tên dự án (mã `DA_0001` tự sinh).
 
-Khách hàng hoặc công trình đã dùng trong chứng từ bán hàng thì không xoá được.
+Khách hàng hoặc dự án đã dùng trong chứng từ bán hàng thì không xoá được.
 
 ### 3.2 Yêu cầu báo giá (Sales → Phân công kỹ sư)
 
 1. **Bán hàng › Yêu cầu báo giá**, bấm **"Tạo yêu cầu"**.
    - Bắt buộc: Khách hàng và Tiêu đề.
-   - Tuỳ chọn: Công trình, Người liên hệ (phải thuộc khách đã chọn), Yêu cầu kỹ thuật, Ngày khách cần hàng, Hạn báo giá.
+   - Tuỳ chọn: Dự án, Người liên hệ (phải thuộc khách đã chọn), Yêu cầu kỹ thuật, Ngày khách cần hàng, Hạn báo giá.
+   - Có thể đính kèm ngay tài liệu nhận từ khách ở mục "Tài liệu từ khách hàng"; tệp được tải lên sau khi yêu cầu được tạo, tệp nào lỗi sẽ được nêu tên để đính kèm lại trong chi tiết. Muốn phân công kỹ sư, yêu cầu phải có Yêu cầu kỹ thuật hoặc ít nhất 1 tài liệu đính kèm.
    - Kết quả: mã `YC_…`, trạng thái **Nháp**.
 2. Trong chi tiết yêu cầu, mục "Tài liệu đính kèm" → **"Chọn tệp"** để đính kèm bản vẽ (pdf, dwg, dxf, xlsx, png, jpg; tối đa 20 MB/tệp, 20 tệp).
 3. Bấm **"Phân công"**, chọn một kỹ sư → **"Xác nhận"**. Yêu cầu chuyển **Đã phân công**, kỹ sư nhận thông báo. Có thể "Đổi kỹ sư" cho đến khi dự toán được gửi.
@@ -102,7 +103,7 @@ Khách hàng hoặc công trình đã dùng trong chứng từ bán hàng thì k
 Trạng thái của yêu cầu chạy theo luồng:
 
 ```text
-Nháp → Đã phân công → Đang dự toán → Đã dự toán → Đã báo giá → Thắng thầu
+Nháp → Đã phân công → Đang dự toán → Đã dự toán → Đã báo giá → Đã lên đơn hàng
                                                    └──────────► Thất bại / Đã hủy
 ```
 
@@ -154,7 +155,7 @@ Muốn sửa một báo giá đã gửi duyệt, đã duyệt hay bị từ ch�
 
 1. Trên trang báo giá ở trạng thái **Khách đã xác nhận**, mục "Đơn hàng" → **"Chuyển thành đơn hàng"**. Có thể nhập ngay Số hợp đồng, Ngày hợp đồng, Ngày giao hàng.
 2. Kết quả: mã `DH_…`, trạng thái **Đang mở**. Mỗi báo giá chỉ chuyển thành đơn một lần. Hệ thống tự động:
-   - chuyển yêu cầu sang **Thắng thầu**;
+   - chuyển yêu cầu sang **Đã lên đơn hàng**;
    - **giữ vật tư đang có trong kho** cho đơn này;
    - nếu đơn còn thiếu vật tư, gửi thông báo cho Mua hàng, QL sản xuất và sales phụ trách;
    - báo cho Trưởng phòng KD, Giám đốc và admin là có đơn mới.
@@ -314,7 +315,7 @@ Dùng kịch bản này để demo hoặc kiểm thử một vòng đầy đủ.
 
 | # | Tài khoản | Việc làm | Kết quả cần thấy |
 |---|---|---|---|
-| 1 | `sales_a` | Tạo khách hàng, công trình, yêu cầu báo giá | Yêu cầu `YC_…` ở Nháp |
+| 1 | `sales_a` | Tạo khách hàng, dự án, yêu cầu báo giá | Yêu cầu `YC_…` ở Nháp |
 | 2 | `sales_mgr` | Phân công yêu cầu cho `engineer_a` | Đã phân công; engineer_a có thông báo |
 | 3 | `engineer_a` | Tạo dự toán, thêm 1 tủ (SL 2) với vài vật tư, gửi dự toán | Yêu cầu Đã dự toán |
 | 4 | `sales_a` | Tạo báo giá, nhập biên lợi nhuận, lưu giá, gửi duyệt | Báo giá Chờ duyệt |

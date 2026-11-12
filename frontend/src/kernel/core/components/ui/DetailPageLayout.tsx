@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React from "react";
 
 import { MobileNavButton } from "@/kernel/core/components/layout/MobileNavButton";
@@ -8,8 +9,10 @@ import {
   type BreadcrumbItem,
 } from "@/kernel/core/components/ui/Breadcrumb";
 import { DetailTableCards } from "@/kernel/core/components/ui/DetailTableCards";
+import { Icon } from "@/kernel/core/components/ui/Icon";
 import { PageHeader } from "@/kernel/core/components/ui/PageHeader";
 import { PageHeaderUserMenu } from "@/kernel/core/components/ui/PageHeaderUserMenu";
+import { Link } from "@/kernel/i18n/navigation";
 
 export interface DetailPageLayoutProps {
   pageTitle?: string;
@@ -20,6 +23,16 @@ export interface DetailPageLayoutProps {
   actions?: React.ReactNode;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  /** Input screens set this: closing would drop what the user has typed. */
+  hideClose?: boolean;
+}
+
+/** Where the X goes: the last linked crumb before the current page (the list or a parent record). */
+function closeTarget(breadcrumbs: BreadcrumbItem[]): string | undefined {
+  return breadcrumbs
+    .slice(0, -1)
+    .reverse()
+    .find((crumb) => crumb.href)?.href;
 }
 
 export function DetailPageLayout({
@@ -31,7 +44,11 @@ export function DetailPageLayout({
   actions,
   children,
   footer,
+  hideClose,
 }: Readonly<DetailPageLayoutProps>) {
+  const t = useTranslations("common");
+  const closeHref = hideClose ? undefined : closeTarget(breadcrumbs);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
       {pageTitle ? (
@@ -55,8 +72,18 @@ export function DetailPageLayout({
           */}
           <div className="scrollbar-thin min-h-0 flex-1 overflow-y-auto max-lg:overflow-visible">
             <header className="sticky top-0 z-40 border-b border-border-secondary bg-surface-primary px-5 py-4 max-lg:static max-lg:px-3.5">
-              <div className="mb-3">
+              <div className="mb-3 flex items-start justify-between gap-3">
                 <Breadcrumb items={breadcrumbs} />
+                {closeHref ? (
+                  <Link
+                    href={closeHref}
+                    aria-label={t("close")}
+                    title={t("close")}
+                    className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-text-secondary transition-colors hover:bg-surface-secondary hover:text-text-primary max-lg:size-11"
+                  >
+                    <Icon name="x" size={18} className="stroke-current" />
+                  </Link>
+                ) : null}
               </div>
               <div className="flex items-start justify-between gap-3 max-lg:flex-col">
                 <div className="min-w-0">

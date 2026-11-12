@@ -67,6 +67,7 @@ import {
 import { RequestReasonDto } from '@plugins/sales/request/dto/request-reason.dto';
 import { UpdateRequestDto } from '@plugins/sales/request/dto/update-request.dto';
 import { SalesRequestActivity } from '@plugins/sales/request/entities/request-activity.entity';
+import { SalesRequestAttachment } from '@plugins/sales/request/entities/request-attachment.entity';
 import { SalesRequest } from '@plugins/sales/request/entities/request.entity';
 import { RequestStatus } from '@plugins/sales/request/enums/request-status.enum';
 import { REQUEST_READ } from '@plugins/sales/request/permissions/request.permissions';
@@ -456,6 +457,17 @@ export class RequestService implements OnModuleInit {
         }
         if (request.assignedEngineerId === dto.engineerId) {
           return { request, changed: false };
+        }
+        // Engineering estimates from what sales hands over: a written brief or a customer file.
+        if (trimToNull(request.technicalRequirements) === null) {
+          const files = await manager
+            .getRepository(SalesRequestAttachment)
+            .count({ where: { requestId: id } });
+          if (files === 0) {
+            throw new ConflictException(
+              'A request needs technical requirements or an attachment before it is assigned.',
+            );
+          }
         }
 
         const reassigned = request.assignedEngineerId != null;

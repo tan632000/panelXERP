@@ -327,15 +327,22 @@ export function buildRequestFixture(
 
 export type RequestFixture = ReturnType<typeof buildRequestFixture>;
 
-/** A draft request of `owner`'s own customer, created through the service. */
+/**
+ * A draft request of `owner`'s own customer, created through the service. It carries technical
+ * requirements by default, since a request without them (or a file) cannot be assigned.
+ */
 export async function createDraft(
   fixture: RequestFixture,
   owner: AuthUserPayload = SALES_A,
-  overrides: { title?: string } = {},
+  overrides: { title?: string; technicalRequirements?: string } = {},
 ) {
   const customer = fixture.customerOf(owner.userId);
   return fixture.service.create(
-    { customerId: customer.id, title: overrides.title ?? 'Panel line quote' },
+    {
+      customerId: customer.id,
+      title: overrides.title ?? 'Panel line quote',
+      technicalRequirements: overrides.technicalRequirements ?? 'PIR 50mm',
+    },
     owner,
   );
 }

@@ -281,6 +281,7 @@ describe('RequestService', () => {
           title: 'x',
           projectId: project.id,
           contactId: contact.id,
+          technicalRequirements: 'PIR 50mm',
         },
         SALES_A,
       );
@@ -535,6 +536,93 @@ describe('RequestService', () => {
   });
 
   describe('assign', () => {
+    describe('needs technical requirements or a file', () => {
+      const PDF = Buffer.from('%PDF-1.7\n%âãÏÓ\n1 0 obj\n', 'latin1');
+
+      it('refuses a request with neither, and changes nothing', async () => {
+        const fixture = buildRequestFixture();
+        const created = await createDraft(fixture, SALES_A, {
+          technicalRequirements: '   ',
+        });
+
+        await expect(
+          fixture.service.assign(
+            created.id,
+            { engineerId: ENGINEER_A.userId },
+            SALES_A,
+          ),
+        ).rejects.toThrow(
+          new ConflictException(
+            'A request needs technical requirements or an attachment before it is assigned.',
+          ),
+        );
+        expect(fixture.requests.rows[0]).toMatchObject({
+          status: RequestStatus.DRAFT,
+          assignedEngineerId: null,
+        });
+        expect(fixture.notifications.emit).not.toHaveBeenCalled();
+      });
+
+      it('assigns a request that has technical requirements only', async () => {
+        const fixture = buildRequestFixture();
+        const created = await createDraft(fixture);
+
+        await expect(
+          fixture.service.assign(
+            created.id,
+            { engineerId: ENGINEER_A.userId },
+            SALES_A,
+          ),
+        ).resolves.toMatchObject({ status: 'assigned' });
+      });
+
+      it('assigns a request that has a file only', async () => {
+        const fixture = buildRequestFixture();
+        const created = await createDraft(fixture, SALES_A, {
+          technicalRequirements: '',
+        });
+        await fixture.attachmentService.upload(
+          created.id,
+          { originalname: 'brief.pdf', buffer: PDF, size: PDF.length },
+          SALES_A,
+        );
+
+        await expect(
+          fixture.service.assign(
+            created.id,
+            { engineerId: ENGINEER_A.userId },
+            SALES_A,
+          ),
+        ).resolves.toMatchObject({ status: 'assigned' });
+      });
+
+      it('keeps re-assigning the same engineer a no-op after the requirements are cleared', async () => {
+        const fixture = buildRequestFixture();
+        const created = await createDraft(fixture);
+        await fixture.service.assign(
+          created.id,
+          { engineerId: ENGINEER_A.userId },
+          SALES_A,
+        );
+        await fixture.service.update(
+          created.id,
+          { technicalRequirements: '' },
+          SALES_A,
+        );
+
+        await expect(
+          fixture.service.assign(
+            created.id,
+            { engineerId: ENGINEER_A.userId },
+            SALES_A,
+          ),
+        ).resolves.toMatchObject({
+          status: 'assigned',
+          assignedEngineerId: ENGINEER_A.userId,
+        });
+      });
+    });
+
     it('moves a draft to assigned and notifies the engineer exactly once, after the commit', async () => {
       const fixture = buildRequestFixture();
       const created = await createDraft(fixture);

@@ -7,7 +7,6 @@ import { useAuth } from "@/kernel/core/auth/AuthContext";
 import { DetailField } from "@/kernel/core/components/ui/DetailField";
 import { DetailFieldGrid } from "@/kernel/core/components/ui/DetailFieldGrid";
 import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
-import { StatusBadge } from "@/kernel/core/components/ui/StatusBadge";
 import { formatCurrency } from "@/kernel/core/lib/formatters";
 import { Link, useRouter } from "@/kernel/i18n/navigation";
 
@@ -77,23 +76,13 @@ function EstimateSectionBody({
             </Link>
           </DetailField>
           <DetailField label={t("status")}>
-            <EstimateStatusBadge status={estimate.status} />
+            <EstimateStatusBadge
+              status={estimate.status}
+              pricedAt={estimate.latestPricedAt ?? null}
+            />
           </DetailField>
           <DetailField label={t("revision")}>
-            <span className="inline-flex items-center gap-2">
-              {`#${estimate.latestRevision}`}
-              {estimate.status === "submitted" ? (
-                <StatusBadge
-                  status={estimate.latestPricedAt ? "completed" : "pending"}
-                  label={t(
-                    estimate.latestPricedAt
-                      ? "pricing.priced"
-                      : "pricing.awaiting",
-                  )}
-                  size="sm"
-                />
-              ) : null}
-            </span>
+            {`#${estimate.latestRevision}`}
           </DetailField>
           {can(ItemPermission.referencePriceRead) ? (
             <DetailField label={t("total")}>

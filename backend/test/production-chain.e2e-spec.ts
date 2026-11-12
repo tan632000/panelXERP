@@ -436,6 +436,7 @@ describe('Production chain (e2e)', () => {
           customerId: created.customerId,
           projectId: created.projectId,
           title: `E2E production request ${tag}`,
+          technicalRequirements: 'PIR 50mm',
         }).expect(201)
       ).body as { id: number }
     ).id;

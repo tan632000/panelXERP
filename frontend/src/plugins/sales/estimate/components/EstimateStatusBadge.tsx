@@ -14,15 +14,35 @@ const BADGE_TONE: Record<RevisionStatus, string> = {
   superseded: "closed",
 };
 
+/**
+ * One badge for where an estimate stands. A submitted revision reads its pricing step instead
+ * of "submitted": `pricedAt` null means it awaits sales, a date means it is priced. Leave
+ * `pricedAt` out where pricing does not apply (an older revision), and the plain status shows.
+ */
 export function EstimateStatusBadge({
   status,
+  pricedAt,
   size,
 }: {
   status: RevisionStatus;
+  pricedAt?: string | null;
   size?: "sm" | "md";
 }) {
-  const t = useTranslations("estimate.statuses");
+  const t = useTranslations("estimate");
+  if (status === "submitted" && pricedAt !== undefined) {
+    return (
+      <StatusBadge
+        status={pricedAt ? "completed" : "pending"}
+        label={t(pricedAt ? "pricing.priced" : "pricing.awaiting")}
+        size={size}
+      />
+    );
+  }
   return (
-    <StatusBadge status={BADGE_TONE[status]} label={t(status)} size={size} />
+    <StatusBadge
+      status={BADGE_TONE[status]}
+      label={t(`statuses.${status}`)}
+      size={size}
+    />
   );
 }

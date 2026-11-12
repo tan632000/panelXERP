@@ -165,7 +165,12 @@ describe('RequestController', () => {
     request(server())
       .post('/sales/requests')
       .set(as(token))
-      .send({ customerId, title: 'Panel line quote', ...body });
+      .send({
+        customerId,
+        title: 'Panel line quote',
+        technicalRequirements: 'PIR 50mm',
+        ...body,
+      });
 
   const assign = (id: number, engineerId: number, token = SALES_A) =>
     request(server())

@@ -265,6 +265,7 @@ describe('Sales chain (e2e)', () => {
       customerId: created.customerId,
       projectId: created.projectId,
       title: `E2E request ${tag}`,
+      technicalRequirements: 'PIR 50mm',
     }).expect(201);
     created.requestId = (req.body as { id: number }).id;
     await post('sales_a', `/sales/requests/${created.requestId}/assign`, {

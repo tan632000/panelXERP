@@ -101,6 +101,7 @@ export function ReceiveScreen() {
     return (
       <DetailPageLayout
         {...header}
+        hideClose
         breadcrumbs={[listCrumb, { label: t("receive.title") }]}
         title={t("receive.title")}
       >
@@ -196,6 +197,7 @@ export function ReceiveScreen() {
   return (
     <DetailPageLayout
       {...header}
+      hideClose
       breadcrumbs={[listCrumb, { label: order.code }]}
       title={t("receive.titleOf", { code: order.code })}
       subtitle={`${order.supplierCode} — ${order.supplierName}`}

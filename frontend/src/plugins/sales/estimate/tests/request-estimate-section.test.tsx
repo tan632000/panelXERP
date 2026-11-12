@@ -181,6 +181,23 @@ describe("RequestEstimateSection", () => {
     expect(screen.queryByText(viEstimate.create)).not.toBeInTheDocument();
   });
 
+  it.each([
+    [null, viEstimate.pricing.awaiting],
+    ["2026-11-11T08:00:00Z", viEstimate.pricing.priced],
+  ])(
+    "shows one status for a submitted estimate priced at %s",
+    async (latestPricedAt, label) => {
+      respondWith([{ ...ESTIMATE, status: "submitted", latestPricedAt }]);
+      renderSection("estimated");
+
+      expect(await screen.findByText(label)).toBeInTheDocument();
+      // The final step replaces "submitted"; the two never read side by side.
+      expect(
+        screen.queryByText(viEstimate.statuses.submitted),
+      ).not.toBeInTheDocument();
+    },
+  );
+
   it("renders nothing, and asks for nothing, without estimate:read", () => {
     granted.value = new Set();
     const { container } = renderSection("assigned");

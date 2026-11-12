@@ -16,7 +16,6 @@ import { DetailSection } from "@/kernel/core/components/ui/DetailSection";
 import { EmptyState } from "@/kernel/core/components/ui/EmptyState";
 import { LoadingState } from "@/kernel/core/components/ui/LoadingState";
 import { SegmentedTabs } from "@/kernel/core/components/ui/SegmentedTabs";
-import { StatusBadge } from "@/kernel/core/components/ui/StatusBadge";
 import { useEntityIdParam } from "@/kernel/core/hooks/useEntityIdParam";
 import { isNotFoundError } from "@/kernel/core/lib/api-error-mapping";
 import {
@@ -208,15 +207,11 @@ export function EstimateDetailPage() {
             <DetailField label={t("revision")}>
               <span className="inline-flex items-center gap-2">
                 {`#${revision.revision}`}
-                <EstimateStatusBadge status={revision.status} />
-                {isSubmitted ? (
-                  <StatusBadge
-                    status={revision.pricedAt ? "completed" : "pending"}
-                    label={t(
-                      revision.pricedAt ? "pricing.priced" : "pricing.awaiting",
-                    )}
-                  />
-                ) : null}
+                {/* Only the latest revision can be priced; an older one shows its plain status. */}
+                <EstimateStatusBadge
+                  status={revision.status}
+                  pricedAt={isLatest ? (revision.pricedAt ?? null) : undefined}
+                />
               </span>
             </DetailField>
             <DetailField label={t("request")}>

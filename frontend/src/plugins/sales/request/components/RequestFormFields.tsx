@@ -10,11 +10,15 @@ import { FormSelect } from "@/kernel/core/components/ui/FormSelect";
 import { FormTextArea } from "@/kernel/core/components/ui/FormTextArea";
 
 import { useCustomerContacts } from "@plugins/crm/contact/hooks/api/useContact";
-import { useCustomerProjectOptions } from "@plugins/sales/request/hooks/api/useRequest";
+import {
+  useCustomerProjectOptions,
+  useProjectSearchOptions,
+} from "@plugins/sales/request/hooks/api/useRequest";
 
 import { RequestCustomerPicker } from "./RequestCustomerPicker";
 
 import type { RequestFormInput } from "@plugins/sales/request/schemas/request.schema";
+import type { ProjectSearchOption } from "@plugins/sales/request/services/request.service";
 import type { RequestDetail } from "@plugins/sales/request/types";
 import type { UseFormReturn } from "react-hook-form";
 
@@ -41,17 +45,49 @@ export function RequestFormFields({ form, request }: RequestFormFieldsProps) {
   const [pickedLabel, setPickedLabel] = useState("");
 
   const customerId = Number(watch("customerId") || 0);
+  const projectId = watch("projectId") ?? "";
   const projectsQuery = useCustomerProjectOptions(customerId);
   const contactsQuery = useCustomerContacts(customerId);
 
-  const projectOptions = useMemo(
-    () =>
-      (projectsQuery.data ?? []).map((project) => ({
-        value: String(project.id),
-        label: `${project.code} — ${project.name}`,
-      })),
-    [projectsQuery.data],
+  // Before a customer is chosen, the project select searches every visible project instead,
+  // and picking one fills in its customer.
+  const searchingProjects = !request && customerId === 0;
+  const [projectSearch, setProjectSearch] = useState("");
+  const projectSearchQuery = useProjectSearchOptions(
+    projectSearch,
+    searchingProjects,
   );
+  // The chosen project stays listed whatever page the search shows, so its label never blanks.
+  const [pickedProject, setPickedProject] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
+
+  const projectOptions = useMemo(() => {
+    const options = searchingProjects
+      ? projectSearchQuery.records.map((project) => ({
+          value: String(project.id),
+          label: `${project.code} — ${project.name} (${project.customerName ?? ""})`,
+        }))
+      : (projectsQuery.data ?? []).map((project) => ({
+          value: String(project.id),
+          label: `${project.code} — ${project.name}`,
+        }));
+    if (
+      pickedProject &&
+      pickedProject.value === projectId &&
+      !options.some((option) => option.value === pickedProject.value)
+    ) {
+      options.unshift(pickedProject);
+    }
+    return options;
+  }, [
+    searchingProjects,
+    projectSearchQuery.records,
+    projectsQuery.data,
+    pickedProject,
+    projectId,
+  ]);
   const contactOptions = useMemo(
     () =>
       (contactsQuery.data?.data ?? []).map((contact) => ({
@@ -67,6 +103,23 @@ export function RequestFormFields({ form, request }: RequestFormFieldsProps) {
     (field: "projectId" | "contactId") =>
     (event: React.ChangeEvent<HTMLSelectElement>) =>
       setValue(field, event.target.value, { shouldValidate: true });
+
+  const handleProjectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setValue("projectId", value, { shouldValidate: true });
+    if (!searchingProjects || !value) return;
+
+    const project: ProjectSearchOption | undefined =
+      projectSearchQuery.records.find((record) => String(record.id) === value);
+    if (!project) return;
+    // Kept under the label the customer's own list will show once the customer is set.
+    setPickedProject({ value, label: `${project.code} — ${project.name}` });
+    setPickedLabel(customerLabel(project.customerCode, project.customerName));
+    setValue("customerId", String(project.customerId), {
+      shouldValidate: true,
+    });
+    setValue("contactId", "");
+  };
 
   return (
     <div className="grid grid-cols-1 gap-[11px] md:grid-cols-2">
@@ -86,18 +139,24 @@ export function RequestFormFields({ form, request }: RequestFormFieldsProps) {
           displayLabel={pickedLabel}
           onChange={(customer) => {
             setPickedLabel(customerLabel(customer.code, customer.name));
+            const sameCustomer = customer.id === customerId;
             setValue("customerId", String(customer.id), {
               shouldValidate: true,
             });
-            // A project or contact of the previous customer is no longer a valid choice.
-            setValue("projectId", "");
-            setValue("contactId", "");
+            // A project or contact of the previous customer is no longer a valid choice; the
+            // same customer chosen again keeps both.
+            if (!sameCustomer) {
+              setValue("projectId", "");
+              setValue("contactId", "");
+              setPickedProject(null);
+            }
           }}
           onClear={() => {
             setPickedLabel("");
             setValue("customerId", "", { shouldValidate: true });
             setValue("projectId", "");
             setValue("contactId", "");
+            setPickedProject(null);
           }}
           error={errors.customerId?.message}
         />
@@ -106,9 +165,19 @@ export function RequestFormFields({ form, request }: RequestFormFieldsProps) {
       <FormSelect
         label={t("project")}
         options={projectOptions}
-        value={watch("projectId") ?? ""}
-        onChange={selectChange("projectId")}
-        disabled={customerId === 0}
+        value={projectId}
+        onChange={handleProjectChange}
+        asyncLoad={
+          searchingProjects
+            ? {
+                onSearch: setProjectSearch,
+                isLoading: projectSearchQuery.isLoading,
+                hasMore: projectSearchQuery.hasMore,
+                isLoadingMore: projectSearchQuery.isLoadingMore,
+                onLoadMore: projectSearchQuery.loadMore,
+              }
+            : undefined
+        }
         allowClear
         placeholder={t("placeholders.project")}
         error={errors.projectId?.message}

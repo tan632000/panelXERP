@@ -7,6 +7,7 @@ import {
   requestApiRoutes,
 } from "@plugins/sales/request/constants";
 
+import type { RecordPickerPageParams } from "@/kernel/core/hooks/useRecordPickerQuery";
 import type { PaginatedResponse } from "@/kernel/core/types/common";
 import type {
   AssignRequestDto,
@@ -157,4 +158,28 @@ export async function getCustomerProjectOptions(
     params: { customerId, limit: REQUEST_PICKER_LIMIT },
   });
   return data.data;
+}
+
+/** A project offered before a customer is chosen: picking it also names its customer. */
+export interface ProjectSearchOption {
+  id: number;
+  code: string;
+  name: string;
+  customerId: number;
+  customerCode?: string | null;
+  customerName?: string | null;
+}
+
+/**
+ * One page of every project the actor may see, matching `search`. The server scopes the list
+ * to the actor's customers, so nothing out of reach can be offered.
+ */
+export async function searchProjectOptions(
+  params: RecordPickerPageParams,
+): Promise<PaginatedResponse<ProjectSearchOption>> {
+  const { data } = await api.get<PaginatedResponse<ProjectSearchOption>>(
+    projectApiRoutes.list,
+    { params: { page: params.page, limit: params.limit, search: params.search } },
+  );
+  return data;
 }

@@ -78,6 +78,7 @@ export function WorkshopReturnScreen() {
     return (
       <DetailPageLayout
         {...header}
+        hideClose
         breadcrumbs={[listCrumb, { label: t("returnScreen.title") }]}
         title={t("returnScreen.title")}
       >
@@ -147,6 +148,7 @@ export function WorkshopReturnScreen() {
   return (
     <DetailPageLayout
       {...header}
+      hideClose
       breadcrumbs={[listCrumb, { label: detail.order.code }]}
       title={t("returnScreen.titleOf", { code: detail.order.code })}
       subtitle={detail.order.customerName}

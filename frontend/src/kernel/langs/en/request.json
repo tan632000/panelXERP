@@ -102,7 +102,9 @@
       "type": "Only pdf, dwg, dxf, xlsx, png and jpg files are accepted.",
       "size": "The file exceeds the 20 MB limit.",
       "empty": "The file is empty."
-    }
+    },
+    "pickAtCreate": "Customer documents (drawings, technical description)",
+    "assignHint": "Enter the technical requirements or attach at least one document before an engineer is assigned."
   },
   "timeline": {
     "title": "Activity",
@@ -136,6 +138,7 @@
     "createSuccess": "Quote request created.",
     "updateSuccess": "Request updated.",
     "assignSuccess": "Engineer assigned.",
+    "assignBriefMissing": "Enter the technical requirements or attach at least one document before assigning an engineer.",
     "cancelSuccess": "Request cancelled.",
     "lostSuccess": "Request marked lost.",
     "uploadSuccess": "Attachment added.",
@@ -150,7 +153,8 @@
     "attachmentTooLarge": "The file exceeds the 20 MB limit.",
     "attachmentGone": "The file is no longer available.",
     "systemError": "Something went wrong, please try again later.",
-    "forbidden": "You do not have permission to do this."
+    "forbidden": "You do not have permission to do this.",
+    "uploadFailed": "The request was created, but these files did not upload: {names}. Attach them again on the request page."
   },
   "validation": {
     "customerRequired": "Please choose a customer.",

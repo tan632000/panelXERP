@@ -94,6 +94,7 @@ export function OrderMaterialPage() {
     return (
       <DetailPageLayout
         {...header}
+        hideClose
         breadcrumbs={[listCrumb, { label: t("detailTitle") }]}
         title={t("detailTitle")}
       >
@@ -235,6 +236,7 @@ export function OrderMaterialPage() {
   return (
     <DetailPageLayout
       {...header}
+      hideClose
       breadcrumbs={[listCrumb, { label: order.code }]}
       title={order.code}
       subtitle={order.customerName}

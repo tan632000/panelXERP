@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { DEFAULT_LIST_STALE_MS } from "@/kernel/core/constants/list-ui";
 import { useMutationFeedback } from "@/kernel/core/hooks/useMutationFeedback";
+import { useRecordPickerQuery } from "@/kernel/core/hooks/useRecordPickerQuery";
 import { useToastMutationFeedback } from "@/kernel/core/hooks/useToastMutationFeedback";
 
 import { requestQueryKeys } from "@plugins/sales/request/constants";
@@ -20,6 +21,7 @@ import {
   getRequestAttachments,
   getRequests,
   markRequestLost,
+  searchProjectOptions,
   updateRequest,
   uploadRequestAttachment,
 } from "@plugins/sales/request/services/request.service";
@@ -82,6 +84,17 @@ export function useCustomerProjectOptions(customerId: number) {
     queryFn: () => getCustomerProjectOptions(customerId),
     enabled: customerId > 0,
     staleTime: DEFAULT_LIST_STALE_MS,
+  });
+}
+
+/** Every visible project matching `search`, paged, while no customer narrows the choice. */
+export function useProjectSearchOptions(search: string, enabled: boolean) {
+  return useRecordPickerQuery({
+    search,
+    enabled,
+    queryKey: (keyword) =>
+      [...requestQueryKeys.all, "project-search", keyword] as const,
+    fetchPage: searchProjectOptions,
   });
 }
 
