@@ -1,6 +1,6 @@
 # Ma trận phân quyền và tài khoản demo
 
-Cập nhật: 2026-11-02. Nguồn: `backend/src/kernel/core/database/seeds/seed-roles.ts` (quyền theo role), `seed-users.ts` (tài khoản), `kernel/shared/services/data-scope.service.ts` (phạm vi dữ liệu). Ma trận được sinh bằng chính hàm `holds()` mà guard dùng, nên wildcard (`order:*`, `*:*`) đã được bung ra từng quyền.
+Cập nhật: 2026-11-06. Nguồn: `backend/src/kernel/core/database/seeds/seed-roles.ts` (quyền theo role), `seed-users.ts` (tài khoản), `kernel/shared/services/data-scope.service.ts` (phạm vi dữ liệu). Ma trận được sinh bằng chính hàm `holds()` mà guard dùng, nên wildcard (`order:*`, `*:*`) đã được bung ra từng quyền.
 
 Lúc lập tài liệu, trong DB không có role nào bị admin sửa trên màn hình phân quyền (`roles.updated_by` rỗng), nên quyền thực tế khớp seed. Nếu admin đã sửa một role, seed giữ nguyên bản sửa đó và tài liệu này không còn đúng cho role ấy.
 
@@ -64,21 +64,22 @@ Quyền quyết định **được làm hành động nào**; phạm vi dữ li�
 | `item:delete` | ✅ | ✅ |  |  | ✅ |  | ✅ |  |  |  |
 | `item:import` | ✅ | ✅ |  |  | ✅ |  | ✅ |  |  |  |
 | `item:stock_settings` | ✅ | ✅ |  |  | ✅ |  | ✅ | ✅ |  |  |
-| `reference_price:read` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |  |  |  |
+| `reference_price:read` | ✅ | ✅ | ✅ | ✅ |  |  | ✅ |  |  |  |
 | `purchase_price:read` | ✅ | ✅ | ✅ |  |  |  | ✅ |  |  |  |
 | `location:read` | ✅ | ✅ |  |  |  |  | ✅ | ✅ |  |  |
-| `location:create` | ✅ |  |  |  |  |  |  | ✅ |  |  |
-| `location:update` | ✅ |  |  |  |  |  |  | ✅ |  |  |
-| `location:delete` | ✅ |  |  |  |  |  |  | ✅ |  |  |
+| `location:create` | ✅ | ✅ |  |  |  |  |  | ✅ |  |  |
+| `location:update` | ✅ | ✅ |  |  |  |  |  | ✅ |  |  |
+| `location:delete` | ✅ | ✅ |  |  |  |  |  | ✅ |  |  |
 | `request:read` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |  |  |  |  |
 | `request:create` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |
 | `request:update` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |
 | `request:assign` | ✅ | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |
 | `request:cancel` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |
 | `estimate:read` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |  |  |  |  |
-| `estimate:create` | ✅ |  |  |  | ✅ | ✅ |  |  |  |  |
-| `estimate:update` | ✅ |  |  |  | ✅ | ✅ |  |  |  |  |
-| `estimate:submit` | ✅ |  |  |  | ✅ | ✅ |  |  |  |  |
+| `estimate:create` | ✅ | ✅ |  |  | ✅ | ✅ |  |  |  |  |
+| `estimate:update` | ✅ | ✅ |  |  | ✅ | ✅ |  |  |  |  |
+| `estimate:submit` | ✅ | ✅ |  |  | ✅ | ✅ |  |  |  |  |
+| `estimate:price` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |
 | `quotation:read` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |
 | `quotation:create` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |
 | `quotation:update` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |
@@ -107,41 +108,45 @@ Quyền quyết định **được làm hành động nào**; phạm vi dữ li�
 | `purchase_order:close` | ✅ | ✅ |  |  |  |  | ✅ |  |  |  |
 | `material:read` | ✅ | ✅ | ✅ | ✅ | ✅ |  | ✅ | ✅ | ✅ |  |
 | `stock_receipt:read` | ✅ | ✅ |  |  |  |  | ✅ | ✅ |  |  |
-| `stock_receipt:create` | ✅ |  |  |  |  |  |  | ✅ |  |  |
+| `stock_receipt:create` | ✅ | ✅ |  |  |  |  |  | ✅ |  |  |
 | `stock_issue:read` | ✅ | ✅ |  |  |  |  | ✅ | ✅ |  |  |
-| `stock_issue:create` | ✅ |  |  |  |  |  |  | ✅ |  |  |
+| `stock_issue:create` | ✅ | ✅ |  |  |  |  |  | ✅ |  |  |
 | `stock_return:read` | ✅ | ✅ |  |  |  |  | ✅ | ✅ |  |  |
-| `stock_return:create` | ✅ |  |  |  |  |  |  | ✅ |  |  |
+| `stock_return:create` | ✅ | ✅ |  |  |  |  |  | ✅ |  |  |
 | `stocktake:read` | ✅ | ✅ |  |  |  |  | ✅ | ✅ |  |  |
-| `stocktake:create` | ✅ |  |  |  |  |  |  | ✅ |  |  |
-| `stocktake:update` | ✅ |  |  |  |  |  |  | ✅ |  |  |
-| `stocktake:submit` | ✅ |  |  |  |  |  |  | ✅ |  |  |
+| `stocktake:create` | ✅ | ✅ |  |  |  |  |  | ✅ |  |  |
+| `stocktake:update` | ✅ | ✅ |  |  |  |  |  | ✅ |  |  |
+| `stocktake:submit` | ✅ | ✅ |  |  |  |  |  | ✅ |  |  |
 | `stocktake:approve` | ✅ | ✅ |  |  |  |  |  |  |  |  |
-| `stocktake:cancel` | ✅ |  |  |  |  |  |  | ✅ |  |  |
+| `stocktake:cancel` | ✅ | ✅ |  |  |  |  |  | ✅ |  |  |
 | `purchase_request:read` | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ |  |  |
-| `purchase_request:create` | ✅ |  |  |  | ✅ | ✅ | ✅ | ✅ |  |  |
-| `purchase_request:update` | ✅ |  |  |  |  |  | ✅ |  |  |  |
-| `purchase_request:cancel` | ✅ |  |  |  |  |  | ✅ |  |  |  |
+| `purchase_request:create` | ✅ | ✅ |  |  | ✅ | ✅ | ✅ | ✅ |  |  |
+| `purchase_request:update` | ✅ | ✅ |  |  |  |  | ✅ |  |  |  |
+| `purchase_request:cancel` | ✅ | ✅ |  |  |  |  | ✅ |  |  |  |
 | `production_order:read` | ✅ | ✅ | ✅ | ✅ |  |  |  |  | ✅ | ✅ |
-| `production_order:create` | ✅ |  |  |  |  |  |  |  | ✅ |  |
-| `production_order:update` | ✅ |  |  |  |  |  |  |  | ✅ |  |
-| `production_order:release` | ✅ |  |  |  |  |  |  |  | ✅ |  |
-| `production_order:cancel` | ✅ |  |  |  |  |  |  |  | ✅ |  |
+| `production_order:create` | ✅ | ✅ |  |  |  |  |  |  | ✅ |  |
+| `production_order:update` | ✅ | ✅ |  |  |  |  |  |  | ✅ |  |
+| `production_order:release` | ✅ | ✅ |  |  |  |  |  |  | ✅ |  |
+| `production_order:cancel` | ✅ | ✅ |  |  |  |  |  |  | ✅ |  |
 | `production_progress:read` | ✅ | ✅ | ✅ | ✅ |  |  |  |  | ✅ | ✅ |
-| `production_progress:update` | ✅ |  |  |  |  |  |  |  | ✅ | ✅ |
-| `production_progress:undo` | ✅ |  |  |  |  |  |  |  | ✅ |  |
+| `production_progress:update` | ✅ | ✅ |  |  |  |  |  |  | ✅ | ✅ |
+| `production_progress:undo` | ✅ | ✅ |  |  |  |  |  |  | ✅ |  |
 | `production_issue:read` | ✅ | ✅ | ✅ |  |  |  |  |  | ✅ | ✅ |
-| `production_issue:create` | ✅ |  |  |  |  |  |  |  | ✅ | ✅ |
-| `production_issue:resolve` | ✅ |  |  |  |  |  |  |  | ✅ |  |
-| `file:read` | ✅ |  |  |  |  |  |  |  |  |  |
-| `file:write` | ✅ |  |  |  |  |  |  |  |  |  |
-| `user:import` | ✅ |  |  |  |  |  |  |  |  |  |
-| `user:export` | ✅ |  |  |  |  |  |  |  |  |  |
+| `production_issue:create` | ✅ | ✅ |  |  |  |  |  |  | ✅ | ✅ |
+| `production_issue:resolve` | ✅ | ✅ |  |  |  |  |  |  | ✅ |  |
+| `file:read` | ✅ | ✅ |  |  |  |  |  |  |  |  |
+| `file:write` | ✅ | ✅ |  |  |  |  |  |  |  |  |
+| `user:import` | ✅ | ✅ |  |  |  |  |  |  |  |  |
+| `user:export` | ✅ | ✅ |  |  |  |  |  |  |  |  |
 
 ## 4. Ghi chú
 
 - `file:read`, `file:write` chỉ admin có: các route file của kernel ký được mọi key lưu trữ; tệp đính kèm nghiệp vụ đi qua endpoint của từng tính năng.
+- `director` giữ `*:*` như admin nên có mọi quyền, kể cả quản trị người dùng, role và tệp. Giám đốc nhận mọi thông báo nghiệp vụ, là người được soạn dự toán (cùng Trưởng kỹ thuật) và xem được lịch sử lệnh sản xuất. Role `director` bị khoá trên màn hình phân quyền (không thu hẹp được quyền), và chữ ký mới của giám đốc được lưu ngay, không qua bước duyệt chữ ký.
+- Báo giá, đơn mua (PO) và phiếu kiểm kê do giám đốc gửi thì được duyệt ngay trong cùng thao tác; giám đốc không bị chặn bởi nguyên tắc 4 mắt. Admin vẫn phải theo nguyên tắc 4 mắt và không soạn được dự toán.
 - Chỉ `admin`, `director`, `salesManager` duyệt được báo giá (`quotation:approve`) và huỷ được đơn (`order:cancel`).
+- `engineer` và `engineeringLead` không có quyền xem giá nào (`reference_price:read`, `purchase_price:read`) và không có `estimate:price`: màn hình và API dự toán không trả tiền cho họ, kỹ sư chỉ nhập tủ, vật tư và số lượng.
+- `estimate:price` (điền đơn giá vốn và chi phí khác của dự toán đã gửi, rồi "Hoàn tất giá") do `sales` và `salesManager` giữ; `director` và `admin` có qua `*:*`. Báo giá chỉ lập được từ dự toán đã điền giá.
 - productionManager và technician không có `order:read` và không thấy giá (`purchase_price:read`, `reference_price:read`).
 - Quy ước đặt tên quyền và 6 lớp phân quyền: xem [permission-convention.md](permission-convention.md).
 

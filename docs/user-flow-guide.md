@@ -110,23 +110,26 @@ Nháp → Đã phân công → Đang dự toán → Đã dự toán → Đã bá
 - **"Đánh dấu thất bại"** (cần lý do): khi Đã dự toán hoặc Đã báo giá.
 - Huỷ yêu cầu hoặc đánh dấu thất bại sẽ huỷ luôn báo giá đang mở. Riêng khi báo giá đã "Khách đã xác nhận" thì không đóng yêu cầu được nữa.
 
-### 3.3 Dự toán (Kỹ sư được giao)
+### 3.3 Dự toán (Kỹ sư nhập số lượng → Sales điền giá)
 
-Chỉ kỹ sư được giao hoặc Trưởng kỹ thuật được sửa dự toán. Admin và Giám đốc chỉ xem được.
+Chỉ kỹ sư được giao, Trưởng kỹ thuật và Giám đốc được soạn dự toán. Admin chỉ xem được. Phòng kỹ thuật **không thấy giá**: không có đơn giá, chi phí hay tổng tiền trên màn hình dự toán. Giá do Sales điền ở bước 6.
 
 1. Đăng nhập bằng tài khoản kỹ sư, mở yêu cầu đã được giao, bấm **"Tạo dự toán"**. Mã `DT_…`, bản #1 ở trạng thái **Nháp**; yêu cầu chuyển **Đang dự toán**.
 2. **"Thêm tủ"**: nhập Ký hiệu tủ (ví dụ `MSB-01`), Mô tả, Số lượng tủ.
 3. Trong từng tủ:
-   - "Vật tư của tủ" → chọn vật tư, nhập số lượng. Đơn giá vốn lấy sẵn từ Giá tham khảo.
-   - "Chi phí khác của tủ" → "Thêm chi phí" (Thiết kế / Nhân công / Lắp đặt / Vận chuyển / Khác), tính cho 1 tủ.
+   - "Vật tư của tủ" → chọn vật tư, nhập số lượng. Kỹ sư không nhập đơn giá.
    - Cột Tồn kho / Khả dụng / Thiếu cho biết kho đang có bao nhiêu.
 4. Kiểm tra mục "Tổng hợp", rồi bấm **"Gửi dự toán"**. Mỗi tủ cần có ít nhất một vật tư.
-   - Bản vừa gửi bị khoá, không sửa được nữa. Yêu cầu chuyển **Đã dự toán**, sales nhận thông báo.
-5. Cần sửa lại thì bấm **"Lập bản mới"** để chép thành bản #2 ở trạng thái Nháp; bản cũ chuyển "Đã thay thế". Khi yêu cầu đã **Đã báo giá** thì không lập bản mới được nữa.
+   - Bản vừa gửi bị khoá số lượng, không sửa được nữa. Yêu cầu chuyển **Đã dự toán**, sales nhận thông báo. Bản dự toán hiện chip **"Chờ điền giá"**.
+5. Cần sửa lại thì bấm **"Lập bản mới"** để chép thành bản #2 ở trạng thái Nháp; bản cũ chuyển "Đã thay thế". Khi yêu cầu đã **Đã báo giá** thì không lập bản mới được nữa. Bản mới chép cả đơn giá Sales đã điền (kỹ sư không thấy), nhưng bắt đầu ở trạng thái chưa điền giá: sau khi kỹ sư gửi, Sales điền lại từ số liệu đã chép.
+6. **Điền giá (Sales, Trưởng phòng KD, Giám đốc)**: mở bản dự toán đã gửi đang **"Chờ điền giá"**.
+   - Nhập đơn giá vốn từng vật tư (lấy sẵn từ Giá tham khảo) và quản lý mục **"Chi phí khác"** của từng tủ (Thiết kế / Nhân công / Lắp đặt / Vận chuyển / Khác, tính cho 1 tủ).
+   - Bấm **"Hoàn tất giá"** rồi xác nhận. Nếu còn vật tư có đơn giá 0, hệ thống từ chối và nêu mã các vật tư đó.
+   - Sau khi hoàn tất, bản dự toán hiện chip **"Đã điền giá"** và bị khoá giá; muốn đổi giá phải để kỹ sư lập bản mới. Báo giá chỉ lập được từ dự toán đã điền giá.
 
 ### 3.4 Báo giá (Sales soạn → Quản lý duyệt)
 
-1. Có hai cách tạo báo giá cho một yêu cầu đang **Đã dự toán**:
+1. Có hai cách tạo báo giá cho một yêu cầu đang **Đã dự toán** và có bản dự toán **"Đã điền giá"** (chưa điền giá thì hệ thống từ chối vì yêu cầu chưa có dự toán đã điền giá để lập báo giá):
    - Mở yêu cầu, ở mục Báo giá bấm **"Tạo báo giá"**.
    - Hoặc vào **Bán hàng › Báo giá** → **"Tạo báo giá"** → chọn yêu cầu.
 
@@ -140,6 +143,7 @@ Chỉ kỹ sư được giao hoặc Trưởng kỹ thuật được sửa dự t
 4. Người duyệt (Trưởng phòng KD, Giám đốc hoặc admin) **không được là người tạo hoặc người sửa báo giá đó** (nguyên tắc 4 mắt):
    - **"Duyệt"** → **Đã duyệt**. Lần duyệt đầu tiên chuyển yêu cầu sang **Đã báo giá**.
    - **"Từ chối"** (cần lý do) → **Bị từ chối**. Sales nhận thông báo kèm lý do.
+   - **Giám đốc tự gửi duyệt**: khi chính Giám đốc bấm "Gửi duyệt", báo giá được duyệt ngay, không cần người thứ hai (Giám đốc không bị ràng buộc nguyên tắc 4 mắt; admin vẫn bị ràng buộc). Sales phụ trách và Trưởng phòng KD nhận thông báo đã duyệt.
 5. Khi báo giá đã duyệt, bấm **"Tải Excel"** hoặc **"Tải PDF"** để gửi khách.
 6. Ghi lại phản hồi của khách ở mục "Phản hồi của khách hàng" → **"Ghi nhận phản hồi"** (Ngày, Kênh, Nội dung).
 7. Khi khách đồng ý, bấm **"Khách đã xác nhận"**. Bước này chưa tạo đơn hàng; nó chỉ mở nút chuyển thành đơn ở bước 3.5.
@@ -155,6 +159,7 @@ Muốn sửa một báo giá đã gửi duyệt, đã duyệt hay bị từ ch�
    - nếu đơn còn thiếu vật tư, gửi thông báo cho Mua hàng, QL sản xuất và sales phụ trách;
    - báo cho Trưởng phòng KD, Giám đốc và admin là có đơn mới.
 3. Khi đơn còn **Đang mở**, sửa mục "Hợp đồng và giao hàng" rồi bấm "Lưu".
+   - **Thông báo cập nhật đơn**: mỗi khi đơn được sửa hợp đồng/giao hàng, huỷ, phát hành hoặc huỷ lệnh sản xuất, hoàn thành sản xuất, hay xuất kho cho đơn, hệ thống gửi thông báo cập nhật đơn cho Trưởng phòng KD, Mua hàng, Thủ kho, QL sản xuất và sales phụ trách của đơn (trừ người vừa thao tác). Giám đốc nhận như mọi thông báo nghiệp vụ.
 4. Trang đơn hàng có hai nút dẫn sang các khâu sau:
    - **"Vật tư"**: mở màn hình Vật tư đơn hàng (mục 4.1).
    - **"Sản xuất"**: mở danh sách lệnh sản xuất của đơn (mục 5).
@@ -195,8 +200,8 @@ Trạng thái được tính tự động: **Đang mở** → **Đã đặt đ�
 1. Có hai cách tạo PO:
    - Trên màn Đề nghị mua hàng: tick chọn các dòng, chọn "Nhà cung cấp" → **"Tạo PO ({n} dòng)"**. Số lượng các dòng này bị khoá, chỉ sửa được đơn giá.
    - Hoặc vào **Đơn mua hàng › "Tạo đơn mua"**: chọn Nhà cung cấp (phải đang hợp tác), Ngày dự kiến nhận, VAT, thêm các dòng vật tư và đơn giá → **"Lưu nháp"**.
-2. **"Gửi duyệt"** → **Chờ duyệt**; Giám đốc nhận thông báo.
-3. Giám đốc hoặc admin (không phải người tạo, người sửa hay người gửi duyệt) bấm:
+2. **"Gửi duyệt"** → **Chờ duyệt**; Giám đốc nhận thông báo. Khi chính Giám đốc gửi, PO được duyệt ngay (bỏ qua nguyên tắc 4 mắt); người tạo, Mua hàng và Thủ kho nhận thông báo đã duyệt.
+3. Giám đốc hoặc admin (admin không được là người tạo, người sửa hay người gửi duyệt) bấm:
    - **"Duyệt"** → **Đã duyệt**, người tạo nhận thông báo.
    - **"Từ chối"** (cần lý do) → PO quay về **Nháp**.
 4. Các nút khác:
@@ -232,8 +237,8 @@ Phiếu nhập không sửa được. Nếu nhập sai hoặc hàng lỗi, dùng
 - **Kiểm kê kho** (Thủ kho đếm, Giám đốc hoặc admin duyệt):
   1. **"Mở phiếu"**, chọn phạm vi "Toàn kho" hoặc "Một vị trí". Mỗi lúc chỉ có một phiếu đang mở.
   2. Quét hoặc nhập "Thực đếm" cho từng vật tư.
-  3. **"Gửi duyệt"** → Chờ duyệt.
-  4. Người duyệt (không phải người đã đếm hay đã gửi) bấm **"Duyệt"**: chênh lệch được ghi vào sổ kho dưới dạng "Điều chỉnh kiểm kê". **"Trả lại"** đưa phiếu về Đang đếm; **"Huỷ phiếu"** để huỷ.
+  3. **"Gửi duyệt"** → Chờ duyệt. Khi Giám đốc gửi thì phiếu được duyệt ngay và chênh lệch được ghi sổ luôn (một lần).
+  4. Người duyệt (admin không được là người đã đếm hay đã gửi) bấm **"Duyệt"**: chênh lệch được ghi vào sổ kho dưới dạng "Điều chỉnh kiểm kê". **"Trả lại"** đưa phiếu về Đang đếm; **"Huỷ phiếu"** để huỷ. Khi phiếu được duyệt, Thủ kho và Mua hàng nhận thông báo kiểm kê đã duyệt.
 
 ---
 
