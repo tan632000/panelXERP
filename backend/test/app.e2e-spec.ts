@@ -6,6 +6,10 @@ import { AppModule } from '@src/app.module';
 
 import type { App } from 'supertest/types';
 
+// Booting the whole AppModule (TypeORM alone takes about 4.6 s under jest) outgrew
+// jest's 5 s default for hooks; the other e2e suites set their own budget the same way.
+jest.setTimeout(60_000);
+
 describe('AppController (e2e)', () => {
   let app: INestApplication<App>;
 
