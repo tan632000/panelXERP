@@ -4,11339 +4,11949 @@
  */
 
 export interface paths {
-  "/api/v1/auth/login": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Sign in and issue an access and refresh token pair */
-    post: operations["AuthController_login"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/refresh": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Exchange a refresh token for a new token pair */
-    post: operations["AuthController_refresh"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/forgot-password": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Request a password reset link by email
-     * @description Always succeeds, whether or not the address belongs to an account, so the response cannot be used to discover who has one.
-     */
-    post: operations["AuthController_forgotPassword"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/reset-password": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Set a new password using a reset link token */
-    post: operations["AuthController_resetPassword"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/change-password": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Change the signed-in user's own password */
-    post: operations["AuthController_changePassword"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/logout": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Revoke the caller's session
-     * @description Signs out this device only; the account's sessions on other devices stay valid.
-     */
-    post: operations["AuthController_logout"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/me": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Read the signed-in user's own profile */
-    get: operations["AuthController_me"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Update the signed-in user's own directory fields */
-    patch: operations["AuthController_updateProfile"];
-    trace?: never;
-  };
-  "/api/v1/auth/me/avatar": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Replace the signed-in user's own avatar */
-    post: operations["AuthController_updateAvatar"];
-    /** Remove the signed-in user's own avatar */
-    delete: operations["AuthController_removeAvatar"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/me/signature": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Replace the signed-in user's own electronic signature
-     * @description Applies at once for an administrator; anyone else submits it for administrator review.
-     */
-    post: operations["AuthController_updateSignature"];
-    /** Remove the signed-in user's own electronic signature */
-    delete: operations["AuthController_removeSignature"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/auth/me/signature/request": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Withdraw the signed-in user's signature waiting for review */
-    delete: operations["AuthController_withdrawSignatureRequest"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/notifications": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List notifications addressed to the current user
-     * @description One keyset page, newest first, each row carrying the read flag of the calling user only. Send the returned `nextCursor` back as `cursor` for the next page; a null `nextCursor` means there is nothing older left.
-     */
-    get: operations["NotificationController_findAll"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/notifications/unread-count": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Count notifications this user has neither read nor seen closed */
-    get: operations["NotificationController_unreadCount"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/notifications/read-all": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Mark every notification of this user read */
-    patch: operations["NotificationController_markAllRead"];
-    trace?: never;
-  };
-  "/api/v1/notifications/{id}/read": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Mark one notification read for this user */
-    patch: operations["NotificationController_markRead"];
-    trace?: never;
-  };
-  "/api/v1/users": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List users
-     * @description Paginated account list with keyword search, role filter and active filter.
-     */
-    get: operations["UsersController_findAll"];
-    put?: never;
-    /**
-     * Create an account
-     * @description Without a password the account is mailed a single-use link to set its own.
-     */
-    post: operations["UsersController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/column-values": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List distinct values of one filterable user column
-     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
-     */
-    get: operations["UsersController_findColumnValues"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/roles": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List the roles an account can be assigned to */
-    get: operations["UsersController_findAssignableRoles"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Read one account */
-    get: operations["UsersController_findOne"];
-    put?: never;
-    post?: never;
-    /**
-     * Delete an account
-     * @description Soft-deletes the account: it leaves the list, frees its username and email, and loses every session it holds.
-     */
-    delete: operations["UsersController_remove"];
-    options?: never;
-    head?: never;
-    /** Update an account */
-    patch: operations["UsersController_update"];
-    trace?: never;
-  };
-  "/api/v1/users/{id}/active": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /**
-     * Deactivate or restore an account
-     * @description A deactivated account keeps its records but loses every session it holds.
-     */
-    patch: operations["UsersController_setActive"];
-    trace?: never;
-  };
-  "/api/v1/users/{id}/signature/approve": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Approve an account's signature waiting for review
-     * @description The waiting signature becomes the one printed documents stamp, replacing the old one.
-     */
-    post: operations["UsersController_approveSignature"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/signatures/bulk-approve": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Approve selected user signatures
-     * @description Approves the given ids through the same rules as the single-row approval, one at a time. A row that approval refuses is reported in `failed` and leaves the rest of the batch approved.
-     */
-    post: operations["UsersController_bulkApproveSignatures"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/{id}/signature/reject": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Reject an account's signature waiting for review
-     * @description The waiting signature is dropped; the reason is shown to the holder on their profile.
-     */
-    post: operations["UsersController_rejectSignature"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/bulk-deactivate": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Deactivate every ticked account
-     * @description Reports per row: a refused account leaves the rest of the batch deactivated.
-     */
-    post: operations["UsersController_bulkDeactivate"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/bulk-delete": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Soft-delete selected user accounts
-     * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
-     */
-    post: operations["UsersController_bulkRemove"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/import": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Import accounts from a parsed .xlsx
-     * @description All or nothing: each row is judged by the create form's own rules and saved through the same create, in one transaction. Any error rejects the file with every problem located by sheet row. No password is read from the file.
-     */
-    post: operations["UsersController_importUsers"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/export": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Queue an Excel export of the account list
-     * @description Queues every account matching the posted search/filters/sort as a zipped .xlsx laid out like the list, one row per account. Follow the job on GET /excel/jobs/{id}/events and download it once from GET /excel/jobs/{id}/download.
-     */
-    post: operations["UsersController_export"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/users/{id}/reset-password": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Set another account's password */
-    post: operations["UsersController_resetPassword"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/list-preferences/{moduleKey}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Read the caller's column choice for one list */
-    get: operations["ListPreferenceController_find"];
-    /** Store the caller's column choice for one list */
-    put: operations["ListPreferenceController_upsert"];
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/files/upload": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Upload one file and store it */
-    post: operations["FilesController_upload"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/files/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Issue a short-lived signed URL for one stored file */
-    get: operations["FilesController_getUrl"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/excel/template": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Build an empty import template from a sheet spec */
-    post: operations["ExcelController_template"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/excel/parse": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Queue an uploaded .xlsx to be read against a sheet spec */
-    post: operations["ExcelController_parse"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/excel/jobs/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Current state of one of your Excel jobs */
-    get: operations["ExcelController_snapshot"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/excel/jobs/{id}/events": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Server-sent events for one of your Excel jobs
-     * @description Sends one snapshot, then progress events, then one completed or failed event, then closes.
-     */
-    get: operations["ExcelController_events"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/excel/jobs/{id}/result": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Rows read by one of your finished parse jobs */
-    get: operations["ExcelController_result"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/excel/jobs/{id}/download": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Download the zip of one of your finished exports, once
-     * @description The stored file is deleted as soon as this download completes, or 30 minutes after it was ready.
-     */
-    get: operations["ExcelController_download"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/roles": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List roles with the permissions they grant */
-    get: operations["RolesController_findAll"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/roles/permissions": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List every permission the build defines, grouped by resource */
-    get: operations["RolesController_findPermissionCatalog"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/roles/{id}/permissions": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Replace a role's permission set */
-    patch: operations["RolesController_updatePermissions"];
-    trace?: never;
-  };
-  "/api/v1/health": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Report service liveness */
-    get: operations["HealthController_check"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/customers": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List customers
-     * @description Paginated customer list with search and column filters. A Sales actor sees only the customers they own.
-     */
-    get: operations["CustomerController_findAll"];
-    put?: never;
-    /**
-     * Create customer
-     * @description Code must be unique among active customers. The owner defaults to the caller; only an actor who sees every customer may name another sales account.
-     */
-    post: operations["CustomerController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/customers/column-values": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List distinct values of one filterable customer column
-     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
-     */
-    get: operations["CustomerController_findColumnValues"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/customers/next-code": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Preview next customer code
-     * @description Returns the next suggested KH_xxxx code without reserving it. The code stays editable on create.
-     */
-    get: operations["CustomerController_getNextCode"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/customers/owner-options": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List the accounts a customer may be assigned to
-     * @description Sales accounts for an actor who sees every customer; only the caller otherwise.
-     */
-    get: operations["CustomerController_listOwnerOptions"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/customers/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get customer by ID */
-    get: operations["CustomerController_findOne"];
-    put?: never;
-    post?: never;
-    /**
-     * Soft-delete customer
-     * @description Refused with 409 while any sales document references the customer.
-     */
-    delete: operations["CustomerController_remove"];
-    options?: never;
-    head?: never;
-    /**
-     * Update customer
-     * @description Code is immutable. Reassigning the owner needs full customer scope.
-     */
-    patch: operations["CustomerController_update"];
-    trace?: never;
-  };
-  "/api/v1/customers/bulk-delete": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Soft-delete selected customers
-     * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
-     */
-    post: operations["CustomerController_bulkRemove"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/contacts": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List contacts
-     * @description Paginated contact list, optionally of one customer. Contacts follow their customer: a Sales actor sees only the contacts of customers they own.
-     */
-    get: operations["ContactController_findAll"];
-    put?: never;
-    /**
-     * Create contact
-     * @description Adds a contact to a customer. Marking it primary demotes the customer’s previous primary contact.
-     */
-    post: operations["ContactController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/contacts/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get contact by ID */
-    get: operations["ContactController_findOne"];
-    put?: never;
-    post?: never;
-    /** Soft-delete contact */
-    delete: operations["ContactController_remove"];
-    options?: never;
-    head?: never;
-    /** Update contact */
-    patch: operations["ContactController_update"];
-    trace?: never;
-  };
-  "/api/v1/projects": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List projects
-     * @description Paginated project list with search and column filters. Projects follow their customer: a Sales actor sees only the projects of customers they own.
-     */
-    get: operations["ProjectController_findAll"];
-    put?: never;
-    /**
-     * Create project
-     * @description Code must be unique among active projects. The customer is fixed at creation.
-     */
-    post: operations["ProjectController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/projects/column-values": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List distinct values of one filterable project column
-     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
-     */
-    get: operations["ProjectController_findColumnValues"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/projects/next-code": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Preview next project code
-     * @description Returns the next suggested DA_xxxx code without reserving it. The code stays editable on create.
-     */
-    get: operations["ProjectController_getNextCode"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/projects/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get project by ID */
-    get: operations["ProjectController_findOne"];
-    put?: never;
-    post?: never;
-    /**
-     * Soft-delete project
-     * @description Refused with 409 while any sales document references the project.
-     */
-    delete: operations["ProjectController_remove"];
-    options?: never;
-    head?: never;
-    /**
-     * Update project
-     * @description Code and customer are immutable.
-     */
-    patch: operations["ProjectController_update"];
-    trace?: never;
-  };
-  "/api/v1/projects/bulk-delete": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Soft-delete selected projects
-     * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
-     */
-    post: operations["ProjectController_bulkRemove"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/items": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List items
-     * @description Paginated item list with search and column filters. referencePrice is omitted unless the actor holds reference_price:read.
-     */
-    get: operations["ItemController_findAll"];
-    put?: never;
-    /**
-     * Create item
-     * @description Code must be unique among active items (case-insensitive).
-     */
-    post: operations["ItemController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/items/column-values": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List distinct values of one filterable item column
-     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
-     */
-    get: operations["ItemController_findColumnValues"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/items/import-template": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Download the item import template
-     * @description An .xlsx with the header row the import reads: STT, MÔ TẢ, MÃ HÀNG, HÃNG SẢN XUẤT, ĐV TÍNH, ĐƠN GIÁ (VNĐ), NHÓM, QUY CÁCH, GHI CHÚ.
-     */
-    get: operations["ItemController_importTemplate"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/items/import": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Import items from an Excel quotation sheet
-     * @description Reads the first worksheet of an .xlsx (max 5 MB, 2000 data rows). The header row is found within the first 50 rows by its "MÔ TẢ" and "MÃ HÀNG" cells. Every row is validated first; valid rows are inserted in one transaction and invalid rows are reported by sheet row.
-     */
-    post: operations["ItemController_import"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/items/resolve": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Resolve a scanned value to an item
-     * @description The active item whose barcode equals the trimmed value, else the one whose code does (any case). Carries no price.
-     */
-    get: operations["ItemController_resolve"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/items/labels.pdf": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Download item labels as PDF
-     * @description One 50 x 30 mm page per item and copy: the item code as Code 128, the code in text and the name. Carries no price. ids x copies is at most 500.
-     */
-    get: operations["ItemController_labelsPdf"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/items/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get item by ID */
-    get: operations["ItemController_findOne"];
-    put?: never;
-    post?: never;
-    /**
-     * Soft-delete item
-     * @description Refused with 409 while any sales document references the item.
-     */
-    delete: operations["ItemController_remove"];
-    options?: never;
-    head?: never;
-    /**
-     * Update item
-     * @description The code is immutable.
-     */
-    patch: operations["ItemController_update"];
-    trace?: never;
-  };
-  "/api/v1/items/{id}/stock-settings": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /**
-     * Update the warehouse settings of an item
-     * @description Edits only barcode, default location and minimum stock. A barcode must be neither another active item barcode nor another active item code.
-     */
-    patch: operations["ItemController_updateStockSettings"];
-    trace?: never;
-  };
-  "/api/v1/items/bulk-delete": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Soft-delete selected items
-     * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
-     */
-    post: operations["ItemController_bulkRemove"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/catalog/locations": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List locations
-     * @description Paginated location list with search and column filters.
-     */
-    get: operations["LocationController_findAll"];
-    put?: never;
-    /**
-     * Create location
-     * @description Code must be unique among active locations, in any case.
-     */
-    post: operations["LocationController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/catalog/locations/column-values": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List distinct values of one filterable location column
-     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
-     */
-    get: operations["LocationController_findColumnValues"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/catalog/locations/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get location by ID */
-    get: operations["LocationController_findOne"];
-    put?: never;
-    post?: never;
-    /**
-     * Soft-delete location
-     * @description Refused with 409 while an active item has the location as its default.
-     */
-    delete: operations["LocationController_remove"];
-    options?: never;
-    head?: never;
-    /** Update location */
-    patch: operations["LocationController_update"];
-    trace?: never;
-  };
-  "/api/v1/catalog/locations/bulk-delete": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Soft-delete selected locations
-     * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
-     */
-    post: operations["LocationController_bulkRemove"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/requests": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List quote requests
-     * @description Paginated request list with search, status, engineer and quotation-due filters. A Sales actor sees only the requests they own; an Engineer only the requests assigned to them.
-     */
-    get: operations["RequestController_findAll"];
-    put?: never;
-    /**
-     * Create quote request
-     * @description The code (YC_YYYY_NNNN) is generated. The customer must be visible to the caller; project and contact must belong to it. The owner defaults to the caller; only an actor who sees every request may name another sales account.
-     */
-    post: operations["RequestController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/requests/column-values": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List distinct values of one filterable request column
-     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
-     */
-    get: operations["RequestController_findColumnValues"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/requests/engineer-options": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List the accounts a request may be assigned to
-     * @description Active engineers and engineering leads.
-     */
-    get: operations["RequestController_listEngineerOptions"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/requests/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get quote request by ID
-     * @description Embeds the customer, project and contact summary, so an assigned engineer sees them without customer or project read permission.
-     */
-    get: operations["RequestController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /**
-     * Update quote request
-     * @description Only while the request is a draft or assigned. Code and customer are immutable.
-     */
-    patch: operations["RequestController_update"];
-    trace?: never;
-  };
-  "/api/v1/sales/requests/{id}/activities": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Timeline of a quote request */
-    get: operations["RequestController_listActivities"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/requests/{id}/assign": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Assign or reassign the engineer
-     * @description The first assignment moves a draft to assigned. The engineer is notified once, after the change is saved.
-     */
-    post: operations["RequestController_assign"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/requests/{id}/cancel": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Cancel a quote request
-     * @description Needs a reason. Possible until the request has been quoted.
-     */
-    post: operations["RequestController_cancel"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/requests/{id}/lost": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Mark a quote request lost
-     * @description Needs a reason. Possible once the request is estimated or quoted.
-     */
-    post: operations["RequestController_markLost"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/requests/{id}/attachments": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List the files of a quote request */
-    get: operations["RequestAttachmentController_list"];
-    put?: never;
-    /**
-     * Attach a file to a quote request
-     * @description Allowed: pdf, dwg, dxf, xlsx, png, jpg/jpeg — by extension and by content — up to 20 MB each, 20 per request, while the request is a draft, assigned or being estimated.
-     */
-    post: operations["RequestAttachmentController_upload"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/requests/{id}/attachments/{attachmentId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Download a file of a quote request
-     * @description Served as an attachment, never inline. Requires access to the request.
-     */
-    get: operations["RequestAttachmentController_download"];
-    put?: never;
-    post?: never;
-    /**
-     * Remove a file of a quote request
-     * @description Only while the request is a draft, assigned or being estimated.
-     */
-    delete: operations["RequestAttachmentController_remove"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/estimates": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List estimates
-     * @description Paginated list; filter by the status of the latest revision, request or engineer. The keyword matches the estimate code or the code or title of its request. A Sales actor sees the estimates of the requests they own; an Engineer those of requests assigned to them.
-     */
-    get: operations["EstimateController_findAll"];
-    put?: never;
-    /**
-     * Start the estimate of a request
-     * @description Creates the first draft (code DT_YYYY_NNNN) and moves the request from assigned to estimating in the same transaction. Only the assigned engineer or an actor who sees every request may start it.
-     */
-    post: operations["EstimateController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/estimates/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get an estimate with one revision
-     * @description The header, the request it answers, the revision list, and the panels with BOM and cost lines of the revision asked for (the latest by default).
-     */
-    get: operations["EstimateController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/estimates/{id}/submit": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Submit the draft revision
-     * @description Freezes the draft, supersedes the previous submitted revision, moves the request to estimated in the same transaction and notifies the sales owner once.
-     */
-    post: operations["EstimateController_submit"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/estimates/{id}/revise": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Open a new draft revision
-     * @description Copies the latest submitted revision (BOM snapshots included) into a new draft. Only while the request is estimating or estimated.
-     */
-    post: operations["EstimateController_revise"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/estimates/{id}/panels": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Add a panel to the draft
-     * @description Returns the whole draft revision with recomputed totals.
-     */
-    post: operations["EstimateController_addPanel"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/estimates/{id}/panels/{panelId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Remove a panel and its lines from the draft */
-    delete: operations["EstimateController_deletePanel"];
-    options?: never;
-    head?: never;
-    /** Update a panel of the draft */
-    patch: operations["EstimateController_updatePanel"];
-    trace?: never;
-  };
-  "/api/v1/sales/estimates/{id}/panels/{panelId}/bom-lines": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Add a BOM line to a panel
-     * @description Copies the item code, name, brand and unit onto the line; the unit cost defaults to the item reference price.
-     */
-    post: operations["EstimateController_addBomLine"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/estimates/{id}/bom-lines/{lineId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Remove a BOM line from the draft */
-    delete: operations["EstimateController_deleteBomLine"];
-    options?: never;
-    head?: never;
-    /** Update the quantity, unit cost or note of a line */
-    patch: operations["EstimateController_updateBomLine"];
-    trace?: never;
-  };
-  "/api/v1/sales/estimates/{id}/panels/{panelId}/cost-lines": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Add a cost line to a panel
-     * @description The amount is the cost of ONE panel.
-     */
-    post: operations["EstimateController_addCostLine"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/estimates/{id}/cost-lines/{lineId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    /** Remove a cost line from the draft */
-    delete: operations["EstimateController_deleteCostLine"];
-    options?: never;
-    head?: never;
-    /** Update a cost line */
-    patch: operations["EstimateController_updateCostLine"];
-    trace?: never;
-  };
-  "/api/v1/sales/quotations": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List quotations
-     * @description Paginated list with the request and the latest version of each; filter by the latest version status, code, customer or request. The keyword matches the quotation code or the code or title of its request. A Sales actor sees the quotations of the requests they own.
-     */
-    get: operations["QuotationController_findAll"];
-    put?: never;
-    /**
-     * Quote an estimated request
-     * @description Builds version 1 (draft, code NN-ddmmyyyy/BG) from the latest submitted estimate revision and leaves the request estimated. A revision that is not the latest submitted one, a request not estimated, or a request that already has a quotation answer 409.
-     */
-    post: operations["QuotationController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/quotations/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get a quotation with one version
-     * @description The header, the request it answers, the version list, and the lines with their frozen BOM and cost-line copies of the version asked for (the latest by default).
-     */
-    get: operations["QuotationController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /**
-     * Set margins, discount, VAT and terms of the draft version
-     * @description Only what the body names changes; margins are per line (0–1000%), the discount a percent (0–100) or an amount not above the subtotal, VAT one of 0/5/8/10, and the terms replace the printed list. The server recomputes and stores every total.
-     */
-    patch: operations["QuotationController_updatePricing"];
-    trace?: never;
-  };
-  "/api/v1/sales/quotations/{id}/revise": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Revise the quotation
-     * @description Opens the next version as a draft copying the latest one and closes the latest. Allowed only from pending_approval, approved or rejected; two concurrent revises produce exactly one new version.
-     */
-    post: operations["QuotationController_revise"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/quotations/{id}/refresh-estimate": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Update the draft from the latest submitted estimate
-     * @description Rebuilds the draft panel lines and frozen BOM from the latest submitted estimate revision, keeping the margin of every panel whose tag still exists. Discount, VAT and terms stay. A draft already on the latest revision is returned unchanged.
-     */
-    post: operations["QuotationController_refreshEstimate"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/quotations/{id}/submit": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Submit the draft for approval
-     * @description draft → pending_approval, by the version creator or a manager; the approvers are notified after the commit. A draft built on an estimate revision that is no longer the latest submitted one answers 409.
-     */
-    post: operations["QuotationController_submit"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/quotations/{id}/approve": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Approve the version
-     * @description pending_approval → approved in one step, by someone other than the version creator. The first approval moves the request from estimated to quoted in the same transaction; the sales owner is notified after the commit.
-     */
-    post: operations["QuotationController_approve"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/quotations/{id}/reject": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Reject the version
-     * @description pending_approval → rejected with a reason, by someone other than the version creator. The version stays as it was; Sales revises it into the next version.
-     */
-    post: operations["QuotationController_reject"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/quotations/{id}/confirm": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Record that the customer accepted
-     * @description approved → customer_confirmed; any other status answers 409.
-     */
-    post: operations["QuotationController_confirm"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/quotations/{id}/cancel": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Cancel the quotation
-     * @description From draft, pending_approval, approved or rejected: the version becomes cancelled and the request lost, with the reason, in one transaction. A confirmed or already cancelled quotation answers 409.
-     */
-    post: operations["QuotationController_cancel"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/quotations/{id}/feedback": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List the customer feedback of a quotation
-     * @description Newest first: date, channel, content and who recorded it.
-     */
-    get: operations["QuotationController_listFeedback"];
-    put?: never;
-    /**
-     * Record what the customer answered
-     * @description Appends one entry to the feedback log of the quotation.
-     */
-    post: operations["QuotationController_addFeedback"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/quotations/{id}/export.xlsx": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Download the customer-facing quotation as .xlsx
-     * @description The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.
-     */
-    get: operations["QuotationController_exportXlsx"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/quotations/{id}/export.pdf": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Download the customer-facing quotation as PDF
-     * @description The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.
-     */
-    get: operations["QuotationController_exportPdf"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/orders": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List orders
-     * @description Paginated list; filter by status, code or customer. The keyword matches the order code, the customer name, the contract number or the request code. A Sales actor sees the orders of the requests they own.
-     */
-    get: operations["OrderController_findAll"];
-    put?: never;
-    /**
-     * Convert a confirmed quotation into an order
-     * @description Snapshots the customer-confirmed version (customer, project, terms, lines, totals) into one order DH_YYYY_NNNN and moves the request to won in the same transaction. Contract number, contract date and delivery date are optional. A quotation whose latest version is not customer_confirmed, or that already has an order (cancelled ones included), answers 409.
-     */
-    post: operations["OrderController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/sales/orders/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get an order
-     * @description The order with its snapshots, lines (and their BOM) and the chain links to its request, estimate revision and quotation version.
-     */
-    get: operations["OrderController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /**
-     * Edit the contract number, contract date and delivery date
-     * @description Only while the order is open; lines, prices, totals and snapshots are never editable.
-     */
-    patch: operations["OrderController_update"];
-    trace?: never;
-  };
-  "/api/v1/sales/orders/{id}/cancel": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Cancel the order
-     * @description An open order becomes cancelled and its request lost, with the reason, in one transaction. The quotation stays confirmed and is not converted again. Any other status answers 409.
-     */
-    post: operations["OrderController_cancel"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/suppliers": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List suppliers
-     * @description Paginated supplier list with search and column filters.
-     */
-    get: operations["SupplierController_findAll"];
-    put?: never;
-    /**
-     * Create supplier
-     * @description Code must be unique among active suppliers, in any case.
-     */
-    post: operations["SupplierController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/suppliers/column-values": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List distinct values of one filterable supplier column
-     * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
-     */
-    get: operations["SupplierController_findColumnValues"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/suppliers/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get supplier by ID */
-    get: operations["SupplierController_findOne"];
-    put?: never;
-    post?: never;
-    /**
-     * Soft-delete supplier
-     * @description Refused with 409 while any purchasing document references the supplier.
-     */
-    delete: operations["SupplierController_remove"];
-    options?: never;
-    head?: never;
-    /** Update supplier */
-    patch: operations["SupplierController_update"];
-    trace?: never;
-  };
-  "/api/v1/inventory/suppliers/bulk-delete": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Soft-delete selected suppliers
-     * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
-     */
-    post: operations["SupplierController_bulkRemove"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/stock": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List stock
-     * @description Every active item with on hand, reserved, available and minimum stock. Average cost and value only with purchase_price:read.
-     */
-    get: operations["StockController_findAll"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/stock/availability": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Stock availability of items
-     * @description On hand, reserved and available per item, never any cost. Items without stock answer zeros; deleted or unknown ids are left out.
-     */
-    get: operations["StockController_findAvailability"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/stock/{itemId}/movements": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List the stock movements of an item
-     * @description Newest first. Unit cost, value, reference value and average cost only with purchase_price:read.
-     */
-    get: operations["StockController_findMovements"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-orders": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List purchase orders
-     * @description VAT rate, unit prices, amounts and totals only with purchase_price:read.
-     */
-    get: operations["PurchaseOrderController_findAll"];
-    put?: never;
-    /** Create a draft purchase order */
-    post: operations["PurchaseOrderController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-orders/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get a purchase order with its lines and history
-     * @description VAT rate, unit prices, amounts and totals only with purchase_price:read.
-     */
-    get: operations["PurchaseOrderController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /**
-     * Edit a draft
-     * @description Lines, when given, replace every line. The editor can no longer approve the order.
-     */
-    patch: operations["PurchaseOrderController_update"];
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-orders/from-requests": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Turn open purchase request lines into a draft order
-     * @description Each line at most what its request line has remaining; prices default to the items’ reference price. Lines remember the request line and the sales order it was raised for.
-     */
-    post: operations["PurchaseOrderController_createFromRequests"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-orders/{id}/submit": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Submit a draft for approval */
-    post: operations["PurchaseOrderController_submit"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-orders/{id}/approve": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Approve a submitted order
-     * @description Refused to its creator, its submitter and anyone who edited it.
-     */
-    post: operations["PurchaseOrderController_approve"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-orders/{id}/reject": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Reject a submitted order back to draft
-     * @description The reason is kept in the order history.
-     */
-    post: operations["PurchaseOrderController_reject"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-orders/{id}/cancel": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Cancel an order nothing was received on */
-    post: operations["PurchaseOrderController_cancel"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-orders/{id}/close": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Short-close an approved or partly received order */
-    post: operations["PurchaseOrderController_close"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/materials/orders": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List orders with their material shortage
-     * @description Every order the actor may see (a sales account only its own), with the count of items still short. No sales money.
-     */
-    get: operations["MaterialController_findOrders"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/materials/orders/{orderId}/estimate-vs-actual": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Estimate against actual material of one order
-     * @description Per item: estimated (BOM) and actual (issued net of workshop returns) quantity; costs only with purchase_price:read. Every over-BOM issue with its reason. No sales money.
-     */
-    get: operations["MaterialController_findEstimateVsActual"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/materials/orders/{orderId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Material view of one order
-     * @description Per item: demand, reserved, issued, returned and short; per panel its BOM; unlinked BOM lines listed apart. No sales money.
-     */
-    get: operations["MaterialController_findOrder"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/receipts": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List stock receipts */
-    get: operations["StockReceiptController_findAll"];
-    put?: never;
-    /**
-     * Receive goods of an approved purchase order into stock
-     * @description Posts at the order line prices and allocates the stock to short orders, the order’s source orders first. A request key already used answers the first receipt with 200 and posts nothing.
-     */
-    post: operations["StockReceiptController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/receipts/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get a stock receipt with its lines
-     * @description Unit costs only with purchase_price:read.
-     */
-    get: operations["StockReceiptController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/issues": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List stock issues */
-    get: operations["StockIssueController_findAll"];
-    put?: never;
-    /**
-     * Issue materials to an open order
-     * @description Uses the order’s reservation first, then free stock, never another order’s reservation. Beyond the BOM every line of the item needs a reason. A request key already used answers the first issue with 200 and posts nothing.
-     */
-    post: operations["StockIssueController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/issues/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get a stock issue with its lines
-     * @description Line unit costs and values only with purchase_price:read.
-     */
-    get: operations["StockIssueController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/workshop-returns": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List workshop returns */
-    get: operations["WorkshopReturnController_findAll"];
-    put?: never;
-    /**
-     * Take back what the workshop did not use
-     * @description At most what the order still has out, at its net issued average cost; the stock goes back to the order first while it is open and short. A request key already used answers the first return with 200.
-     */
-    post: operations["WorkshopReturnController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/workshop-returns/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get a workshop return with its lines
-     * @description Line unit costs and values only with purchase_price:read.
-     */
-    get: operations["WorkshopReturnController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/supplier-returns": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List supplier returns */
-    get: operations["SupplierReturnController_findAll"];
-    put?: never;
-    /**
-     * Return received goods to the supplier
-     * @description At most what the purchase order line has received; leaves at the order price and shrinks reservations the stock no longer covers. A request key already used answers the first return with 200.
-     */
-    post: operations["SupplierReturnController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/supplier-returns/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get a supplier return with its lines
-     * @description Unit costs, values and reference values only with purchase_price:read.
-     */
-    get: operations["SupplierReturnController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/stocktakes": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List stock counts */
-    get: operations["StocktakeController_findAll"];
-    put?: never;
-    /** Open a count of the whole warehouse or one location */
-    post: operations["StocktakeController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/stocktakes/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get a stock count with its lines
-     * @description Book and counted quantities and the difference to every reader; unit costs and values only with purchase_price:read.
-     */
-    get: operations["StocktakeController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/stocktakes/{id}/scan": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Count one more of a scanned item
-     * @description An item without a line gets one. Records the book quantity of the moment.
-     */
-    post: operations["StocktakeController_scan"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/stocktakes/{id}/lines/{itemId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /** Set the counted quantity of an item on the count */
-    patch: operations["StocktakeController_setCount"];
-    trace?: never;
-  };
-  "/api/v1/inventory/stocktakes/{id}/submit": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Submit a count for approval */
-    post: operations["StocktakeController_submit"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/stocktakes/{id}/approve": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Approve a submitted count and post its differences
-     * @description Refused to its creator, every submitter and every counter. A result below zero refuses the whole count.
-     */
-    post: operations["StocktakeController_approve"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/stocktakes/{id}/reject": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Send a submitted count back to counting */
-    post: operations["StocktakeController_reject"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/stocktakes/{id}/cancel": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Cancel an open count */
-    post: operations["StocktakeController_cancel"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-requests": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List purchase requests with what each line has been ordered */
-    get: operations["PurchaseRequestController_findAll"];
-    put?: never;
-    /** Raise a purchase request by hand */
-    post: operations["PurchaseRequestController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-requests/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a purchase request */
-    get: operations["PurchaseRequestController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /**
-     * Edit a request nothing has been ordered on
-     * @description Lines, when given, replace every line.
-     */
-    patch: operations["PurchaseRequestController_update"];
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-requests/from-order/{orderId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Request what an order is still short of
-     * @description One line per item: the shortage less what open requests for the order still ask and what purchase orders bought for it still bring.
-     */
-    post: operations["PurchaseRequestController_createFromOrder"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/inventory/purchase-requests/{id}/cancel": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /** Cancel a request nothing has been ordered on */
-    post: operations["PurchaseRequestController_cancel"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/orders": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List production orders
-     * @description Filter by status or sales order. A sales actor sees the production orders of the orders they own; a technician only those with a cabinet assigned to them.
-     */
-    get: operations["ProductionOrderController_findAll"];
-    put?: never;
-    /**
-     * Create a draft production order for an open order
-     * @description One cabinet per panel ordered, coded <tag>-<n>, each with its six stages pending.
-     */
-    post: operations["ProductionOrderController_create"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/open-orders": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List the open orders a production order can still be made for
-     * @description Code, customer name and delivery date only.
-     */
-    get: operations["ProductionOrderController_findOpenOrders"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/technician-options": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List the accounts a cabinet may be assigned to
-     * @description Active accounts holding the technician role.
-     */
-    get: operations["ProductionOrderController_listTechnicianOptions"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/orders/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * Get a production order with its cabinets and history
-     * @description A technician sees only the cabinets assigned to them.
-     */
-    get: operations["ProductionOrderController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/orders/{id}/shortage": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List the items the order is still short of
-     * @description Quantities only, as the material view computes them. Nothing here blocks a stage.
-     */
-    get: operations["ProductionOrderController_findShortage"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/orders/{id}/units/{unitId}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    /**
-     * Assign a technician and a planned end date to a cabinet
-     * @description The assignee must hold the technician role. Refused once the order is completed or cancelled, or the cabinet is finished.
-     */
-    patch: operations["ProductionOrderController_updateUnit"];
-    trace?: never;
-  };
-  "/api/v1/production/orders/{id}/release": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Release a draft to the workshop
-     * @description Every cabinet needs a technician and a planned end date. The sales order becomes in_production and keeps its materials.
-     */
-    post: operations["ProductionOrderController_releaseOrder"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/orders/{id}/cancel": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Cancel a draft or released production order
-     * @description A released order gives the sales order back: it becomes open again. Stage history stays.
-     */
-    post: operations["ProductionOrderController_cancel"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/units": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List cabinets with the progress of their six stages
-     * @description Filter by mine, production order or the status of the current stage. A technician sees only their own cabinets; a sales actor those of the orders they own.
-     */
-    get: operations["ProgressController_findAll"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/units/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** Get a cabinet with its six stages */
-    get: operations["ProgressController_findOne"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/units/{id}/stages/{stage}/start": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Start a stage
-     * @description The previous stage must be done and the production order released. Only the assigned technician or a production manager.
-     */
-    post: operations["ProgressController_startStage"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/units/{id}/stages/{stage}/finish": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Finish a stage
-     * @description The last finishing completes the production order and tells the production managers and the sales owner.
-     */
-    post: operations["ProgressController_finishStage"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/units/{id}/stages/{stage}/undo": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Take the latest finished stage back to in progress
-     * @description Production manager only, with a reason, while the production order is released and the next stage is still pending.
-     */
-    post: operations["ProgressController_undoStage"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/units/{id}/photos": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /** List the photos of a cabinet, oldest first */
-    get: operations["UnitPhotoController_list"];
-    put?: never;
-    /**
-     * Attach a photo to a stage of a cabinet
-     * @description PNG or JPEG, by extension and by content, up to 10 MB each and 30 per cabinet, while the production order is released. Only the assigned technician or a production manager. An optional issue must belong to the same cabinet.
-     */
-    post: operations["UnitPhotoController_upload"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/photos/{photoId}/content": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * The image of a photo
-     * @description Served with the content type stored at upload. Requires access to the cabinet.
-     */
-    get: operations["UnitPhotoController_content"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/issues": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    /**
-     * List production issues
-     * @description Filter by status, production order or cabinet. A technician sees only the issues of their own cabinets; a sales actor those of the orders they own.
-     */
-    get: operations["ProductionIssueController_findAll"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/units/{id}/issues": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Report an issue on a stage of a cabinet
-     * @description Only the assigned technician or a production manager, while the production order is released. An open issue never blocks a stage; the production managers are told.
-     */
-    post: operations["ProductionIssueController_open"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/production/issues/{id}/resolve": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    get?: never;
-    put?: never;
-    /**
-     * Resolve an issue
-     * @description Production manager only, with a resolution. The technician who reported it is told.
-     */
-    post: operations["ProductionIssueController_resolve"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
+    "/api/v1/auth/login": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Sign in and issue an access and refresh token pair */
+        post: operations["AuthController_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Exchange a refresh token for a new token pair */
+        post: operations["AuthController_refresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/forgot-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request a password reset link by email
+         * @description Always succeeds, whether or not the address belongs to an account, so the response cannot be used to discover who has one.
+         */
+        post: operations["AuthController_forgotPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set a new password using a reset link token */
+        post: operations["AuthController_resetPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Change the signed-in user's own password */
+        post: operations["AuthController_changePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Revoke the caller's session
+         * @description Signs out this device only; the account's sessions on other devices stay valid.
+         */
+        post: operations["AuthController_logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the signed-in user's own profile */
+        get: operations["AuthController_me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update the signed-in user's own directory fields */
+        patch: operations["AuthController_updateProfile"];
+        trace?: never;
+    };
+    "/api/v1/auth/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Replace the signed-in user's own avatar */
+        post: operations["AuthController_updateAvatar"];
+        /** Remove the signed-in user's own avatar */
+        delete: operations["AuthController_removeAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/signature": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Replace the signed-in user's own electronic signature
+         * @description Applies at once for an administrator; anyone else submits it for administrator review.
+         */
+        post: operations["AuthController_updateSignature"];
+        /** Remove the signed-in user's own electronic signature */
+        delete: operations["AuthController_removeSignature"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/me/signature/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Withdraw the signed-in user's signature waiting for review */
+        delete: operations["AuthController_withdrawSignatureRequest"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List notifications addressed to the current user
+         * @description One keyset page, newest first, each row carrying the read flag of the calling user only. Send the returned `nextCursor` back as `cursor` for the next page; a null `nextCursor` means there is nothing older left.
+         */
+        get: operations["NotificationController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/unread-count": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Count notifications this user has neither read nor seen closed */
+        get: operations["NotificationController_unreadCount"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/notifications/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Mark every notification of this user read */
+        patch: operations["NotificationController_markAllRead"];
+        trace?: never;
+    };
+    "/api/v1/notifications/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Mark one notification read for this user */
+        patch: operations["NotificationController_markRead"];
+        trace?: never;
+    };
+    "/api/v1/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List users
+         * @description Paginated account list with keyword search, role filter and active filter.
+         */
+        get: operations["UsersController_findAll"];
+        put?: never;
+        /**
+         * Create an account
+         * @description Without a password the account is mailed a single-use link to set its own.
+         */
+        post: operations["UsersController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/column-values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List distinct values of one filterable user column
+         * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+         */
+        get: operations["UsersController_findColumnValues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the roles an account can be assigned to */
+        get: operations["UsersController_findAssignableRoles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read one account */
+        get: operations["UsersController_findOne"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete an account
+         * @description Soft-deletes the account: it leaves the list, frees its username and email, and loses every session it holds.
+         */
+        delete: operations["UsersController_remove"];
+        options?: never;
+        head?: never;
+        /** Update an account */
+        patch: operations["UsersController_update"];
+        trace?: never;
+    };
+    "/api/v1/users/{id}/active": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Deactivate or restore an account
+         * @description A deactivated account keeps its records but loses every session it holds.
+         */
+        patch: operations["UsersController_setActive"];
+        trace?: never;
+    };
+    "/api/v1/users/{id}/signature/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve an account's signature waiting for review
+         * @description The waiting signature becomes the one printed documents stamp, replacing the old one.
+         */
+        post: operations["UsersController_approveSignature"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/signatures/bulk-approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve selected user signatures
+         * @description Approves the given ids through the same rules as the single-row approval, one at a time. A row that approval refuses is reported in `failed` and leaves the rest of the batch approved.
+         */
+        post: operations["UsersController_bulkApproveSignatures"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/signature/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reject an account's signature waiting for review
+         * @description The waiting signature is dropped; the reason is shown to the holder on their profile.
+         */
+        post: operations["UsersController_rejectSignature"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/bulk-deactivate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Deactivate every ticked account
+         * @description Reports per row: a refused account leaves the rest of the batch deactivated.
+         */
+        post: operations["UsersController_bulkDeactivate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/bulk-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Soft-delete selected user accounts
+         * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
+         */
+        post: operations["UsersController_bulkRemove"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import accounts from a parsed .xlsx
+         * @description All or nothing: each row is judged by the create form's own rules and saved through the same create, in one transaction. Any error rejects the file with every problem located by sheet row. No password is read from the file.
+         */
+        post: operations["UsersController_importUsers"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Queue an Excel export of the account list
+         * @description Queues every account matching the posted search/filters/sort as a zipped .xlsx laid out like the list, one row per account. Follow the job on GET /excel/jobs/{id}/events and download it once from GET /excel/jobs/{id}/download.
+         */
+        post: operations["UsersController_export"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/users/{id}/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set another account's password */
+        post: operations["UsersController_resetPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/list-preferences/{moduleKey}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read the caller's column choice for one list */
+        get: operations["ListPreferenceController_find"];
+        /** Store the caller's column choice for one list */
+        put: operations["ListPreferenceController_upsert"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/files/upload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload one file and store it */
+        post: operations["FilesController_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/files/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Issue a short-lived signed URL for one stored file */
+        get: operations["FilesController_getUrl"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/excel/template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Build an empty import template from a sheet spec */
+        post: operations["ExcelController_template"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/excel/parse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Queue an uploaded .xlsx to be read against a sheet spec */
+        post: operations["ExcelController_parse"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/excel/jobs/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Current state of one of your Excel jobs */
+        get: operations["ExcelController_snapshot"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/excel/jobs/{id}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Server-sent events for one of your Excel jobs
+         * @description Sends one snapshot, then progress events, then one completed or failed event, then closes.
+         */
+        get: operations["ExcelController_events"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/excel/jobs/{id}/result": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Rows read by one of your finished parse jobs */
+        get: operations["ExcelController_result"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/excel/jobs/{id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download the zip of one of your finished exports, once
+         * @description The stored file is deleted as soon as this download completes, or 30 minutes after it was ready.
+         */
+        get: operations["ExcelController_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List roles with the permissions they grant */
+        get: operations["RolesController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/roles/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List every permission the build defines, grouped by resource */
+        get: operations["RolesController_findPermissionCatalog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/roles/{id}/permissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Replace a role's permission set */
+        patch: operations["RolesController_updatePermissions"];
+        trace?: never;
+    };
+    "/api/v1/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Report service liveness */
+        get: operations["HealthController_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List customers
+         * @description Paginated customer list with search and column filters. A Sales actor sees only the customers they own.
+         */
+        get: operations["CustomerController_findAll"];
+        put?: never;
+        /**
+         * Create customer
+         * @description Code must be unique among active customers. The owner defaults to the caller; only an actor who sees every customer may name another sales account.
+         */
+        post: operations["CustomerController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers/column-values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List distinct values of one filterable customer column
+         * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+         */
+        get: operations["CustomerController_findColumnValues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers/next-code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Preview next customer code
+         * @description Returns the next suggested KH_xxxx code without reserving it. The code stays editable on create.
+         */
+        get: operations["CustomerController_getNextCode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers/owner-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the accounts a customer may be assigned to
+         * @description Sales accounts for an actor who sees every customer; only the caller otherwise.
+         */
+        get: operations["CustomerController_listOwnerOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/customers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get customer by ID */
+        get: operations["CustomerController_findOne"];
+        put?: never;
+        post?: never;
+        /**
+         * Soft-delete customer
+         * @description Refused with 409 while any sales document references the customer.
+         */
+        delete: operations["CustomerController_remove"];
+        options?: never;
+        head?: never;
+        /**
+         * Update customer
+         * @description Code is immutable. Reassigning the owner needs full customer scope.
+         */
+        patch: operations["CustomerController_update"];
+        trace?: never;
+    };
+    "/api/v1/customers/bulk-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Soft-delete selected customers
+         * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
+         */
+        post: operations["CustomerController_bulkRemove"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List contacts
+         * @description Paginated contact list, optionally of one customer. Contacts follow their customer: a Sales actor sees only the contacts of customers they own.
+         */
+        get: operations["ContactController_findAll"];
+        put?: never;
+        /**
+         * Create contact
+         * @description Adds a contact to a customer. Marking it primary demotes the customer’s previous primary contact.
+         */
+        post: operations["ContactController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/contacts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get contact by ID */
+        get: operations["ContactController_findOne"];
+        put?: never;
+        post?: never;
+        /** Soft-delete contact */
+        delete: operations["ContactController_remove"];
+        options?: never;
+        head?: never;
+        /** Update contact */
+        patch: operations["ContactController_update"];
+        trace?: never;
+    };
+    "/api/v1/projects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List projects
+         * @description Paginated project list with search and column filters. Projects follow their customer: a Sales actor sees only the projects of customers they own.
+         */
+        get: operations["ProjectController_findAll"];
+        put?: never;
+        /**
+         * Create project
+         * @description Code must be unique among active projects. The customer is fixed at creation.
+         */
+        post: operations["ProjectController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/column-values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List distinct values of one filterable project column
+         * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+         */
+        get: operations["ProjectController_findColumnValues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/next-code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Preview next project code
+         * @description Returns the next suggested DA_xxxx code without reserving it. The code stays editable on create.
+         */
+        get: operations["ProjectController_getNextCode"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/projects/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get project by ID */
+        get: operations["ProjectController_findOne"];
+        put?: never;
+        post?: never;
+        /**
+         * Soft-delete project
+         * @description Refused with 409 while any sales document references the project.
+         */
+        delete: operations["ProjectController_remove"];
+        options?: never;
+        head?: never;
+        /**
+         * Update project
+         * @description Code and customer are immutable.
+         */
+        patch: operations["ProjectController_update"];
+        trace?: never;
+    };
+    "/api/v1/projects/bulk-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Soft-delete selected projects
+         * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
+         */
+        post: operations["ProjectController_bulkRemove"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List items
+         * @description Paginated item list with search and column filters. referencePrice is omitted unless the actor holds reference_price:read.
+         */
+        get: operations["ItemController_findAll"];
+        put?: never;
+        /**
+         * Create item
+         * @description Code must be unique among active items (case-insensitive).
+         */
+        post: operations["ItemController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/items/column-values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List distinct values of one filterable item column
+         * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+         */
+        get: operations["ItemController_findColumnValues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/items/import-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download the item import template
+         * @description An .xlsx with the header row the import reads: STT, MÔ TẢ, MÃ HÀNG, HÃNG SẢN XUẤT, ĐV TÍNH, ĐƠN GIÁ (VNĐ), NHÓM, QUY CÁCH, GHI CHÚ.
+         */
+        get: operations["ItemController_importTemplate"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/items/import": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Import items from an Excel quotation sheet
+         * @description Reads the first worksheet of an .xlsx (max 5 MB, 2000 data rows). The header row is found within the first 50 rows by its "MÔ TẢ" and "MÃ HÀNG" cells. Every row is validated first; valid rows are inserted in one transaction and invalid rows are reported by sheet row.
+         */
+        post: operations["ItemController_import"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/items/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resolve a scanned value to an item
+         * @description The active item whose barcode equals the trimmed value, else the one whose code does (any case). Carries no price.
+         */
+        get: operations["ItemController_resolve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/items/labels.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download item labels as PDF
+         * @description One 50 x 30 mm page per item and copy: the item code as Code 128, the code in text and the name. Carries no price. ids x copies is at most 500.
+         */
+        get: operations["ItemController_labelsPdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/items/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get item by ID */
+        get: operations["ItemController_findOne"];
+        put?: never;
+        post?: never;
+        /**
+         * Soft-delete item
+         * @description Refused with 409 while any sales document references the item.
+         */
+        delete: operations["ItemController_remove"];
+        options?: never;
+        head?: never;
+        /**
+         * Update item
+         * @description The code is immutable.
+         */
+        patch: operations["ItemController_update"];
+        trace?: never;
+    };
+    "/api/v1/items/{id}/stock-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update the warehouse settings of an item
+         * @description Edits only barcode, default location and minimum stock. A barcode must be neither another active item barcode nor another active item code.
+         */
+        patch: operations["ItemController_updateStockSettings"];
+        trace?: never;
+    };
+    "/api/v1/items/bulk-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Soft-delete selected items
+         * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
+         */
+        post: operations["ItemController_bulkRemove"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalog/locations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List locations
+         * @description Paginated location list with search and column filters.
+         */
+        get: operations["LocationController_findAll"];
+        put?: never;
+        /**
+         * Create location
+         * @description Code must be unique among active locations, in any case.
+         */
+        post: operations["LocationController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalog/locations/column-values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List distinct values of one filterable location column
+         * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+         */
+        get: operations["LocationController_findColumnValues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalog/locations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get location by ID */
+        get: operations["LocationController_findOne"];
+        put?: never;
+        post?: never;
+        /**
+         * Soft-delete location
+         * @description Refused with 409 while an active item has the location as its default.
+         */
+        delete: operations["LocationController_remove"];
+        options?: never;
+        head?: never;
+        /** Update location */
+        patch: operations["LocationController_update"];
+        trace?: never;
+    };
+    "/api/v1/catalog/locations/bulk-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Soft-delete selected locations
+         * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
+         */
+        post: operations["LocationController_bulkRemove"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List quote requests
+         * @description Paginated request list with search, status, engineer and quotation-due filters. A Sales actor sees only the requests they own; an Engineer only the requests assigned to them.
+         */
+        get: operations["RequestController_findAll"];
+        put?: never;
+        /**
+         * Create quote request
+         * @description The code (YC_YYYY_NNNN) is generated. The customer must be visible to the caller; project and contact must belong to it. The owner defaults to the caller; only an actor who sees every request may name another sales account.
+         */
+        post: operations["RequestController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/requests/column-values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List distinct values of one filterable request column
+         * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+         */
+        get: operations["RequestController_findColumnValues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/requests/engineer-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the accounts a request may be assigned to
+         * @description Active engineers and engineering leads.
+         */
+        get: operations["RequestController_listEngineerOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get quote request by ID
+         * @description Embeds the customer, project and contact summary, so an assigned engineer sees them without customer or project read permission.
+         */
+        get: operations["RequestController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update quote request
+         * @description Only while the request is a draft or assigned. Code and customer are immutable.
+         */
+        patch: operations["RequestController_update"];
+        trace?: never;
+    };
+    "/api/v1/sales/requests/{id}/activities": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Timeline of a quote request */
+        get: operations["RequestController_listActivities"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/requests/{id}/assign": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Assign or reassign the engineer
+         * @description The first assignment moves a draft to assigned. The engineer is notified once, after the change is saved.
+         */
+        post: operations["RequestController_assign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/requests/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel a quote request
+         * @description Needs a reason. Possible until the request has been quoted.
+         */
+        post: operations["RequestController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/requests/{id}/lost": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark a quote request lost
+         * @description Needs a reason. Possible once the request is estimated or quoted.
+         */
+        post: operations["RequestController_markLost"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/requests/{id}/attachments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the files of a quote request */
+        get: operations["RequestAttachmentController_list"];
+        put?: never;
+        /**
+         * Attach a file to a quote request
+         * @description Allowed: pdf, dwg, dxf, xlsx, png, jpg/jpeg — by extension and by content — up to 20 MB each, 20 per request, while the request is a draft, assigned or being estimated.
+         */
+        post: operations["RequestAttachmentController_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/requests/{id}/attachments/{attachmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download a file of a quote request
+         * @description Served as an attachment, never inline. Requires access to the request.
+         */
+        get: operations["RequestAttachmentController_download"];
+        put?: never;
+        post?: never;
+        /**
+         * Remove a file of a quote request
+         * @description Only while the request is a draft, assigned or being estimated.
+         */
+        delete: operations["RequestAttachmentController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/estimates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List estimates
+         * @description Paginated list; filter by the status of the latest revision, request or engineer. The keyword matches the estimate code or the code or title of its request. A Sales actor sees the estimates of the requests they own; an Engineer those of requests assigned to them.
+         */
+        get: operations["EstimateController_findAll"];
+        put?: never;
+        /**
+         * Start the estimate of a request
+         * @description Creates the first draft (code DT_YYYY_NNNN) and moves the request from assigned to estimating in the same transaction. Only the assigned engineer or an actor who sees every request may start it.
+         */
+        post: operations["EstimateController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/estimates/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an estimate with one revision
+         * @description The header, the request it answers, the revision list, and the panels with BOM and cost lines of the revision asked for (the latest by default).
+         */
+        get: operations["EstimateController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/estimates/{id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit the draft revision
+         * @description Freezes the draft, supersedes the previous submitted revision, moves the request to estimated in the same transaction and notifies the sales owner once.
+         */
+        post: operations["EstimateController_submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/estimates/{id}/revise": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Open a new draft revision
+         * @description Copies the latest submitted revision (BOM snapshots included) into a new draft. Only while the request is estimating or estimated.
+         */
+        post: operations["EstimateController_revise"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/estimates/{id}/panels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a panel to the draft
+         * @description Returns the whole draft revision with recomputed totals.
+         */
+        post: operations["EstimateController_addPanel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/estimates/{id}/panels/{panelId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a panel and its lines from the draft */
+        delete: operations["EstimateController_deletePanel"];
+        options?: never;
+        head?: never;
+        /** Update a panel of the draft */
+        patch: operations["EstimateController_updatePanel"];
+        trace?: never;
+    };
+    "/api/v1/sales/estimates/{id}/panels/{panelId}/bom-lines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a BOM line to a panel
+         * @description Copies the item code, name, brand and unit onto the line; the unit cost is the item reference price until sales prices the submitted revision.
+         */
+        post: operations["EstimateController_addBomLine"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/estimates/{id}/bom-lines/{lineId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a BOM line from the draft */
+        delete: operations["EstimateController_deleteBomLine"];
+        options?: never;
+        head?: never;
+        /** Update the quantity or note of a line */
+        patch: operations["EstimateController_updateBomLine"];
+        trace?: never;
+    };
+    "/api/v1/sales/estimates/{id}/bom-lines/{lineId}/unit-cost": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Set the unit cost of a BOM line of the submitted revision
+         * @description Sales prices the revision the engineer submitted. Returns the whole revision with recomputed totals.
+         */
+        patch: operations["EstimateController_setUnitCost"];
+        trace?: never;
+    };
+    "/api/v1/sales/estimates/{id}/price": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Mark the submitted revision priced
+         * @description Freezes the costs and lets a quotation be built on the revision. Refused while a BOM line still costs 0.
+         */
+        post: operations["EstimateController_completePricing"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/estimates/{id}/panels/{panelId}/cost-lines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add a cost line to a panel of the submitted revision
+         * @description The amount is the cost of ONE panel.
+         */
+        post: operations["EstimateController_addCostLine"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/estimates/{id}/cost-lines/{lineId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove a cost line from the submitted revision */
+        delete: operations["EstimateController_deleteCostLine"];
+        options?: never;
+        head?: never;
+        /** Update a cost line of the submitted revision */
+        patch: operations["EstimateController_updateCostLine"];
+        trace?: never;
+    };
+    "/api/v1/sales/quotations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List quotations
+         * @description Paginated list with the request and the latest version of each; filter by the latest version status, code, customer or request. The keyword matches the quotation code or the code or title of its request. A Sales actor sees the quotations of the requests they own.
+         */
+        get: operations["QuotationController_findAll"];
+        put?: never;
+        /**
+         * Quote an estimated request
+         * @description Builds version 1 (draft, code NN-ddmmyyyy/BG) from the latest submitted estimate revision and leaves the request estimated. A revision that is not the latest submitted one, a request not estimated, or a request that already has a quotation answer 409.
+         */
+        post: operations["QuotationController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotations/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a quotation with one version
+         * @description The header, the request it answers, the version list, and the lines with their frozen BOM and cost-line copies of the version asked for (the latest by default).
+         */
+        get: operations["QuotationController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Set margins, discount, VAT and terms of the draft version
+         * @description Only what the body names changes; margins are per line (0–1000%), the discount a percent (0–100) or an amount not above the subtotal, VAT one of 0/5/8/10, and the terms replace the printed list. The server recomputes and stores every total.
+         */
+        patch: operations["QuotationController_updatePricing"];
+        trace?: never;
+    };
+    "/api/v1/sales/quotations/{id}/revise": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Revise the quotation
+         * @description Opens the next version as a draft copying the latest one and closes the latest. Allowed only from pending_approval, approved or rejected; two concurrent revises produce exactly one new version.
+         */
+        post: operations["QuotationController_revise"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotations/{id}/refresh-estimate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Update the draft from the latest submitted estimate
+         * @description Rebuilds the draft panel lines and frozen BOM from the latest submitted estimate revision, keeping the margin of every panel whose tag still exists. Discount, VAT and terms stay. A draft already on the latest revision is returned unchanged.
+         */
+        post: operations["QuotationController_refreshEstimate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotations/{id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Submit the draft for approval
+         * @description draft → pending_approval, by the version creator or a manager; the approvers are notified after the commit. A draft built on an estimate revision that is no longer the latest submitted one answers 409.
+         */
+        post: operations["QuotationController_submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotations/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve the version
+         * @description pending_approval → approved in one step, by someone other than the version creator. The first approval moves the request from estimated to quoted in the same transaction; the sales owner is notified after the commit.
+         */
+        post: operations["QuotationController_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotations/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reject the version
+         * @description pending_approval → rejected with a reason, by someone other than the version creator. The version stays as it was; Sales revises it into the next version.
+         */
+        post: operations["QuotationController_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotations/{id}/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record that the customer accepted
+         * @description approved → customer_confirmed; any other status answers 409.
+         */
+        post: operations["QuotationController_confirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotations/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel the quotation
+         * @description From draft, pending_approval, approved or rejected: the version becomes cancelled and the request lost, with the reason, in one transaction. A confirmed or already cancelled quotation answers 409.
+         */
+        post: operations["QuotationController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotations/{id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the customer feedback of a quotation
+         * @description Newest first: date, channel, content and who recorded it.
+         */
+        get: operations["QuotationController_listFeedback"];
+        put?: never;
+        /**
+         * Record what the customer answered
+         * @description Appends one entry to the feedback log of the quotation.
+         */
+        post: operations["QuotationController_addFeedback"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotations/{id}/export.xlsx": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download the customer-facing quotation as .xlsx
+         * @description The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.
+         */
+        get: operations["QuotationController_exportXlsx"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/quotations/{id}/export.pdf": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download the customer-facing quotation as PDF
+         * @description The BẢNG CHÀO GIÁ sheet of the approved or customer-confirmed newest version, in the company layout.
+         */
+        get: operations["QuotationController_exportPdf"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List orders
+         * @description Paginated list; filter by status, code or customer. The keyword matches the order code, the customer name, the contract number or the request code. A Sales actor sees the orders of the requests they own.
+         */
+        get: operations["OrderController_findAll"];
+        put?: never;
+        /**
+         * Convert a confirmed quotation into an order
+         * @description Snapshots the customer-confirmed version (customer, project, terms, lines, totals) into one order DH_YYYY_NNNN and moves the request to won in the same transaction. Contract number, contract date and delivery date are optional. A quotation whose latest version is not customer_confirmed, or that already has an order (cancelled ones included), answers 409.
+         */
+        post: operations["OrderController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/sales/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get an order
+         * @description The order with its snapshots, lines (and their BOM) and the chain links to its request, estimate revision and quotation version.
+         */
+        get: operations["OrderController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edit the contract number, contract date and delivery date
+         * @description Only while the order is open; lines, prices, totals and snapshots are never editable.
+         */
+        patch: operations["OrderController_update"];
+        trace?: never;
+    };
+    "/api/v1/sales/orders/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel the order
+         * @description An open order becomes cancelled and its request lost, with the reason, in one transaction. The quotation stays confirmed and is not converted again. Any other status answers 409.
+         */
+        post: operations["OrderController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/suppliers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List suppliers
+         * @description Paginated supplier list with search and column filters.
+         */
+        get: operations["SupplierController_findAll"];
+        put?: never;
+        /**
+         * Create supplier
+         * @description Code must be unique among active suppliers, in any case.
+         */
+        post: operations["SupplierController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/suppliers/column-values": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List distinct values of one filterable supplier column
+         * @description Paginated, searchable distinct values of a filterable list column, for the column filter of the list table. Values come from the whole table, not one page.
+         */
+        get: operations["SupplierController_findColumnValues"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/suppliers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get supplier by ID */
+        get: operations["SupplierController_findOne"];
+        put?: never;
+        post?: never;
+        /**
+         * Soft-delete supplier
+         * @description Refused with 409 while any purchasing document references the supplier.
+         */
+        delete: operations["SupplierController_remove"];
+        options?: never;
+        head?: never;
+        /** Update supplier */
+        patch: operations["SupplierController_update"];
+        trace?: never;
+    };
+    "/api/v1/inventory/suppliers/bulk-delete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Soft-delete selected suppliers
+         * @description Soft-deletes the given ids through the same guards as the single-row delete, one at a time. A row a guard refuses is reported in `failed` and leaves the rest of the batch deleted.
+         */
+        post: operations["SupplierController_bulkRemove"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List stock
+         * @description Every active item with on hand, reserved, available and minimum stock. Average cost and value only with purchase_price:read.
+         */
+        get: operations["StockController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stock/availability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Stock availability of items
+         * @description On hand, reserved and available per item, never any cost. Items without stock answer zeros; deleted or unknown ids are left out.
+         */
+        get: operations["StockController_findAvailability"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stock/{itemId}/movements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the stock movements of an item
+         * @description Newest first. Unit cost, value, reference value and average cost only with purchase_price:read.
+         */
+        get: operations["StockController_findMovements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List purchase orders
+         * @description VAT rate, unit prices, amounts and totals only with purchase_price:read.
+         */
+        get: operations["PurchaseOrderController_findAll"];
+        put?: never;
+        /** Create a draft purchase order */
+        post: operations["PurchaseOrderController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a purchase order with its lines and history
+         * @description VAT rate, unit prices, amounts and totals only with purchase_price:read.
+         */
+        get: operations["PurchaseOrderController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edit a draft
+         * @description Lines, when given, replace every line. The editor can no longer approve the order.
+         */
+        patch: operations["PurchaseOrderController_update"];
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-orders/from-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Turn open purchase request lines into a draft order
+         * @description Each line at most what its request line has remaining; prices default to the items’ reference price. Lines remember the request line and the sales order it was raised for.
+         */
+        post: operations["PurchaseOrderController_createFromRequests"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-orders/{id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit a draft for approval */
+        post: operations["PurchaseOrderController_submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-orders/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve a submitted order
+         * @description Refused to its creator, its submitter and anyone who edited it.
+         */
+        post: operations["PurchaseOrderController_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-orders/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reject a submitted order back to draft
+         * @description The reason is kept in the order history.
+         */
+        post: operations["PurchaseOrderController_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-orders/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel an order nothing was received on */
+        post: operations["PurchaseOrderController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-orders/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Short-close an approved or partly received order */
+        post: operations["PurchaseOrderController_close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/materials/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List orders with their material shortage
+         * @description Every order the actor may see (a sales account only its own), with the count of items still short. No sales money.
+         */
+        get: operations["MaterialController_findOrders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/materials/orders/{orderId}/estimate-vs-actual": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Estimate against actual material of one order
+         * @description Per item: estimated (BOM) and actual (issued net of workshop returns) quantity; costs only with purchase_price:read. Every over-BOM issue with its reason. No sales money.
+         */
+        get: operations["MaterialController_findEstimateVsActual"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/materials/orders/{orderId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Material view of one order
+         * @description Per item: demand, reserved, issued, returned and short; per panel its BOM; unlinked BOM lines listed apart. No sales money.
+         */
+        get: operations["MaterialController_findOrder"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/receipts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List stock receipts */
+        get: operations["StockReceiptController_findAll"];
+        put?: never;
+        /**
+         * Receive goods of an approved purchase order into stock
+         * @description Posts at the order line prices and allocates the stock to short orders, the order’s source orders first. A request key already used answers the first receipt with 200 and posts nothing.
+         */
+        post: operations["StockReceiptController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/receipts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a stock receipt with its lines
+         * @description Unit costs only with purchase_price:read.
+         */
+        get: operations["StockReceiptController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/issues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List stock issues */
+        get: operations["StockIssueController_findAll"];
+        put?: never;
+        /**
+         * Issue materials to an open order
+         * @description Uses the order’s reservation first, then free stock, never another order’s reservation. Beyond the BOM every line of the item needs a reason. A request key already used answers the first issue with 200 and posts nothing.
+         */
+        post: operations["StockIssueController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/issues/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a stock issue with its lines
+         * @description Line unit costs and values only with purchase_price:read.
+         */
+        get: operations["StockIssueController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/workshop-returns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List workshop returns */
+        get: operations["WorkshopReturnController_findAll"];
+        put?: never;
+        /**
+         * Take back what the workshop did not use
+         * @description At most what the order still has out, at its net issued average cost; the stock goes back to the order first while it is open and short. A request key already used answers the first return with 200.
+         */
+        post: operations["WorkshopReturnController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/workshop-returns/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a workshop return with its lines
+         * @description Line unit costs and values only with purchase_price:read.
+         */
+        get: operations["WorkshopReturnController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/supplier-returns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List supplier returns */
+        get: operations["SupplierReturnController_findAll"];
+        put?: never;
+        /**
+         * Return received goods to the supplier
+         * @description At most what the purchase order line has received; leaves at the order price and shrinks reservations the stock no longer covers. A request key already used answers the first return with 200.
+         */
+        post: operations["SupplierReturnController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/supplier-returns/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a supplier return with its lines
+         * @description Unit costs, values and reference values only with purchase_price:read.
+         */
+        get: operations["SupplierReturnController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stocktakes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List stock counts */
+        get: operations["StocktakeController_findAll"];
+        put?: never;
+        /** Open a count of the whole warehouse or one location */
+        post: operations["StocktakeController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stocktakes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a stock count with its lines
+         * @description Book and counted quantities and the difference to every reader; unit costs and values only with purchase_price:read.
+         */
+        get: operations["StocktakeController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stocktakes/{id}/scan": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Count one more of a scanned item
+         * @description An item without a line gets one. Records the book quantity of the moment.
+         */
+        post: operations["StocktakeController_scan"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stocktakes/{id}/lines/{itemId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Set the counted quantity of an item on the count */
+        patch: operations["StocktakeController_setCount"];
+        trace?: never;
+    };
+    "/api/v1/inventory/stocktakes/{id}/submit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Submit a count for approval */
+        post: operations["StocktakeController_submit"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stocktakes/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Approve a submitted count and post its differences
+         * @description Refused to its creator, every submitter and every counter. A result below zero refuses the whole count.
+         */
+        post: operations["StocktakeController_approve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stocktakes/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send a submitted count back to counting */
+        post: operations["StocktakeController_reject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/stocktakes/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel an open count */
+        post: operations["StocktakeController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List purchase requests with what each line has been ordered */
+        get: operations["PurchaseRequestController_findAll"];
+        put?: never;
+        /** Raise a purchase request by hand */
+        post: operations["PurchaseRequestController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-requests/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a purchase request */
+        get: operations["PurchaseRequestController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Edit a request nothing has been ordered on
+         * @description Lines, when given, replace every line.
+         */
+        patch: operations["PurchaseRequestController_update"];
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-requests/from-order/{orderId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Request what an order is still short of
+         * @description One line per item: the shortage less what open requests for the order still ask and what purchase orders bought for it still bring.
+         */
+        post: operations["PurchaseRequestController_createFromOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/inventory/purchase-requests/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Cancel a request nothing has been ordered on */
+        post: operations["PurchaseRequestController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List production orders
+         * @description Filter by status or sales order. A sales actor sees the production orders of the orders they own; a technician only those with a cabinet assigned to them.
+         */
+        get: operations["ProductionOrderController_findAll"];
+        put?: never;
+        /**
+         * Create a draft production order for an open order
+         * @description One cabinet per panel ordered, coded <tag>-<n>, each with its six stages pending.
+         */
+        post: operations["ProductionOrderController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/open-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the open orders a production order can still be made for
+         * @description Code, customer name and delivery date only.
+         */
+        get: operations["ProductionOrderController_findOpenOrders"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/technician-options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the accounts a cabinet may be assigned to
+         * @description Active accounts holding the technician role.
+         */
+        get: operations["ProductionOrderController_listTechnicianOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/orders/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get a production order with its cabinets and history
+         * @description A technician sees only the cabinets assigned to them.
+         */
+        get: operations["ProductionOrderController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/orders/{id}/shortage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the items the order is still short of
+         * @description Quantities only, as the material view computes them. Nothing here blocks a stage.
+         */
+        get: operations["ProductionOrderController_findShortage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/orders/{id}/units/{unitId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Assign a technician and a planned end date to a cabinet
+         * @description The assignee must hold the technician role. Refused once the order is completed or cancelled, or the cabinet is finished.
+         */
+        patch: operations["ProductionOrderController_updateUnit"];
+        trace?: never;
+    };
+    "/api/v1/production/orders/{id}/release": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Release a draft to the workshop
+         * @description Every cabinet needs a technician and a planned end date. The sales order becomes in_production and keeps its materials.
+         */
+        post: operations["ProductionOrderController_releaseOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/orders/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Cancel a draft or released production order
+         * @description A released order gives the sales order back: it becomes open again. Stage history stays.
+         */
+        post: operations["ProductionOrderController_cancel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/units": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List cabinets with the progress of their six stages
+         * @description Filter by mine, production order or the status of the current stage. A technician sees only their own cabinets; a sales actor those of the orders they own.
+         */
+        get: operations["ProgressController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/units/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a cabinet with its six stages */
+        get: operations["ProgressController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/units/{id}/stages/{stage}/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Start a stage
+         * @description The previous stage must be done and the production order released. Only the assigned technician or a production manager.
+         */
+        post: operations["ProgressController_startStage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/units/{id}/stages/{stage}/finish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Finish a stage
+         * @description The last finishing completes the production order and tells the production managers and the sales owner.
+         */
+        post: operations["ProgressController_finishStage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/units/{id}/stages/{stage}/undo": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Take the latest finished stage back to in progress
+         * @description Production manager only, with a reason, while the production order is released and the next stage is still pending.
+         */
+        post: operations["ProgressController_undoStage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/units/{id}/photos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the photos of a cabinet, oldest first */
+        get: operations["UnitPhotoController_list"];
+        put?: never;
+        /**
+         * Attach a photo to a stage of a cabinet
+         * @description PNG or JPEG, by extension and by content, up to 10 MB each and 30 per cabinet, while the production order is released. Only the assigned technician or a production manager. An optional issue must belong to the same cabinet.
+         */
+        post: operations["UnitPhotoController_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/photos/{photoId}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The image of a photo
+         * @description Served with the content type stored at upload. Requires access to the cabinet.
+         */
+        get: operations["UnitPhotoController_content"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/issues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List production issues
+         * @description Filter by status, production order or cabinet. A technician sees only the issues of their own cabinets; a sales actor those of the orders they own.
+         */
+        get: operations["ProductionIssueController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/units/{id}/issues": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Report an issue on a stage of a cabinet
+         * @description Only the assigned technician or a production manager, while the production order is released. An open issue never blocks a stage; the production managers are told.
+         */
+        post: operations["ProductionIssueController_open"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/production/issues/{id}/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Resolve an issue
+         * @description Production manager only, with a resolution. The technician who reported it is told.
+         */
+        post: operations["ProductionIssueController_resolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/qc/checklist-items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the QC checklist template
+         * @description Ordered by position. Hidden items are returned only with includeHidden=true.
+         */
+        get: operations["QcChecklistController_list"];
+        put?: never;
+        /** Add an item at the end of the template */
+        post: operations["QcChecklistController_add"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/qc/checklist-items/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Reorder the template
+         * @description ids must be exactly the set of all item ids, hidden ones included.
+         */
+        put: operations["QcChecklistController_reorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/qc/checklist-items/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Rename an item, or hide or show it */
+        patch: operations["QcChecklistController_update"];
+        trace?: never;
+    };
+    "/api/v1/delivery/qc/units": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List cabinets with their QC status
+         * @description Cabinets of the orders the caller’s data scope reaches; the QC status is not_ready, waiting, failed or passed.
+         */
+        get: operations["QcInspectionController_listUnits"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/qc/units/{unitId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One cabinet with its QC rounds and defects */
+        get: operations["QcInspectionController_getUnit"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/qc/units/{unitId}/rounds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record a QC round
+         * @description One result per active checklist item. A failed item needs a note and opens one defect.
+         */
+        post: operations["QcInspectionController_createRound"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/qc/defects": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List QC defects */
+        get: operations["QcInspectionController_listDefects"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/qc/defects/{id}/fix": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mark an open defect fixed */
+        post: operations["QcInspectionController_fix"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/qc/defects/{id}/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Verify a fixed defect
+         * @description Not allowed for the user who marked it fixed.
+         */
+        post: operations["QcInspectionController_verify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    LoginDto: {
-      /** @description Username or email */
-      username: string;
-      /** @description Password (min 6 characters) */
-      password: string;
-    };
-    ForgotPasswordDto: {
-      /** @description Email address the reset link is sent to */
-      email: string;
-    };
-    ResetPasswordDto: {
-      /** @description Token from the reset link */
-      token: string;
-      /** @description Password must be at least 8 characters and contain a letter, a digit and a special character */
-      newPassword: string;
-    };
-    ChangePasswordDto: {
-      /** @description The password currently in use */
-      currentPassword: string;
-      /** @description Password must be at least 8 characters and contain a letter, a digit and a special character */
-      newPassword: string;
-    };
-    UpdateProfileDto: {
-      username?: string;
-      email?: string;
-      /** @description The password currently in use; required to change the email */
-      currentPassword?: string;
-      fullName: string;
-      phone?: Record<string, never> | null;
-      /** @enum {string|null} */
-      department?:
-        | "sales"
-        | "planning"
-        | "purchasing"
-        | "technical"
-        | "qcLab"
-        | "warehouse"
-        | "accounting"
-        | "other"
-        | null;
-      title?: Record<string, never> | null;
-    };
-    CreateUserDto: {
-      username: string;
-      email: string;
-      fullName: string;
-      /** @description Role code the account is assigned to */
-      roleCode: string;
-      /** @description Password must be at least 8 characters and contain a letter, a digit and a special character */
-      password?: string;
-      phone?: Record<string, never> | null;
-      /** @enum {string|null} */
-      department?:
-        | "sales"
-        | "planning"
-        | "purchasing"
-        | "technical"
-        | "qcLab"
-        | "warehouse"
-        | "accounting"
-        | "other"
-        | null;
-      title?: Record<string, never> | null;
-      /** @default true */
-      isActive: boolean;
-    };
-    UpdateUserDto: {
-      username?: string;
-      email?: string;
-      fullName?: string;
-      /** @description Role code the account is assigned to */
-      roleCode?: string;
-      phone?: Record<string, never> | null;
-      /** @enum {string|null} */
-      department?:
-        | "sales"
-        | "planning"
-        | "purchasing"
-        | "technical"
-        | "qcLab"
-        | "warehouse"
-        | "accounting"
-        | "other"
-        | null;
-      title?: Record<string, never> | null;
-      /** @default true */
-      isActive: boolean;
-    };
-    SetUserActiveDto: {
-      /** @description False deactivates the account and revokes its sessions */
-      isActive: boolean;
-    };
-    BulkApproveDto: {
-      /** @description Ids of the rows to approve (1–2000) */
-      ids: number[];
-    };
-    RejectSignatureDto: {
-      /** @description Shown to the account holder on their profile */
-      reason: string;
-    };
-    BulkDeleteDto: {
-      /** @description Ids of the rows to delete (1–2000) */
-      ids: number[];
-    };
-    ExcelImportRequestDto: {
-      /** @description Documents to create or update (1–500). Each is the feature's create payload plus `fileRow`, an optional `code` (an existing active code updates that record), and a `fileRow` on every line. */
-      documents: Array<Record<string, never>>;
-    };
-    UserFilterDto: {
-      /**
-       * @description Page number
-       * @default 1
-       */
-      page: number;
-      /**
-       * @description Items per page
-       * @default 25
-       */
-      limit: number;
-      /** @description Search keyword */
-      search?: string;
-      /** @description Enum values whose translated label matched the keyword */
-      searchClassifications?: string[];
-      /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-      columnFilters?: string;
-      /**
-       * @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.
-       * @default createdAt
-       */
-      sortBy: string;
-      /**
-       * @description Sort order. Defaults to DESC for createdAt, ASC otherwise.
-       * @default DESC
-       */
-      sortOrder: string;
-      /** @description Filter by role code */
-      roleCode?: string;
-      /** @description Filter by account state; omitted returns both */
-      isActive?: boolean;
-    };
-    ExcelFieldRefDto: {
-      /**
-       * @description Row field name
-       * @example orderDate
-       */
-      field: string;
-      /**
-       * @default text
-       * @enum {string}
-       */
-      type: "text" | "number" | "date";
-      /** @description Display label per stored value, e.g. an enum member */
-      valueLabels?: {
-        [key: string]: string;
-      };
-    };
-    ExcelColumnSpecDto: {
-      /**
-       * @description Column key
-       * @example orderCode
-       */
-      key: string;
-      /** @description Display label drawn in the header */
-      label: string;
-      /** @description Header group labels, outermost first */
-      headerGroup?: string[];
-      fields?: Array<components["schemas"]["ExcelFieldRefDto"]>;
-      /**
-       * @default join
-       * @enum {string}
-       */
-      combine: "join" | "coalesce";
-      /**
-       * @description Separator for `join`
-       * @default
-       */
-      joinWith: string;
-      /** @description Excel number format, e.g. #,##0.00 */
-      numberFormat?: string;
-      /** @description Write once per row group and merge across the group */
-      groupSpan?: boolean;
-      /** @description Column width in Excel characters */
-      width?: number;
-      /** @description Whether this column must hold a value on every import row */
-      required?: boolean;
-    };
-    ExcelSheetSpecDto: {
-      columns: Array<components["schemas"]["ExcelColumnSpecDto"]>;
-      /** @description Row field whose consecutive equal values form one record */
-      rowGroupField?: string;
-      /** @description Worksheet name */
-      sheetName?: string;
-    };
-    UserExportDto: {
-      /** @description The list search, filters, column filters and sort in force; page and limit are ignored */
-      query: components["schemas"]["UserFilterDto"];
-      sheet: components["schemas"]["ExcelSheetSpecDto"];
-      /**
-       * @description File name without extension
-       * @example nguoi-dung_2026-10-14
-       */
-      fileName: string;
-    };
-    AdminResetPasswordDto: {
-      /** @description Password must be at least 8 characters and contain a letter, a digit and a special character */
-      newPassword: string;
-    };
-    UpdateListPreferenceDto: {
-      /**
-       * @description Column keys the user leaves visible
-       * @example [
-       *       "customerCode",
-       *       "status"
-       *     ]
-       */
-      visibleColumns: string[];
-      /**
-       * @description Last column pinned while scrolling sideways; null unfreezes, absent keeps the stored choice
-       * @example customerCode
-       */
-      frozenColumn?: string | null;
-      /**
-       * @description Width in pixels of each column the user dragged, keyed by column key; absent keeps the stored widths
-       * @example {
-       *       "customerCode": 120,
-       *       "status": 96
-       *     }
-       */
-      columnWidths?: {
-        [key: string]: number;
-      };
-    };
-    ExcelTemplateBodyDto: {
-      sheet: components["schemas"]["ExcelSheetSpecDto"];
-    };
-    UpdateRolePermissionsDto: {
-      /** @description The full permission set the role should hold after the save */
-      permissions: string[];
-    };
-    CreateCustomerDto: {
-      /**
-       * @description Customer code (KH_xxxx)
-       * @example KH_0001
-       */
-      code: string;
-      /** @description Customer name */
-      name: string;
-      /** @description Tax code */
-      taxCode?: string;
-      /** @description Address */
-      address?: string;
-      /** @description Phone number */
-      phone?: string;
-      /** @description Email address */
-      email?: string;
-      /** @description Owning sales account. Defaults to the caller; only an actor who sees all customers may name another account. */
-      salesOwnerId?: number;
-      /** @description Note */
-      note?: string;
-    };
-    UpdateCustomerDto: {
-      /**
-       * @description Customer code (KH_xxxx)
-       * @example KH_0001
-       */
-      code?: string;
-      /** @description Customer name */
-      name?: string;
-      /** @description Tax code */
-      taxCode?: string;
-      /** @description Address */
-      address?: string;
-      /** @description Phone number */
-      phone?: string;
-      /** @description Email address */
-      email?: string;
-      /** @description Owning sales account. Defaults to the caller; only an actor who sees all customers may name another account. */
-      salesOwnerId?: number;
-      /** @description Note */
-      note?: string;
-    };
-    CreateContactDto: {
-      /** @description Customer the contact belongs to */
-      customerId: number;
-      /** @description Contact name */
-      name: string;
-      /** @description Position */
-      position?: string;
-      /** @description Phone number */
-      phone?: string;
-      /** @description Email address */
-      email?: string;
-      /** @description Primary contact of the customer; setting it demotes the previous primary contact. */
-      isPrimary?: boolean;
-    };
-    UpdateContactDto: {
-      /** @description Contact name */
-      name?: string;
-      /** @description Position */
-      position?: string;
-      /** @description Phone number */
-      phone?: string;
-      /** @description Email address */
-      email?: string;
-      /** @description Primary contact of the customer; setting it demotes the previous primary contact. */
-      isPrimary?: boolean;
-    };
-    CreateProjectDto: {
-      /**
-       * @description Project code (DA_xxxx)
-       * @example DA_0001
-       */
-      code: string;
-      /** @description Customer the project belongs to */
-      customerId: number;
-      /** @description Project name */
-      name: string;
-      /** @description Site address */
-      siteAddress?: string;
-      /** @description Note */
-      note?: string;
-    };
-    UpdateProjectDto: {
-      /**
-       * @description Project code (DA_xxxx)
-       * @example DA_0001
-       */
-      code?: string;
-      /** @description Project name */
-      name?: string;
-      /** @description Site address */
-      siteAddress?: string;
-      /** @description Note */
-      note?: string;
-    };
-    CreateItemDto: {
-      /**
-       * @description Manufacturer part number or internal code
-       * @example LC1D09M7
-       */
-      code: string;
-      /** @description Item name */
-      name: string;
-      /** @description Technical specification */
-      specification?: string;
-      /** @description Brand */
-      brand?: string;
-      /**
-       * @description Item group
-       * @enum {string}
-       */
-      group:
-        | "enclosure"
-        | "breaker"
-        | "contactor"
-        | "relay"
-        | "plc"
-        | "inverter"
-        | "cable"
-        | "terminal"
-        | "accessory"
-        | "other";
-      /** @description Unit of measure, e.g. pcs, m, set */
-      unit: string;
-      /** @description Reference purchase price in VND (>= 0) */
-      referencePrice?: number | null;
-      /** @description Note */
-      note?: string;
-    };
-    UpdateItemDto: {
-      /**
-       * @description Manufacturer part number or internal code
-       * @example LC1D09M7
-       */
-      code?: string;
-      /** @description Item name */
-      name?: string;
-      /** @description Technical specification */
-      specification?: string;
-      /** @description Brand */
-      brand?: string;
-      /**
-       * @description Item group
-       * @enum {string}
-       */
-      group?:
-        | "enclosure"
-        | "breaker"
-        | "contactor"
-        | "relay"
-        | "plc"
-        | "inverter"
-        | "cable"
-        | "terminal"
-        | "accessory"
-        | "other";
-      /** @description Unit of measure, e.g. pcs, m, set */
-      unit?: string;
-      /** @description Reference purchase price in VND (>= 0) */
-      referencePrice?: number | null;
-      /** @description Note */
-      note?: string;
-    };
-    UpdateItemStockSettingsDto: {
-      /** @description Barcode, unique among active items and never another item code (any case) */
-      barcode?: Record<string, never> | null;
-      /** @description Default warehouse location id */
-      defaultLocationId?: number | null;
-      /** @description Minimum stock (>= 0); blank means no low-stock alert */
-      minStock?: number | null;
-    };
-    CreateLocationDto: {
-      /**
-       * @description Location code, unique among active locations (any case)
-       * @example A-01-02
-       */
-      code: string;
-      /** @description Location name */
-      name: string;
-      /** @description Note */
-      note?: string;
-      /** @description Whether the location is in use. Defaults to true. */
-      isActive?: boolean;
-    };
-    UpdateLocationDto: {
-      /**
-       * @description Location code, unique among active locations (any case)
-       * @example A-01-02
-       */
-      code?: string;
-      /** @description Location name */
-      name?: string;
-      /** @description Note */
-      note?: string;
-      /** @description Whether the location is in use. Defaults to true. */
-      isActive?: boolean;
-    };
-    CreateRequestDto: {
-      /** @description Customer the request is for */
-      customerId: number;
-      /** @description Project of that customer the request belongs to */
-      projectId?: Record<string, never> | null;
-      /** @description Contact person of that customer */
-      contactId?: Record<string, never> | null;
-      /** @description Request title */
-      title: string;
-      /** @description Technical requirements */
-      technicalRequirements?: Record<string, never> | null;
-      /**
-       * @description Date the customer wants delivery (YYYY-MM-DD)
-       * @example 2027-02-15
-       */
-      requestedDeliveryDate?: Record<string, never> | null;
-      /**
-       * @description Date the quotation is due (YYYY-MM-DD)
-       * @example 2027-01-20
-       */
-      quotationDueDate?: Record<string, never> | null;
-    };
-    UpdateRequestDto: {
-      /** @description Project of that customer the request belongs to */
-      projectId?: Record<string, never> | null;
-      /** @description Contact person of that customer */
-      contactId?: Record<string, never> | null;
-      /** @description Request title */
-      title?: string;
-      /** @description Technical requirements */
-      technicalRequirements?: Record<string, never> | null;
-      /**
-       * @description Date the customer wants delivery (YYYY-MM-DD)
-       * @example 2027-02-15
-       */
-      requestedDeliveryDate?: Record<string, never> | null;
-      /**
-       * @description Date the quotation is due (YYYY-MM-DD)
-       * @example 2027-01-20
-       */
-      quotationDueDate?: Record<string, never> | null;
-    };
-    AssignRequestDto: {
-      /** @description Engineer (or engineering lead) to assign */
-      engineerId: number;
-    };
-    RequestReasonDto: {
-      /** @description Why the request is closed */
-      reason: string;
-    };
-    CreateEstimateDto: {
-      /** @description The assigned request to build the estimate for */
-      requestId: number;
-    };
-    CreatePanelDto: {
-      /**
-       * @description Panel tag, unique within the revision
-       * @example MSB-01
-       */
-      tag: string;
-      /** @description Description */
-      description?: Record<string, never> | null;
-      /** @description How many identical panels are built */
-      quantity: number;
-    };
-    UpdatePanelDto: {
-      /**
-       * @description Panel tag, unique within the revision
-       * @example MSB-01
-       */
-      tag?: string;
-      /** @description Description */
-      description?: Record<string, never> | null;
-      /** @description How many identical panels are built */
-      quantity?: number;
-    };
-    CreateBomLineDto: {
-      /** @description Catalog item */
-      itemId: number;
-      /** @description Quantity, up to 3 decimals */
-      quantity: number;
-      /** @description Cost of one unit in VND, up to 2 decimals; the item reference price (0 when it has none) when omitted */
-      unitCost?: number;
-      note?: Record<string, never> | null;
-    };
-    UpdateBomLineDto: {
-      /** @description Quantity, up to 3 decimals */
-      quantity?: number;
-      /** @description Cost of one unit in VND, up to 2 decimals; the item reference price (0 when it has none) when omitted */
-      unitCost?: number;
-      note?: Record<string, never> | null;
-    };
-    CreateCostLineDto: {
-      /** @enum {string} */
-      category: "design" | "labor" | "installation" | "transport" | "other";
-      description?: Record<string, never> | null;
-      /** @description Cost for ONE panel, whole VND */
-      amount: number;
-    };
-    UpdateCostLineDto: {
-      /** @enum {string} */
-      category?: "design" | "labor" | "installation" | "transport" | "other";
-      description?: Record<string, never> | null;
-      /** @description Cost for ONE panel, whole VND */
-      amount?: number;
-    };
-    CreateQuotationDto: {
-      /** @description The estimated request to quote */
-      requestId: number;
-      /** @description Estimate revision to build from; it must be the latest submitted one (409 otherwise). The latest submitted revision when omitted. */
-      estimateRevisionId?: number;
-    };
-    LineMarginDto: {
-      /** @description The quotation line (one estimate panel) */
-      lineId: number;
-      /** @description Margin over the panel cost, percent, 0–1000, up to 2 decimals */
-      marginPercent: number;
-    };
-    UpdateQuotationPricingDto: {
-      lines?: Array<components["schemas"]["LineMarginDto"]>;
-      /** @enum {string} */
-      discountType?: "percent" | "amount";
-      /** @description Percent (0–100) or VND per the discount type, up to 2 decimals; the cap per type is checked by the server */
-      discountValue?: number;
-      /** @enum {number} */
-      vatRate?: 0 | 5 | 8 | 10;
-      /** @description The numbered terms printed under the table; replaces the whole list */
-      terms?: string[];
-    };
-    CreateQuotationFeedbackDto: {
-      /**
-       * @description The day the customer answered (YYYY-MM-DD)
-       * @example 2027-01-20
-       */
-      feedbackDate: string;
-      /** @enum {string} */
-      channel: "phone" | "email" | "meeting" | "chat" | "other";
-      /** @description What the customer said */
-      content: string;
-    };
-    CreateOrderDto: {
-      /** @description The quotation whose confirmed version becomes the order */
-      quotationId: number;
-      /** @description Contract number */
-      contractNo?: Record<string, never> | null;
-      /**
-       * @description Contract date (YYYY-MM-DD)
-       * @example 2027-01-20
-       */
-      contractDate?: Record<string, never> | null;
-      /**
-       * @description Delivery date (YYYY-MM-DD)
-       * @example 2027-02-15
-       */
-      deliveryDate?: Record<string, never> | null;
-    };
-    UpdateOrderDto: {
-      /** @description Contract number */
-      contractNo?: Record<string, never> | null;
-      /**
-       * @description Contract date (YYYY-MM-DD)
-       * @example 2027-01-20
-       */
-      contractDate?: Record<string, never> | null;
-      /**
-       * @description Delivery date (YYYY-MM-DD)
-       * @example 2027-02-15
-       */
-      deliveryDate?: Record<string, never> | null;
-    };
-    CreateSupplierDto: {
-      /**
-       * @description Supplier code, unique among active suppliers (any case)
-       * @example NCC_0001
-       */
-      code: string;
-      /** @description Supplier name */
-      name: string;
-      /** @description Tax code */
-      taxCode?: string;
-      /** @description Address */
-      address?: string;
-      /** @description Phone number */
-      phone?: string;
-      /** @description Email address */
-      email?: string;
-      /** @description Contact person */
-      contactName?: string;
-      /** @description Note */
-      note?: string;
-      /** @description Whether the supplier is in use. Defaults to true. */
-      isActive?: boolean;
-    };
-    UpdateSupplierDto: {
-      /**
-       * @description Supplier code, unique among active suppliers (any case)
-       * @example NCC_0001
-       */
-      code?: string;
-      /** @description Supplier name */
-      name?: string;
-      /** @description Tax code */
-      taxCode?: string;
-      /** @description Address */
-      address?: string;
-      /** @description Phone number */
-      phone?: string;
-      /** @description Email address */
-      email?: string;
-      /** @description Contact person */
-      contactName?: string;
-      /** @description Note */
-      note?: string;
-      /** @description Whether the supplier is in use. Defaults to true. */
-      isActive?: boolean;
-    };
-    PurchaseOrderLineDto: {
-      /** @description Catalog item */
-      itemId: number;
-      /** @description Quantity, up to 3 decimals */
-      quantity: number;
-      /** @description Price of one unit excluding VAT, whole VND */
-      unitPrice: number;
-    };
-    CreatePurchaseOrderDto: {
-      /** @description Active supplier */
-      supplierId: number;
-      /**
-       * @description Date the goods are expected (YYYY-MM-DD)
-       * @example 2027-02-15
-       */
-      expectedDate?: Record<string, never> | null;
-      /**
-       * @description VAT rate in percent
-       * @enum {number}
-       */
-      vatRate: 0 | 5 | 8 | 10;
-      note?: Record<string, never> | null;
-      lines: Array<components["schemas"]["PurchaseOrderLineDto"]>;
-    };
-    PurchaseOrderFromRequestLineDto: {
-      /** @description Purchase request line ordered */
-      prLineId: number;
-      /** @description Quantity ordered, at most what the line has remaining */
-      quantity: number;
-    };
-    PurchaseOrderFromRequestsDto: {
-      /** @description Active supplier */
-      supplierId: number;
-      /**
-       * @description VAT rate in percent; 10 when left out
-       * @enum {number}
-       */
-      vatRate?: 0 | 5 | 8 | 10;
-      lines: Array<components["schemas"]["PurchaseOrderFromRequestLineDto"]>;
-    };
-    UpdatePurchaseOrderDto: {
-      /** @description Active supplier */
-      supplierId?: number;
-      /** @description Date the goods are expected (YYYY-MM-DD); null clears it */
-      expectedDate?: Record<string, never> | null;
-      /** @enum {number} */
-      vatRate?: 0 | 5 | 8 | 10;
-      note?: Record<string, never> | null;
-      lines?: Array<components["schemas"]["PurchaseOrderLineDto"]>;
-    };
-    PurchaseOrderReasonDto: {
-      reason: string;
-    };
-    StockReceiptLineDto: {
-      /** @description Line of the purchase order being received */
-      poLineId: number;
-      /** @description Quantity received, up to 3 decimals */
-      quantity: number;
-    };
-    CreateStockReceiptDto: {
-      /** @description Approved or partly received purchase order */
-      purchaseOrderId: number;
-      /**
-       * Format: uuid
-       * @description One key per receive screen: posting it again returns the first receipt with 200 and posts nothing.
-       */
-      requestKey?: string;
-      note?: Record<string, never> | null;
-      lines: Array<components["schemas"]["StockReceiptLineDto"]>;
-    };
-    StockIssueLineDto: {
-      /** @description Catalog item */
-      itemId: number;
-      /** @description Panel line of the order the material is for */
-      orderLineId?: Record<string, never> | null;
-      /** @description Quantity, up to 3 decimals */
-      quantity: number;
-      /** @description Why more than the BOM is issued; required on every line of an item once the order’s issues exceed its demand */
-      reason?: Record<string, never> | null;
-    };
-    CreateStockIssueDto: {
-      /** @description Sales order */
-      orderId: number;
-      /**
-       * Format: uuid
-       * @description One key per screen: posting it again returns the first document with 200 and posts nothing.
-       */
-      requestKey?: string;
-      note?: Record<string, never> | null;
-      lines: Array<components["schemas"]["StockIssueLineDto"]>;
-    };
-    WorkshopReturnLineDto: {
-      /** @description Catalog item */
-      itemId: number;
-      /** @description Panel line of the order the material is for */
-      orderLineId?: Record<string, never> | null;
-      /** @description Quantity, up to 3 decimals */
-      quantity: number;
-      note?: Record<string, never> | null;
-    };
-    CreateWorkshopReturnDto: {
-      /** @description Sales order */
-      orderId: number;
-      /**
-       * Format: uuid
-       * @description One key per screen: posting it again returns the first document with 200 and posts nothing.
-       */
-      requestKey?: string;
-      note?: Record<string, never> | null;
-      lines: Array<components["schemas"]["WorkshopReturnLineDto"]>;
-    };
-    SupplierReturnLineDto: {
-      /** @description Line of the purchase order the goods came on */
-      poLineId: number;
-      /** @description Quantity returned, up to 3 decimals */
-      quantity: number;
-    };
-    CreateSupplierReturnDto: {
-      /** @description Purchase order goods were received on */
-      purchaseOrderId: number;
-      /**
-       * Format: uuid
-       * @description One key per return screen: posting it again returns the first return with 200 and posts nothing.
-       */
-      requestKey?: string;
-      /** @description Why the goods go back */
-      reason: string;
-      lines: Array<components["schemas"]["SupplierReturnLineDto"]>;
-    };
-    CreateStocktakeDto: {
-      /** @enum {string} */
-      scope: "all" | "location";
-      /** @description The location counted, when the scope is one location */
-      locationId?: number;
-      note?: Record<string, never> | null;
-    };
-    StocktakeScanDto: {
-      /** @description A scanned barcode or a typed item code */
-      code: string;
-    };
-    StocktakeCountDto: {
-      /** @description Counted quantity, up to 3 decimals */
-      countedQty: number;
-    };
-    StocktakeReasonDto: {
-      reason: string;
-    };
-    PurchaseRequestLineDto: {
-      /** @description Active catalog item */
-      itemId: number;
-      /** @description Quantity, up to 3 decimals */
-      quantity: number;
-      /** @description Needed by (YYYY-MM-DD) */
-      neededBy?: Record<string, never> | null;
-      note?: Record<string, never> | null;
-    };
-    CreatePurchaseRequestDto: {
-      note?: Record<string, never> | null;
-      lines: Array<components["schemas"]["PurchaseRequestLineDto"]>;
-    };
-    UpdatePurchaseRequestDto: {
-      note?: Record<string, never> | null;
-      /** @description Replaces every line; refused once anything has been ordered */
-      lines?: Array<components["schemas"]["PurchaseRequestLineDto"]>;
-    };
-    PurchaseRequestReasonDto: {
-      reason: string;
-    };
-    CreateProductionOrderDto: {
-      /** @description The open sales order to build */
-      orderId: number;
-    };
-    UpdateProductionUnitDto: {
-      /** @description Account holding the technician role */
-      assigneeId?: number;
-      /**
-       * @description Planned end date, YYYY-MM-DD
-       * @example 2026-12-31
-       */
-      plannedEndDate?: string;
-    };
-    ProductionOrderReasonDto: {
-      reason: string;
-    };
-    StageUndoDto: {
-      reason: string;
-    };
-    CreateProductionIssueDto: {
-      /** @enum {string} */
-      stage:
-        | "material_prep"
-        | "enclosure"
-        | "device_mounting"
-        | "wiring"
-        | "internal_test"
-        | "finishing";
-      description: string;
-      /** @enum {string} */
-      severity: "low" | "medium" | "high";
-    };
-    ResolveProductionIssueDto: {
-      resolution: string;
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    schemas: {
+        LoginDto: {
+            /** @description Username or email */
+            username: string;
+            /** @description Password (min 6 characters) */
+            password: string;
+        };
+        ForgotPasswordDto: {
+            /** @description Email address the reset link is sent to */
+            email: string;
+        };
+        ResetPasswordDto: {
+            /** @description Token from the reset link */
+            token: string;
+            /** @description Password must be at least 8 characters and contain a letter, a digit and a special character */
+            newPassword: string;
+        };
+        ChangePasswordDto: {
+            /** @description The password currently in use */
+            currentPassword: string;
+            /** @description Password must be at least 8 characters and contain a letter, a digit and a special character */
+            newPassword: string;
+        };
+        UpdateProfileDto: {
+            username?: string;
+            email?: string;
+            /** @description The password currently in use; required to change the email */
+            currentPassword?: string;
+            fullName: string;
+            phone?: Record<string, never> | null;
+            /** @enum {string|null} */
+            department?: "sales" | "planning" | "purchasing" | "technical" | "qcLab" | "warehouse" | "accounting" | "other" | null;
+            title?: Record<string, never> | null;
+        };
+        CreateUserDto: {
+            username: string;
+            email: string;
+            fullName: string;
+            /** @description Role code the account is assigned to */
+            roleCode: string;
+            /** @description Password must be at least 8 characters and contain a letter, a digit and a special character */
+            password?: string;
+            phone?: Record<string, never> | null;
+            /** @enum {string|null} */
+            department?: "sales" | "planning" | "purchasing" | "technical" | "qcLab" | "warehouse" | "accounting" | "other" | null;
+            title?: Record<string, never> | null;
+            /** @default true */
+            isActive: boolean;
+        };
+        UpdateUserDto: {
+            username?: string;
+            email?: string;
+            fullName?: string;
+            /** @description Role code the account is assigned to */
+            roleCode?: string;
+            phone?: Record<string, never> | null;
+            /** @enum {string|null} */
+            department?: "sales" | "planning" | "purchasing" | "technical" | "qcLab" | "warehouse" | "accounting" | "other" | null;
+            title?: Record<string, never> | null;
+            /** @default true */
+            isActive: boolean;
+        };
+        SetUserActiveDto: {
+            /** @description False deactivates the account and revokes its sessions */
+            isActive: boolean;
+        };
+        BulkApproveDto: {
+            /** @description Ids of the rows to approve (1–2000) */
+            ids: number[];
+        };
+        RejectSignatureDto: {
+            /** @description Shown to the account holder on their profile */
+            reason: string;
+        };
+        BulkDeleteDto: {
+            /** @description Ids of the rows to delete (1–2000) */
+            ids: number[];
+        };
+        ExcelImportRequestDto: {
+            /** @description Documents to create or update (1–500). Each is the feature's create payload plus `fileRow`, an optional `code` (an existing active code updates that record), and a `fileRow` on every line. */
+            documents: Record<string, never>[];
+        };
+        UserFilterDto: {
+            /**
+             * @description Page number
+             * @default 1
+             */
+            page: number;
+            /**
+             * @description Items per page
+             * @default 25
+             */
+            limit: number;
+            /** @description Search keyword */
+            search?: string;
+            /** @description Enum values whose translated label matched the keyword */
+            searchClassifications?: string[];
+            /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+            columnFilters?: string;
+            /**
+             * @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending.
+             * @default createdAt
+             */
+            sortBy: string;
+            /**
+             * @description Sort order. Defaults to DESC for createdAt, ASC otherwise.
+             * @default DESC
+             */
+            sortOrder: string;
+            /** @description Filter by role code */
+            roleCode?: string;
+            /** @description Filter by account state; omitted returns both */
+            isActive?: boolean;
+        };
+        ExcelFieldRefDto: {
+            /**
+             * @description Row field name
+             * @example orderDate
+             */
+            field: string;
+            /**
+             * @default text
+             * @enum {string}
+             */
+            type: "text" | "number" | "date";
+            /** @description Display label per stored value, e.g. an enum member */
+            valueLabels?: {
+                [key: string]: string;
+            };
+        };
+        ExcelColumnSpecDto: {
+            /**
+             * @description Column key
+             * @example orderCode
+             */
+            key: string;
+            /** @description Display label drawn in the header */
+            label: string;
+            /** @description Header group labels, outermost first */
+            headerGroup?: string[];
+            fields?: components["schemas"]["ExcelFieldRefDto"][];
+            /**
+             * @default join
+             * @enum {string}
+             */
+            combine: "join" | "coalesce";
+            /**
+             * @description Separator for `join`
+             * @default
+             */
+            joinWith: string;
+            /** @description Excel number format, e.g. #,##0.00 */
+            numberFormat?: string;
+            /** @description Write once per row group and merge across the group */
+            groupSpan?: boolean;
+            /** @description Column width in Excel characters */
+            width?: number;
+            /** @description Whether this column must hold a value on every import row */
+            required?: boolean;
+        };
+        ExcelSheetSpecDto: {
+            columns: components["schemas"]["ExcelColumnSpecDto"][];
+            /** @description Row field whose consecutive equal values form one record */
+            rowGroupField?: string;
+            /** @description Worksheet name */
+            sheetName?: string;
+        };
+        UserExportDto: {
+            /** @description The list search, filters, column filters and sort in force; page and limit are ignored */
+            query: components["schemas"]["UserFilterDto"];
+            sheet: components["schemas"]["ExcelSheetSpecDto"];
+            /**
+             * @description File name without extension
+             * @example nguoi-dung_2026-10-14
+             */
+            fileName: string;
+        };
+        AdminResetPasswordDto: {
+            /** @description Password must be at least 8 characters and contain a letter, a digit and a special character */
+            newPassword: string;
+        };
+        UpdateListPreferenceDto: {
+            /**
+             * @description Column keys the user leaves visible
+             * @example [
+             *       "customerCode",
+             *       "status"
+             *     ]
+             */
+            visibleColumns: string[];
+            /**
+             * @description Last column pinned while scrolling sideways; null unfreezes, absent keeps the stored choice
+             * @example customerCode
+             */
+            frozenColumn?: string | null;
+            /**
+             * @description Width in pixels of each column the user dragged, keyed by column key; absent keeps the stored widths
+             * @example {
+             *       "customerCode": 120,
+             *       "status": 96
+             *     }
+             */
+            columnWidths?: {
+                [key: string]: number;
+            };
+        };
+        ExcelTemplateBodyDto: {
+            sheet: components["schemas"]["ExcelSheetSpecDto"];
+        };
+        UpdateRolePermissionsDto: {
+            /** @description The full permission set the role should hold after the save */
+            permissions: string[];
+        };
+        CreateCustomerDto: {
+            /**
+             * @description Customer code (KH_xxxx)
+             * @example KH_0001
+             */
+            code: string;
+            /** @description Customer name */
+            name: string;
+            /** @description Tax code */
+            taxCode?: string;
+            /** @description Address */
+            address?: string;
+            /** @description Phone number */
+            phone?: string;
+            /** @description Email address */
+            email?: string;
+            /** @description Owning sales account. Defaults to the caller; only an actor who sees all customers may name another account. */
+            salesOwnerId?: number;
+            /** @description Note */
+            note?: string;
+        };
+        UpdateCustomerDto: {
+            /**
+             * @description Customer code (KH_xxxx)
+             * @example KH_0001
+             */
+            code?: string;
+            /** @description Customer name */
+            name?: string;
+            /** @description Tax code */
+            taxCode?: string;
+            /** @description Address */
+            address?: string;
+            /** @description Phone number */
+            phone?: string;
+            /** @description Email address */
+            email?: string;
+            /** @description Owning sales account. Defaults to the caller; only an actor who sees all customers may name another account. */
+            salesOwnerId?: number;
+            /** @description Note */
+            note?: string;
+        };
+        CreateContactDto: {
+            /** @description Customer the contact belongs to */
+            customerId: number;
+            /** @description Contact name */
+            name: string;
+            /** @description Position */
+            position?: string;
+            /** @description Phone number */
+            phone?: string;
+            /** @description Email address */
+            email?: string;
+            /** @description Primary contact of the customer; setting it demotes the previous primary contact. */
+            isPrimary?: boolean;
+        };
+        UpdateContactDto: {
+            /** @description Contact name */
+            name?: string;
+            /** @description Position */
+            position?: string;
+            /** @description Phone number */
+            phone?: string;
+            /** @description Email address */
+            email?: string;
+            /** @description Primary contact of the customer; setting it demotes the previous primary contact. */
+            isPrimary?: boolean;
+        };
+        CreateProjectDto: {
+            /**
+             * @description Project code (DA_xxxx)
+             * @example DA_0001
+             */
+            code: string;
+            /** @description Customer the project belongs to */
+            customerId: number;
+            /** @description Project name */
+            name: string;
+            /** @description Site address */
+            siteAddress?: string;
+            /** @description Note */
+            note?: string;
+        };
+        UpdateProjectDto: {
+            /**
+             * @description Project code (DA_xxxx)
+             * @example DA_0001
+             */
+            code?: string;
+            /** @description Project name */
+            name?: string;
+            /** @description Site address */
+            siteAddress?: string;
+            /** @description Note */
+            note?: string;
+        };
+        CreateItemDto: {
+            /**
+             * @description Manufacturer part number or internal code
+             * @example LC1D09M7
+             */
+            code: string;
+            /** @description Item name */
+            name: string;
+            /** @description Technical specification */
+            specification?: string;
+            /** @description Brand */
+            brand?: string;
+            /**
+             * @description Item group
+             * @enum {string}
+             */
+            group: "enclosure" | "breaker" | "contactor" | "relay" | "plc" | "inverter" | "cable" | "terminal" | "accessory" | "other";
+            /** @description Unit of measure, e.g. pcs, m, set */
+            unit: string;
+            /** @description Reference purchase price in VND (>= 0) */
+            referencePrice?: number | null;
+            /** @description Note */
+            note?: string;
+        };
+        UpdateItemDto: {
+            /**
+             * @description Manufacturer part number or internal code
+             * @example LC1D09M7
+             */
+            code?: string;
+            /** @description Item name */
+            name?: string;
+            /** @description Technical specification */
+            specification?: string;
+            /** @description Brand */
+            brand?: string;
+            /**
+             * @description Item group
+             * @enum {string}
+             */
+            group?: "enclosure" | "breaker" | "contactor" | "relay" | "plc" | "inverter" | "cable" | "terminal" | "accessory" | "other";
+            /** @description Unit of measure, e.g. pcs, m, set */
+            unit?: string;
+            /** @description Reference purchase price in VND (>= 0) */
+            referencePrice?: number | null;
+            /** @description Note */
+            note?: string;
+        };
+        UpdateItemStockSettingsDto: {
+            /** @description Barcode, unique among active items and never another item code (any case) */
+            barcode?: Record<string, never> | null;
+            /** @description Default warehouse location id */
+            defaultLocationId?: number | null;
+            /** @description Minimum stock (>= 0); blank means no low-stock alert */
+            minStock?: number | null;
+        };
+        CreateLocationDto: {
+            /**
+             * @description Location code, unique among active locations (any case)
+             * @example A-01-02
+             */
+            code: string;
+            /** @description Location name */
+            name: string;
+            /** @description Note */
+            note?: string;
+            /** @description Whether the location is in use. Defaults to true. */
+            isActive?: boolean;
+        };
+        UpdateLocationDto: {
+            /**
+             * @description Location code, unique among active locations (any case)
+             * @example A-01-02
+             */
+            code?: string;
+            /** @description Location name */
+            name?: string;
+            /** @description Note */
+            note?: string;
+            /** @description Whether the location is in use. Defaults to true. */
+            isActive?: boolean;
+        };
+        CreateRequestDto: {
+            /** @description Customer the request is for */
+            customerId: number;
+            /** @description Project of that customer the request belongs to */
+            projectId?: Record<string, never> | null;
+            /** @description Contact person of that customer */
+            contactId?: Record<string, never> | null;
+            /** @description Request title */
+            title: string;
+            /** @description Technical requirements */
+            technicalRequirements?: Record<string, never> | null;
+            /**
+             * @description Date the customer wants delivery (YYYY-MM-DD)
+             * @example 2027-02-15
+             */
+            requestedDeliveryDate?: Record<string, never> | null;
+            /**
+             * @description Date the quotation is due (YYYY-MM-DD)
+             * @example 2027-01-20
+             */
+            quotationDueDate?: Record<string, never> | null;
+        };
+        UpdateRequestDto: {
+            /** @description Project of that customer the request belongs to */
+            projectId?: Record<string, never> | null;
+            /** @description Contact person of that customer */
+            contactId?: Record<string, never> | null;
+            /** @description Request title */
+            title?: string;
+            /** @description Technical requirements */
+            technicalRequirements?: Record<string, never> | null;
+            /**
+             * @description Date the customer wants delivery (YYYY-MM-DD)
+             * @example 2027-02-15
+             */
+            requestedDeliveryDate?: Record<string, never> | null;
+            /**
+             * @description Date the quotation is due (YYYY-MM-DD)
+             * @example 2027-01-20
+             */
+            quotationDueDate?: Record<string, never> | null;
+        };
+        AssignRequestDto: {
+            /** @description Engineer (or engineering lead) to assign */
+            engineerId: number;
+        };
+        RequestReasonDto: {
+            /** @description Why the request is closed */
+            reason: string;
+        };
+        CreateEstimateDto: {
+            /** @description The assigned request to build the estimate for */
+            requestId: number;
+        };
+        CreatePanelDto: {
+            /**
+             * @description Panel tag, unique within the revision
+             * @example MSB-01
+             */
+            tag: string;
+            /** @description Description */
+            description?: Record<string, never> | null;
+            /** @description How many identical panels are built */
+            quantity: number;
+        };
+        UpdatePanelDto: {
+            /**
+             * @description Panel tag, unique within the revision
+             * @example MSB-01
+             */
+            tag?: string;
+            /** @description Description */
+            description?: Record<string, never> | null;
+            /** @description How many identical panels are built */
+            quantity?: number;
+        };
+        CreateBomLineDto: {
+            /** @description Catalog item */
+            itemId: number;
+            /** @description Quantity, up to 3 decimals */
+            quantity: number;
+            note?: Record<string, never> | null;
+        };
+        UpdateBomLineDto: {
+            /** @description Quantity, up to 3 decimals */
+            quantity?: number;
+            note?: Record<string, never> | null;
+        };
+        PriceBomLineDto: {
+            /** @description Cost of one unit in VND, up to 2 decimals */
+            unitCost: number;
+        };
+        CreateCostLineDto: {
+            /** @enum {string} */
+            category: "design" | "labor" | "installation" | "transport" | "other";
+            description?: Record<string, never> | null;
+            /** @description Cost for ONE panel, whole VND */
+            amount: number;
+        };
+        UpdateCostLineDto: {
+            /** @enum {string} */
+            category?: "design" | "labor" | "installation" | "transport" | "other";
+            description?: Record<string, never> | null;
+            /** @description Cost for ONE panel, whole VND */
+            amount?: number;
+        };
+        CreateQuotationDto: {
+            /** @description The estimated request to quote */
+            requestId: number;
+            /** @description Estimate revision to build from; it must be the latest submitted one (409 otherwise). The latest submitted revision when omitted. */
+            estimateRevisionId?: number;
+        };
+        LineMarginDto: {
+            /** @description The quotation line (one estimate panel) */
+            lineId: number;
+            /** @description Margin over the panel cost, percent, 0–1000, up to 2 decimals */
+            marginPercent: number;
+        };
+        UpdateQuotationPricingDto: {
+            lines?: components["schemas"]["LineMarginDto"][];
+            /** @enum {string} */
+            discountType?: "percent" | "amount";
+            /** @description Percent (0–100) or VND per the discount type, up to 2 decimals; the cap per type is checked by the server */
+            discountValue?: number;
+            /** @enum {number} */
+            vatRate?: 0 | 5 | 8 | 10;
+            /** @description The numbered terms printed under the table; replaces the whole list */
+            terms?: string[];
+        };
+        CreateQuotationFeedbackDto: {
+            /**
+             * @description The day the customer answered (YYYY-MM-DD)
+             * @example 2027-01-20
+             */
+            feedbackDate: string;
+            /** @enum {string} */
+            channel: "phone" | "email" | "meeting" | "chat" | "other";
+            /** @description What the customer said */
+            content: string;
+        };
+        CreateOrderDto: {
+            /** @description The quotation whose confirmed version becomes the order */
+            quotationId: number;
+            /** @description Contract number */
+            contractNo?: Record<string, never> | null;
+            /**
+             * @description Contract date (YYYY-MM-DD)
+             * @example 2027-01-20
+             */
+            contractDate?: Record<string, never> | null;
+            /**
+             * @description Delivery date (YYYY-MM-DD)
+             * @example 2027-02-15
+             */
+            deliveryDate?: Record<string, never> | null;
+        };
+        UpdateOrderDto: {
+            /** @description Contract number */
+            contractNo?: Record<string, never> | null;
+            /**
+             * @description Contract date (YYYY-MM-DD)
+             * @example 2027-01-20
+             */
+            contractDate?: Record<string, never> | null;
+            /**
+             * @description Delivery date (YYYY-MM-DD)
+             * @example 2027-02-15
+             */
+            deliveryDate?: Record<string, never> | null;
+        };
+        CreateSupplierDto: {
+            /**
+             * @description Supplier code, unique among active suppliers (any case)
+             * @example NCC_0001
+             */
+            code: string;
+            /** @description Supplier name */
+            name: string;
+            /** @description Tax code */
+            taxCode?: string;
+            /** @description Address */
+            address?: string;
+            /** @description Phone number */
+            phone?: string;
+            /** @description Email address */
+            email?: string;
+            /** @description Contact person */
+            contactName?: string;
+            /** @description Note */
+            note?: string;
+            /** @description Whether the supplier is in use. Defaults to true. */
+            isActive?: boolean;
+        };
+        UpdateSupplierDto: {
+            /**
+             * @description Supplier code, unique among active suppliers (any case)
+             * @example NCC_0001
+             */
+            code?: string;
+            /** @description Supplier name */
+            name?: string;
+            /** @description Tax code */
+            taxCode?: string;
+            /** @description Address */
+            address?: string;
+            /** @description Phone number */
+            phone?: string;
+            /** @description Email address */
+            email?: string;
+            /** @description Contact person */
+            contactName?: string;
+            /** @description Note */
+            note?: string;
+            /** @description Whether the supplier is in use. Defaults to true. */
+            isActive?: boolean;
+        };
+        PurchaseOrderLineDto: {
+            /** @description Catalog item */
+            itemId: number;
+            /** @description Quantity, up to 3 decimals */
+            quantity: number;
+            /** @description Price of one unit excluding VAT, whole VND */
+            unitPrice: number;
+        };
+        CreatePurchaseOrderDto: {
+            /** @description Active supplier */
+            supplierId: number;
+            /**
+             * @description Date the goods are expected (YYYY-MM-DD)
+             * @example 2027-02-15
+             */
+            expectedDate?: Record<string, never> | null;
+            /**
+             * @description VAT rate in percent
+             * @enum {number}
+             */
+            vatRate: 0 | 5 | 8 | 10;
+            note?: Record<string, never> | null;
+            lines: components["schemas"]["PurchaseOrderLineDto"][];
+        };
+        PurchaseOrderFromRequestLineDto: {
+            /** @description Purchase request line ordered */
+            prLineId: number;
+            /** @description Quantity ordered, at most what the line has remaining */
+            quantity: number;
+        };
+        PurchaseOrderFromRequestsDto: {
+            /** @description Active supplier */
+            supplierId: number;
+            /**
+             * @description VAT rate in percent; 10 when left out
+             * @enum {number}
+             */
+            vatRate?: 0 | 5 | 8 | 10;
+            lines: components["schemas"]["PurchaseOrderFromRequestLineDto"][];
+        };
+        UpdatePurchaseOrderDto: {
+            /** @description Active supplier */
+            supplierId?: number;
+            /** @description Date the goods are expected (YYYY-MM-DD); null clears it */
+            expectedDate?: Record<string, never> | null;
+            /** @enum {number} */
+            vatRate?: 0 | 5 | 8 | 10;
+            note?: Record<string, never> | null;
+            lines?: components["schemas"]["PurchaseOrderLineDto"][];
+        };
+        PurchaseOrderReasonDto: {
+            reason: string;
+        };
+        StockReceiptLineDto: {
+            /** @description Line of the purchase order being received */
+            poLineId: number;
+            /** @description Quantity received, up to 3 decimals */
+            quantity: number;
+        };
+        CreateStockReceiptDto: {
+            /** @description Approved or partly received purchase order */
+            purchaseOrderId: number;
+            /**
+             * Format: uuid
+             * @description One key per receive screen: posting it again returns the first receipt with 200 and posts nothing.
+             */
+            requestKey?: string;
+            note?: Record<string, never> | null;
+            lines: components["schemas"]["StockReceiptLineDto"][];
+        };
+        StockIssueLineDto: {
+            /** @description Catalog item */
+            itemId: number;
+            /** @description Panel line of the order the material is for */
+            orderLineId?: Record<string, never> | null;
+            /** @description Quantity, up to 3 decimals */
+            quantity: number;
+            /** @description Why more than the BOM is issued; required on every line of an item once the order’s issues exceed its demand */
+            reason?: Record<string, never> | null;
+        };
+        CreateStockIssueDto: {
+            /** @description Sales order */
+            orderId: number;
+            /**
+             * Format: uuid
+             * @description One key per screen: posting it again returns the first document with 200 and posts nothing.
+             */
+            requestKey?: string;
+            note?: Record<string, never> | null;
+            lines: components["schemas"]["StockIssueLineDto"][];
+        };
+        WorkshopReturnLineDto: {
+            /** @description Catalog item */
+            itemId: number;
+            /** @description Panel line of the order the material is for */
+            orderLineId?: Record<string, never> | null;
+            /** @description Quantity, up to 3 decimals */
+            quantity: number;
+            note?: Record<string, never> | null;
+        };
+        CreateWorkshopReturnDto: {
+            /** @description Sales order */
+            orderId: number;
+            /**
+             * Format: uuid
+             * @description One key per screen: posting it again returns the first document with 200 and posts nothing.
+             */
+            requestKey?: string;
+            note?: Record<string, never> | null;
+            lines: components["schemas"]["WorkshopReturnLineDto"][];
+        };
+        SupplierReturnLineDto: {
+            /** @description Line of the purchase order the goods came on */
+            poLineId: number;
+            /** @description Quantity returned, up to 3 decimals */
+            quantity: number;
+        };
+        CreateSupplierReturnDto: {
+            /** @description Purchase order goods were received on */
+            purchaseOrderId: number;
+            /**
+             * Format: uuid
+             * @description One key per return screen: posting it again returns the first return with 200 and posts nothing.
+             */
+            requestKey?: string;
+            /** @description Why the goods go back */
+            reason: string;
+            lines: components["schemas"]["SupplierReturnLineDto"][];
+        };
+        CreateStocktakeDto: {
+            /** @enum {string} */
+            scope: "all" | "location";
+            /** @description The location counted, when the scope is one location */
+            locationId?: number;
+            note?: Record<string, never> | null;
+        };
+        StocktakeScanDto: {
+            /** @description A scanned barcode or a typed item code */
+            code: string;
+        };
+        StocktakeCountDto: {
+            /** @description Counted quantity, up to 3 decimals */
+            countedQty: number;
+        };
+        StocktakeReasonDto: {
+            reason: string;
+        };
+        PurchaseRequestLineDto: {
+            /** @description Active catalog item */
+            itemId: number;
+            /** @description Quantity, up to 3 decimals */
+            quantity: number;
+            /** @description Needed by (YYYY-MM-DD) */
+            neededBy?: Record<string, never> | null;
+            note?: Record<string, never> | null;
+        };
+        CreatePurchaseRequestDto: {
+            note?: Record<string, never> | null;
+            lines: components["schemas"]["PurchaseRequestLineDto"][];
+        };
+        UpdatePurchaseRequestDto: {
+            note?: Record<string, never> | null;
+            /** @description Replaces every line; refused once anything has been ordered */
+            lines?: components["schemas"]["PurchaseRequestLineDto"][];
+        };
+        PurchaseRequestReasonDto: {
+            reason: string;
+        };
+        CreateProductionOrderDto: {
+            /** @description The open sales order to build */
+            orderId: number;
+        };
+        UpdateProductionUnitDto: {
+            /** @description Account holding the technician role */
+            assigneeId?: number;
+            /**
+             * @description Planned end date, YYYY-MM-DD
+             * @example 2026-12-31
+             */
+            plannedEndDate?: string;
+        };
+        ProductionOrderReasonDto: {
+            reason: string;
+        };
+        StageUndoDto: {
+            reason: string;
+        };
+        CreateProductionIssueDto: {
+            /** @enum {string} */
+            stage: "material_prep" | "enclosure" | "device_mounting" | "wiring" | "internal_test" | "finishing";
+            description: string;
+            /** @enum {string} */
+            severity: "low" | "medium" | "high";
+        };
+        ResolveProductionIssueDto: {
+            resolution: string;
+        };
+        CreateQcChecklistItemDto: {
+            name: string;
+        };
+        ReorderQcChecklistDto: {
+            /** @description Every item id, hidden ones included, in the new order */
+            ids: number[];
+        };
+        UpdateQcChecklistItemDto: {
+            name?: string;
+            /** @description false hides the item from new rounds */
+            active?: boolean;
+        };
+        QcResultDto: {
+            /** @description Id of an active checklist template item */
+            checklistItemId: number;
+            /** @enum {string} */
+            result: "pass" | "fail" | "na";
+            /** @description Required (and becomes the defect) when result is fail */
+            note?: string;
+        };
+        CreateQcRoundDto: {
+            /** @description Exactly one result per active checklist item */
+            results: components["schemas"]["QcResultDto"][];
+        };
+        FixQcDefectDto: {
+            /** @description What was done */
+            note: string;
+        };
+    };
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  AuthController_login: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["LoginDto"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_refresh: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_forgotPassword: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ForgotPasswordDto"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_resetPassword: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ResetPasswordDto"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_changePassword: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ChangePasswordDto"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_logout: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_me: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_updateProfile: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateProfileDto"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_updateAvatar: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          file?: string;
-        };
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_removeAvatar: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_updateSignature: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          file?: string;
-        };
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_removeSignature: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  AuthController_withdrawSignatureRequest: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  NotificationController_findAll: {
-    parameters: {
-      query?: {
-        limit?: number;
-        /** @description Id of the last row of the previous page */
-        cursor?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description One page for this user */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  NotificationController_unreadCount: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  NotificationController_markAllRead: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  NotificationController_markRead: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Notification is not addressed to this user */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
-        sortBy?: string;
-        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
-        sortOrder?: string;
-        /** @description Filter by role code */
-        roleCode?: string;
-        /** @description Filter by account state; omitted returns both */
-        isActive?: boolean;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateUserDto"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_findColumnValues: {
-    parameters: {
-      query: {
-        /** @description Column key: username, fullName, email, phone, department, title, isActive, lastLoginAt, avatarUrl, signatureUrl, roleName */
-        column: string;
-        /** @description Search within the values */
-        search?: string;
-        /** @description Page number */
-        page?: number;
-        /** @description Values per page */
-        limit?: number;
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Keyword search of the list itself */
-        listSearch?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description Filter by role code */
-        roleCode?: string;
-        /** @description Filter by account state; omitted returns both */
-        isActive?: boolean;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated distinct column values */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Column is not filterable */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires *:* */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_findAssignableRoles: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateUserDto"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_setActive: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SetUserActiveDto"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_approveSignature: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_bulkApproveSignatures: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BulkApproveDto"];
-      };
-    };
-    responses: {
-      /** @description Per-id outcome: `{ approved: number[], failed: [{ id, message }] }` */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Empty or invalid id list */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires *:* */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_rejectSignature: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RejectSignatureDto"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_bulkDeactivate: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BulkDeleteDto"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_bulkRemove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BulkDeleteDto"];
-      };
-    };
-    responses: {
-      /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Empty or invalid id list */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires *:* */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_importUsers: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ExcelImportRequestDto"];
-      };
-    };
-    responses: {
-      /** @description { created, updated } */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Import rejected — errors[{ fileRow, field?, code, message? }] */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_export: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UserExportDto"];
-      };
-    };
-    responses: {
-      /** @description Queued; returns jobId */
-      202: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description invalidSpec or unknownField — a column the list cannot export */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description tooManyJobs */
-      429: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UsersController_resetPassword: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AdminResetPasswordDto"];
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ListPreferenceController_find: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        moduleKey: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Stored choice, or null when unset */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unknown module key */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ListPreferenceController_upsert: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        moduleKey: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateListPreferenceDto"];
-      };
-    };
-    responses: {
-      /** @description Stored choice */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unknown module key or bad columns */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  FilesController_upload: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          file?: string;
-        };
-      };
-    };
-    responses: {
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  FilesController_getUrl: {
-    parameters: {
-      query?: {
-        /** @description How the browser should treat the object. `inline` views it, `attachment` saves it. */
-        disposition?: "inline" | "attachment";
-        /** @description Name the saved file should carry. Only used with `disposition=attachment`. */
-        fileName?: string;
-      };
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ExcelController_template: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ExcelTemplateBodyDto"];
-      };
-    };
-    responses: {
-      /** @description Header-only workbook */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description invalidSpec */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ExcelController_parse: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          file?: string;
-          sheet?: string;
-          label?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Queued; returns jobId */
-      202: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description invalidSpec, invalidFile or fileTooLarge */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description tooManyJobs */
-      429: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ExcelController_snapshot: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Job snapshot */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description jobNotFound */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ExcelController_events: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Event stream */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description jobNotFound */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ExcelController_result: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Keyed rows */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description jobNotFound */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description jobNotCompleted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ExcelController_download: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Zip stream */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description jobNotFound */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description jobNotCompleted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description fileExpired */
-      410: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RolesController_findAll: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RolesController_findPermissionCatalog: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RolesController_updatePermissions: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateRolePermissionsDto"];
-      };
-    };
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  HealthController_check: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  CustomerController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
-        sortBy?: string;
-        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
-        sortOrder?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated customer list */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires customer:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  CustomerController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateCustomerDto"];
-      };
-    };
-    responses: {
-      /** @description Customer created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error or owner not allowed */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires customer:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Duplicate customer code */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  CustomerController_findColumnValues: {
-    parameters: {
-      query: {
-        /** @description Column key: code, name, taxCode, address, phone, email */
-        column: string;
-        /** @description Search within the values */
-        search?: string;
-        /** @description Page number */
-        page?: number;
-        /** @description Values per page */
-        limit?: number;
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Keyword search of the list itself */
-        listSearch?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated distinct column values */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Column is not filterable */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires customer:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  CustomerController_getNextCode: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Next suggested code */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires customer:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  CustomerController_listOwnerOptions: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Owner options */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires customer:create or customer:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  CustomerController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Customer found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, soft-deleted or owned by another sales account */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  CustomerController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Customer soft-deleted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires customer:delete */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Customer not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Customer is referenced by a document */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  CustomerController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateCustomerDto"];
-      };
-    };
-    responses: {
-      /** @description Customer updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires customer:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Customer not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  CustomerController_bulkRemove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BulkDeleteDto"];
-      };
-    };
-    responses: {
-      /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Empty or invalid id list */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires customer:delete */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ContactController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
-        sortBy?: string;
-        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
-        sortOrder?: string;
-        /** @description Only the contacts of this customer */
-        customerId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated contact list */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires contact:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ContactController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateContactDto"];
-      };
-    };
-    responses: {
-      /** @description Contact created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires contact:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Customer not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ContactController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Contact found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found or its customer is owned by another sales account */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ContactController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Contact soft-deleted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires contact:delete */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Contact not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ContactController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateContactDto"];
-      };
-    };
-    responses: {
-      /** @description Contact updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires contact:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Contact not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProjectController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
-        sortBy?: string;
-        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
-        sortOrder?: string;
-        /** @description Only the projects of this customer */
-        customerId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated project list */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires project:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProjectController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateProjectDto"];
-      };
-    };
-    responses: {
-      /** @description Project created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires project:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Customer not found or owned by another sales account */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Duplicate project code */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProjectController_findColumnValues: {
-    parameters: {
-      query: {
-        /** @description Column key: code, name, siteAddress, customerName */
-        column: string;
-        /** @description Search within the values */
-        search?: string;
-        /** @description Page number */
-        page?: number;
-        /** @description Values per page */
-        limit?: number;
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Keyword search of the list itself */
-        listSearch?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description Only the projects of this customer */
-        customerId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated distinct column values */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Column is not filterable */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires project:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProjectController_getNextCode: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Next suggested code */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires project:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProjectController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Project found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, soft-deleted, or its customer is owned by another sales account */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProjectController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Project soft-deleted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires project:delete */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Project not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Project is referenced by a document */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProjectController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateProjectDto"];
-      };
-    };
-    responses: {
-      /** @description Project updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires project:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Project not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProjectController_bulkRemove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BulkDeleteDto"];
-      };
-    };
-    responses: {
-      /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Empty or invalid id list */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires project:delete */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
-        sortBy?: string;
-        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
-        sortOrder?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated item list */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires item:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateItemDto"];
-      };
-    };
-    responses: {
-      /** @description Item created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires item:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Duplicate item code */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_findColumnValues: {
-    parameters: {
-      query: {
-        /** @description Column key: code, name, brand, group, unit */
-        column: string;
-        /** @description Search within the values */
-        search?: string;
-        /** @description Page number */
-        page?: number;
-        /** @description Values per page */
-        limit?: number;
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Keyword search of the list itself */
-        listSearch?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated distinct column values */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Column is not filterable */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires item:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_importTemplate: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description The template workbook */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires item:import */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_import: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          file?: string;
-        };
-      };
-    };
-    responses: {
-      /** @description Created count and the rows that were rejected */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not an .xlsx, too large, no header row or no data rows */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires item:import */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Import rolled back */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_resolve: {
-    parameters: {
-      query: {
-        /** @description Scanned value: an item barcode, else an item code (any case) */
-        code: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description The item the value stands for */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Missing code */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires item:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description No item for the value */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_labelsPdf: {
-    parameters: {
-      query: {
-        /** @description Comma-separated item ids, one label per id and copy */
-        ids: string[];
-        /** @description Copies of each label (at least 1); ids x copies must not exceed 500 */
-        copies?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description The PDF */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Missing or invalid ids, copies below 1, or more than 500 labels */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires item:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description An item is unknown or deleted */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description An item code holds characters Code 128 cannot print, or is longer than 28 characters and cannot be printed scannably on a 50 x 30 mm label */
-      422: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Item found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found or soft-deleted */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Item soft-deleted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires item:delete */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Item not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Item is referenced by a document */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateItemDto"];
-      };
-    };
-    responses: {
-      /** @description Item updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error or attempt to change the code */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires item:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Item not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_updateStockSettings: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateItemStockSettingsDto"];
-      };
-    };
-    responses: {
-      /** @description Stock settings updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires item:stock_settings */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Item not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Barcode already in use */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ItemController_bulkRemove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BulkDeleteDto"];
-      };
-    };
-    responses: {
-      /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Empty or invalid id list */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires item:delete */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LocationController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
-        sortBy?: string;
-        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
-        sortOrder?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated location list */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires location:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LocationController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateLocationDto"];
-      };
-    };
-    responses: {
-      /** @description Location created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires location:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Duplicate location code */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LocationController_findColumnValues: {
-    parameters: {
-      query: {
-        /** @description Column key: code, name */
-        column: string;
-        /** @description Search within the values */
-        search?: string;
-        /** @description Page number */
-        page?: number;
-        /** @description Values per page */
-        limit?: number;
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Keyword search of the list itself */
-        listSearch?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated distinct column values */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Column is not filterable */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires location:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LocationController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Location found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found or soft-deleted */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LocationController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Location soft-deleted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires location:delete */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Location not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Location is the default location of an item */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LocationController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateLocationDto"];
-      };
-    };
-    responses: {
-      /** @description Location updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires location:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Location not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Duplicate location code */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  LocationController_bulkRemove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BulkDeleteDto"];
-      };
-    };
-    responses: {
-      /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Empty or invalid id list */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires location:delete */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
-        sortBy?: string;
-        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
-        sortOrder?: string;
-        /** @description Only this status */
-        status?:
-          | "draft"
-          | "assigned"
-          | "estimating"
-          | "estimated"
-          | "quoted"
-          | "won"
-          | "lost"
-          | "cancelled";
-        /** @description Only requests assigned to this engineer */
-        assignedEngineerId?: number;
-        /** @description Quotation due on or after this date (YYYY-MM-DD) */
-        quotationDueFrom?: string;
-        /** @description Quotation due on or before this date (YYYY-MM-DD) */
-        quotationDueTo?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated request list */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires request:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateRequestDto"];
-      };
-    };
-    responses: {
-      /** @description Request created as a draft */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error, foreign project or contact, owner not allowed */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires request:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Customer not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestController_findColumnValues: {
-    parameters: {
-      query: {
-        /** @description Column key: code, title, status */
-        column: string;
-        /** @description Search within the values */
-        search?: string;
-        /** @description Page number */
-        page?: number;
-        /** @description Values per page */
-        limit?: number;
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Keyword search of the list itself */
-        listSearch?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description Only this status */
-        status?:
-          | "draft"
-          | "assigned"
-          | "estimating"
-          | "estimated"
-          | "quoted"
-          | "won"
-          | "lost"
-          | "cancelled";
-        /** @description Only requests assigned to this engineer */
-        assignedEngineerId?: number;
-        /** @description Quotation due on or after this date (YYYY-MM-DD) */
-        quotationDueFrom?: string;
-        /** @description Quotation due on or before this date (YYYY-MM-DD) */
-        quotationDueTo?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated distinct column values */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Column is not filterable */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires request:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestController_listEngineerOptions: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Engineer options */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires request:assign */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Request found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateRequestDto"];
-      };
-    };
-    responses: {
-      /** @description Request updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires request:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request can no longer be edited */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestController_listActivities: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Timeline, oldest first */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestController_assign: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AssignRequestDto"];
-      };
-    };
-    responses: {
-      /** @description Request assigned */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Engineer is not an active engineer or engineering lead */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires request:assign */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request can no longer be assigned */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestController_cancel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RequestReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Request cancelled */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires request:cancel */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request can no longer be cancelled */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestController_markLost: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RequestReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Request marked lost */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires request:cancel */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request cannot be lost from here */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestAttachmentController_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Attachments, oldest first */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestAttachmentController_upload: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          file: string;
-        };
-      };
-    };
-    responses: {
-      /** @description File attached */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description File missing, type not allowed, content mismatch, or limit reached */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires request:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request no longer accepts files */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description File larger than 20 MB */
-      413: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestAttachmentController_download: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        attachmentId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description File content */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request or file not found, or outside the caller’s data scope */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  RequestAttachmentController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        attachmentId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description File removed */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires request:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request or file not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request no longer accepts changes */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Status of the latest revision */
-        status?: "draft" | "submitted";
-        /** @description Only the estimate of this request */
-        requestId?: number;
-        /** @description Only estimates of requests assigned to this engineer */
-        assignedEngineerId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated estimate list */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires estimate:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateEstimateDto"];
-      };
-    };
-    responses: {
-      /** @description Estimate created as a draft */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires estimate:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The request already has an estimate or is not assigned */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_findOne: {
-    parameters: {
-      query?: {
-        /** @description Revision number to read; the latest when omitted */
-        revision?: number;
-      };
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Estimate found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_submit: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Revision submitted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description No panel, or a panel without a BOM line */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires estimate:submit */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The revision is submitted or superseded and read-only */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_revise: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description New draft revision */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires estimate:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description A draft is already open, or the request is quoted or closed */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_addPanel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreatePanelDto"];
-      };
-    };
-    responses: {
-      /** @description Panel added */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires estimate:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The revision is submitted or superseded and read-only, or tag in use */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_deletePanel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        panelId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Panel removed */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The revision is submitted or superseded and read-only */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_updatePanel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        panelId: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdatePanelDto"];
-      };
-    };
-    responses: {
-      /** @description Panel updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The revision is submitted or superseded and read-only, or tag in use */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_addBomLine: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        panelId: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateBomLineDto"];
-      };
-    };
-    responses: {
-      /** @description Line added */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Item is not an active item */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The revision is submitted or superseded and read-only */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_deleteBomLine: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        lineId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Line removed */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The revision is submitted or superseded and read-only */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_updateBomLine: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        lineId: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateBomLineDto"];
-      };
-    };
-    responses: {
-      /** @description Line updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The revision is submitted or superseded and read-only */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_addCostLine: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        panelId: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateCostLineDto"];
-      };
-    };
-    responses: {
-      /** @description Line added */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The revision is submitted or superseded and read-only */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_deleteCostLine: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        lineId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Line removed */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The revision is submitted or superseded and read-only */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  EstimateController_updateCostLine: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        lineId: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateCostLineDto"];
-      };
-    };
-    responses: {
-      /** @description Line updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The revision is submitted or superseded and read-only */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Status of the latest version */
-        status?:
-          | "draft"
-          | "pending_approval"
-          | "approved"
-          | "rejected"
-          | "customer_confirmed"
-          | "cancelled"
-          | "closed";
-        /** @description Part of the quotation code */
-        code?: string;
-        /** @description Only quotations of this customer */
-        customerId?: number;
-        /** @description Only the quotation of this request */
-        requestId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated quotation list */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateQuotationDto"];
-      };
-    };
-    responses: {
-      /** @description Quotation created as a draft */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description No submitted estimate, not the latest revision, request not estimated, or a quotation exists */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_findOne: {
-    parameters: {
-      query?: {
-        /** @description Version number to read; the latest when omitted */
-        ver?: number;
-      };
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Quotation found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_updatePricing: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateQuotationPricingDto"];
-      };
-    };
-    responses: {
-      /** @description Pricing updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Invalid figure, or a discount above the subtotal */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The latest version is not a draft */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_revise: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description New draft version opened */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The latest version is a draft, confirmed, cancelled or closed, or changed meanwhile */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_refreshEstimate: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Draft refreshed */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The latest version is not a draft, or no estimate is submitted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_submit: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Submitted for approval */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:submit, and the version creator or a manager */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not a draft, or the estimate was revised since */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_approve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Approved */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:approve, and not the version creator */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not pending approval */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_reject: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RequestReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Rejected */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:approve, and not the version creator */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not pending approval */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_confirm: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Confirmed by the customer */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:confirm */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not approved */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_cancel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RequestReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Cancelled; the request is lost */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:cancel */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Confirmed, cancelled or closed, or the request cannot be lost */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_listFeedback: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description The feedback log */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_addFeedback: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateQuotationFeedbackDto"];
-      };
-    };
-    responses: {
-      /** @description Feedback recorded */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_exportXlsx: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description The workbook */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:export */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not approved or confirmed */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  QuotationController_exportPdf: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description The PDF */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires quotation:export */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not approved or confirmed */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  OrderController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        status?:
-          "open" | "in_production" | "delivered" | "completed" | "cancelled";
-        /** @description Part of the order code */
-        code?: string;
-        /** @description Only orders of this customer */
-        customerId?: number;
-        /** @description Only the order of this quotation */
-        quotationId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated order list */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires order:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  OrderController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateOrderDto"];
-      };
-    };
-    responses: {
-      /** @description Order created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires order:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not customer-confirmed, or the quotation already has an order */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  OrderController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Order found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  OrderController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateOrderDto"];
-      };
-    };
-    responses: {
-      /** @description Order updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires order:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The order is not open */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  OrderController_cancel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RequestReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Cancelled; the request is lost */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires order:cancel */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The order is not open */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  SupplierController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
-        sortBy?: string;
-        /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
-        sortOrder?: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated supplier list */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires supplier:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  SupplierController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateSupplierDto"];
-      };
-    };
-    responses: {
-      /** @description Supplier created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires supplier:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Duplicate supplier code */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  SupplierController_findColumnValues: {
-    parameters: {
-      query: {
-        /** @description Column key: code, name, taxCode, contactName, phone, email */
-        column: string;
-        /** @description Search within the values */
-        search?: string;
-        /** @description Page number */
-        page?: number;
-        /** @description Values per page */
-        limit?: number;
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Keyword search of the list itself */
-        listSearch?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated distinct column values */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Column is not filterable */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires supplier:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  SupplierController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Supplier found */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found or soft-deleted */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  SupplierController_remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Supplier soft-deleted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires supplier:delete */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Supplier not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Supplier is referenced by a document */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  SupplierController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateSupplierDto"];
-      };
-    };
-    responses: {
-      /** @description Supplier updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires supplier:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Supplier not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Duplicate supplier code */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  SupplierController_bulkRemove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["BulkDeleteDto"];
-      };
-    };
-    responses: {
-      /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Empty or invalid id list */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Unauthorized */
-      401: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires supplier:delete */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StockController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Only items whose default location is this one */
-        locationId?: number;
-        /** @description Only items whose available stock is below their minimum */
-        lowOnly?: boolean;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated stock list */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires stock:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StockController_findAvailability: {
-    parameters: {
-      query: {
-        /** @description Comma-separated item ids (1–500) */
-        itemIds: string;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description One row per active item */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description itemIds missing or over 500 */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires stock:availability */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StockController_findMovements: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-      };
-      header?: never;
-      path: {
-        itemId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated movements */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires stock:ledger */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Item not found or deleted */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseOrderController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        status?:
-          | "draft"
-          | "pending_approval"
-          | "approved"
-          | "partially_received"
-          | "received"
-          | "closed"
-          | "cancelled";
-        /** @description Only the orders to this supplier */
-        supplierId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated purchase orders */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires purchase_order:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseOrderController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreatePurchaseOrderDto"];
-      };
-    };
-    responses: {
-      /** @description Draft created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Supplier or item not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Supplier inactive or item deleted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseOrderController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Purchase order */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseOrderController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdatePurchaseOrderDto"];
-      };
-    };
-    responses: {
-      /** @description Draft updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not a draft, or supplier/item unusable */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseOrderController_createFromRequests: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PurchaseOrderFromRequestsDto"];
-      };
-    };
-    responses: {
-      /** @description Draft created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Request line or supplier not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description More than remains, a cancelled request, or supplier/item unusable */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseOrderController_submit: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Pending approval */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not a draft, or no lines */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseOrderController_approve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Approved */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The actor took part in the order */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not pending approval */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseOrderController_reject: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PurchaseOrderReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Back to draft */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The actor took part in the order */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not pending approval */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseOrderController_cancel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PurchaseOrderReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Cancelled */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Wrong status or goods received */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseOrderController_close: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PurchaseOrderReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Closed */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Wrong status */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  MaterialController_findOrders: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        status?:
-          "open" | "in_production" | "delivered" | "completed" | "cancelled";
-        /** @description Only this sales owner’s orders; never widens the actor’s own scope */
-        salesOwnerId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated orders */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires material:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  MaterialController_findEstimateVsActual: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        orderId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Estimate against actual */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found or outside the actor’s scope */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  MaterialController_findOrder: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        orderId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Order material view */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found or outside the actor’s scope */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StockReceiptController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Only the receipts of this purchase order */
-        purchaseOrderId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated stock receipts */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires stock_receipt:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StockReceiptController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateStockReceiptDto"];
-      };
-    };
-    responses: {
-      /** @description The request key was posted before: the first receipt */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Receipt posted */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error, or a line not on the order */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Purchase order not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Order not approved or partly received, more than remains, or item deleted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StockReceiptController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Stock receipt */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StockIssueController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Only the documents of this order */
-        orderId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated stock issues */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires stock_issue:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StockIssueController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateStockIssueDto"];
-      };
-    };
-    responses: {
-      /** @description The request key was posted before: the first issue */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Issue posted */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error, a panel of another order, or a reason missing beyond the BOM */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Order or item not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Order not open, not enough stock outside other orders’ reservations, or item deleted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StockIssueController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Stock issue */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  WorkshopReturnController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Only the documents of this order */
-        orderId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated workshop returns */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires stock_return:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  WorkshopReturnController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateWorkshopReturnDto"];
-      };
-    };
-    responses: {
-      /** @description The request key was posted before: the first return */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Return posted */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Order or item not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Order neither open nor cancelled, or more than is out at the workshop */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  WorkshopReturnController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Workshop return */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  SupplierReturnController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Only the returns of this purchase order */
-        purchaseOrderId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated supplier returns */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires stock_return:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  SupplierReturnController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateSupplierReturnDto"];
-      };
-    };
-    responses: {
-      /** @description The request key was posted before: the first return */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Return posted */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Validation error, no reason, or a line not on the order */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Purchase order not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Nothing received on the order, more than received or on hand, or item deleted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  SupplierReturnController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Supplier return */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StocktakeController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        status?: "counting" | "submitted" | "approved" | "cancelled";
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated stock counts */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StocktakeController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateStocktakeDto"];
-      };
-    };
-    responses: {
-      /** @description Count opened */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Another count is still open */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StocktakeController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Stock count */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StocktakeController_scan: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StocktakeScanDto"];
-      };
-    };
-    responses: {
-      /** @description Counted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Count or item not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The count is not being counted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StocktakeController_setCount: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        itemId: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StocktakeCountDto"];
-      };
-    };
-    responses: {
-      /** @description Counted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Count or line not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The count is not being counted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StocktakeController_submit: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Submitted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not being counted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StocktakeController_approve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Approved and posted */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The actor took part in the count */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not submitted, or an item would go below zero */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StocktakeController_reject: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StocktakeReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Back to counting */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The actor took part in the count */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not submitted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  StocktakeController_cancel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StocktakeReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Cancelled */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not open */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseRequestController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Only the requests raised for this sales order */
-        sourceOrderId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated purchase requests */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseRequestController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreatePurchaseRequestDto"];
-      };
-    };
-    responses: {
-      /** @description Request raised */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Item not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Item deleted */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseRequestController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Purchase request */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseRequestController_update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdatePurchaseRequestDto"];
-      };
-    };
-    responses: {
-      /** @description Request updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Cancelled or already ordered */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseRequestController_createFromOrder: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        orderId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Request raised */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Order not found or outside the reader’s scope */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Nothing left to request */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  PurchaseRequestController_cancel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PurchaseRequestReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Cancelled */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Already cancelled or ordered */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionOrderController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        status?: "draft" | "released" | "completed" | "cancelled";
-        /** @description Only the production orders of this sales order */
-        orderId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated production orders */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires production_order:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionOrderController_create: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateProductionOrderDto"];
-      };
-    };
-    responses: {
-      /** @description Draft created */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Order not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description The order is not open or already has a production order */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionOrderController_findOpenOrders: {
-    parameters: {
-      query?: {
-        /** @description Order code, customer or project */
-        search?: string;
-        limit?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Open orders without production */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires production_order:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionOrderController_listTechnicianOptions: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Technician options */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires production_order:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionOrderController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Production order */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionOrderController_findShortage: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Short items, possibly none */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller’s data scope */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionOrderController_updateUnit: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        unitId: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UpdateProductionUnitDto"];
-      };
-    };
-    responses: {
-      /** @description Cabinet updated */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Assignee is not a technician */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Production order or cabinet not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Order completed or cancelled, or cabinet finished */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionOrderController_releaseOrder: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Released */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Cabinets without a technician or a planned end date */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not a draft, or the sales order is no longer open */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionOrderController_cancel: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ProductionOrderReasonDto"];
-      };
-    };
-    responses: {
-      /** @description Cancelled */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Already completed or cancelled */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProgressController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        /** @description Only the cabinets assigned to the caller */
-        mine?: boolean;
-        /** @description Only the cabinets of this production order */
-        productionOrderId?: number;
-        /** @description Status of the current stage: the first one not done. `done` means every stage is done. */
-        stageStatus?: "pending" | "in_progress" | "done";
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated cabinets */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires production_progress:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProgressController_findOne: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Cabinet */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Not found, or outside the caller data scope */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProgressController_startStage: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        stage:
-          | "material_prep"
-          | "enclosure"
-          | "device_mounting"
-          | "wiring"
-          | "internal_test"
-          | "finishing";
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Cabinet with its stages */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Cabinet not found or not yours */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Previous stage not done, stage not pending, or order not released */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProgressController_finishStage: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        stage:
-          | "material_prep"
-          | "enclosure"
-          | "device_mounting"
-          | "wiring"
-          | "internal_test"
-          | "finishing";
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Cabinet with its stages */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Cabinet not found or not yours */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Stage not in progress, or order not released */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProgressController_undoStage: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-        stage:
-          | "material_prep"
-          | "enclosure"
-          | "device_mounting"
-          | "wiring"
-          | "internal_test"
-          | "finishing";
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["StageUndoDto"];
-      };
-    };
-    responses: {
-      /** @description Cabinet with its stages */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Stage not done, next stage already started, or order not released */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UnitPhotoController_list: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Photos of every stage */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Cabinet not found, or outside the caller data scope */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UnitPhotoController_upload: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          file: string;
-          /** @enum {string} */
-          stage:
-            | "material_prep"
-            | "enclosure"
-            | "device_mounting"
-            | "wiring"
-            | "internal_test"
-            | "finishing";
-          issueId?: number;
-        };
-      };
-    };
-    responses: {
-      /** @description Photo attached */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description File missing, type not allowed, content mismatch, foreign issue, or limit reached */
-      400: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires production_progress:update */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Cabinet not found or not yours */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Order not released */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description File larger than 10 MB */
-      413: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  UnitPhotoController_content: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        photoId: number;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Image bytes */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Photo not found, or outside the caller data scope */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionIssueController_findAll: {
-    parameters: {
-      query?: {
-        /** @description Page number */
-        page?: number;
-        /** @description Items per page */
-        limit?: number;
-        /** @description Search keyword */
-        search?: string;
-        /** @description Enum values whose translated label matched the keyword */
-        searchClassifications?: string[];
-        /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
-        columnFilters?: string;
-        status?: "open" | "resolved";
-        /** @description Only the issues of this production order */
-        productionOrderId?: number;
-        /** @description Only the issues of this cabinet */
-        unitId?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description Paginated issues, newest first */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires production_issue:read */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionIssueController_open: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CreateProductionIssueDto"];
-      };
-    };
-    responses: {
-      /** @description Issue opened */
-      201: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires production_issue:create */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Cabinet not found or not yours */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Order not released */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
-  ProductionIssueController_resolve: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: number;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ResolveProductionIssueDto"];
-      };
-    };
-    responses: {
-      /** @description Issue resolved */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Forbidden — requires production_issue:resolve */
-      403: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Issue not found */
-      404: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-      /** @description Issue already resolved */
-      409: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content?: never;
-      };
-    };
-  };
+    AuthController_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_refresh: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_forgotPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ForgotPasswordDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_resetPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_changePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_logout: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_updateProfile: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProfileDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_updateAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_removeAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_updateSignature: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_removeSignature: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AuthController_withdrawSignatureRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NotificationController_findAll: {
+        parameters: {
+            query?: {
+                limit?: number;
+                /** @description Id of the last row of the previous page */
+                cursor?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One page for this user */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NotificationController_unreadCount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NotificationController_markAllRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    NotificationController_markRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Notification is not addressed to this user */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+                sortBy?: string;
+                /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+                sortOrder?: string;
+                /** @description Filter by role code */
+                roleCode?: string;
+                /** @description Filter by account state; omitted returns both */
+                isActive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateUserDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_findColumnValues: {
+        parameters: {
+            query: {
+                /** @description Column key: username, fullName, email, phone, department, title, isActive, lastLoginAt, avatarUrl, signatureUrl, roleName */
+                column: string;
+                /** @description Search within the values */
+                search?: string;
+                /** @description Page number */
+                page?: number;
+                /** @description Values per page */
+                limit?: number;
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Keyword search of the list itself */
+                listSearch?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description Filter by role code */
+                roleCode?: string;
+                /** @description Filter by account state; omitted returns both */
+                isActive?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated distinct column values */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Column is not filterable */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires *:* */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_findAssignableRoles: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateUserDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_setActive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SetUserActiveDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_approveSignature: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_bulkApproveSignatures: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkApproveDto"];
+            };
+        };
+        responses: {
+            /** @description Per-id outcome: `{ approved: number[], failed: [{ id, message }] }` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Empty or invalid id list */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires *:* */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_rejectSignature: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RejectSignatureDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_bulkDeactivate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkDeleteDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_bulkRemove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkDeleteDto"];
+            };
+        };
+        responses: {
+            /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Empty or invalid id list */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires *:* */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_importUsers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExcelImportRequestDto"];
+            };
+        };
+        responses: {
+            /** @description { created, updated } */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Import rejected — errors[{ fileRow, field?, code, message? }] */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_export: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UserExportDto"];
+            };
+        };
+        responses: {
+            /** @description Queued; returns jobId */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description invalidSpec or unknownField — a column the list cannot export */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description tooManyJobs */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UsersController_resetPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminResetPasswordDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ListPreferenceController_find: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                moduleKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Stored choice, or null when unset */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown module key */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ListPreferenceController_upsert: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                moduleKey: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateListPreferenceDto"];
+            };
+        };
+        responses: {
+            /** @description Stored choice */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown module key or bad columns */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FilesController_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    FilesController_getUrl: {
+        parameters: {
+            query?: {
+                /** @description How the browser should treat the object. `inline` views it, `attachment` saves it. */
+                disposition?: "inline" | "attachment";
+                /** @description Name the saved file should carry. Only used with `disposition=attachment`. */
+                fileName?: string;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExcelController_template: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ExcelTemplateBodyDto"];
+            };
+        };
+        responses: {
+            /** @description Header-only workbook */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description invalidSpec */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExcelController_parse: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                    sheet?: string;
+                    label?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Queued; returns jobId */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description invalidSpec, invalidFile or fileTooLarge */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description tooManyJobs */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExcelController_snapshot: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Job snapshot */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description jobNotFound */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExcelController_events: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Event stream */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description jobNotFound */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExcelController_result: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Keyed rows */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description jobNotFound */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description jobNotCompleted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ExcelController_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Zip stream */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description jobNotFound */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description jobNotCompleted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description fileExpired */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RolesController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RolesController_findPermissionCatalog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RolesController_updatePermissions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRolePermissionsDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    HealthController_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomerController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+                sortBy?: string;
+                /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+                sortOrder?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated customer list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires customer:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomerController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCustomerDto"];
+            };
+        };
+        responses: {
+            /** @description Customer created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error or owner not allowed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires customer:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate customer code */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomerController_findColumnValues: {
+        parameters: {
+            query: {
+                /** @description Column key: code, name, taxCode, address, phone, email */
+                column: string;
+                /** @description Search within the values */
+                search?: string;
+                /** @description Page number */
+                page?: number;
+                /** @description Values per page */
+                limit?: number;
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Keyword search of the list itself */
+                listSearch?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated distinct column values */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Column is not filterable */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires customer:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomerController_getNextCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Next suggested code */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires customer:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomerController_listOwnerOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Owner options */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires customer:create or customer:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomerController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Customer found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, soft-deleted or owned by another sales account */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomerController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Customer soft-deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires customer:delete */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Customer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Customer is referenced by a document */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomerController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCustomerDto"];
+            };
+        };
+        responses: {
+            /** @description Customer updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires customer:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Customer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CustomerController_bulkRemove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkDeleteDto"];
+            };
+        };
+        responses: {
+            /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Empty or invalid id list */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires customer:delete */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+                sortBy?: string;
+                /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+                sortOrder?: string;
+                /** @description Only the contacts of this customer */
+                customerId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated contact list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires contact:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateContactDto"];
+            };
+        };
+        responses: {
+            /** @description Contact created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires contact:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Customer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Contact found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found or its customer is owned by another sales account */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Contact soft-deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires contact:delete */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Contact not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ContactController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateContactDto"];
+            };
+        };
+        responses: {
+            /** @description Contact updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires contact:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Contact not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProjectController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+                sortBy?: string;
+                /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+                sortOrder?: string;
+                /** @description Only the projects of this customer */
+                customerId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated project list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires project:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProjectController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProjectDto"];
+            };
+        };
+        responses: {
+            /** @description Project created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires project:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Customer not found or owned by another sales account */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate project code */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProjectController_findColumnValues: {
+        parameters: {
+            query: {
+                /** @description Column key: code, name, siteAddress, customerName */
+                column: string;
+                /** @description Search within the values */
+                search?: string;
+                /** @description Page number */
+                page?: number;
+                /** @description Values per page */
+                limit?: number;
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Keyword search of the list itself */
+                listSearch?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description Only the projects of this customer */
+                customerId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated distinct column values */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Column is not filterable */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires project:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProjectController_getNextCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Next suggested code */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires project:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProjectController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Project found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, soft-deleted, or its customer is owned by another sales account */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProjectController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Project soft-deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires project:delete */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Project not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Project is referenced by a document */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProjectController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProjectDto"];
+            };
+        };
+        responses: {
+            /** @description Project updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires project:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Project not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProjectController_bulkRemove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkDeleteDto"];
+            };
+        };
+        responses: {
+            /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Empty or invalid id list */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires project:delete */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+                sortBy?: string;
+                /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+                sortOrder?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated item list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires item:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateItemDto"];
+            };
+        };
+        responses: {
+            /** @description Item created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires item:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate item code */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_findColumnValues: {
+        parameters: {
+            query: {
+                /** @description Column key: code, name, brand, group, unit */
+                column: string;
+                /** @description Search within the values */
+                search?: string;
+                /** @description Page number */
+                page?: number;
+                /** @description Values per page */
+                limit?: number;
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Keyword search of the list itself */
+                listSearch?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated distinct column values */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Column is not filterable */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires item:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_importTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The template workbook */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires item:import */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_import: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Created count and the rows that were rejected */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not an .xlsx, too large, no header row or no data rows */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires item:import */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Import rolled back */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_resolve: {
+        parameters: {
+            query: {
+                /** @description Scanned value: an item barcode, else an item code (any case) */
+                code: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The item the value stands for */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing code */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires item:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No item for the value */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_labelsPdf: {
+        parameters: {
+            query: {
+                /** @description Comma-separated item ids, one label per id and copy */
+                ids: string[];
+                /** @description Copies of each label (at least 1); ids x copies must not exceed 500 */
+                copies?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The PDF */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing or invalid ids, copies below 1, or more than 500 labels */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires item:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description An item is unknown or deleted */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description An item code holds characters Code 128 cannot print, or is longer than 28 characters and cannot be printed scannably on a 50 x 30 mm label */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Item found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found or soft-deleted */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Item soft-deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires item:delete */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Item is referenced by a document */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateItemDto"];
+            };
+        };
+        responses: {
+            /** @description Item updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error or attempt to change the code */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires item:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_updateStockSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateItemStockSettingsDto"];
+            };
+        };
+        responses: {
+            /** @description Stock settings updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires item:stock_settings */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Barcode already in use */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ItemController_bulkRemove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkDeleteDto"];
+            };
+        };
+        responses: {
+            /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Empty or invalid id list */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires item:delete */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LocationController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+                sortBy?: string;
+                /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+                sortOrder?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated location list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires location:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LocationController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLocationDto"];
+            };
+        };
+        responses: {
+            /** @description Location created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires location:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate location code */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LocationController_findColumnValues: {
+        parameters: {
+            query: {
+                /** @description Column key: code, name */
+                column: string;
+                /** @description Search within the values */
+                search?: string;
+                /** @description Page number */
+                page?: number;
+                /** @description Values per page */
+                limit?: number;
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Keyword search of the list itself */
+                listSearch?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated distinct column values */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Column is not filterable */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires location:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LocationController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Location found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found or soft-deleted */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LocationController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Location soft-deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires location:delete */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Location not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Location is the default location of an item */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LocationController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateLocationDto"];
+            };
+        };
+        responses: {
+            /** @description Location updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires location:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Location not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate location code */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    LocationController_bulkRemove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkDeleteDto"];
+            };
+        };
+        responses: {
+            /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Empty or invalid id list */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires location:delete */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+                sortBy?: string;
+                /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+                sortOrder?: string;
+                /** @description Only this status */
+                status?: "draft" | "assigned" | "estimating" | "estimated" | "quoted" | "won" | "lost" | "cancelled";
+                /** @description Only requests assigned to this engineer */
+                assignedEngineerId?: number;
+                /** @description Quotation due on or after this date (YYYY-MM-DD) */
+                quotationDueFrom?: string;
+                /** @description Quotation due on or before this date (YYYY-MM-DD) */
+                quotationDueTo?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated request list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires request:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Request created as a draft */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error, foreign project or contact, owner not allowed */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires request:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Customer not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestController_findColumnValues: {
+        parameters: {
+            query: {
+                /** @description Column key: code, title, status */
+                column: string;
+                /** @description Search within the values */
+                search?: string;
+                /** @description Page number */
+                page?: number;
+                /** @description Values per page */
+                limit?: number;
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Keyword search of the list itself */
+                listSearch?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description Only this status */
+                status?: "draft" | "assigned" | "estimating" | "estimated" | "quoted" | "won" | "lost" | "cancelled";
+                /** @description Only requests assigned to this engineer */
+                assignedEngineerId?: number;
+                /** @description Quotation due on or after this date (YYYY-MM-DD) */
+                quotationDueFrom?: string;
+                /** @description Quotation due on or before this date (YYYY-MM-DD) */
+                quotationDueTo?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated distinct column values */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Column is not filterable */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires request:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestController_listEngineerOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Engineer options */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires request:assign */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Request updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires request:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request can no longer be edited */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestController_listActivities: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Timeline, oldest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestController_assign: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Request assigned */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Engineer is not an active engineer or engineering lead */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires request:assign */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request can no longer be assigned */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Request cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires request:cancel */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request can no longer be cancelled */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestController_markLost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Request marked lost */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires request:cancel */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request cannot be lost from here */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestAttachmentController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Attachments, oldest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestAttachmentController_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description File attached */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File missing, type not allowed, content mismatch, or limit reached */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires request:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request no longer accepts files */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File larger than 20 MB */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestAttachmentController_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                attachmentId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description File content */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request or file not found, or outside the caller’s data scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    RequestAttachmentController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                attachmentId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description File removed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires request:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request or file not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request no longer accepts changes */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Status of the latest revision */
+                status?: "draft" | "submitted";
+                /** @description Only the estimate of this request */
+                requestId?: number;
+                /** @description Only estimates of requests assigned to this engineer */
+                assignedEngineerId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated estimate list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires estimate:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEstimateDto"];
+            };
+        };
+        responses: {
+            /** @description Estimate created as a draft */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires estimate:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The request already has an estimate or is not assigned */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_findOne: {
+        parameters: {
+            query?: {
+                /** @description Revision number to read; the latest when omitted */
+                revision?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Estimate found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revision submitted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No panel, or a panel without a BOM line */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires estimate:submit */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The revision is submitted or superseded and read-only */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_revise: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description New draft revision */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires estimate:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A draft is already open, or the request is quoted or closed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_addPanel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePanelDto"];
+            };
+        };
+        responses: {
+            /** @description Panel added */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires estimate:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The revision is submitted or superseded and read-only, or tag in use */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_deletePanel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                panelId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Panel removed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The revision is submitted or superseded and read-only */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_updatePanel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                panelId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePanelDto"];
+            };
+        };
+        responses: {
+            /** @description Panel updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The revision is submitted or superseded and read-only, or tag in use */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_addBomLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                panelId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateBomLineDto"];
+            };
+        };
+        responses: {
+            /** @description Line added */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Item is not an active item */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The revision is submitted or superseded and read-only */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_deleteBomLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                lineId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Line removed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The revision is submitted or superseded and read-only */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_updateBomLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                lineId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateBomLineDto"];
+            };
+        };
+        responses: {
+            /** @description Line updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The revision is submitted or superseded and read-only */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_setUnitCost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                lineId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PriceBomLineDto"];
+            };
+        };
+        responses: {
+            /** @description Unit cost set */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires estimate:price */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The latest revision is not submitted, is already priced, or the request is no longer estimated */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_completePricing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revision priced */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A BOM line has no unit cost (the item codes are listed) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires estimate:price */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The latest revision is not submitted, is already priced, or the request is no longer estimated */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_addCostLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                panelId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateCostLineDto"];
+            };
+        };
+        responses: {
+            /** @description Line added */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The latest revision is not submitted, is already priced, or the request is no longer estimated */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_deleteCostLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                lineId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Line removed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The latest revision is not submitted, is already priced, or the request is no longer estimated */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    EstimateController_updateCostLine: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                lineId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateCostLineDto"];
+            };
+        };
+        responses: {
+            /** @description Line updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (also an actor who is not the assigned engineer) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The latest revision is not submitted, is already priced, or the request is no longer estimated */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Status of the latest version */
+                status?: "draft" | "pending_approval" | "approved" | "rejected" | "customer_confirmed" | "cancelled" | "closed";
+                /** @description Part of the quotation code */
+                code?: string;
+                /** @description Only quotations of this customer */
+                customerId?: number;
+                /** @description Only the quotation of this request */
+                requestId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated quotation list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateQuotationDto"];
+            };
+        };
+        responses: {
+            /** @description Quotation created as a draft */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No submitted estimate, not the latest revision, request not estimated, or a quotation exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_findOne: {
+        parameters: {
+            query?: {
+                /** @description Version number to read; the latest when omitted */
+                ver?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Quotation found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_updatePricing: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateQuotationPricingDto"];
+            };
+        };
+        responses: {
+            /** @description Pricing updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Invalid figure, or a discount above the subtotal */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The latest version is not a draft */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_revise: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description New draft version opened */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The latest version is a draft, confirmed, cancelled or closed, or changed meanwhile */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_refreshEstimate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Draft refreshed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The latest version is not a draft, or no estimate is submitted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Submitted for approval */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:submit, and the version creator or a manager */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a draft, or the estimate was revised since */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Approved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:approve, and not the version creator */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not pending approval */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Rejected */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:approve, and not the version creator */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not pending approval */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_confirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Confirmed by the customer */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:confirm */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not approved */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Cancelled; the request is lost */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:cancel */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Confirmed, cancelled or closed, or the request cannot be lost */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_listFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The feedback log */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_addFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateQuotationFeedbackDto"];
+            };
+        };
+        responses: {
+            /** @description Feedback recorded */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_exportXlsx: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The workbook */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:export */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not approved or confirmed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QuotationController_exportPdf: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The PDF */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires quotation:export */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the quotations of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not approved or confirmed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrderController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                status?: "open" | "in_production" | "delivered" | "completed" | "cancelled";
+                /** @description Part of the order code */
+                code?: string;
+                /** @description Only orders of this customer */
+                customerId?: number;
+                /** @description Only the order of this quotation */
+                quotationId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated order list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires order:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrderController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateOrderDto"];
+            };
+        };
+        responses: {
+            /** @description Order created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires order:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not customer-confirmed, or the quotation already has an order */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrderController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Order found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrderController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOrderDto"];
+            };
+        };
+        responses: {
+            /** @description Order updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires order:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The order is not open */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    OrderController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RequestReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Cancelled; the request is lost */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires order:cancel */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope (a Sales actor reads the orders of requests they own) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The order is not open */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SupplierController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Sort column. Omitted means newest first (createdAt descending); an explicit column defaults to ascending. */
+                sortBy?: string;
+                /** @description Sort order. Defaults to DESC for createdAt, ASC otherwise. */
+                sortOrder?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated supplier list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires supplier:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SupplierController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSupplierDto"];
+            };
+        };
+        responses: {
+            /** @description Supplier created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires supplier:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate supplier code */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SupplierController_findColumnValues: {
+        parameters: {
+            query: {
+                /** @description Column key: code, name, taxCode, contactName, phone, email */
+                column: string;
+                /** @description Search within the values */
+                search?: string;
+                /** @description Page number */
+                page?: number;
+                /** @description Values per page */
+                limit?: number;
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Keyword search of the list itself */
+                listSearch?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated distinct column values */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Column is not filterable */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires supplier:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SupplierController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Supplier found */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found or soft-deleted */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SupplierController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Supplier soft-deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires supplier:delete */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Supplier not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Supplier is referenced by a document */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SupplierController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateSupplierDto"];
+            };
+        };
+        responses: {
+            /** @description Supplier updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires supplier:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Supplier not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Duplicate supplier code */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SupplierController_bulkRemove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkDeleteDto"];
+            };
+        };
+        responses: {
+            /** @description Per-id outcome: `{ deleted: number[], failed: [{ id, message }] }` */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Empty or invalid id list */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unauthorized */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires supplier:delete */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StockController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Only items whose default location is this one */
+                locationId?: number;
+                /** @description Only items whose available stock is below their minimum */
+                lowOnly?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated stock list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires stock:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StockController_findAvailability: {
+        parameters: {
+            query: {
+                /** @description Comma-separated item ids (1–500) */
+                itemIds: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One row per active item */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description itemIds missing or over 500 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires stock:availability */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StockController_findMovements: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+            };
+            header?: never;
+            path: {
+                itemId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated movements */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires stock:ledger */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Item not found or deleted */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseOrderController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                status?: "draft" | "pending_approval" | "approved" | "partially_received" | "received" | "closed" | "cancelled";
+                /** @description Only the orders to this supplier */
+                supplierId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated purchase orders */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires purchase_order:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseOrderController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePurchaseOrderDto"];
+            };
+        };
+        responses: {
+            /** @description Draft created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Supplier or item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Supplier inactive or item deleted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseOrderController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Purchase order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseOrderController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePurchaseOrderDto"];
+            };
+        };
+        responses: {
+            /** @description Draft updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a draft, or supplier/item unusable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseOrderController_createFromRequests: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PurchaseOrderFromRequestsDto"];
+            };
+        };
+        responses: {
+            /** @description Draft created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Request line or supplier not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description More than remains, a cancelled request, or supplier/item unusable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseOrderController_submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pending approval */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a draft, or no lines */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseOrderController_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Approved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The actor took part in the order */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not pending approval */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseOrderController_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PurchaseOrderReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Back to draft */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The actor took part in the order */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not pending approval */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseOrderController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PurchaseOrderReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Wrong status or goods received */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseOrderController_close: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PurchaseOrderReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Closed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Wrong status */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialController_findOrders: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                status?: "open" | "in_production" | "delivered" | "completed" | "cancelled";
+                /** @description Only this sales owner’s orders; never widens the actor’s own scope */
+                salesOwnerId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated orders */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires material:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialController_findEstimateVsActual: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Estimate against actual */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found or outside the actor’s scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MaterialController_findOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Order material view */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found or outside the actor’s scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StockReceiptController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Only the receipts of this purchase order */
+                purchaseOrderId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated stock receipts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires stock_receipt:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StockReceiptController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStockReceiptDto"];
+            };
+        };
+        responses: {
+            /** @description The request key was posted before: the first receipt */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Receipt posted */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error, or a line not on the order */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Purchase order not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Order not approved or partly received, more than remains, or item deleted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StockReceiptController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Stock receipt */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StockIssueController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Only the documents of this order */
+                orderId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated stock issues */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires stock_issue:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StockIssueController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStockIssueDto"];
+            };
+        };
+        responses: {
+            /** @description The request key was posted before: the first issue */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Issue posted */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error, a panel of another order, or a reason missing beyond the BOM */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Order or item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Order not open, not enough stock outside other orders’ reservations, or item deleted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StockIssueController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Stock issue */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WorkshopReturnController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Only the documents of this order */
+                orderId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated workshop returns */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires stock_return:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WorkshopReturnController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateWorkshopReturnDto"];
+            };
+        };
+        responses: {
+            /** @description The request key was posted before: the first return */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Return posted */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Order or item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Order neither open nor cancelled, or more than is out at the workshop */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    WorkshopReturnController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Workshop return */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SupplierReturnController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Only the returns of this purchase order */
+                purchaseOrderId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated supplier returns */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires stock_return:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SupplierReturnController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateSupplierReturnDto"];
+            };
+        };
+        responses: {
+            /** @description The request key was posted before: the first return */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Return posted */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation error, no reason, or a line not on the order */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Purchase order not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Nothing received on the order, more than received or on hand, or item deleted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    SupplierReturnController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Supplier return */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StocktakeController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                status?: "counting" | "submitted" | "approved" | "cancelled";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated stock counts */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StocktakeController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStocktakeDto"];
+            };
+        };
+        responses: {
+            /** @description Count opened */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Another count is still open */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StocktakeController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Stock count */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StocktakeController_scan: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StocktakeScanDto"];
+            };
+        };
+        responses: {
+            /** @description Counted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Count or item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The count is not being counted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StocktakeController_setCount: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                itemId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StocktakeCountDto"];
+            };
+        };
+        responses: {
+            /** @description Counted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Count or line not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The count is not being counted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StocktakeController_submit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Submitted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not being counted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StocktakeController_approve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Approved and posted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The actor took part in the count */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not submitted, or an item would go below zero */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StocktakeController_reject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StocktakeReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Back to counting */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The actor took part in the count */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not submitted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    StocktakeController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StocktakeReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not open */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseRequestController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Only the requests raised for this sales order */
+                sourceOrderId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated purchase requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseRequestController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreatePurchaseRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Request raised */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Item deleted */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseRequestController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Purchase request */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseRequestController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdatePurchaseRequestDto"];
+            };
+        };
+        responses: {
+            /** @description Request updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Cancelled or already ordered */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseRequestController_createFromOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Request raised */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Order not found or outside the reader’s scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Nothing left to request */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    PurchaseRequestController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PurchaseRequestReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Already cancelled or ordered */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionOrderController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                status?: "draft" | "released" | "completed" | "cancelled";
+                /** @description Only the production orders of this sales order */
+                orderId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated production orders */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires production_order:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionOrderController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProductionOrderDto"];
+            };
+        };
+        responses: {
+            /** @description Draft created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Order not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The order is not open or already has a production order */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionOrderController_findOpenOrders: {
+        parameters: {
+            query?: {
+                /** @description Order code, customer or project */
+                search?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Open orders without production */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires production_order:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionOrderController_listTechnicianOptions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Technician options */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires production_order:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionOrderController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Production order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionOrderController_findShortage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Short items, possibly none */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller’s data scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionOrderController_updateUnit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                unitId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateProductionUnitDto"];
+            };
+        };
+        responses: {
+            /** @description Cabinet updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Assignee is not a technician */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Production order or cabinet not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Order completed or cancelled, or cabinet finished */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionOrderController_releaseOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Released */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Cabinets without a technician or a planned end date */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not a draft, or the sales order is no longer open */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionOrderController_cancel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductionOrderReasonDto"];
+            };
+        };
+        responses: {
+            /** @description Cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Already completed or cancelled */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProgressController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                /** @description Only the cabinets assigned to the caller */
+                mine?: boolean;
+                /** @description Only the cabinets of this production order */
+                productionOrderId?: number;
+                /** @description Status of the current stage: the first one not done. `done` means every stage is done. */
+                stageStatus?: "pending" | "in_progress" | "done";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated cabinets */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires production_progress:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProgressController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cabinet */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found, or outside the caller data scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProgressController_startStage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                stage: "material_prep" | "enclosure" | "device_mounting" | "wiring" | "internal_test" | "finishing";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cabinet with its stages */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Cabinet not found or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Previous stage not done, stage not pending, or order not released */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProgressController_finishStage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                stage: "material_prep" | "enclosure" | "device_mounting" | "wiring" | "internal_test" | "finishing";
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cabinet with its stages */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Cabinet not found or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Stage not in progress, or order not released */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProgressController_undoStage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+                stage: "material_prep" | "enclosure" | "device_mounting" | "wiring" | "internal_test" | "finishing";
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StageUndoDto"];
+            };
+        };
+        responses: {
+            /** @description Cabinet with its stages */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Stage not done, next stage already started, or order not released */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UnitPhotoController_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Photos of every stage */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Cabinet not found, or outside the caller data scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UnitPhotoController_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                    /** @enum {string} */
+                    stage: "material_prep" | "enclosure" | "device_mounting" | "wiring" | "internal_test" | "finishing";
+                    issueId?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Photo attached */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File missing, type not allowed, content mismatch, foreign issue, or limit reached */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires production_progress:update */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Cabinet not found or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Order not released */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File larger than 10 MB */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    UnitPhotoController_content: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                photoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Image bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Photo not found, or outside the caller data scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionIssueController_findAll: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                status?: "open" | "resolved";
+                /** @description Only the issues of this production order */
+                productionOrderId?: number;
+                /** @description Only the issues of this cabinet */
+                unitId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Paginated issues, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires production_issue:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionIssueController_open: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateProductionIssueDto"];
+            };
+        };
+        responses: {
+            /** @description Issue opened */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires production_issue:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Cabinet not found or not yours */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Order not released */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ProductionIssueController_resolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResolveProductionIssueDto"];
+            };
+        };
+        responses: {
+            /** @description Issue resolved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires production_issue:resolve */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Issue not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Issue already resolved */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcChecklistController_list: {
+        parameters: {
+            query?: {
+                /** @description Also return hidden items; defaults to false */
+                includeHidden?: "true" | "false";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Checklist items in order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires qc_checklist:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcChecklistController_add: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateQcChecklistItemDto"];
+            };
+        };
+        responses: {
+            /** @description Item added */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires qc_checklist:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description An item with this name exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcChecklistController_reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderQcChecklistDto"];
+            };
+        };
+        responses: {
+            /** @description Items in the new order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description ids is not the full set */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires qc_checklist:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcChecklistController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateQcChecklistItemDto"];
+            };
+        };
+        responses: {
+            /** @description Item updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires qc_checklist:manage */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description An item with this name exists */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcInspectionController_listUnits: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                qcStatus?: "not_ready" | "waiting" | "failed" | "passed";
+                /** @description Only the cabinets of this sales order */
+                orderId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of cabinets */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires qc_inspection:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcInspectionController_getUnit: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                unitId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The cabinet, rounds and defects */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such cabinet in the caller’s scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcInspectionController_createRound: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                unitId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateQcRoundDto"];
+            };
+        };
+        responses: {
+            /** @description The cabinet with its new round */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A failed item has no note */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires qc_inspection:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such cabinet in the caller’s scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Cabinet not ready, already passed, has an unverified defect, or the checklist changed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcInspectionController_listDefects: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Items per page */
+                limit?: number;
+                /** @description Search keyword */
+                search?: string;
+                /** @description Enum values whose translated label matched the keyword */
+                searchClassifications?: string[];
+                /** @description JSON map of column key to selected values, e.g. {"classification":["mechanical"]} */
+                columnFilters?: string;
+                status?: "open" | "fixed" | "verified";
+                /** @description Only the defects of this cabinet */
+                unitId?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of defects */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires qc_inspection:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcInspectionController_fix: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FixQcDefectDto"];
+            };
+        };
+        responses: {
+            /** @description The defect */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires qc_inspection:fix */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such defect in the caller’s scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The defect is not open */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcInspectionController_verify: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The defect */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires qc_inspection:verify */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such defect in the caller’s scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The defect is not fixed, or the caller fixed it */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
 }

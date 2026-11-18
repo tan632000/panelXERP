@@ -22,6 +22,7 @@ const PANEL_ROLES = [
   'storekeeper',
   'productionManager',
   'technician',
+  'qcInspector',
 ];
 
 /**
@@ -29,7 +30,11 @@ const PANEL_ROLES = [
  * each. A plugin task removes its modules here when it registers its permissions, so the list
  * is empty once its feature is built; until then `seedRoles` stores none of these scopes.
  */
-const PENDING_MODULES: Readonly<Record<string, string>> = {};
+const PENDING_MODULES: Readonly<Record<string, string>> = {
+  delivery_note: 'delivery plugin, delivery-note feature',
+  installation: 'delivery plugin, installation feature',
+  acceptance: 'delivery plugin, acceptance feature',
+};
 
 /**
  * Scopes of a module whose plugin is declared but not yet complete, with the task that
@@ -248,6 +253,7 @@ describe('panel-shop role matrix', () => {
       1,
     );
     expect(roles.filter((role) => role === 'technician')).toHaveLength(2);
+    expect(roles.filter((role) => role === 'qcInspector')).toHaveLength(1);
   });
 
   it('grants the production manager and technicians exactly the production matrix', () => {
@@ -258,6 +264,10 @@ describe('panel-shop role matrix', () => {
         'production_issue:*',
         'material:read',
         'stock:availability',
+        'qc_checklist:*',
+        'qc_inspection:*',
+        'delivery_note:read',
+        'installation:read',
       ].sort(),
     );
     expect([...grantsOf('technician')].sort()).toEqual(
@@ -309,5 +319,94 @@ describe('panel-shop role matrix', () => {
     expect(holds(sales, 'production_order:read')).toBe(true);
     expect(holds(sales, 'production_progress:read')).toBe(true);
     expect(holds(sales, 'production_issue:read')).toBe(false);
+  });
+
+  it('grants the QC inspector exactly the QC matrix and nothing of sales, prices or materials', () => {
+    const inspector = grantsOf('qcInspector');
+    expect([...inspector].sort()).toEqual(
+      [
+        'qc_checklist:read',
+        'qc_inspection:read',
+        'qc_inspection:create',
+        'qc_inspection:verify',
+      ].sort(),
+    );
+    for (const scope of [
+      'order:read',
+      'material:read',
+      'customer:read',
+      'request:read',
+      'purchase_price:read',
+      'reference_price:read',
+      'production_order:read',
+      'qc_inspection:fix',
+      'qc_checklist:manage',
+    ]) {
+      expect(holds(inspector, scope)).toBe(false);
+    }
+  });
+
+  it('adds the QC, delivery, installation and acceptance grants to the roles that follow them', () => {
+    const p4Grants = (role: string) =>
+      [...grantsOf(role)]
+        .filter((scope) =>
+          [
+            'qc_checklist',
+            'qc_inspection',
+            'delivery_note',
+            'installation',
+            'acceptance',
+          ].includes(moduleOf(scope)),
+        )
+        .sort();
+    // Every delivery-note and installation action, spelled out: the storekeeper holds no
+    // wildcard (P2 role matrix).
+    expect(p4Grants('storekeeper')).toEqual(
+      [
+        'qc_inspection:read',
+        'delivery_note:read',
+        'delivery_note:create',
+        'delivery_note:ship',
+        'delivery_note:receive',
+        'delivery_note:cancel',
+        'installation:read',
+        'installation:manage',
+        'acceptance:read',
+      ].sort(),
+    );
+    expect(p4Grants('salesManager')).toEqual(
+      [
+        'qc_inspection:read',
+        'delivery_note:read',
+        'installation:read',
+        'acceptance:*',
+      ].sort(),
+    );
+    expect(p4Grants('sales')).toEqual(
+      [
+        'qc_inspection:read',
+        'delivery_note:read',
+        'installation:read',
+        'acceptance:read',
+        'acceptance:create',
+      ].sort(),
+    );
+    for (const role of [
+      'engineeringLead',
+      'engineer',
+      'purchasing',
+      'technician',
+    ]) {
+      expect(p4Grants(role)).toEqual([]);
+    }
+  });
+
+  it('lets only the storekeeper write delivery notes and installations', () => {
+    for (const scope of ['delivery_note:create', 'installation:manage']) {
+      const writers = PANEL_ROLES.filter((role) =>
+        holds(grantsOf(role), scope),
+      );
+      expect(writers).toEqual(['admin', 'director', 'storekeeper']);
+    }
   });
 });

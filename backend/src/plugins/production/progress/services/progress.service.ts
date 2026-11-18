@@ -7,6 +7,7 @@ import { DataSource } from 'typeorm';
 
 import { DataScopeService } from '@shared/services/data-scope.service';
 
+import { ProductionGuardRegistry } from '@plugins/production/_shared/ports/production-guard.registry';
 import { ProductionUnitStage } from '@plugins/production/production-order/entities/production-unit-stage.entity';
 import { ProductionOrderEventType } from '@plugins/production/production-order/enums/production-order-event.enum';
 import { ProductionOrderStatus } from '@plugins/production/production-order/enums/production-order-status.enum';
@@ -48,6 +49,7 @@ export class ProgressService {
     private readonly queries: ProgressQueryService,
     private readonly notifier: ProductionOrderNotifier,
     private readonly followers: OrderFollowerNotifier,
+    private readonly guards: ProductionGuardRegistry,
   ) {}
 
   start(unitId: number, stage: ProductionStage, actor: AuthUserPayload) {
@@ -141,6 +143,10 @@ export class ProgressService {
             throw new ConflictException(
               `Stage ${stage} of cabinet ${unit.code} cannot be undone: ${after.stage} has already started.`,
             );
+          }
+          // After the locks and the next-stage check, so a veto reads what cannot change.
+          if (stage === ProductionStage.FINISHING) {
+            await this.guards.beforeFinishingUndo(manager, unitId);
           }
           await this.move(
             manager,

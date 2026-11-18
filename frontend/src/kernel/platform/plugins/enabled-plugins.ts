@@ -12,6 +12,7 @@ import {
 
 import { catalogFrontendPlugin } from "@plugins/catalog/plugin";
 import { crmFrontendPlugin } from "@plugins/crm/plugin";
+import { deliveryFrontendPlugin } from "@plugins/delivery/plugin";
 import { inventoryFrontendPlugin } from "@plugins/inventory/plugin";
 import { productionFrontendPlugin } from "@plugins/production/plugin";
 import { salesFrontendPlugin } from "@plugins/sales/plugin";
@@ -25,6 +26,7 @@ export const FRONTEND_PLUGIN_CATALOG: ErpFrontendPlugin[] = [
   salesFrontendPlugin,
   inventoryFrontendPlugin,
   productionFrontendPlugin,
+  deliveryFrontendPlugin,
 ];
 
 const defaultPluginKeys = FRONTEND_PLUGIN_CATALOG.map((plugin) => plugin.key);

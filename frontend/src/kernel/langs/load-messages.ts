@@ -4,6 +4,7 @@ import commonEn from "@kernel/langs/en/common.json";
 import contactEn from "@kernel/langs/en/contact.json";
 import crmEn from "@kernel/langs/en/crm.json";
 import customerEn from "@kernel/langs/en/customer.json";
+import deliveryEn from "@kernel/langs/en/delivery.json";
 import estimateEn from "@kernel/langs/en/estimate.json";
 import inventoryEn from "@kernel/langs/en/inventory.json";
 import issueEn from "@kernel/langs/en/issue.json";
@@ -34,6 +35,7 @@ import commonVi from "@kernel/langs/vi/common.json";
 import contactVi from "@kernel/langs/vi/contact.json";
 import crmVi from "@kernel/langs/vi/crm.json";
 import customerVi from "@kernel/langs/vi/customer.json";
+import deliveryVi from "@kernel/langs/vi/delivery.json";
 import estimateVi from "@kernel/langs/vi/estimate.json";
 import inventoryVi from "@kernel/langs/vi/inventory.json";
 import issueVi from "@kernel/langs/vi/issue.json";
@@ -83,6 +85,7 @@ export const enMessages = {
   purchaseRequest: purchaseRequestEn,
   material: materialEn,
   production: productionEn,
+  delivery: deliveryEn,
   location: locationEn,
   system: systemEn,
   permission: permissionEn,
@@ -116,6 +119,7 @@ export const viMessages = {
   purchaseRequest: purchaseRequestVi,
   material: materialVi,
   production: productionVi,
+  delivery: deliveryVi,
   location: locationVi,
   system: systemVi,
   permission: permissionVi,

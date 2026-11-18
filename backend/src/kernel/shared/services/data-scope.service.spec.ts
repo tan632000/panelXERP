@@ -25,6 +25,7 @@ describe('DataScopeService', () => {
     expect(scopeOf('engineer')).toBe('assignedEngineer');
     expect(scopeOf('productionManager')).toBe('material');
     expect(scopeOf('technician')).toBe('assignedTechnician');
+    expect(scopeOf('qcInspector')).toBe('material');
   });
 
   it('gives full access the whole scope whatever the role code', () => {
@@ -118,6 +119,16 @@ describe('DataScopeService', () => {
     const manager = { userId: 11, role: 'productionManager' };
     expect(service.canSee(manager, record)).toBe(false);
     expect(service.canSeeMaterial(manager, { salesOwnerId: 99 })).toBe(true);
+  });
+
+  it('hides every sales-chain record from the QC inspector', () => {
+    const inspector = { userId: 11, role: 'qcInspector' };
+    // Owning or being assigned the record by id never reaches it from the material scope.
+    expect(service.canSee(inspector, record)).toBe(false);
+    expect(service.canSee(inspector, { salesOwnerId: 11 })).toBe(false);
+    expect(service.canSee(inspector, { assignedEngineerId: 11 })).toBe(false);
+    // The scope would allow the material view; the role holds no `material:read` to reach it.
+    expect(service.canSeeMaterial(inspector, { salesOwnerId: 99 })).toBe(true);
   });
 
   it('answers 404, not 403, for a record outside the scope or missing', () => {

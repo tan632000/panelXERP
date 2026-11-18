@@ -130,6 +130,14 @@ export const DEMO_USER_SPECS: readonly SeedUserSpec[] = [
     department: 'technical',
     title: 'Technician',
   },
+  {
+    username: 'qc_a',
+    emailLocal: 'qc.a',
+    fullName: 'Demo QC Inspector A',
+    roleCode: 'qcInspector',
+    department: 'qcLab',
+    title: 'QC Inspector',
+  },
 ];
 
 /**

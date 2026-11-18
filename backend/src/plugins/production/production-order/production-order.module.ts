@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuditModule } from '@kernel/core/audit/audit.module';
 
 import { InventorySharedModule } from '@plugins/inventory/_shared/inventory-shared.module';
+import { ProductionSharedModule } from '@plugins/production/_shared/production-shared.module';
 import { ProductionOrderEvent } from '@plugins/production/production-order/entities/production-order-event.entity';
 import { ProductionOrder } from '@plugins/production/production-order/entities/production-order.entity';
 import { ProductionUnitStage } from '@plugins/production/production-order/entities/production-unit-stage.entity';
@@ -27,6 +28,7 @@ import { SalesSharedModule } from '@plugins/sales/_shared/sales-shared.module';
     AuditModule,
     SalesSharedModule,
     InventorySharedModule,
+    ProductionSharedModule,
   ],
   controllers: [ProductionOrderController],
   providers: [

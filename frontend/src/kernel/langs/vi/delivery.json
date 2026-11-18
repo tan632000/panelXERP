@@ -1,0 +1,30 @@
+{
+  "moduleName": "QC & Giao hàng",
+  "sidebarDelivery": "QC & Giao hàng",
+  "checklistMenu": "Mẫu checklist",
+  "checklist": {
+    "title": "Mẫu checklist",
+    "description": "Các hạng mục kiểm tra chung cho mọi tủ; mỗi lượt QC sao chép các hạng mục đang hiện",
+    "addLabel": "Tên hạng mục",
+    "addPlaceholder": "Tên hạng mục mới",
+    "add": "Thêm hạng mục",
+    "none": "Chưa có hạng mục nào",
+    "loadError": "Không tải được mẫu checklist",
+    "hiddenBadge": "Ẩn",
+    "hide": "Ẩn",
+    "show": "Hiện",
+    "rename": "Đổi tên",
+    "save": "Lưu",
+    "cancel": "Huỷ",
+    "moveUp": "Chuyển lên: {name}",
+    "moveDown": "Chuyển xuống: {name}"
+  },
+  "toast": {
+    "systemError": "Có lỗi xảy ra, vui lòng thử lại",
+    "forbidden": "Bạn không có quyền thực hiện thao tác này",
+    "checklistAdded": "Đã thêm hạng mục",
+    "checklistUpdated": "Đã cập nhật hạng mục",
+    "checklistConflict": "Đã có hạng mục trùng tên",
+    "checklistStale": "Danh sách đã thay đổi, đã tải lại"
+  }
+}

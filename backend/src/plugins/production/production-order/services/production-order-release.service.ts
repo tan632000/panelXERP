@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 
 import { requireText } from '@plugins/inventory/_shared/utils/text.util';
+import { ProductionGuardRegistry } from '@plugins/production/_shared/ports/production-guard.registry';
 import { ProductionOrderReasonDto } from '@plugins/production/production-order/dto/production-order.dto';
 import { ProductionOrderEventType } from '@plugins/production/production-order/enums/production-order-event.enum';
 import {
@@ -40,6 +41,7 @@ export class ProductionOrderReleaseService {
     private readonly queries: ProductionOrderQueryService,
     private readonly notifier: ProductionOrderNotifier,
     private readonly followers: OrderFollowerNotifier,
+    private readonly guards: ProductionGuardRegistry,
   ) {}
 
   /**
@@ -119,6 +121,8 @@ export class ProductionOrderReleaseService {
       assertProductionStatus(held, PRODUCTION_ORDER_CANCELLABLE, 'cancelled');
       const wasReleased = held.status === ProductionOrderStatus.RELEASED;
       const units = wasReleased ? await lockUnits(manager, id) : [];
+      // After every lock of the global order, so a veto reads what cannot change.
+      await this.guards.beforeCancel(manager, id);
       if (wasReleased) {
         await this.notifier.clearOverdue(
           manager,

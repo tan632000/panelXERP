@@ -12,6 +12,7 @@ import {
 
 import { catalogPlugin } from '@plugins/catalog/catalog.plugin';
 import { crmPlugin } from '@plugins/crm/crm.plugin';
+import { deliveryPlugin } from '@plugins/delivery/delivery.plugin';
 import { inventoryPlugin } from '@plugins/inventory/inventory.plugin';
 import { productionPlugin } from '@plugins/production/production.plugin';
 import { salesPlugin } from '@plugins/sales/sales.plugin';
@@ -26,6 +27,7 @@ export const PLUGIN_CATALOG: ErpPlugin[] = [
   salesPlugin,
   inventoryPlugin,
   productionPlugin,
+  deliveryPlugin,
 ];
 
 const defaultPluginNames = PLUGIN_CATALOG.map((plugin) => plugin.name);

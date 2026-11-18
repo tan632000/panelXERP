@@ -1,4 +1,5 @@
 import {
+  DEMO_USER_SPECS,
   EXAMPLE_ADMIN_PASSWORD,
   resolveAdminPassword,
   seedUsers,
@@ -107,6 +108,22 @@ describe('seedUsers', () => {
     await expect(seedUsers(ctx, new Map(), [])).rejects.toThrow(
       'Role not found: admin',
     );
+  });
+
+  it('seeds one demo QC inspector in the QC lab', () => {
+    const inspectors = DEMO_USER_SPECS.filter(
+      (spec) => spec.roleCode === 'qcInspector',
+    );
+    expect(inspectors).toEqual([
+      {
+        username: 'qc_a',
+        emailLocal: 'qc.a',
+        fullName: 'Demo QC Inspector A',
+        roleCode: 'qcInspector',
+        department: 'qcLab',
+        title: 'QC Inspector',
+      },
+    ]);
   });
 
   it('creates demo accounts outside production only', async () => {

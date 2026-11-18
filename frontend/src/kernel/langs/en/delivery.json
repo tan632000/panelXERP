@@ -1,0 +1,30 @@
+{
+  "moduleName": "QC & Delivery",
+  "sidebarDelivery": "QC & Delivery",
+  "checklistMenu": "Checklist template",
+  "checklist": {
+    "title": "Checklist template",
+    "description": "The checks shared by every cabinet; each QC round copies the items that are shown",
+    "addLabel": "Item name",
+    "addPlaceholder": "New item name",
+    "add": "Add item",
+    "none": "No item yet",
+    "loadError": "Could not load the checklist template",
+    "hiddenBadge": "Hidden",
+    "hide": "Hide",
+    "show": "Show",
+    "rename": "Rename",
+    "save": "Save",
+    "cancel": "Cancel",
+    "moveUp": "Move up: {name}",
+    "moveDown": "Move down: {name}"
+  },
+  "toast": {
+    "systemError": "Something went wrong, please try again",
+    "forbidden": "You do not have permission to do this",
+    "checklistAdded": "Item added",
+    "checklistUpdated": "Item updated",
+    "checklistConflict": "An item with this name exists",
+    "checklistStale": "The list changed and was reloaded"
+  }
+}

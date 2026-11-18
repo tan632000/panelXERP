@@ -1,5 +1,8 @@
+import { ConflictException } from '@nestjs/common';
+
 import { expectNoMoneyKeys } from '@kernel/shared/testing/money-keys.helper-spec';
 
+import { ProductionGuardRegistry } from '@plugins/production/_shared/ports/production-guard.registry';
 import {
   PRODUCTION_STAGES,
   ProductionStage,
@@ -428,5 +431,48 @@ describeWithDatabase('Stage tracking (real Postgres)', () => {
         (await h.get(`/production/units?productionOrderId=${id}`, as)).body,
       );
     }
+  });
+
+  it('lets a registered guard veto the undo of finishing inside the locks, and only of finishing', async () => {
+    const { id, units } = await releasedOrder(h, 2);
+    const [first, second] = units;
+    const seen: Array<{ unitId: number; header: boolean; unit: boolean }> = [];
+    let veto = true;
+    h.app.get(ProductionGuardRegistry).register('undo-spec', {
+      beforeFinishingUndo: async (_manager, unitId) => {
+        // The probe runs on another connection: it only sees locks this transaction holds.
+        seen.push({
+          unitId,
+          header: await h.isLocked('production_orders', id),
+          unit: await h.isLocked('production_units', unitId),
+        });
+        if (veto) throw new ConflictException('Cabinet is on a delivery note');
+      },
+    });
+    // One cabinet is done, the other still open, so the production order stays released.
+    await runStages(h, first.id);
+    await runStages(h, second.id, [ProductionStage.MATERIAL_PREP]);
+    const undo = (unitId: number, stage: ProductionStage) =>
+      h.post(stagePath(unitId, stage, 'undo'), { reason: 'Redo' }, 'manager');
+    const stageStatus = async (unitId: number, stage: string) => {
+      const [row]: Array<{ status: string }> = await h.dataSource.query(
+        `SELECT status FROM production_unit_stages WHERE unit_id = $1 AND stage = $2`,
+        [unitId, stage],
+      );
+      return row.status;
+    };
+
+    // Another stage: the guard is not asked.
+    await undo(second.id, ProductionStage.MATERIAL_PREP).expect(200);
+    expect(seen).toEqual([]);
+
+    await undo(first.id, ProductionStage.FINISHING).expect(409);
+    expect(await stageStatus(first.id, 'finishing')).toBe('done');
+    expect(seen).toEqual([{ unitId: first.id, header: true, unit: true }]);
+
+    veto = false;
+    await undo(first.id, ProductionStage.FINISHING).expect(200);
+    expect(await stageStatus(first.id, 'finishing')).toBe('in_progress');
+    expect(seen).toHaveLength(2);
   });
 });

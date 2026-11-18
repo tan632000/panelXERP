@@ -9,7 +9,8 @@ import { RequestContextStore } from '@shared/context/request-context.store';
  *   ownSales         — records whose `salesOwnerId` is the actor
  *   assignedEngineer — requests (and their estimates) whose `assignedEngineerId` is the actor
  *   material         — every order's material view (purchasing, storekeeper) and no sales-chain
- *                      record: customers, requests, estimates, quotations and orders stay hidden
+ *                      record: customers, requests, estimates, quotations and orders stay hidden;
+ *                      also every order's QC and delivery records (QC inspector)
  *   assignedTechnician — the production cabinets assigned to the actor; no sales-chain record and
  *                      no material view
  *
@@ -39,6 +40,9 @@ export const ROLE_DATA_SCOPES: Readonly<Record<string, DataScope>> = {
   // sales-chain record; a technician reaches only the cabinets assigned to them.
   productionManager: 'material',
   technician: 'assignedTechnician',
+  // The QC inspector checks every finished cabinet; holding no `material:read`, the material
+  // view the scope would allow stays out of reach.
+  qcInspector: 'material',
   sales: 'ownSales',
   engineer: 'assignedEngineer',
 };

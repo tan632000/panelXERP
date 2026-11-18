@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AuditModule } from '@kernel/core/audit/audit.module';
 
+import { ProductionSharedModule } from '@plugins/production/_shared/production-shared.module';
 import { ProductionOrderModule } from '@plugins/production/production-order/production-order.module';
 import { UnitPhoto } from '@plugins/production/progress/entities/unit-photo.entity';
 import { ProgressController } from '@plugins/production/progress/progress.controller';
@@ -19,6 +20,7 @@ import { SalesSharedModule } from '@plugins/sales/_shared/sales-shared.module';
     TypeOrmModule.forFeature([UnitPhoto]),
     AuditModule,
     ProductionOrderModule,
+    ProductionSharedModule,
     SalesSharedModule,
   ],
   controllers: [ProgressController, UnitPhotoController],

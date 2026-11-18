@@ -6,6 +6,7 @@ import {
 
 import { CATALOG_FRONTEND_FEATURES } from "@/plugins/catalog/catalog.features";
 import { CRM_FRONTEND_FEATURES } from "@/plugins/crm/crm.features";
+import { DELIVERY_FRONTEND_FEATURES } from "@/plugins/delivery/delivery.features";
 import { INVENTORY_FRONTEND_FEATURES } from "@/plugins/inventory/inventory.features";
 import { PRODUCTION_FRONTEND_FEATURES } from "@/plugins/production/production.features";
 import { SALES_FRONTEND_FEATURES } from "@/plugins/sales/sales.features";
@@ -25,6 +26,7 @@ export const FRONTEND_FEATURE_CATALOG: ErpFrontendFeature[] = [
   ...SALES_FRONTEND_FEATURES,
   ...INVENTORY_FRONTEND_FEATURES,
   ...PRODUCTION_FRONTEND_FEATURES,
+  ...DELIVERY_FRONTEND_FEATURES,
   ...SYSTEM_FRONTEND_FEATURES,
 ];
 

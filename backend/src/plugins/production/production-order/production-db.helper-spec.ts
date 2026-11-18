@@ -29,6 +29,8 @@ import { DataScopeService } from '@shared/services/data-scope.service';
 
 import { shortageKit } from '@plugins/inventory/_shared/order-shortage.helper-spec';
 import { OrderShortagePort } from '@plugins/inventory/_shared/ports/order-shortage.port';
+import { ProductionGuardRegistry } from '@plugins/production/_shared/ports/production-guard.registry';
+import { ProductionUnitPort } from '@plugins/production/_shared/ports/production-unit.port';
 import { ProductionOrderEvent } from '@plugins/production/production-order/entities/production-order-event.entity';
 import { ProductionOrder } from '@plugins/production/production-order/entities/production-order.entity';
 import { ProductionUnitStage } from '@plugins/production/production-order/entities/production-unit-stage.entity';
@@ -84,6 +86,7 @@ const ACTORS = {
   salesMgr: { username: 'sales_mgr', role: 'salesManager' },
   director: { username: 'director', role: 'director' },
   admin: { username: 'admin', role: 'admin' },
+  qcInspector: { username: 'qc_a', role: 'qcInspector' },
 } as const;
 
 export type ActorName = keyof typeof ACTORS;
@@ -138,6 +141,11 @@ export interface ProductionHarness {
   ): Promise<Array<{ id: number; code: string; assignee_id: number | null }>>;
   statusOfOrder(orderId: number): Promise<string>;
   statusOfProduction(productionOrderId: number): Promise<string>;
+  /** True when another transaction holds the row `FOR UPDATE`: asks from a second connection, without waiting. */
+  isLocked(
+    table: 'production_orders' | 'production_units',
+    id: number,
+  ): Promise<boolean>;
   /** What the actor reads through their notification list about one sales order. */
   notices(as: ActorName, orderId: number): Promise<NotificationView[]>;
   close(): Promise<void>;
@@ -210,6 +218,9 @@ export async function openProductionHarness(
       ProductionOrderUnitService,
       ProductionOrderNotifier,
       OrderFollowerNotifier,
+      // One real registry and port, as ProductionSharedModule provides them in the app.
+      ProductionGuardRegistry,
+      ProductionUnitPort,
       ...(extras.providers ?? []),
       OrderProductionPort,
       OrderMaterialReadPort,
@@ -304,6 +315,18 @@ export async function openProductionHarness(
         [productionOrderId],
       );
       return row.status;
+    },
+    async isLocked(table, id) {
+      try {
+        await dataSource.query(
+          `SELECT id FROM ${table} WHERE id = $1 FOR UPDATE NOWAIT`,
+          [id],
+        );
+        return false;
+      } catch (error: unknown) {
+        if ((error as { code?: string }).code === '55P03') return true;
+        throw error;
+      }
     },
     async notices(as, orderId) {
       const actor = actors[as];

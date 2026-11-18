@@ -65,6 +65,7 @@ const SECTION_ORDER: string[] = [
   "sidebarSales",
   "sidebarInventory",
   "sidebarProduction",
+  "sidebarDelivery",
 ];
 
 /**

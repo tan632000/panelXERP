@@ -59,6 +59,13 @@ const PRODUCTION_VIEW = [
   'production_issue:read',
 ];
 
+/** What the roles that follow QC, delivery and installation, without running them, may read. */
+const DELIVERY_VIEW = [
+  'qc_inspection:read',
+  'delivery_note:read',
+  'installation:read',
+];
+
 /**
  * [name, code, description, permissions] in seed order (D-11, D-12). Kernel file routes
  * (`file:read`, `file:write`) sign any stored key, so only the full-access roles hold them;
@@ -91,6 +98,9 @@ const ROLES: ReadonlyArray<
       ...STOCK_VIEW,
       'material:read',
       ...PRODUCTION_VIEW,
+      ...DELIVERY_VIEW,
+      // Any order's acceptance minutes, as the order's own sales owner may.
+      'acceptance:*',
     ],
   ],
   [
@@ -111,6 +121,10 @@ const ROLES: ReadonlyArray<
       // The progress of their own orders; issues stay with production.
       'production_order:read',
       'production_progress:read',
+      // QC, delivery and installation of their own orders; they upload the acceptance minutes.
+      ...DELIVERY_VIEW,
+      'acceptance:read',
+      'acceptance:create',
     ],
   ],
   [
@@ -195,6 +209,16 @@ const ROLES: ReadonlyArray<
       'stocktake:update',
       'stocktake:submit',
       'stocktake:cancel',
+      // Ships the cabinets that passed QC and follows their installation.
+      'qc_inspection:read',
+      'delivery_note:read',
+      'delivery_note:create',
+      'delivery_note:ship',
+      'delivery_note:receive',
+      'delivery_note:cancel',
+      'installation:read',
+      'installation:manage',
+      'acceptance:read',
     ],
   ],
   [
@@ -207,6 +231,11 @@ const ROLES: ReadonlyArray<
       'production_issue:*',
       'material:read',
       'stock:availability',
+      // Keeps the QC checklist, may inspect and fixes defects; follows delivery.
+      'qc_checklist:*',
+      'qc_inspection:*',
+      'delivery_note:read',
+      'installation:read',
     ],
   ],
   [
@@ -219,6 +248,17 @@ const ROLES: ReadonlyArray<
       'production_progress:update',
       'production_issue:read',
       'production_issue:create',
+    ],
+  ],
+  [
+    'QC Inspector',
+    'qcInspector',
+    'Inspects finished cabinets against the QC checklist and verifies fixed defects; sees no sales record or price',
+    [
+      'qc_checklist:read',
+      'qc_inspection:read',
+      'qc_inspection:create',
+      'qc_inspection:verify',
     ],
   ],
 ];

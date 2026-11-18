@@ -4,6 +4,7 @@ import { expectNoMoneyKeys } from '@kernel/shared/testing/money-keys.helper-spec
 
 import { DataScopeService } from '@shared/services/data-scope.service';
 
+import { ProductionGuardRegistry } from '@plugins/production/_shared/ports/production-guard.registry';
 import {
   describeWithDatabase,
   openProductionHarness,
@@ -585,6 +586,45 @@ describeWithDatabase('Production orders (real Postgres)', () => {
       .expect(200);
     expect((live.body as PageBody).data.map((row) => row.id)).toEqual([
       second.id,
+    ]);
+  });
+
+  it('lets a registered guard veto a cancel inside the locks and changes nothing, and cancels as before once it lets go', async () => {
+    const { orderId, id } = await draftFor();
+    await h.prepare(id);
+    await h.post(`/production/orders/${id}/release`, {}).expect(200);
+    const [first] = await h.units(id);
+    const seen: Array<{ id: number; header: boolean; unit: boolean }> = [];
+    let veto = true;
+    h.app.get(ProductionGuardRegistry).register('cancel-spec', {
+      beforeCancel: async (_manager, productionOrderId) => {
+        // The probe runs on another connection: it only sees locks this transaction holds.
+        seen.push({
+          id: productionOrderId,
+          header: await h.isLocked('production_orders', id),
+          unit: await h.isLocked('production_units', first.id),
+        });
+        if (veto) {
+          throw new ConflictException('A cabinet is on a delivery note');
+        }
+      },
+    });
+
+    await h
+      .post(`/production/orders/${id}/cancel`, { reason: 'Redesign' })
+      .expect(409);
+    expect(await h.statusOfProduction(id)).toBe('released');
+    expect(await h.statusOfOrder(orderId)).toBe('in_production');
+
+    veto = false;
+    await h
+      .post(`/production/orders/${id}/cancel`, { reason: 'Redesign' })
+      .expect(200);
+    expect(await h.statusOfProduction(id)).toBe('cancelled');
+    expect(await h.statusOfOrder(orderId)).toBe('open');
+    expect(seen).toEqual([
+      { id, header: true, unit: true },
+      { id, header: true, unit: true },
     ]);
   });
 });
