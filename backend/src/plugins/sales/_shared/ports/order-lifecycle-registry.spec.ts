@@ -83,6 +83,42 @@ describe('OrderLifecycleRegistry', () => {
     logged.mockRestore();
   });
 
+  it('runs every onDelivered hook, rejects when one throws, and follows up once after the commit', async () => {
+    const registry = new OrderLifecycleRegistry();
+    const calls: string[] = [];
+    const followUp = jest.fn(() => Promise.resolve());
+    registry.register('stock', {
+      onDelivered: () => {
+        calls.push('stock');
+        return Promise.resolve({ changedOrderIds: [7], touchedItemIds: [2] });
+      },
+      afterCommit: followUp,
+    });
+    registry.register('cancel-only', {
+      onCancelled: () => {
+        calls.push('cancel-only');
+        return Promise.resolve({ changedOrderIds: [], touchedItemIds: [] });
+      },
+    });
+
+    const pending = await registry.delivered(manager, event);
+    expect(calls).toEqual(['stock']);
+    expect(followUp).not.toHaveBeenCalled();
+    await pending.afterCommit();
+    expect(followUp).toHaveBeenCalledTimes(1);
+    expect(followUp).toHaveBeenCalledWith({
+      changedOrderIds: [7],
+      touchedItemIds: [2],
+    });
+
+    registry.register('broken', {
+      onDelivered: () => Promise.reject(new Error('Stock refused')),
+    });
+    await expect(registry.delivered(manager, event)).rejects.toThrow(
+      'Stock refused',
+    );
+  });
+
   it('skips a registration without the hook being run', async () => {
     const registry = new OrderLifecycleRegistry();
     registry.register('cancel-only', {

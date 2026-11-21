@@ -91,6 +91,24 @@ export class OrderProductionPort {
   }
 
   /**
+   * Where the cabinets are installed: the project's site address, else the order's customer
+   * address, else null. Read-only, so the caller needs no order lock.
+   */
+  async siteAddress(
+    manager: EntityManager,
+    orderId: number,
+  ): Promise<string | null> {
+    const [row]: RawRow[] = await manager.query(
+      `SELECT COALESCE(NULLIF(p.site_address, ''), NULLIF(o.customer_address, '')) AS address
+         FROM sales_orders o
+         LEFT JOIN projects p ON p.id = o.project_id
+        WHERE o.id = $1 AND o.is_deleted = false`,
+      [orderId],
+    );
+    return typeof row?.address === 'string' ? row.address : null;
+  }
+
+  /**
    * A SQL condition keeping an order id column of another table to the orders the actor owns
    * NOW (the owner of the order's request, never a snapshot), so a reassigned customer takes
    * the order away from its former owner at once. `column` is the caller's own column

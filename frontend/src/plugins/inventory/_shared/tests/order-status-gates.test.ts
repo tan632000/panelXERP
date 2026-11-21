@@ -18,9 +18,11 @@ describe("order status gates", () => {
     }
   });
 
-  it("refuses a delivered order everywhere and a cancelled one except for returns", () => {
+  it("refuses a delivered order everywhere except for returns, like a cancelled one", () => {
     expect(isIssuableOrder("delivered")).toBe(false);
-    expect(isReturnableOrder("delivered")).toBe(false);
+    expect(isReturnableOrder("delivered")).toBe(true);
+    expect(isReturnableOrder("completed")).toBe(true);
+    expect(isIssuableOrder("completed")).toBe(false);
     expect(isDemandBearingOrder("delivered")).toBe(false);
     expect(isIssuableOrder("cancelled")).toBe(false);
     expect(isDemandBearingOrder("cancelled")).toBe(false);

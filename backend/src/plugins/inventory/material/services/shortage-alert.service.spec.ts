@@ -136,6 +136,31 @@ describeWithDatabase('ShortageAlertService (real Postgres)', () => {
     ]);
   });
 
+  it('closes the notices of a short order that became delivered, and of one that became completed', async () => {
+    const w = await db.createItem();
+    const delivered = await create({ bom: [{ itemId: w, perPanel: '2' }] });
+    const completed = await create({ bom: [{ itemId: w, perPanel: '2' }] });
+    expect(await outstanding(delivered)).toHaveLength(2);
+    expect(await outstanding(completed)).toHaveLength(2);
+
+    // `deliver` runs the hooks and then the alert service, as a receipt does.
+    await kit.deliver(delivered);
+    expect((await noticesOf(delivered)).map((row) => row.status)).toEqual([
+      'resolved',
+      'resolved',
+    ]);
+
+    await db.dataSource.query(
+      `UPDATE sales_orders SET status = 'completed' WHERE id = $1`,
+      [completed],
+    );
+    await kit.alerts.afterCommit([completed], [w]);
+    expect((await noticesOf(completed)).map((row) => row.status)).toEqual([
+      'resolved',
+      'resolved',
+    ]);
+  });
+
   it('raises for 0.1 × 3 panels with nothing on hand and releases after 0.1 + 0.2 arrive', async () => {
     const q = await db.createItem();
     const o4 = await create({

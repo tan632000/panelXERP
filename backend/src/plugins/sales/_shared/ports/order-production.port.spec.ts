@@ -42,8 +42,20 @@ describeWithDatabase('OrderProductionPort (real Postgres)', () => {
     salesB = await fixture.userId('sales_b');
   });
 
+  const projectIds: number[] = [];
+
   afterAll(async () => {
     if (!dataSource?.isInitialized) return;
+    // The fixture deletes the customers a project points at: drop the projects first.
+    if (projectIds.length > 0) {
+      await dataSource.query(
+        `UPDATE sales_orders SET project_id = NULL WHERE project_id = ANY($1)`,
+        [projectIds],
+      );
+      await dataSource.query(`DELETE FROM projects WHERE id = ANY($1)`, [
+        projectIds,
+      ]);
+    }
     await fixture.cleanup();
     await dataSource.destroy();
   });
@@ -159,6 +171,47 @@ describeWithDatabase('OrderProductionPort (real Postgres)', () => {
           port.moveStatus(manager, 2147483000, 'open', 'in_production'),
         ),
       ).rejects.toBeInstanceOf(ConflictException);
+    });
+  });
+
+  describe('siteAddress', () => {
+    const addressOf = (orderId: number) =>
+      inTransaction((manager) => port.siteAddress(manager, orderId));
+
+    it('answers the project address, then the order customer address, then null', async () => {
+      const orderId = await orderOf('open');
+      expect(await addressOf(orderId)).toBeNull();
+
+      await dataSource.query(
+        `UPDATE sales_orders SET customer_address = 'Kho khách, Hà Nội' WHERE id = $1`,
+        [orderId],
+      );
+      expect(await addressOf(orderId)).toBe('Kho khách, Hà Nội');
+
+      const [project]: Array<{ id: number }> = await dataSource.query(
+        `INSERT INTO projects (code, customer_id, name, site_address)
+         SELECT $2, customer_id, 'Dự án spec', 'Công trường A, Đà Nẵng'
+           FROM sales_orders WHERE id = $1
+         RETURNING id`,
+        [orderId, `PRJ_SPEC_${orderId}`],
+      );
+      projectIds.push(project.id);
+      await dataSource.query(
+        `UPDATE sales_orders SET project_id = $2 WHERE id = $1`,
+        [orderId, project.id],
+      );
+      expect(await addressOf(orderId)).toBe('Công trường A, Đà Nẵng');
+
+      // A project without an address falls back to the customer's.
+      await dataSource.query(
+        `UPDATE projects SET site_address = NULL WHERE id = $1`,
+        [project.id],
+      );
+      expect(await addressOf(orderId)).toBe('Kho khách, Hà Nội');
+    });
+
+    it('answers null for an order that does not exist', async () => {
+      expect(await addressOf(2147483000)).toBeNull();
     });
   });
 

@@ -108,7 +108,7 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("WorkshopReturnScreen by order status", () => {
-  it.each(["open", "in_production", "cancelled"])(
+  it.each(["open", "in_production", "cancelled", "delivered", "completed"])(
     "renders the return form for a %s order",
     async (status) => {
       renderScreen(status);
@@ -121,10 +121,4 @@ describe("WorkshopReturnScreen by order status", () => {
       expect(screen.queryByText(refusal)).not.toBeInTheDocument();
     },
   );
-
-  it("refuses a delivered order", async () => {
-    renderScreen("delivered");
-
-    expect(await screen.findByText(refusal)).toBeInTheDocument();
-  });
 });

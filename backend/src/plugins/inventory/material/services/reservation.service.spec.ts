@@ -93,6 +93,32 @@ describeWithDatabase('ReservationService (real Postgres)', () => {
     });
   });
 
+  it('gives a delivered order reservation to the order that is short, through the delivered hook', async () => {
+    const x = await db.createItem();
+    await stockOf(x, '10');
+    const a = await kit.createOrder({
+      deliveryDate: '2026-11-05',
+      bom: [{ itemId: x, perPanel: '6' }],
+    });
+    const b = await kit.createOrder({
+      deliveryDate: '2026-11-10',
+      bom: [{ itemId: x, perPanel: '6' }],
+    });
+    expect(await kit.reservationsOf(x)).toEqual({
+      [a.orderId]: '6',
+      [b.orderId]: '4',
+    });
+
+    await kit.deliver(a.orderId);
+
+    expect(await kit.reservationsOf(x)).toEqual({ [b.orderId]: '6' });
+    expect(await kit.balanceOf(x)).toEqual({
+      onHand: '10',
+      reserved: '6',
+      sum: '6',
+    });
+  });
+
   it('reserves exactly 0.3 of 0.1 per panel over 3 panels from receipts of 0.1 and 0.2', async () => {
     const q = await db.createItem();
     const o4 = await kit.createOrder({

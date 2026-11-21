@@ -31,6 +31,11 @@ export interface ReservationKit {
   ): Promise<{ orderId: number; change: ReservationChange }>;
   /** Cancels the order and runs its cancel hook in one transaction, as a cancel runs it. */
   cancel(orderId: number): Promise<ReservationChange>;
+  /**
+   * Moves the order to delivered, runs the delivered hooks in that transaction and the
+   * after-commit follow-up (shortage notices) once it committed, as a receipt does.
+   */
+  deliver(orderId: number): Promise<void>;
   /** A receipt of `quantity`, then allocation of the item, in one transaction. */
   receive(itemId: number, quantity: string): Promise<ReservationChange>;
   /** Reservations of the item per order id, as exact numeric text. */
@@ -61,10 +66,11 @@ export function reservationKit(db: InventoryDb): ReservationKit {
     notifications,
     new StockAlertService(db.dataSource, notifications),
   );
+  const lifecycle = new OrderLifecycleRegistry();
   const reservations = new ReservationService(
     db.posting,
     port,
-    new OrderLifecycleRegistry(),
+    lifecycle,
     alerts,
   );
   const orders = orderMaterialFixture(db.dataSource);
@@ -100,6 +106,23 @@ export function reservationKit(db: InventoryDb): ReservationKit {
         );
         return reservations.releaseOrder(manager, orderId);
       });
+    },
+    async deliver(orderId) {
+      // Nest already ran `onModuleInit` on this instance when a harness mounts it; register
+      // here only for the harnesses that do not, so `deliver` reaches the real `onDelivered`.
+      try {
+        reservations.onModuleInit();
+      } catch (error: unknown) {
+        if (!String(error).includes('already registered')) throw error;
+      }
+      const pending = await db.dataSource.transaction(async (manager) => {
+        await manager.query(
+          `UPDATE sales_orders SET status = 'delivered' WHERE id = $1`,
+          [orderId],
+        );
+        return lifecycle.delivered(manager, { orderId, actorId: 0 });
+      });
+      await pending.afterCommit();
     },
     receive(itemId, quantity) {
       receiptNo += 1;

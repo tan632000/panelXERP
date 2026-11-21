@@ -112,14 +112,14 @@ describeWithDatabase('StockIssueService (real Postgres)', () => {
     await h.workshopReturn(orderId, [{ itemId: x, quantity: 1 }]).expect(201);
     expect(await h.netIssued(orderId, x)).toBe('1');
 
-    // A delivered order is out of both lists.
+    // A delivered order is out of the issue list but still takes returns (user, Q9).
     await h.db.dataSource.query(
       `UPDATE sales_orders SET status = 'delivered' WHERE id = $1`,
       [orderId],
     );
     await h.issue(orderId, [{ itemId: x, quantity: 1 }]).expect(409);
-    await h.workshopReturn(orderId, [{ itemId: x, quantity: 1 }]).expect(409);
-    expect(await h.netIssued(orderId, x)).toBe('1');
+    await h.workshopReturn(orderId, [{ itemId: x, quantity: 1 }]).expect(201);
+    expect(await h.netIssued(orderId, x)).toBe('0');
   });
 
   it('lists only the documents of orders the reader’s scope reaches', async () => {

@@ -71,6 +71,27 @@ describeWithDatabase('WorkshopReturnService (real Postgres)', () => {
     expect(await h.netIssued(o1, x)).toBe('4');
   });
 
+  it('accepts returns to a delivered and to a completed order, and still refuses issuing to them', async () => {
+    const x = await h.db.createItem();
+    await h.stockOf(x, '6', 1000);
+    const order = (
+      await h.kit.createOrder({ bom: [{ itemId: x, perPanel: '2' }] })
+    ).orderId;
+    await h.issue(order, [{ itemId: x, quantity: 2 }]).expect(201);
+
+    await h.kit.deliver(order);
+    await h.issue(order, [{ itemId: x, quantity: 1 }]).expect(409);
+    await h.workshopReturn(order, [{ itemId: x, quantity: 1 }]).expect(201);
+
+    await h.db.dataSource.query(
+      `UPDATE sales_orders SET status = 'completed' WHERE id = $1`,
+      [order],
+    );
+    await h.issue(order, [{ itemId: x, quantity: 1 }]).expect(409);
+    await h.workshopReturn(order, [{ itemId: x, quantity: 1 }]).expect(201);
+    expect(await h.netIssued(order, x)).toBe('0');
+  });
+
   it('refuses a return naming a panel of another order', async () => {
     const x = await h.db.createItem();
     await h.stockOf(x, '2', 1000);

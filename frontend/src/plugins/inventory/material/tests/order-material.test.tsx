@@ -401,13 +401,22 @@ describe("OrderMaterialPage actions by order status", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("offers none of them for a delivered order", async () => {
-    orderIs("delivered");
-    renderWith(<OrderMaterialPage />);
-    await screen.findByText("VT-0102");
+  it.each(["delivered", "completed"])(
+    "offers only the workshop return for a %s order",
+    async (status) => {
+      orderIs(status);
+      renderWith(<OrderMaterialPage />);
+      await screen.findByText("VT-0102");
 
-    for (const label of actions) {
-      expect(screen.queryByText(label)).not.toBeInTheDocument();
-    }
-  });
+      expect(
+        screen.getByText(viMaterial.actions.workshopReturn),
+      ).toBeInTheDocument();
+      for (const label of [
+        viMaterial.actions.issue,
+        viMaterial.actions.requestPurchase,
+      ]) {
+        expect(screen.queryByText(label)).not.toBeInTheDocument();
+      }
+    },
+  );
 });

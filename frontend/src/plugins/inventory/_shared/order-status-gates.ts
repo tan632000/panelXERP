@@ -13,11 +13,13 @@ export const ISSUABLE_ORDER_STATUSES: readonly string[] = [
   "in_production",
 ];
 
-/** Orders the workshop may return stock from: a cancelled order's leftovers too. */
+/** Orders the workshop may return stock from: cancelled, delivered and completed leftovers too. */
 export const RETURNABLE_ORDER_STATUSES: readonly string[] = [
   "open",
   "in_production",
   "cancelled",
+  "delivered",
+  "completed",
 ];
 
 export const isIssuableOrder = (status: string) =>

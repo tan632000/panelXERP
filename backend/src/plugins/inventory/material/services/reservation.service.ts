@@ -51,8 +51,18 @@ export class ReservationService implements OnModuleInit {
     private readonly alerts: ShortageAlertService,
   ) {}
 
-  /** A new order takes what it can at once; a cancelled one gives everything back. */
+  /**
+   * A new order takes what it can at once; a cancelled or delivered one gives everything back
+   * (a delivered order has no demand left, user Q6).
+   */
   onModuleInit(): void {
+    const release = async (manager: EntityManager, orderId: number) => {
+      const change = await this.releaseOrder(manager, orderId);
+      return {
+        changedOrderIds: ascending([orderId, ...change.orderIds]),
+        touchedItemIds: change.itemIds,
+      };
+    };
     this.lifecycle.register(MATERIAL_LIFECYCLE_HOOK, {
       onCreated: async (manager, { orderId }) => {
         const change = await this.reserveForOrder(manager, orderId);
@@ -62,13 +72,8 @@ export class ReservationService implements OnModuleInit {
           touchedItemIds: change.itemIds,
         };
       },
-      onCancelled: async (manager, { orderId }) => {
-        const change = await this.releaseOrder(manager, orderId);
-        return {
-          changedOrderIds: ascending([orderId, ...change.orderIds]),
-          touchedItemIds: change.itemIds,
-        };
-      },
+      onCancelled: (manager, { orderId }) => release(manager, orderId),
+      onDelivered: (manager, { orderId }) => release(manager, orderId),
       afterCommit: (result) =>
         this.alerts.afterCommit(result.changedOrderIds, result.touchedItemIds),
     });

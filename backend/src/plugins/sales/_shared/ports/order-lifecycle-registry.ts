@@ -25,6 +25,11 @@ export interface OrderLifecycleHandlers {
     manager: EntityManager,
     event: OrderLifecycleEvent,
   ) => Promise<OrderLifecycleResult>;
+  /** Inside the transaction that moved the order to delivered, after the move. */
+  onDelivered?: (
+    manager: EntityManager,
+    event: OrderLifecycleEvent,
+  ) => Promise<OrderLifecycleResult>;
   /** After the transaction committed, with what this handler's hook returned. */
   afterCommit?: (result: OrderLifecycleResult) => Promise<void>;
 }
@@ -72,8 +77,15 @@ export class OrderLifecycleRegistry {
     return this.run('onCancelled', manager, event);
   }
 
+  delivered(
+    manager: EntityManager,
+    event: OrderLifecycleEvent,
+  ): Promise<PendingOrderLifecycle> {
+    return this.run('onDelivered', manager, event);
+  }
+
   private async run(
-    hook: 'onCreated' | 'onCancelled',
+    hook: 'onCreated' | 'onCancelled' | 'onDelivered',
     manager: EntityManager,
     event: OrderLifecycleEvent,
   ): Promise<PendingOrderLifecycle> {

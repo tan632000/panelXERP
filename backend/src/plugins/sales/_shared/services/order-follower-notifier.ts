@@ -17,7 +17,10 @@ export type OrderChange =
   | 'production_released'
   | 'production_cancelled'
   | 'production_completed'
-  | 'stock_issued';
+  | 'stock_issued'
+  | 'delivery_received'
+  | 'delivered'
+  | 'completed';
 
 /** Departments that act on an order besides its sales owner. */
 export const ORDER_FOLLOWER_ROLE_CODES: readonly string[] = [

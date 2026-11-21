@@ -24,7 +24,12 @@ import {
 } from '@plugins/sales/_shared/ports/order-material-read.port';
 
 const SHORTAGE_ROLES = ['purchasing', 'productionManager'];
-const CANCELLED_STATUS = 'cancelled';
+/** An order in one of these has no demand left: its shortage notices are closed. */
+const NO_DEMAND_STATUSES: readonly string[] = [
+  'cancelled',
+  'delivered',
+  'completed',
+];
 
 const dedupeKeyOf = (orderId: number) => `order:${orderId}`;
 
@@ -87,7 +92,7 @@ export class ShortageAlertService {
   private async evaluate(orderId: number): Promise<void> {
     const order = await this.orders.getOrder(this.dataSource.manager, orderId);
     if (!order) return;
-    if (order.status === CANCELLED_STATUS) {
+    if (NO_DEMAND_STATUSES.includes(order.status)) {
       for (const eventType of [ORDER_SHORT_EVENT, ORDER_SHORT_OWNER_EVENT]) {
         await this.notifications.close({
           eventType,
