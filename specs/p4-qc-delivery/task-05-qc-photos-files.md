@@ -1,6 +1,6 @@
 # Task 05 — QC photos and the shared delivery file util
 
-Status: pending
+Status: done
 
 ## Outcome
 Photos attach to a QC round's item results under the hardened upload rules, are served only to actors who can read the unit, and every later P4 upload reuses one file util.
@@ -41,3 +41,34 @@ Photos attach to a QC round's item results under the hardened upload rules, are 
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/delivery/_shared/utils/delivery-file.util.spec.ts && test -f src/plugins/delivery/qc-inspection/services/qc-photo.service.spec.ts && test -f src/plugins/delivery/qc-inspection/qc-photo.controller.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/delivery src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations"
+Exit: 0
+Base: b6d4eef06cb6d6a3e21bec0e60a67be3230b51c2
+Head: 2096f7bde953d053df51d35ffef33884d2eea928e8b578cfd2381de15c027dbb
+```text
+$ docker compose exec -T backend sh -c "test -f src/plugins/delivery/_shared/utils/delivery-file.util.spec.ts && test -f src/plugins/delivery/qc-inspection/services/qc-photo.service.spec.ts && test -f src/plugins/delivery/qc-inspection/qc-photo.controller.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/delivery src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations"
+PASS src/plugins/delivery/qc-inspection/qc-photo.controller.spec.ts (23.072 s)
+PASS src/plugins/delivery/qc-inspection/services/qc-defect.service.spec.ts (24.352 s)
+PASS src/plugins/delivery/qc-checklist/services/qc-checklist.service.spec.ts (24.916 s)
+PASS src/plugins/delivery/qc-inspection/services/qc-photo.service.spec.ts (27.106 s)
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts (6.423 s)
+PASS src/plugins/delivery/qc-inspection/services/qc-race.spec.ts (7.939 s)
+PASS src/plugins/delivery/_shared/utils/delivery-file.util.spec.ts
+PASS src/kernel/core/database/seeds/role-matrix-doc.spec.ts (6.567 s)
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/plugins/delivery/_shared/utils/delivery-scope.util.spec.ts
+PASS src/plugins/delivery/qc-inspection/services/qc-inspection.service.spec.ts (34.483 s)
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+PASS src/plugins/delivery/qc-checklist/database/qc-checklist-data.migration.spec.ts
+PASS src/kernel/core/database/soft-delete-unique-index.spec.ts (13.905 s)
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts (5.672 s)
+Test Suites: 16 passed, 16 total
+Tests:       146 passed, 146 total
+Migration filename check passed (51 files).
+EXIT=0
+```
+Counterexamples (each run once against a temporary mutation, reverted before the final Command above; the worktree Head was identical before and after): checking only the extension (signature check disabled) failed `delivery-file.util.spec.ts` "refuses a PDF renamed .png"; counting without the production locks (`lockUnit` removed) failed `qc-photo.service.spec.ts` "lets one of two uploads queued behind the production header row take the 30th place"; storing before the visibility check failed `qc-photo.service.spec.ts` "answers 404 for a round item that does not exist and never calls storage".
+Deviations from Ownership: `backend/src/plugins/delivery/_shared/delivery-storage.helper-spec.ts` (new: storage fake and image bytes for delivery specs, since lint forbids importing production's `unit-photo-db.helper-spec.ts`), `qc-inspection/qc-db.helper-spec.ts` (photo wiring), `qc-views.ts` (photo view and select), `backend/docs/api/openapi.yaml` (regenerated beside the listed `openapi.json`).

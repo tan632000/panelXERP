@@ -1,6 +1,6 @@
 # Task 06 — QC screens and the qcInspector landing
 
-Status: pending
+Status: done
 
 ## Outcome
 From "QC & Giao hàng" a qcInspector (landing on "Kiểm tra QC") lists cabinets waiting for QC, records a round item by item with notes and photos, and verifies defects fixed by someone else; a productionManager sees "Lỗi QC" and marks defects fixed; sales and storekeeper see QC status read-only; the bell phrases both QC notices.
@@ -41,3 +41,34 @@ From "QC & Giao hàng" a qcInspector (landing on "Kiểm tra QC") lists cabinets
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T frontend sh -c "test -f src/plugins/delivery/qc-inspection/tests/qc-unit-list.test.tsx && test -f src/plugins/delivery/qc-inspection/tests/qc-round-form.test.tsx && test -f src/plugins/delivery/qc-inspection/tests/qc-defects.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/delivery src/kernel/core/tests/use-notifications.test.ts src/kernel/core/tests/notification-spec-wording.test.ts src/kernel/core/tests/sales-order-notification.test.ts src/kernel/core/tests/landing-path.test.ts"
+Exit: 0
+Base: b6d4eef06cb6d6a3e21bec0e60a67be3230b51c2
+Head: 12de08637e3b81b41749850d780f1f8fbabcc9cf59689570a76832fbfcc561c0
+```text
+$ docker compose exec -T frontend sh -c "test -f src/plugins/delivery/qc-inspection/tests/qc-unit-list.test.tsx && test -f src/plugins/delivery/qc-inspection/tests/qc-round-form.test.tsx && test -f src/plugins/delivery/qc-inspection/tests/qc-defects.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/delivery src/kernel/core/tests/use-notifications.test.ts src/kernel/core/tests/notification-spec-wording.test.ts src/kernel/core/tests/sales-order-notification.test.ts src/kernel/core/tests/landing-path.test.ts"
+> panelxerp-frontend@0.1.0 lint
+> eslint . --max-warnings=0 && npm run lint:i18n
+> panelxerp-frontend@0.1.0 lint:i18n
+> node scripts/check-i18n-enum-conformance.mjs
+ ✓ src/kernel/core/tests/i18n-enum-conformance.test.ts (7 tests) 6109ms
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+> tsc --noEmit
+ ✓ src/kernel/core/tests/notification-spec-wording.test.ts (15 tests) 149ms
+ ✓ src/kernel/core/tests/use-notifications.test.ts (53 tests) 85ms
+ ✓ src/kernel/core/tests/sales-order-notification.test.ts (16 tests) 52ms
+ ✓ src/plugins/delivery/qc-inspection/tests/qc-round-form.test.tsx (7 tests) 1462ms
+ ✓ src/plugins/delivery/qc-checklist/tests/checklist-template.test.tsx (9 tests) 889ms
+ ✓ src/plugins/delivery/qc-inspection/tests/qc-defects.test.tsx (6 tests) 622ms
+ ✓ src/plugins/delivery/qc-inspection/tests/qc-unit-list.test.tsx (9 tests) 650ms
+ ✓ src/kernel/core/tests/landing-path.test.ts (7 tests) 24ms
+ Test Files  8 passed (8)
+      Tests  122 passed (122)
+EXIT=0
+```
+Counterexamples (each run once against a temporary mutation, reverted before the final Command above; the worktree Head was identical before and after): putting `qcChecklistFeature` before `qcInspectionFeature` in `delivery.features.ts` failed `landing-path.test.ts` "opens a QC inspector on the cabinets to inspect, not on the checklist template"; dropping the `fixedBy !== user.id` check failed `qc-defects.test.tsx` "offers 'verify' only with qc_inspection:verify, only on a fixed defect, never to the one who fixed it".
+Deviations from Ownership: `frontend/src/kernel/core/api/generated/api.ts` was passed through `eslint --fix` (the committed copy carried 14 `T[]` array-type violations that failed `npm run lint`; no content change), `kernel/langs/{vi,en}/delivery.json` also gained the toast keys, `use-notifications.test.ts` expected-scope list gained `qc_inspection:read`, `frontend/src/plugins/delivery/qc-inspection/` also holds `QcStatusBadge`, `QcPhotoThumb`, `QcRoundHistory` and the `useQcInspection` hook. The order filter of the list has no input: `orderId` is read from the URL for a delivery link to use.
