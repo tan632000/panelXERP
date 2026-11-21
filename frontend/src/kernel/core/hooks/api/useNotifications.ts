@@ -120,6 +120,9 @@ export const NOTIFICATION_REQUIRED_SCOPES = [
   // An issue reported on a cabinet goes to the production managers, its closing to the
   // technician who reported it; both hold the production issue read scope.
   "production_issue:read",
+  // A QC round's result goes to the production managers (failed) or the storekeepers (passed),
+  // stamped with the QC read scope; neither holds anything above for it.
+  "qc_inspection:read",
 ] as const;
 
 /** The purchase order and order shortage events the bell phrases, with their message keys. */
@@ -148,6 +151,12 @@ const PRODUCTION_EVENT_MESSAGE_KEYS: Readonly<Record<string, string>> = {
   "production.issue.resolved": "events.production_issue_resolved",
   "production.unit.overdue": "events.production_unit_overdue",
   "production.unit.overdue.assignee": "events.production_unit_overdue_assignee",
+};
+
+/** The QC round events the bell phrases, with their message keys. */
+const QC_EVENT_MESSAGE_KEYS: Readonly<Record<string, string>> = {
+  "qc.unit.failed": "events.qc_unit_failed",
+  "qc.unit.passed": "events.qc_unit_passed",
 };
 
 /** Badge stops counting past this and renders the overflow marker instead. */
@@ -185,6 +194,8 @@ export const NOTIFICATION_EVENT_KEYS = [
   "production.issue.resolved",
   "production.unit.overdue",
   "production.unit.overdue.assignee",
+  "qc.unit.failed",
+  "qc.unit.passed",
   "purchaseRequestAwaitingReceipt",
   "purchaseRequestReceived",
   "purchaseRequestApproved",
@@ -1316,6 +1327,15 @@ export function resolveNotificationMessage(
           severity: field(payload.severity),
           plannedEndDate: formatIsoDate(field(payload.plannedEndDate)),
         },
+      };
+    }
+
+    const qcKey = QC_EVENT_MESSAGE_KEYS[item.eventType];
+    if (qcKey) {
+      return {
+        kind: "key",
+        key: qcKey,
+        values: { unitCode: field(payload.unitCode) },
       };
     }
 

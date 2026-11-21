@@ -172,6 +172,8 @@ describe("notification bell surface", () => {
         "production_order:read",
         // An issue reported on a cabinet, and its closing.
         "production_issue:read",
+        // The result of a QC round.
+        "qc_inspection:read",
       ]);
     });
 
@@ -375,6 +377,38 @@ describe("notification bell surface", () => {
           }
         }
       }
+    });
+
+    it("phrases both QC round events from the cabinet code, in both languages", () => {
+      const payload = { unitCode: "MSB-2", roundNo: 1, defectCount: 2 };
+      const expected: Record<string, string> = {
+        "qc.unit.failed": "MSB-2",
+        "qc.unit.passed": "MSB-2",
+      };
+      for (const common of [viCommon, enCommon]) {
+        const t = createTranslator({
+          locale: common === viCommon ? "vi" : "en",
+          messages: { common },
+          namespace: "common.notification",
+        });
+        for (const [eventType, part] of Object.entries(expected)) {
+          expect(NOTIFICATION_EVENT_KEYS).toContain(eventType);
+          const message = resolveNotificationMessage(
+            notification({ id: 1, eventType, payload }),
+          );
+          expect(message.kind).toBe("key");
+          if (message.kind !== "key") return;
+          expect(
+            t(message.key as Parameters<typeof t>[0], message.values),
+          ).toContain(part);
+        }
+      }
+      expect(viCommon.notification.events.qc_unit_failed).toBe(
+        "Tủ {unitCode} không đạt QC",
+      );
+      expect(viCommon.notification.events.qc_unit_passed).toBe(
+        "Tủ {unitCode} đạt QC, sẵn sàng giao",
+      );
     });
 
     it("phrases a purchase-order event from its own payload fields", () => {

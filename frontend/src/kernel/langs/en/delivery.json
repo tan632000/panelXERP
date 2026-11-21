@@ -1,6 +1,9 @@
 {
   "moduleName": "QC & Delivery",
   "sidebarDelivery": "QC & Delivery",
+  "qcMenu": "QC inspection",
+  "defectsMenu": "QC defects",
+  "emptyValue": "—",
   "checklistMenu": "Checklist template",
   "checklist": {
     "title": "Checklist template",
@@ -25,6 +28,97 @@
     "checklistAdded": "Item added",
     "checklistUpdated": "Item updated",
     "checklistConflict": "An item with this name exists",
-    "checklistStale": "The list changed and was reloaded"
+    "checklistStale": "The list changed and was reloaded",
+    "qcRoundRecorded": "Round recorded",
+    "qcRoundConflict": "Not recorded: the cabinet or the checklist changed, reloaded",
+    "qcRoundRejected": "The round is not valid: every item needs a result, a failed item needs a note",
+    "qcDefectFixed": "Defect marked fixed",
+    "qcDefectVerified": "Defect verified",
+    "qcDefectConflict": "The defect changed state, reloaded",
+    "photoTooLarge": "The round is recorded, but a photo over 10 MB was not uploaded",
+    "photoRejected": "The round is recorded, but a photo could not be uploaded"
+  },
+  "qc": {
+    "title": "QC inspection",
+    "description": "Cabinets whose finishing stage is done, waiting for or past their quality check",
+    "allStatuses": "All statuses",
+    "statuses": {
+      "waiting": "Waiting for QC",
+      "failed": "Failed",
+      "passed": "Passed",
+      "not_ready": "Not ready"
+    },
+    "defectStatuses": {
+      "open": "Open",
+      "fixed": "Awaiting verification",
+      "verified": "Verified"
+    },
+    "columns": {
+      "tag": "Cabinet",
+      "code": "Cabinet code",
+      "productionOrder": "Production order",
+      "order": "Order",
+      "customer": "Customer",
+      "status": "QC status"
+    },
+    "noUnits": "No cabinet to inspect yet",
+    "noUnitsFound": "No cabinet matches the filter",
+    "loadError": "Could not load the cabinets",
+    "unitItem": "cabinets",
+    "unit": {
+      "title": "Cabinet inspection",
+      "description": "The QC rounds, defects and result of one cabinet",
+      "notFound": "Cabinet not found",
+      "info": "Cabinet",
+      "rounds": "Inspection rounds",
+      "noRounds": "No round yet",
+      "roundTitle": "Round {no}",
+      "defects": "QC defects",
+      "noDefects": "The cabinet has no defect",
+      "defectsBlock": "A defect is not verified yet, so a new round cannot be recorded."
+    },
+    "form": {
+      "title": "New round",
+      "noTemplate": "The checklist template has no visible item, so nothing can be inspected.",
+      "results": {
+        "pass": "Pass",
+        "fail": "Fail",
+        "na": "Not applicable"
+      },
+      "note": "Note",
+      "noteRequired": "A note is required when the item fails",
+      "addPhoto": "Add photo",
+      "photoHint": "PNG or JPEG, up to 10 MB",
+      "photosPicked": "{count} photo(s) picked",
+      "photoProblems": {
+        "type": "Only PNG or JPEG photos are accepted",
+        "size": "A photo may be at most 10 MB",
+        "empty": "The photo file is empty"
+      },
+      "submit": "Record round"
+    },
+    "defects": {
+      "title": "QC defects",
+      "description": "Defects found by QC: the workshop fixes them, QC verifies",
+      "allStatuses": "All statuses",
+      "columns": {
+        "unit": "Cabinet code",
+        "round": "Round",
+        "description": "Defect",
+        "status": "Status",
+        "fixNote": "Fix note"
+      },
+      "fix": "Mark fixed",
+      "verify": "Verify",
+      "fixTitle": "Mark the defect of cabinet {unit} fixed",
+      "fixNote": "What was done",
+      "fixPlaceholder": "What was done to fix the defect",
+      "fixRequired": "Enter what was done",
+      "fixMax": "At most {max} characters",
+      "none": "No QC defect yet",
+      "noneFound": "No defect matches the filter",
+      "loadError": "Could not load the defects",
+      "item": "defects"
+    }
   }
 }

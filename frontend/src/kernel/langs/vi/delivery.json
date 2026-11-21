@@ -1,6 +1,9 @@
 {
   "moduleName": "QC & Giao hàng",
   "sidebarDelivery": "QC & Giao hàng",
+  "qcMenu": "Kiểm tra QC",
+  "defectsMenu": "Lỗi QC",
+  "emptyValue": "—",
   "checklistMenu": "Mẫu checklist",
   "checklist": {
     "title": "Mẫu checklist",
@@ -25,6 +28,97 @@
     "checklistAdded": "Đã thêm hạng mục",
     "checklistUpdated": "Đã cập nhật hạng mục",
     "checklistConflict": "Đã có hạng mục trùng tên",
-    "checklistStale": "Danh sách đã thay đổi, đã tải lại"
+    "checklistStale": "Danh sách đã thay đổi, đã tải lại",
+    "qcRoundRecorded": "Đã ghi nhận lượt kiểm tra",
+    "qcRoundConflict": "Không ghi nhận được: tủ hoặc mẫu checklist đã thay đổi, đã tải lại",
+    "qcRoundRejected": "Lượt kiểm tra không hợp lệ: mỗi hạng mục cần một kết quả, hạng mục không đạt cần ghi chú",
+    "qcDefectFixed": "Đã ghi nhận khắc phục lỗi",
+    "qcDefectVerified": "Đã xác nhận lỗi được khắc phục",
+    "qcDefectConflict": "Lỗi đã thay đổi trạng thái, đã tải lại",
+    "photoTooLarge": "Lượt kiểm tra đã ghi nhận, nhưng có ảnh lớn hơn 10 MB nên chưa được tải lên",
+    "photoRejected": "Lượt kiểm tra đã ghi nhận, nhưng có ảnh không tải lên được"
+  },
+  "qc": {
+    "title": "Kiểm tra QC",
+    "description": "Các tủ đã xong công đoạn hoàn thiện, chờ hoặc đã qua kiểm tra chất lượng",
+    "allStatuses": "Tất cả trạng thái",
+    "statuses": {
+      "waiting": "Chờ QC",
+      "failed": "Không đạt",
+      "passed": "Đạt",
+      "not_ready": "Chưa sẵn sàng"
+    },
+    "defectStatuses": {
+      "open": "Chưa khắc phục",
+      "fixed": "Chờ xác nhận",
+      "verified": "Đã xác nhận"
+    },
+    "columns": {
+      "tag": "Tủ",
+      "code": "Mã tủ",
+      "productionOrder": "Lệnh sản xuất",
+      "order": "Đơn hàng",
+      "customer": "Khách hàng",
+      "status": "Trạng thái QC"
+    },
+    "noUnits": "Chưa có tủ nào để kiểm tra",
+    "noUnitsFound": "Không có tủ nào khớp bộ lọc",
+    "loadError": "Không tải được danh sách tủ",
+    "unitItem": "tủ",
+    "unit": {
+      "title": "Kiểm tra tủ",
+      "description": "Các lượt kiểm tra, lỗi và kết quả QC của một tủ",
+      "notFound": "Không tìm thấy tủ",
+      "info": "Thông tin tủ",
+      "rounds": "Các lượt kiểm tra",
+      "noRounds": "Chưa có lượt kiểm tra nào",
+      "roundTitle": "Lần {no}",
+      "defects": "Lỗi QC",
+      "noDefects": "Tủ chưa có lỗi nào",
+      "defectsBlock": "Tủ còn lỗi chưa được xác nhận nên chưa thể kiểm tra lần mới."
+    },
+    "form": {
+      "title": "Kiểm tra lần mới",
+      "noTemplate": "Mẫu checklist chưa có hạng mục nào đang hiện, chưa thể kiểm tra.",
+      "results": {
+        "pass": "Đạt",
+        "fail": "Không đạt",
+        "na": "Không áp dụng"
+      },
+      "note": "Ghi chú",
+      "noteRequired": "Ghi chú bắt buộc khi không đạt",
+      "addPhoto": "Thêm ảnh",
+      "photoHint": "PNG hoặc JPEG, tối đa 10 MB",
+      "photosPicked": "Đã chọn {count} ảnh",
+      "photoProblems": {
+        "type": "Chỉ nhận ảnh PNG hoặc JPEG",
+        "size": "Ảnh tối đa 10 MB",
+        "empty": "Tệp ảnh trống"
+      },
+      "submit": "Ghi nhận lượt kiểm tra"
+    },
+    "defects": {
+      "title": "Lỗi QC",
+      "description": "Lỗi tìm thấy khi kiểm tra: xưởng khắc phục, QC xác nhận",
+      "allStatuses": "Tất cả trạng thái",
+      "columns": {
+        "unit": "Mã tủ",
+        "round": "Lần",
+        "description": "Lỗi",
+        "status": "Trạng thái",
+        "fixNote": "Đã khắc phục"
+      },
+      "fix": "Đã khắc phục",
+      "verify": "Xác nhận",
+      "fixTitle": "Đã khắc phục lỗi của tủ {unit}",
+      "fixNote": "Nội dung khắc phục",
+      "fixPlaceholder": "Đã làm gì để khắc phục lỗi",
+      "fixRequired": "Vui lòng nhập nội dung khắc phục",
+      "fixMax": "Tối đa {max} ký tự",
+      "none": "Chưa có lỗi QC nào",
+      "noneFound": "Không có lỗi nào khớp bộ lọc",
+      "loadError": "Không tải được danh sách lỗi",
+      "item": "lỗi"
+    }
   }
 }

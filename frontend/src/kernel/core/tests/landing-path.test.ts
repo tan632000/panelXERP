@@ -101,3 +101,19 @@ describe("getLandingPath for production roles", () => {
     ).toBe("/production/orders");
   });
 });
+
+describe("getLandingPath for the QC inspector", () => {
+  // The real sidebar: "Kiểm tra QC" must come before "Mẫu checklist", which the same role reads.
+  it("opens a QC inspector on the cabinets to inspect, not on the checklist template", () => {
+    expect(
+      getLandingPath(
+        grants(
+          "qc_checklist:read",
+          "qc_inspection:read",
+          "qc_inspection:create",
+          "qc_inspection:verify",
+        ),
+      ),
+    ).toBe("/delivery/qc");
+  });
+});
