@@ -10387,6 +10387,103 @@
           "delivery/qc-inspection"
         ]
       }
+    },
+    "/api/v1/delivery/qc/round-items/{id}/photos": {
+      "post": {
+        "description": "PNG or JPEG, by extension and by content, up to 10 MB each and 30 per QC round.",
+        "operationId": "QcPhotoController_upload",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Photo attached"
+          },
+          "400": {
+            "description": "File missing, type not allowed, content mismatch, or limit reached"
+          },
+          "403": {
+            "description": "Forbidden — requires qc_inspection:create"
+          },
+          "404": {
+            "description": "No such round item in the caller’s scope"
+          },
+          "413": {
+            "description": "File larger than 10 MB"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Attach a photo to a QC round item",
+        "tags": [
+          "delivery/qc-inspection"
+        ]
+      }
+    },
+    "/api/v1/delivery/qc/photos/{photoId}/content": {
+      "get": {
+        "description": "Served inline with the content type stored at upload. Requires access to the cabinet.",
+        "operationId": "QcPhotoController_content",
+        "parameters": [
+          {
+            "name": "photoId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Image bytes"
+          },
+          "403": {
+            "description": "Forbidden — requires qc_inspection:read"
+          },
+          "404": {
+            "description": "Photo not found, or outside the caller’s scope"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The image of a QC photo",
+        "tags": [
+          "delivery/qc-inspection"
+        ]
+      }
     }
   },
   "info": {

@@ -3348,6 +3348,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/delivery/qc/round-items/{id}/photos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Attach a photo to a QC round item
+         * @description PNG or JPEG, by extension and by content, up to 10 MB each and 30 per QC round.
+         */
+        post: operations["QcPhotoController_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/qc/photos/{photoId}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The image of a QC photo
+         * @description Served inline with the content type stored at upload. Requires access to the cabinet.
+         */
+        get: operations["QcPhotoController_content"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -3431,7 +3471,7 @@ export interface components {
         };
         ExcelImportRequestDto: {
             /** @description Documents to create or update (1–500). Each is the feature's create payload plus `fileRow`, an optional `code` (an existing active code updates that record), and a `fileRow` on every line. */
-            documents: Record<string, never>[];
+            documents: Array<Record<string, never>>;
         };
         UserFilterDto: {
             /**
@@ -3491,7 +3531,7 @@ export interface components {
             label: string;
             /** @description Header group labels, outermost first */
             headerGroup?: string[];
-            fields?: components["schemas"]["ExcelFieldRefDto"][];
+            fields?: Array<components["schemas"]["ExcelFieldRefDto"]>;
             /**
              * @default join
              * @enum {string}
@@ -3512,7 +3552,7 @@ export interface components {
             required?: boolean;
         };
         ExcelSheetSpecDto: {
-            columns: components["schemas"]["ExcelColumnSpecDto"][];
+            columns: Array<components["schemas"]["ExcelColumnSpecDto"]>;
             /** @description Row field whose consecutive equal values form one record */
             rowGroupField?: string;
             /** @description Worksheet name */
@@ -3861,7 +3901,7 @@ export interface components {
             marginPercent: number;
         };
         UpdateQuotationPricingDto: {
-            lines?: components["schemas"]["LineMarginDto"][];
+            lines?: Array<components["schemas"]["LineMarginDto"]>;
             /** @enum {string} */
             discountType?: "percent" | "amount";
             /** @description Percent (0–100) or VND per the discount type, up to 2 decimals; the cap per type is checked by the server */
@@ -3980,7 +4020,7 @@ export interface components {
              */
             vatRate: 0 | 5 | 8 | 10;
             note?: Record<string, never> | null;
-            lines: components["schemas"]["PurchaseOrderLineDto"][];
+            lines: Array<components["schemas"]["PurchaseOrderLineDto"]>;
         };
         PurchaseOrderFromRequestLineDto: {
             /** @description Purchase request line ordered */
@@ -3996,7 +4036,7 @@ export interface components {
              * @enum {number}
              */
             vatRate?: 0 | 5 | 8 | 10;
-            lines: components["schemas"]["PurchaseOrderFromRequestLineDto"][];
+            lines: Array<components["schemas"]["PurchaseOrderFromRequestLineDto"]>;
         };
         UpdatePurchaseOrderDto: {
             /** @description Active supplier */
@@ -4006,7 +4046,7 @@ export interface components {
             /** @enum {number} */
             vatRate?: 0 | 5 | 8 | 10;
             note?: Record<string, never> | null;
-            lines?: components["schemas"]["PurchaseOrderLineDto"][];
+            lines?: Array<components["schemas"]["PurchaseOrderLineDto"]>;
         };
         PurchaseOrderReasonDto: {
             reason: string;
@@ -4026,7 +4066,7 @@ export interface components {
              */
             requestKey?: string;
             note?: Record<string, never> | null;
-            lines: components["schemas"]["StockReceiptLineDto"][];
+            lines: Array<components["schemas"]["StockReceiptLineDto"]>;
         };
         StockIssueLineDto: {
             /** @description Catalog item */
@@ -4047,7 +4087,7 @@ export interface components {
              */
             requestKey?: string;
             note?: Record<string, never> | null;
-            lines: components["schemas"]["StockIssueLineDto"][];
+            lines: Array<components["schemas"]["StockIssueLineDto"]>;
         };
         WorkshopReturnLineDto: {
             /** @description Catalog item */
@@ -4067,7 +4107,7 @@ export interface components {
              */
             requestKey?: string;
             note?: Record<string, never> | null;
-            lines: components["schemas"]["WorkshopReturnLineDto"][];
+            lines: Array<components["schemas"]["WorkshopReturnLineDto"]>;
         };
         SupplierReturnLineDto: {
             /** @description Line of the purchase order the goods came on */
@@ -4085,7 +4125,7 @@ export interface components {
             requestKey?: string;
             /** @description Why the goods go back */
             reason: string;
-            lines: components["schemas"]["SupplierReturnLineDto"][];
+            lines: Array<components["schemas"]["SupplierReturnLineDto"]>;
         };
         CreateStocktakeDto: {
             /** @enum {string} */
@@ -4116,12 +4156,12 @@ export interface components {
         };
         CreatePurchaseRequestDto: {
             note?: Record<string, never> | null;
-            lines: components["schemas"]["PurchaseRequestLineDto"][];
+            lines: Array<components["schemas"]["PurchaseRequestLineDto"]>;
         };
         UpdatePurchaseRequestDto: {
             note?: Record<string, never> | null;
             /** @description Replaces every line; refused once anything has been ordered */
-            lines?: components["schemas"]["PurchaseRequestLineDto"][];
+            lines?: Array<components["schemas"]["PurchaseRequestLineDto"]>;
         };
         PurchaseRequestReasonDto: {
             reason: string;
@@ -4177,7 +4217,7 @@ export interface components {
         };
         CreateQcRoundDto: {
             /** @description Exactly one result per active checklist item */
-            results: components["schemas"]["QcResultDto"][];
+            results: Array<components["schemas"]["QcResultDto"]>;
         };
         FixQcDefectDto: {
             /** @description What was done */
@@ -11942,6 +11982,95 @@ export interface operations {
             };
             /** @description The defect is not fixed, or the caller fixed it */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcPhotoController_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Photo attached */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File missing, type not allowed, content mismatch, or limit reached */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires qc_inspection:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such round item in the caller’s scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File larger than 10 MB */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    QcPhotoController_content: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                photoId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Image bytes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires qc_inspection:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Photo not found, or outside the caller’s scope */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

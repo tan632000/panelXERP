@@ -32,8 +32,11 @@ import {
 } from '@plugins/delivery/qc-inspection/services/qc-notifier.service';
 import {
   DEFECT_SELECT,
+  PHOTO_SELECT,
   toDefectView,
+  toPhotoView,
   type QcDefectView,
+  type QcPhotoView,
   type RawRow,
 } from '@plugins/delivery/qc-inspection/services/qc-views';
 import {
@@ -66,6 +69,7 @@ export interface QcRoundItemView {
   position: number;
   result: QcItemResult;
   note: string | null;
+  photos: QcPhotoView[];
 }
 
 export interface QcRoundView {
@@ -365,6 +369,14 @@ export class QcInspectionService {
         ORDER BY it.round_id, it.position, it.id`,
       [unitId],
     );
+    const photos: RawRow[] = await manager.query(
+      `${PHOTO_SELECT}
+         JOIN qc_round_items it ON it.id = p.round_item_id
+         JOIN qc_rounds r ON r.id = it.round_id
+        WHERE r.unit_id = $1 AND r.is_deleted = false AND p.is_deleted = false
+        ORDER BY p.id`,
+      [unitId],
+    );
     return rounds.map((round) => ({
       id: Number(round.id),
       roundNo: Number(round.round_no),
@@ -382,6 +394,9 @@ export class QcInspectionService {
           position: Number(item.position),
           result: item.result as QcItemResult,
           note: typeof item.note === 'string' ? item.note : null,
+          photos: photos
+            .filter((photo) => Number(photo.round_item_id) === Number(item.id))
+            .map(toPhotoView),
         })),
     }));
   }

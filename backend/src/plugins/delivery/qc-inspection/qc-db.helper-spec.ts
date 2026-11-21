@@ -1,10 +1,21 @@
+import request from 'supertest';
+
+import { S3StorageService } from '@shared/services/s3-storage.service';
+
+import {
+  storageFake,
+  type StorageFake,
+} from '@plugins/delivery/_shared/delivery-storage.helper-spec';
 import { QC_CHECKLIST_LOCK_KEY } from '@plugins/delivery/qc-checklist/constants/qc-checklist.constant';
 import { QC_GUARD_NAME } from '@plugins/delivery/qc-inspection/constants/qc-inspection.constant';
+import { QcPhoto } from '@plugins/delivery/qc-inspection/entities/qc-photo.entity';
 import { QcInspectionController } from '@plugins/delivery/qc-inspection/qc-inspection.controller';
+import { QcPhotoController } from '@plugins/delivery/qc-inspection/qc-photo.controller';
 import { QcDefectService } from '@plugins/delivery/qc-inspection/services/qc-defect.service';
 import { qcGuards } from '@plugins/delivery/qc-inspection/services/qc-guards';
 import { QcInspectionService } from '@plugins/delivery/qc-inspection/services/qc-inspection.service';
 import { QcNotifier } from '@plugins/delivery/qc-inspection/services/qc-notifier.service';
+import { QcPhotoService } from '@plugins/delivery/qc-inspection/services/qc-photo.service';
 import {
   openHarnessWithProgress,
   releasedOrderWithOneFinishedUnit,
@@ -12,8 +23,6 @@ import {
   type ProductionTestHarness,
 } from '@plugins/production/_shared/finished-unit-kit.helper-spec';
 import { ProductionGuardRegistry } from '@plugins/production/_shared/ports/production-guard.registry';
-
-import type request from 'supertest';
 
 /** A round body: one result per item id, `failing` ones with a note, `na` ones not applicable. */
 export function roundBody(
@@ -48,6 +57,17 @@ export interface ReadyUnit {
 
 export interface QcHarness {
   h: ProductionTestHarness;
+  /** Object storage in memory, as the photo service sees it. */
+  storage: StorageFake;
+  /** The id of the first round item of a round the cabinet already has. */
+  roundItemId(unitId: number): Promise<number>;
+  /** Multipart upload of one photo to a round item. */
+  photo(
+    roundItemId: number,
+    file: { name: string; bytes: Buffer },
+    as?: ProductionTestActor,
+  ): request.Test;
+  photoRows(roundItemId: number): Promise<number>;
   /** Ids of the active checklist template items, in template order. */
   itemIds(): Promise<number[]>;
   /** A released production order of two cabinets, the first finished (see the production kit). */
@@ -80,9 +100,16 @@ export interface QcHarness {
  * build leaves it out and jest does not run it as a test.
  */
 export async function openQcHarness(): Promise<QcHarness> {
-  const h = await openHarnessWithProgress([], {
-    controllers: [QcInspectionController],
-    providers: [QcInspectionService, QcDefectService, QcNotifier],
+  const storage = storageFake();
+  const h = await openHarnessWithProgress([QcPhoto], {
+    controllers: [QcInspectionController, QcPhotoController],
+    providers: [
+      QcInspectionService,
+      QcDefectService,
+      QcPhotoService,
+      QcNotifier,
+      { provide: S3StorageService, useValue: storage },
+    ],
   });
   h.app.get(ProductionGuardRegistry).register(QC_GUARD_NAME, qcGuards);
   const touched: number[] = [];
@@ -96,7 +123,28 @@ export async function openQcHarness(): Promise<QcHarness> {
 
   return {
     h,
+    storage,
     itemIds,
+    async roundItemId(unitId) {
+      const [row]: Array<{ id: number }> = await h.dataSource.query(
+        `SELECT it.id FROM qc_round_items it JOIN qc_rounds r ON r.id = it.round_id
+          WHERE r.unit_id = $1 ORDER BY it.id LIMIT 1`,
+        [unitId],
+      );
+      return row.id;
+    },
+    photo: (roundItemId, file, as = 'qcInspector') =>
+      request(h.app.getHttpServer())
+        .post(`/delivery/qc/round-items/${roundItemId}/photos`)
+        .set('x-test-actor', h.token(as))
+        .attach('file', file.bytes, file.name),
+    async photoRows(roundItemId) {
+      const [row]: Array<{ n: string }> = await h.dataSource.query(
+        `SELECT COUNT(*) AS n FROM qc_photos WHERE round_item_id = $1`,
+        [roundItemId],
+      );
+      return Number(row.n);
+    },
     async submit(unitId, results, as, expected) {
       for (let attempt = 1; ; attempt++) {
         const ids = await itemIds();
@@ -151,6 +199,12 @@ export async function openQcHarness(): Promise<QcHarness> {
         );
         await h.dataSource.query(
           `DELETE FROM qc_defects WHERE unit_id = ANY($1)`,
+          [touched],
+        );
+        await h.dataSource.query(
+          `DELETE FROM qc_photos WHERE round_item_id IN
+             (SELECT it.id FROM qc_round_items it JOIN qc_rounds r ON r.id = it.round_id
+               WHERE r.unit_id = ANY($1))`,
           [touched],
         );
         await h.dataSource.query(

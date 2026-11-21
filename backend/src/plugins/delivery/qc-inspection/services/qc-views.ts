@@ -18,6 +18,34 @@ export interface QcDefectView {
   verifiedAt: Date | null;
 }
 
+/** A photo as the API lists it. The storage key stays server-side. */
+export interface QcPhotoView {
+  id: number;
+  roundItemId: number;
+  fileName: string;
+  contentType: string;
+  sizeBytes: number;
+  createdBy: number | null;
+  createdAt: Date;
+}
+
+export const PHOTO_SELECT = `
+  SELECT p.id, p.round_item_id, p.file_name, p.content_type, p.size_bytes,
+         p.created_by, p.created_at
+    FROM qc_photos p`;
+
+export function toPhotoView(row: RawRow): QcPhotoView {
+  return {
+    id: Number(row.id),
+    roundItemId: Number(row.round_item_id),
+    fileName: String(row.file_name),
+    contentType: String(row.content_type),
+    sizeBytes: Number(row.size_bytes),
+    createdBy: row.created_by === null ? null : Number(row.created_by),
+    createdAt: row.created_at as Date,
+  };
+}
+
 export const DEFECT_SELECT = `
   SELECT d.id, d.unit_id, u.code AS unit_code, r.round_no, d.description, d.status,
          d.fix_note, d.fixed_by, fixer.full_name AS fixed_by_name, d.fixed_at,
