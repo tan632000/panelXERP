@@ -82,7 +82,7 @@ Strictly sequential (shared registration files, one writer each, as P2/P3).
 | 04 | QC rounds, defects, QC guards, QC notices | P1 | AC-03, AC-04, AC-05, AC-11 | `backend/src/plugins/delivery/qc-inspection` | 03 | done |
 | 05 | QC photos + shared file util | P2 | AC-11, AC-12 | `delivery/_shared/utils`, QC photo files | 04 | done |
 | 06 | QC screens + qcInspector landing | P1 | AC-02, AC-13 | `frontend/src/plugins/delivery/qc-inspection`, `common.json` | 05 | done |
-| 07 | Sales/inventory deltas | P1 | AC-08, AC-16 | sales `_shared`, inventory reservation/shortage/returnable | 06 | pending |
+| 07 | Sales/inventory deltas | P1 | AC-08, AC-16 | sales `_shared`, inventory reservation/shortage/returnable | 06 | done |
 | 08 | Delivery notes + order `delivered` | P1 | AC-05, AC-06, AC-07, AC-08, AC-11, AC-12 | `backend/src/plugins/delivery/delivery-note` | 07 | pending |
 | 09 | Delivery note screens + order entry | P1 | AC-13 | `frontend/src/plugins/delivery/delivery-note`, `OrderDetailPage.tsx`, `common.json` | 08 | pending |
 | 10 | Installation backend | P1 | AC-09, AC-11, AC-12 | `backend/src/plugins/delivery/installation` | 09 | pending |
