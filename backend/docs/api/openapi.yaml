@@ -6676,6 +6676,247 @@ paths:
       security: *ref_69
       summary: Download a handover file of a delivery note
       tags: *ref_70
+  /api/v1/delivery/orders/{orderId}/installation:
+    post:
+      description: >-
+        At most one per order, while the order is in production or delivered. The address defaults to the project site
+        address, else the customer address.
+      operationId: InstallationController_create
+      parameters:
+        - name: orderId
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInstallationDto'
+      responses:
+        '201':
+          description: The installation, as planned
+        '403':
+          description: Forbidden — requires installation:manage
+        '404':
+          description: No such order in the caller’s scope
+        '409':
+          description: The order is not in production or delivered, or has one
+      security: &ref_71
+        - bearer: []
+      summary: Plan the installation of an order at the project
+      tags: &ref_72
+        - delivery/installation
+  /api/v1/delivery/installations:
+    get:
+      operationId: InstallationController_list
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Items per page
+          schema:
+            default: 25
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search keyword
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: status
+          required: false
+          in: query
+          schema:
+            type: string
+            enum:
+              - planned
+              - in_progress
+              - done
+        - name: orderId
+          required: false
+          in: query
+          description: Only the installation of this order
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A page of installations
+        '403':
+          description: Forbidden — requires installation:read
+      security: *ref_71
+      summary: List installations
+      tags: *ref_72
+  /api/v1/delivery/installations/{id}:
+    get:
+      operationId: InstallationController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: The installation
+        '403':
+          description: Forbidden — requires installation:read
+        '404':
+          description: No such installation in the caller’s scope
+      security: *ref_71
+      summary: One installation with its photos
+      tags: *ref_72
+    patch:
+      description: An absent field stays, an empty text clears it. Refused while the order is not in production or delivered.
+      operationId: InstallationController_update
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateInstallationDto'
+      responses:
+        '200':
+          description: The installation
+        '403':
+          description: Forbidden — requires installation:manage
+        '404':
+          description: No such installation in the caller’s scope
+        '409':
+          description: The installation is done or the order is not writable
+      security: *ref_71
+      summary: Edit an installation that is not done
+      tags: *ref_72
+  /api/v1/delivery/installations/{id}/start:
+    post:
+      operationId: InstallationController_start
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: The installation, in progress
+        '403':
+          description: Forbidden — requires installation:manage
+        '404':
+          description: No such installation in the caller’s scope
+        '409':
+          description: The installation is not planned or the order is not writable
+      security: *ref_71
+      summary: Start a planned installation
+      tags: *ref_72
+  /api/v1/delivery/installations/{id}/finish:
+    post:
+      operationId: InstallationController_finish
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: The installation, done
+        '403':
+          description: Forbidden — requires installation:manage
+        '404':
+          description: No such installation in the caller’s scope
+        '409':
+          description: The installation is not in progress or the order is not writable
+      security: *ref_71
+      summary: Finish an installation in progress
+      tags: *ref_72
+  /api/v1/delivery/installations/{id}/photos:
+    post:
+      description: PNG or JPEG, by extension and by content, up to 10 MB each and 30 per installation.
+      operationId: InstallationPhotoController_upload
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+                - file
+      responses:
+        '201':
+          description: Photo attached
+        '400':
+          description: File missing, type not allowed, content mismatch, or limit reached
+        '403':
+          description: Forbidden — requires installation:manage
+        '404':
+          description: No such installation in the caller’s scope
+        '409':
+          description: The order is not in production or delivered
+        '413':
+          description: File larger than 10 MB
+      security: &ref_73
+        - bearer: []
+      summary: Attach a photo to an installation
+      tags: &ref_74
+        - delivery/installation
+  /api/v1/delivery/installation-photos/{photoId}/content:
+    get:
+      description: Served inline with the content type stored at upload. Requires access to the installation’s order.
+      operationId: InstallationPhotoController_content
+      parameters:
+        - name: photoId
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Image bytes
+        '403':
+          description: Forbidden — requires installation:read
+        '404':
+          description: Photo not found, or outside the caller’s scope
+      security: *ref_73
+      summary: The image of an installation photo
+      tags: *ref_74
 info:
   title: panelXERP
   description: REST API — ERP Hải Phòng Manufacturing Platform
@@ -6760,7 +7001,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: &ref_71
+          enum: &ref_75
             - sales
             - planning
             - purchasing
@@ -6801,7 +7042,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_71
+          enum: *ref_75
           nullable: true
         title:
           type: object
@@ -6836,7 +7077,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_71
+          enum: *ref_75
           nullable: true
         title:
           type: object
@@ -7271,7 +7512,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: &ref_72
+          enum: &ref_76
             - enclosure
             - breaker
             - contactor
@@ -7321,7 +7562,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: *ref_72
+          enum: *ref_76
         unit:
           type: string
           description: Unit of measure, e.g. pcs, m, set
@@ -7561,7 +7802,7 @@ components:
       properties:
         category:
           type: string
-          enum: &ref_73
+          enum: &ref_77
             - design
             - labor
             - installation
@@ -7583,7 +7824,7 @@ components:
       properties:
         category:
           type: string
-          enum: *ref_73
+          enum: *ref_77
         description:
           type: object
           maxLength: 500
@@ -7825,7 +8066,7 @@ components:
         vatRate:
           type: number
           description: VAT rate in percent
-          enum: &ref_74
+          enum: &ref_78
             - 0
             - 5
             - 8
@@ -7864,7 +8105,7 @@ components:
         vatRate:
           type: number
           description: VAT rate in percent; 10 when left out
-          enum: *ref_74
+          enum: *ref_78
         lines:
           type: array
           items:
@@ -7884,7 +8125,7 @@ components:
           nullable: true
         vatRate:
           type: number
-          enum: *ref_74
+          enum: *ref_78
         note:
           type: object
           maxLength: 2000
@@ -8315,3 +8556,37 @@ components:
           maxLength: 1000
       required:
         - reason
+    CreateInstallationDto:
+      type: object
+      properties:
+        siteAddress:
+          type: string
+          maxLength: 500
+          description: On create, defaults to the project site address, else the customer address
+        plannedDate:
+          type: string
+          example: '2026-12-10'
+        personInCharge:
+          type: string
+          maxLength: 255
+          description: Free text
+        note:
+          type: string
+          maxLength: 2000
+    UpdateInstallationDto:
+      type: object
+      properties:
+        siteAddress:
+          type: string
+          maxLength: 500
+          description: On create, defaults to the project site address, else the customer address
+        plannedDate:
+          type: string
+          example: '2026-12-10'
+        personInCharge:
+          type: string
+          maxLength: 255
+          description: Free text
+        note:
+          type: string
+          maxLength: 2000
