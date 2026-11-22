@@ -1,6 +1,6 @@
 # Task 09 — Delivery note screens and the order's delivery page
 
-Status: pending
+Status: done
 
 ## Outcome
 A storekeeper creates a delivery note by picking an order and its deliverable cabinets, ships it, records the receipt with receiver, date and scanned handover minutes, or cancels it — all from "QC & Giao hàng › Phiếu giao hàng", without `order:read`; anyone with `delivery_note:read` opens an order's delivery page, also from the "Giao hàng" link on the sales order detail page; the bell phrases the new order changes with the note code.
@@ -41,3 +41,31 @@ A storekeeper creates a delivery note by picking an order and its deliverable ca
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T frontend sh -c "test -f src/plugins/delivery/delivery-note/tests/delivery-note-create.test.tsx && test -f src/plugins/delivery/delivery-note/tests/delivery-note-detail.test.tsx && test -f src/plugins/delivery/delivery-note/tests/order-delivery-page.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/delivery src/plugins/sales/order src/kernel/core/tests/use-notifications.test.ts src/kernel/core/tests/notification-spec-wording.test.ts src/kernel/core/tests/sales-order-notification.test.ts src/kernel/core/tests/landing-path.test.ts"
+Exit: 0
+Base: 4965d0a49509d70cd8b7d881c9251a1a66762323
+Head: 78967b4f22bb1c04e8ff0f157065842313dfa6543b3240f1bb22e7ab97b88316
+```text
+$ docker compose exec -T frontend sh -c "test -f ...delivery-note-create.test.tsx && test -f ...delivery-note-detail.test.tsx && test -f ...order-delivery-page.test.tsx && npm run lint && npm run typecheck && npx vitest run src/plugins/delivery src/plugins/sales/order src/kernel/core/tests/use-notifications.test.ts ..."
+> eslint . --max-warnings=0 && npm run lint:i18n
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> tsc --noEmit
+ ✓ src/plugins/delivery/delivery-note/tests/delivery-note-create.test.tsx (4 tests)
+ ✓ src/plugins/delivery/delivery-note/tests/delivery-note-detail.test.tsx (11 tests)
+ ✓ src/plugins/delivery/delivery-note/tests/order-delivery-page.test.tsx (3 tests)
+ ✓ src/plugins/sales/order/tests/order-detail.test.tsx (11 tests)
+ ✓ src/kernel/core/tests/notification-spec-wording.test.ts (15 tests)
+ ✓ src/kernel/core/tests/use-notifications.test.ts (55 tests)
+ ✓ src/kernel/core/tests/sales-order-notification.test.ts (22 tests)
+ ✓ src/kernel/core/tests/landing-path.test.ts (7 tests)
+ Test Files  15 passed (15)
+      Tests  171 passed (171)
+FINAL_EXIT=0
+```
+Skipped: none reported in the log. Counterexamples (each run once against a temporary mutation, reverted afterwards; file SHA-256 identical before and after): (1) gating `OrderDeliveryPage` on `order:read` failed `order-delivery-page.test.tsx` "renders the cabinets with both statuses for a reader without order:read" (3 failed of 3); (2) removing the `delivered` branch from the `sales_order_updated` ICU select in vi and en failed `sales-order-notification.test.ts` "phrases the 'delivered' change in Vietnamese" and "…in English" and `use-notifications.test.ts` "words each new order change differently in both languages" (3 failed, 89 passed).
+Review: code-auditor PASS (0 critical/high/medium). Low, left as is: both detail pages show "not found" for any load error, not only 404; the create form's inline refusal depends on the backend's English 400 text; the create page has no client-side `delivery_note:create` check (backend returns 403); receipt date has no client-side bounds (backend enforces). Observation: the follower broadcast to the storekeeper is stamped `material:read`, so the bell reaches the storekeeper, but its link goes to `/inventory/materials/<orderId>`, not the new delivery page (backend, outside this task). The auditor did not read `delivery-note-fixtures.tsx` or `DeliveryNoteStatusBadge.tsx`.
+Deviations from Ownership: implementation delegated to the implementer agent and verified independently by the controller. A hidden navigation item `/delivery/orders` was added in `delivery-note.feature.ts` (the visible "Phiếu giao hàng" item carries `activeMatch`), because `route-navigation-coverage.test.ts` and `app-navigation.test.ts` require an entry for every route; the "Giao hàng" label lives in `delivery.json` (`orderPage.link`) since `order.json` is outside Ownership. The pre-change run was made by the controller before delegation: the `test -f` check failed (exit 1) because the test files did not exist. Not verified: no live UI walkthrough; `permission-gating-convention.test.ts` timed out once at 5000ms in a larger run outside the Command and passed on a rerun (not root-caused).
+Docs impact: none yet (user-facing docs are task-14).
