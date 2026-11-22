@@ -1,6 +1,6 @@
 # Task 11 — Acceptance minutes and the order becoming `completed`
 
-Status: pending
+Status: done
 
 ## Outcome
 The order's sales owner (or salesManager/director) uploads the signed acceptance minutes once the order is `delivered` and any installation is `done`, which moves the order `delivered → completed` in the same transaction and tells the followers; storekeeper reads the minutes.
@@ -41,3 +41,26 @@ The order's sales owner (or salesManager/director) uploads the signed acceptance
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/delivery/acceptance/services/acceptance.service.spec.ts && test -f src/plugins/delivery/acceptance/services/acceptance-race.spec.ts && test -f src/plugins/delivery/acceptance/acceptance.controller.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/delivery src/plugins/sales/_shared src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+Exit: 0
+Base: c2458e90291d07b4ff76e0ea79f282132ba513d3
+Head: 0eab09f9809b417f9e4c70251584f37417e8695c4e34ee7af0ca7141e312df3c
+```text
+$ docker compose exec -T backend sh -c "test -f ...acceptance.service.spec.ts && ... && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/delivery src/plugins/sales/_shared src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations"
+PASS src/plugins/delivery/acceptance/acceptance.controller.spec.ts (33.989 s)
+PASS src/plugins/delivery/acceptance/services/acceptance.service.spec.ts (34.114 s)
+PASS src/plugins/delivery/acceptance/services/acceptance-race.spec.ts (35.532 s)
+Test Suites: 33 passed, 33 total
+Tests:       352 passed, 352 total
+Migration filename check passed (54 files).
+$ docker compose run --rm --no-deps -v .../backend:/backend:ro frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+ ✓ src/kernel/langs/tests/permission-labels.test.ts (6 tests)
+ Test Files  1 passed (1)
+FINAL_EXIT=0
+```
+Skipped: none reported in the log. Counterexamples (each run once against a temporary mutation of `acceptance.service.ts`, reverted afterwards; file SHA-256 `ef6355599a33c835…` identical before and after all of them): (1) status checked before scope: swapping the order only inside the transaction left all 32 acceptance tests green, because the pre-storage `assertOrderVisible` (R-02) already answers 404 first; removing that pre-storage check as well and putting scope after status failed "answers 404 to an order that does not exist and stores nothing" and "answers 404 to another sales rep before any status answer and stores nothing" (2 failed, 30 passed) — so the 404-before-409 guarantee is held by the pre-storage check, the in-transaction check is a re-check under the lock; (2) reading the installation state before the order lock failed `acceptance-race.spec.ts` "never leaves an order completed beside an installation that is not done: installation create first" (1 failed, 31 passed); (3) writing the acceptance rows without `moveStatus` failed 5 tests, among them "completes a delivered order without an installation", "completes a delivered order whose installation is done", "lets one of two acceptances queued for one order win and moves the order once" (5 failed, 27 passed).
+Review: first code-auditor run PASS_WITH_WARNINGS (one Medium: GET `/delivery/orders/:orderId/acceptance` answered an empty body instead of the JSON `null` the task specifies, and the spec had asserted the empty body). One repair round: the handler now sets `Content-Type: application/json` and returns `(await get()) ?? 'null'`, the spec asserts `res.text === 'null'` and a null `res.body`; the affected acceptance specs (32 tests) passed, the whole Command was run again, and a narrow code-auditor re-review returned PASS (0 critical/high/medium). Low, left as is: a failed follower notice or post-commit read after commit gives a 500 although the order is `completed` (same pattern as the delivery-note receive); the `@Header` placement differs cosmetically from `content()`. The re-review could not confirm with `git diff` that the fix touched only two files, because the acceptance directory was untracked.
+Deviations: implementation delegated to the implementer agent and verified independently by the controller (pre-change run by the controller: the `test -f` check failed, exit 1). Only the resource label `acceptance` was added to both `permission.json` files (one added line each, no existing line touched); `acceptance:read` and `acceptance:create` take the generic action labels, as `delivery_note:read|create` do. `seed-roles.ts` already matched Q7, no seed change. `delivery.module.ts` needed no change. The generated OpenAPI/`api.ts` leave the GET response untyped (`content?: never`), since `AcceptanceView` is an interface: task 12's client must type it as `AcceptanceView | null` by hand. Not verified: no UI walkthrough, and the HTTP chain e2e belongs to task 13.
+Docs impact: none yet (API docs are task-14); openapi.json/.yaml and `api.ts` were regenerated.
