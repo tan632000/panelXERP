@@ -5,6 +5,8 @@
   "defectsMenu": "Lỗi QC",
   "emptyValue": "—",
   "checklistMenu": "Mẫu checklist",
+  "notesMenu": "Phiếu giao hàng",
+  "orderDeliveryMenu": "Giao hàng của đơn",
   "checklist": {
     "title": "Mẫu checklist",
     "description": "Các hạng mục kiểm tra chung cho mọi tủ; mỗi lượt QC sao chép các hạng mục đang hiện",
@@ -36,7 +38,16 @@
     "qcDefectVerified": "Đã xác nhận lỗi được khắc phục",
     "qcDefectConflict": "Lỗi đã thay đổi trạng thái, đã tải lại",
     "photoTooLarge": "Lượt kiểm tra đã ghi nhận, nhưng có ảnh lớn hơn 10 MB nên chưa được tải lên",
-    "photoRejected": "Lượt kiểm tra đã ghi nhận, nhưng có ảnh không tải lên được"
+    "photoRejected": "Lượt kiểm tra đã ghi nhận, nhưng có ảnh không tải lên được",
+    "noteCreated": "Đã lập phiếu giao hàng",
+    "noteShipped": "Đã xuất xưởng phiếu giao hàng",
+    "noteReceived": "Đã ghi nhận khách nhận hàng",
+    "noteCancelled": "Đã huỷ phiếu giao hàng",
+    "noteConflict": "Phiếu đã thay đổi trạng thái, đã tải lại",
+    "noteRejected": "Phiếu giao hàng không hợp lệ, vui lòng kiểm tra lại các thông tin đã nhập",
+    "receiveRejected": "Không ghi nhận được: kiểm tra tên người nhận, ngày nhận và các tệp biên bản",
+    "fileTooLarge": "Có tệp lớn hơn 20 MB",
+    "downloadFailed": "Không tải được tệp"
   },
   "qc": {
     "title": "Kiểm tra QC",
@@ -120,5 +131,100 @@
       "loadError": "Không tải được danh sách lỗi",
       "item": "lỗi"
     }
+  },
+  "note": {
+    "title": "Phiếu giao hàng",
+    "description": "Phiếu giao các tủ đã đạt QC cho khách: lập, xuất xưởng, ghi nhận khách đã nhận",
+    "allStatuses": "Tất cả trạng thái",
+    "statuses": {
+      "draft": "Nháp",
+      "shipped": "Đã xuất xưởng",
+      "received": "Khách đã nhận",
+      "cancelled": "Đã huỷ"
+    },
+    "unitStatuses": {
+      "none": "Chưa lập phiếu",
+      "draft": "Nháp",
+      "shipped": "Đã xuất xưởng",
+      "received": "Khách đã nhận"
+    },
+    "columns": {
+      "code": "Mã phiếu",
+      "order": "Đơn hàng",
+      "customer": "Khách hàng",
+      "unitCount": "Số tủ",
+      "status": "Trạng thái",
+      "receivedDate": "Ngày nhận"
+    },
+    "fields": {
+      "project": "Dự án",
+      "plannedDate": "Ngày giao dự kiến",
+      "address": "Địa chỉ giao hàng",
+      "note": "Ghi chú",
+      "shippedAt": "Xuất xưởng lúc",
+      "cancelReason": "Lý do huỷ"
+    },
+    "none": "Chưa có phiếu giao hàng nào",
+    "noneFound": "Không có phiếu nào khớp bộ lọc",
+    "loadError": "Không tải được danh sách phiếu giao hàng",
+    "item": "phiếu",
+    "create": {
+      "open": "Lập phiếu giao",
+      "title": "Lập phiếu giao hàng",
+      "description": "Chọn đơn hàng và các tủ đã đạt QC để giao",
+      "orderSection": "Đơn hàng",
+      "order": "Đơn hàng",
+      "pickOrder": "Chọn đơn hàng",
+      "noDeliverableOrders": "Chưa có đơn hàng nào có tủ sẵn sàng giao",
+      "units": "Các tủ",
+      "details": "Thông tin giao hàng",
+      "refused": "Không giao được các tủ: {codes}. Tủ phải đạt QC và chưa nằm trên phiếu nào.",
+      "submit": "Lập phiếu"
+    },
+    "detail": {
+      "title": "Phiếu giao hàng",
+      "notFound": "Không tìm thấy phiếu giao hàng",
+      "info": "Thông tin phiếu",
+      "units": "Các tủ trên phiếu",
+      "files": "Biên bản bàn giao"
+    },
+    "actions": {
+      "ship": "Xuất xưởng",
+      "receive": "Khách đã nhận",
+      "cancel": "Huỷ phiếu"
+    },
+    "receive": {
+      "title": "Khách đã nhận hàng",
+      "submit": "Xác nhận đã nhận",
+      "receiverName": "Người nhận",
+      "receivedDate": "Ngày nhận",
+      "files": "Biên bản bàn giao",
+      "fileHint": "PDF, JPG hoặc PNG, 1 đến 5 tệp, mỗi tệp tối đa 20 MB",
+      "problems": {
+        "count": "Tối đa 5 tệp",
+        "type": "Chỉ nhận tệp PDF, JPG hoặc PNG",
+        "size": "Mỗi tệp tối đa 20 MB"
+      }
+    },
+    "cancel": {
+      "title": "Huỷ phiếu {code}",
+      "reason": "Lý do huỷ",
+      "placeholder": "Vì sao huỷ phiếu này",
+      "required": "Vui lòng nhập lý do huỷ",
+      "max": "Tối đa {max} ký tự"
+    }
+  },
+  "orderPage": {
+    "link": "Giao hàng",
+    "title": "Giao hàng của đơn",
+    "description": "Các tủ của đơn hàng, trạng thái QC, trạng thái giao và các phiếu giao hàng",
+    "notFound": "Không tìm thấy đơn hàng",
+    "info": "Thông tin đơn hàng",
+    "status": "Trạng thái đơn",
+    "units": "Các tủ",
+    "noUnits": "Đơn hàng chưa có tủ nào",
+    "notes": "Phiếu giao hàng",
+    "noNotes": "Đơn hàng chưa có phiếu giao hàng nào",
+    "noteUnits": "{count} tủ"
   }
 }

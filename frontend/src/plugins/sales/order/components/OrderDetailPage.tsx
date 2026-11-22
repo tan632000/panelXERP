@@ -23,6 +23,8 @@ import {
 } from "@/kernel/core/lib/formatters";
 import { Link } from "@/kernel/i18n/navigation";
 
+import { deliveryNotePageRoutes } from "@plugins/delivery/delivery-note/constants";
+import { DeliveryNotePermission } from "@plugins/delivery/delivery-note/permissions/delivery-note-permission.keys";
 import { materialPageRoutes } from "@plugins/inventory/material/constants";
 import { MaterialPermission } from "@plugins/inventory/material/permissions/material-permission.keys";
 import { productionOrderPageRoutes } from "@plugins/production/production-order/constants";
@@ -45,6 +47,7 @@ const LINK_CLASS =
 
 export function OrderDetailPage() {
   const t = useTranslations("order");
+  const tDelivery = useTranslations("delivery");
   const orderId = useEntityIdParam();
   const { can } = useAuth();
   const [cancelling, setCancelling] = useState(false);
@@ -108,7 +111,9 @@ export function OrderDetailPage() {
       title={order.code}
       subtitle={order.chain.request.title}
       actions={
-        can(MaterialPermission.read) || can(ProductionOrderPermission.read) ? (
+        can(MaterialPermission.read) ||
+        can(ProductionOrderPermission.read) ||
+        can(DeliveryNotePermission.read) ? (
           <div className="flex flex-wrap items-center gap-2">
             {can(MaterialPermission.read) ? (
               <Link
@@ -126,6 +131,15 @@ export function OrderDetailPage() {
               >
                 <Icon name="building-factory" size={15} />
                 {t("production")}
+              </Link>
+            ) : null}
+            {can(DeliveryNotePermission.read) ? (
+              <Link
+                href={deliveryNotePageRoutes.order(order.id)}
+                className={LINK_CLASS}
+              >
+                <Icon name="truck" size={15} />
+                {tDelivery("orderPage.link")}
               </Link>
             ) : null}
           </div>

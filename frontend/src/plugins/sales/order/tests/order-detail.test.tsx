@@ -11,6 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { NotificationProvider } from "@/kernel/core/contexts/NotificationContext";
 import viCommon from "@/kernel/langs/vi/common.json";
+import viDelivery from "@/kernel/langs/vi/delivery.json";
 import viModal from "@/kernel/langs/vi/modal.json";
 import viOrder from "@/kernel/langs/vi/order.json";
 import viStatus from "@/kernel/langs/vi/status.json";
@@ -127,6 +128,7 @@ function renderPage() {
         messages={{
           common: viCommon,
           modal: viModal,
+          delivery: viDelivery,
           order: viOrder,
           status: viStatus,
         }}
@@ -200,6 +202,23 @@ describe("OrderDetailPage", () => {
     await screen.findByRole("link", { name: viOrder.materials });
     expect(
       screen.queryByRole("link", { name: viOrder.production }),
+    ).not.toBeInTheDocument();
+  });
+
+  it("links to the order's delivery page only for a holder of delivery_note:read", async () => {
+    grant(...EVERYTHING, "delivery_note:read");
+    renderPage();
+    const link = await screen.findByRole("link", {
+      name: viDelivery.orderPage.link,
+    });
+    expect(link).toHaveAttribute("href", "/delivery/orders/4");
+    cleanup();
+
+    grant(...EVERYTHING);
+    renderPage();
+    await screen.findByText("MSB-01");
+    expect(
+      screen.queryByRole("link", { name: viDelivery.orderPage.link }),
     ).not.toBeInTheDocument();
   });
 

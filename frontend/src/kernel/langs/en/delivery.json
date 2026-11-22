@@ -5,6 +5,8 @@
   "defectsMenu": "QC defects",
   "emptyValue": "—",
   "checklistMenu": "Checklist template",
+  "notesMenu": "Delivery notes",
+  "orderDeliveryMenu": "Order delivery",
   "checklist": {
     "title": "Checklist template",
     "description": "The checks shared by every cabinet; each QC round copies the items that are shown",
@@ -36,7 +38,16 @@
     "qcDefectVerified": "Defect verified",
     "qcDefectConflict": "The defect changed state, reloaded",
     "photoTooLarge": "The round is recorded, but a photo over 10 MB was not uploaded",
-    "photoRejected": "The round is recorded, but a photo could not be uploaded"
+    "photoRejected": "The round is recorded, but a photo could not be uploaded",
+    "noteCreated": "Delivery note created",
+    "noteShipped": "Delivery note shipped",
+    "noteReceived": "Customer receipt recorded",
+    "noteCancelled": "Delivery note cancelled",
+    "noteConflict": "The note changed state, reloaded",
+    "noteRejected": "The delivery note is not valid, please check what you entered",
+    "receiveRejected": "Not recorded: check the receiver name, the date and the handover files",
+    "fileTooLarge": "A file is larger than 20 MB",
+    "downloadFailed": "The file could not be downloaded"
   },
   "qc": {
     "title": "QC inspection",
@@ -120,5 +131,100 @@
       "loadError": "Could not load the defects",
       "item": "defects"
     }
+  },
+  "note": {
+    "title": "Delivery notes",
+    "description": "Notes that deliver QC-passed cabinets to the customer: create, ship, record the receipt",
+    "allStatuses": "All statuses",
+    "statuses": {
+      "draft": "Draft",
+      "shipped": "Shipped",
+      "received": "Received by customer",
+      "cancelled": "Cancelled"
+    },
+    "unitStatuses": {
+      "none": "Not on a note",
+      "draft": "Draft",
+      "shipped": "Shipped",
+      "received": "Received by customer"
+    },
+    "columns": {
+      "code": "Note code",
+      "order": "Order",
+      "customer": "Customer",
+      "unitCount": "Cabinets",
+      "status": "Status",
+      "receivedDate": "Received on"
+    },
+    "fields": {
+      "project": "Project",
+      "plannedDate": "Planned date",
+      "address": "Delivery address",
+      "note": "Note",
+      "shippedAt": "Shipped at",
+      "cancelReason": "Cancel reason"
+    },
+    "none": "No delivery note yet",
+    "noneFound": "No note matches the filter",
+    "loadError": "Could not load the delivery notes",
+    "item": "notes",
+    "create": {
+      "open": "New delivery note",
+      "title": "New delivery note",
+      "description": "Pick the order and the QC-passed cabinets to deliver",
+      "orderSection": "Order",
+      "order": "Order",
+      "pickOrder": "Pick an order",
+      "noDeliverableOrders": "No order has cabinets ready to deliver",
+      "units": "Cabinets",
+      "details": "Delivery details",
+      "refused": "These cabinets cannot be delivered: {codes}. A cabinet must have passed QC and be on no note.",
+      "submit": "Create note"
+    },
+    "detail": {
+      "title": "Delivery note",
+      "notFound": "Delivery note not found",
+      "info": "Note details",
+      "units": "Cabinets on the note",
+      "files": "Handover minutes"
+    },
+    "actions": {
+      "ship": "Ship",
+      "receive": "Received by customer",
+      "cancel": "Cancel note"
+    },
+    "receive": {
+      "title": "Customer received the goods",
+      "submit": "Confirm receipt",
+      "receiverName": "Receiver",
+      "receivedDate": "Received on",
+      "files": "Handover minutes",
+      "fileHint": "PDF, JPG or PNG, 1 to 5 files, up to 20 MB each",
+      "problems": {
+        "count": "At most 5 files",
+        "type": "Only PDF, JPG or PNG files",
+        "size": "Each file up to 20 MB"
+      }
+    },
+    "cancel": {
+      "title": "Cancel note {code}",
+      "reason": "Reason",
+      "placeholder": "Why this note is cancelled",
+      "required": "Enter the reason",
+      "max": "At most {max} characters"
+    }
+  },
+  "orderPage": {
+    "link": "Delivery",
+    "title": "Order delivery",
+    "description": "The order's cabinets with their QC and delivery status, and its delivery notes",
+    "notFound": "Order not found",
+    "info": "Order",
+    "status": "Order status",
+    "units": "Cabinets",
+    "noUnits": "The order has no cabinets",
+    "notes": "Delivery notes",
+    "noNotes": "The order has no delivery note yet",
+    "noteUnits": "{count} cabinets"
   }
 }

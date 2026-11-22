@@ -83,6 +83,24 @@ const ORDER_CHANGES: ReadonlyArray<{
     vi: "Đơn hàng SO-0007 vừa được xuất kho theo phiếu PXK-5.",
     en: "Order SO-0007 had stock issued on note PXK-5.",
   },
+  {
+    change: "delivery_received",
+    extra: { deliveryNoteCode: "PGH_2026_0001" },
+    vi: "Đơn hàng SO-0007: khách đã nhận phiếu PGH_2026_0001.",
+    en: "Order SO-0007: the customer received note PGH_2026_0001.",
+  },
+  {
+    change: "delivered",
+    extra: { deliveryNoteCode: "PGH_2026_0002" },
+    vi: "Đơn hàng SO-0007 đã giao đủ (phiếu PGH_2026_0002).",
+    en: "Order SO-0007 is fully delivered (note PGH_2026_0002).",
+  },
+  {
+    change: "completed",
+    extra: {},
+    vi: "Đơn hàng SO-0007 đã nghiệm thu, hoàn thành.",
+    en: "Order SO-0007 was accepted and is complete.",
+  },
 ];
 
 describe("sales order update notices", () => {

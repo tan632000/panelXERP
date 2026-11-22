@@ -379,6 +379,59 @@ describe("notification bell surface", () => {
       }
     });
 
+    it("passes the delivery note code of an order change to the bell, with the empty marker when absent", () => {
+      const payload = { code: "SO-0007", change: "delivery_received" };
+      const received = notification({
+        id: 1,
+        eventType: "sales.order.updated",
+        payload: { ...payload, deliveryNoteCode: "PGH_2026_0001" },
+      });
+      expect(resolveNotificationMessage(received)).toMatchObject({
+        kind: "key",
+        key: "events.sales_order_updated",
+        values: {
+          code: "SO-0007",
+          change: "delivery_received",
+          deliveryNoteCode: "PGH_2026_0001",
+        },
+      });
+      expect(
+        resolveNotificationMessage(
+          notification({ id: 2, eventType: "sales.order.updated", payload }),
+        ),
+      ).toMatchObject({ values: { deliveryNoteCode: "-" } });
+    });
+
+    it("words each new order change differently in both languages", () => {
+      for (const common of [viCommon, enCommon]) {
+        const t = createTranslator({
+          locale: common === viCommon ? "vi" : "en",
+          messages: { common },
+          namespace: "common.notification",
+        });
+        const texts = ["delivery_received", "delivered", "completed"].map(
+          (change) => {
+            const message = resolveNotificationMessage(
+              notification({
+                id: 1,
+                eventType: "sales.order.updated",
+                payload: {
+                  code: "SO-0007",
+                  change,
+                  deliveryNoteCode: "PGH_2026_0001",
+                },
+              }),
+            );
+            if (message.kind !== "key") throw new Error("expected a key");
+            return t(message.key as Parameters<typeof t>[0], message.values);
+          },
+        );
+        expect(new Set(texts).size).toBe(3);
+        expect(texts[0]).toContain("PGH_2026_0001");
+        expect(texts[1]).toContain("PGH_2026_0001");
+      }
+    });
+
     it("phrases both QC round events from the cabinet code, in both languages", () => {
       const payload = { unitCode: "MSB-2", roundNo: 1, defectCount: 2 };
       const expected: Record<string, string> = {

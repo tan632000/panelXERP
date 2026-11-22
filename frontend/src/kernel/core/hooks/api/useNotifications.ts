@@ -1282,6 +1282,7 @@ export function resolveNotificationMessage(
           reason: field(payload.reason),
           productionOrderCode: field(payload.productionOrderCode),
           issueCode: field(payload.issueCode),
+          deliveryNoteCode: field(payload.deliveryNoteCode),
         },
       };
     }
