@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
 import createMiddleware from "next-intl/middleware";
 
-import {
-  getPostLoginFallback,
-  resolveSafeRedirectPath,
-} from "@/kernel/core/auth/redirect-path";
+import { getPostLoginFallback } from "@/kernel/core/auth/redirect-path";
 import { ACCESS_TOKEN_COOKIE } from "@/kernel/core/auth/tokens";
 import { normalizeModulePath } from "@/kernel/core/permissions/route-permissions";
 import { routing } from "@/kernel/i18n/routing";
@@ -34,11 +31,7 @@ function redirectToSalesModule(request: NextRequest): NextResponse {
 }
 
 function redirectAfterLogin(request: NextRequest): NextResponse {
-  const { pathname, searchParams } = request.nextUrl;
-  const targetPath = resolveSafeRedirectPath(
-    searchParams.get("from"),
-    getPostLoginFallback(pathname),
-  );
+  const targetPath = getPostLoginFallback(request.nextUrl.pathname);
   return NextResponse.redirect(new URL(targetPath, request.url));
 }
 
@@ -55,10 +48,7 @@ export default async function middleware(request: NextRequest) {
   }
 
   if (!token) {
-    const loginUrl = new URL("/login", request.url);
-    // Keep the query: a shared list link carries its filters there.
-    loginUrl.searchParams.set("from", `${pathname}${request.nextUrl.search}`);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const normalizedPath = normalizeModulePath(pathname);

@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 import { useAuth } from "@/kernel/core/auth/AuthContext";
-import { resolvePostLoginPath } from "@/kernel/core/auth/redirect-path";
+import { getPostLoginFallback } from "@/kernel/core/auth/redirect-path";
 import { SessionCookieError } from "@/kernel/core/auth/tokens";
 import { Button } from "@/kernel/core/components/ui/Button";
 import { FormField } from "@/kernel/core/components/ui/FormField";
@@ -29,9 +29,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    router.replace(
-      resolvePostLoginPath(window.location.search, window.location.pathname),
-    );
+    router.replace(getPostLoginFallback(window.location.pathname));
   }, [isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {

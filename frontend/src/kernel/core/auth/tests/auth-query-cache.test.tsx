@@ -85,17 +85,38 @@ const click = async (name: string) => {
   });
 };
 
+const assignLocation = vi.fn();
+
 beforeEach(() => {
   vi.clearAllMocks();
   window.localStorage.clear();
+  // jsdom cannot navigate; the stub also records where a sign-out sends the browser.
+  vi.stubGlobal("location", { ...window.location, assign: assignLocation });
+  // clearAllMocks keeps queued once-values: a test that uses fewer would leak the rest.
+  fetchItems.mockReset();
   fetchItems
     .mockResolvedValueOnce("items for the engineer")
     .mockResolvedValueOnce("items for the storekeeper");
 });
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
 
 describe("AuthProvider query cache", () => {
+  it("sends the browser to the login screen with a full navigation on logout", async () => {
+    renderApp();
+    await waitFor(() => expect(screen.getByText("login")).toBeInTheDocument());
+
+    loginAs(ENGINEER);
+    await click("login");
+    await screen.findByText("items for the engineer");
+    await click("logout");
+
+    expect(assignLocation).toHaveBeenCalledWith("/login");
+  });
+
   it("refetches the item query for the next account after a logout and a login", async () => {
     renderApp();
     await waitFor(() => expect(screen.getByText("login")).toBeInTheDocument());

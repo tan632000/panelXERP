@@ -18,7 +18,7 @@ import api, {
   PERMISSIONS_STALE_EVENT,
   SESSION_EXPIRED_EVENT,
 } from "@/kernel/core/api/api";
-import { resolvePostLoginPath } from "@/kernel/core/auth/redirect-path";
+import { getPostLoginFallback } from "@/kernel/core/auth/redirect-path";
 import {
   ACCESS_TOKEN_KEY,
   AUTH_USER_KEY,
@@ -267,9 +267,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // responses, which may carry fields this account is not entitled to.
       queryClient.clear();
       setState(applySession(data));
-      router.replace(
-        resolvePostLoginPath(window.location.search, window.location.pathname),
-      );
+      router.replace(getPostLoginFallback(window.location.pathname));
     },
     [router, queryClient],
   );
@@ -296,8 +294,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearAllListViewState();
     queryClient.clear();
     setState(SIGNED_OUT_STATE);
-    router.push("/login");
-  }, [router, queryClient]);
+    // A full navigation, not router.push: the list the user is leaving rewrites its own URL
+    // through history.replaceState as its filters reset, which swallows a client-side push and
+    // leaves a blank page until a manual reload. It also drops every in-memory trace of the
+    // account.
+    window.location.assign("/login");
+  }, [queryClient]);
 
   const can = useCallback(
     (permission: string) => hasPermission(state.permissions, permission),
