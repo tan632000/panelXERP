@@ -1,6 +1,6 @@
 # Task 08 — Delivery notes in batches and the order becoming `delivered`
 
-Status: pending
+Status: done
 
 ## Outcome
 A storekeeper creates `PGH_YYYY_NNNN` delivery notes from QC-passed, not-yet-delivered cabinets of one order, ships them, records the customer's receipt with the scanned handover minutes, or cancels them; the receipt of the last cabinet moves the order `in_production → delivered` exactly once, releases its reservations and tells the order's followers; production can no longer undo or cancel a cabinet that sits on a delivery note.
@@ -44,3 +44,32 @@ A storekeeper creates `PGH_YYYY_NNNN` delivery notes from QC-passed, not-yet-del
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/delivery/delivery-note/services/delivery-note.service.spec.ts && test -f src/plugins/delivery/delivery-note/services/delivery-note-race.spec.ts && test -f src/plugins/delivery/delivery-note/services/delivery-note-file.service.spec.ts && test -f src/plugins/delivery/delivery-note/delivery-note.controller.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/delivery src/plugins/sales/_shared src/plugins/inventory/material src/plugins/production src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations && npm run test:e2e -- production-chain inventory-chain sales-chain" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+Exit: 0
+Base: 267d343b72b9274cdc12af65c0d38f3c9165e638
+Head: a4fa82a215dd8c1c391b964ddbf2ade286e2b323611570187f6d830b93970f13
+```text
+$ docker compose exec -T backend sh -c "test -f ... && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/delivery ... && npm run validate:migrations && npm run test:e2e -- production-chain inventory-chain sales-chain"
+PASS src/plugins/delivery/delivery-note/services/delivery-note-race.spec.ts (32.166 s)
+PASS src/plugins/delivery/delivery-note/delivery-note.controller.spec.ts (11.337 s)
+PASS src/plugins/delivery/delivery-note/services/delivery-note.service.spec.ts (50.933 s)
+PASS src/plugins/delivery/delivery-note/services/delivery-note-file.service.spec.ts (11.085 s)
+Test Suites: 50 passed, 50 total
+Tests:       470 passed, 470 total
+Migration filename check passed (52 files).
+PASS test/inventory-chain.e2e-spec.ts (33.609 s)
+PASS test/production-chain.e2e-spec.ts (34.425 s)
+PASS test/sales-chain.e2e-spec.ts (53.775 s)
+Test Suites: 3 passed, 3 total
+Tests:       3 passed, 3 total
+$ docker compose run --rm --no-deps -v .../backend:/backend:ro frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+ ✓ src/kernel/langs/tests/permission-labels.test.ts (6 tests)
+ Test Files  1 passed (1)
+FINAL_EXIT=0
+```
+Skipped: none reported in the log. Counterexamples (each run once against a temporary mutation of `delivery-note.service.ts`, reverted afterwards; file SHA-256 `1cc8bf1de2d61952…1bef` identical before and after all three): (1) counting un-received units before the order lock failed `delivery-note-race.spec.ts` "delivers the order exactly once when the receipts of the last two shipped notes race" (1 failed, 4 passed); (2) calling `lifecycle.delivered()` before `moveStatus` failed `delivery-note.service.spec.ts` "releases the delivered order and hands its stock to the short order, closing the notice"; (3) a UTC date bound failed `delivery-note.service.spec.ts` "bounds the received date by the Vietnam date of shipping and by today" (1 failed, 19 passed).
+Review: code-auditor PASS (0 critical/high/medium). Low, left as is: Ownership lists `delivery.module.ts` but wiring is through `delivery.features.ts`; the 1-5 file check is duplicated in the file service and the note service; file validation (400) runs before the visibility 404 and reveals nothing about the note. The auditor did not open the four spec files, the entities, `delivery-note-views.ts` or the generated openapi/api.ts; those are covered by the run above only.
+Deviations: the implementation was delegated to the implementer agent and verified independently by the controller; a first code-auditor run stalled on a permission prompt and was stopped, a second one produced the review. The pre-change run of the Command was not made by the controller (the implementer wrote the code first). A draft note's delivery address cannot be edited after creation (known limitation, not in Scope).
+Docs impact: none yet (API docs are task-14); `backend/docs/api/openapi.*` and `api.ts` were regenerated for the new endpoints.
