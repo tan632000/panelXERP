@@ -1,6 +1,6 @@
 # Task 14 — Docs: flow guide, role matrix, roadmap
 
-Status: pending
+Status: done
 
 ## Outcome
 `docs/permission/role-matrix.md` lists `qcInspector` and every P4 permission row exactly as the seed grants them, and the doc spec now fails if either is missing; `docs/user-flow-guide.md` describes the P4 flow by role with "Dự án" wording; the roadmap P4 row links this packet.
@@ -43,3 +43,25 @@ Status: pending
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "npm run lint && npx jest --ci src/kernel/core/database/seeds/role-matrix-doc.spec.ts" && grep -n "qcInspector" docs/permission/role-matrix.md && grep -n "PGH_" docs/user-flow-guide.md && grep -n "tại dự án" docs/user-flow-guide.md && grep -n "specs/p4-qc-delivery" docs/development-roadmap.md && ! grep -n -i "công trình" docs/user-flow-guide.md
+Exit: 0
+Base: d475a359e3094fdd7d1b0cbc57ccec3829112e35
+Head: b9ddcbd6c9b9f72fac346f447468f87a566c5d5449dbb27349f5e5666325da2e
+```text
+$ docker compose exec -T backend sh -c "npm run lint && npx jest --ci src/kernel/core/database/seeds/role-matrix-doc.spec.ts" && grep -n "qcInspector" docs/permission/role-matrix.md && grep -n "PGH_" docs/user-flow-guide.md && grep -n "tại dự án" docs/user-flow-guide.md && grep -n "specs/p4-qc-delivery" docs/development-roadmap.md && ! grep -n -i "công trình" docs/user-flow-guide.md
+> eslint "{src,apps,libs,test}/**/*.ts" --max-warnings=0
+Test Suites: 1 passed, 1 total
+Tests:       21 passed, 21 total
+docs/permission/role-matrix.md: 28, 41, 48, 167 (qcInspector)
+docs/user-flow-guide.md: 37, 336, 398 (PGH_)
+docs/user-flow-guide.md: 3, 344, 346 (tại dự án)
+docs/development-roadmap.md: 23 (specs/p4-qc-delivery)
+(no "công trình" in docs/user-flow-guide.md)
+FINAL_EXIT=0
+```
+Skipped: none reported in the log. Before the docs were edited, the extended spec failed on the old docs (implementer's run: 16 of 21 tests failed); the controller's pre-change greps also found 0 matches for `qcInspector` and `PGH_`. Counterexamples (each run once against a temporary edit of `docs/permission/role-matrix.md`, reverted afterwards; file SHA-256 `ee391b41c78f6400…` identical before and after): (1) deleting the `delivery_note:create` row failed "role matrix document › has a row for delivery_note:create" (1 failed, 20 passed); (2) deleting the `qcInspector` column failed "has a column for qcInspector" (1 failed, 20 passed); (3) a hand-edited ✅ for `delivery_note:create` under `productionManager` failed "matches holds() over the seeded roles in every cell" (1 failed, 20 passed).
+Review: first code-auditor run PASS_WITH_WARNINGS (one Medium: the guide said the delivery address is editable while a note is a draft and the installation address until it is done, but the UI has no edit step after creation). One repair round: section 6.3 and 6.4 now say the address is edited in the create form or dialog and cannot be edited afterwards, and section 9 lists that as missing; the whole Command was run again and a narrow code-auditor re-review returned PASS (0 critical/high/medium). Low, left as is: `frontend/src/kernel/langs/vi/delivery.json` key `installation.description` still says "tại công trình" (outside Ownership; a one-string follow-up); the guide's "10 hạng mục" checklist figure is the initial seed; section 6.3 names the project address as the prefill without the customer-address fallback that 6.4 mentions. The auditor also spot-checked the guide's button labels, statuses, file limits, date rules, notice wording and role grants against the lang files, services and seed, and found them consistent; the role-matrix section 3 matches the seed cell by cell (checked by the spec).
+Deviations: implementation delegated to the implementer agent and verified independently by the controller. The roadmap P4 row text "lắp đặt công trình" was changed to "lắp đặt tại dự án" (an owned file, beyond the literal task text, to follow the "Dự án" wording). The roadmap row says "Đang làm" and links the packet; "Hoàn thành (GATE-DONE <date>)" is not written and is left to the user's GATE-DONE. Not verified: the guide was not walked against the live UI.
+Docs impact: this task is the docs update itself (role matrix, user flow guide, roadmap row).
