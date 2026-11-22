@@ -6917,6 +6917,98 @@ paths:
       security: *ref_73
       summary: The image of an installation photo
       tags: *ref_74
+  /api/v1/delivery/orders/{orderId}/acceptance:
+    post:
+      description: >-
+        The representative name, the Vietnam signed date and 1 to 10 files (PDF, PNG or JPEG, up to 20 MB each). Once,
+        while the order is delivered and its installation, if any, is done; moves the order to completed.
+      operationId: AcceptanceController_create
+      parameters:
+        - name: orderId
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                representativeName:
+                  type: string
+                signedDate:
+                  type: string
+                  example: '2026-12-20'
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              required:
+                - representativeName
+                - signedDate
+                - files
+      responses:
+        '201':
+          description: The acceptance minutes
+        '400':
+          description: >-
+            Name or date invalid, date out of bounds, file missing, type not allowed, content mismatch, or too many
+            files
+        '403':
+          description: Forbidden — requires acceptance:create
+        '404':
+          description: No such order in the caller’s scope
+        '409':
+          description: The order is not delivered, its installation is not done, or it has minutes already
+        '413':
+          description: File larger than 20 MB
+      security: &ref_75
+        - bearer: []
+      summary: Upload the signed acceptance minutes of a delivered order
+      tags: &ref_76
+        - delivery/acceptance
+    get:
+      description: Answers 200 with null while the order has none.
+      operationId: AcceptanceController_findOne
+      parameters:
+        - name: orderId
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: The minutes, or null
+        '403':
+          description: Forbidden — requires acceptance:read
+        '404':
+          description: No such order in the caller’s scope
+      security: *ref_75
+      summary: The acceptance minutes of an order
+      tags: *ref_76
+  /api/v1/delivery/acceptance-files/{fileId}/content:
+    get:
+      description: Served as an attachment, never inline. Requires access to the order.
+      operationId: AcceptanceController_content
+      parameters:
+        - name: fileId
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: File content
+        '403':
+          description: Forbidden — requires acceptance:read
+        '404':
+          description: File not found, or outside the caller’s scope
+      security: *ref_75
+      summary: Download a file of the acceptance minutes
+      tags: *ref_76
 info:
   title: panelXERP
   description: REST API — ERP Hải Phòng Manufacturing Platform
@@ -7001,7 +7093,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: &ref_75
+          enum: &ref_77
             - sales
             - planning
             - purchasing
@@ -7042,7 +7134,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_75
+          enum: *ref_77
           nullable: true
         title:
           type: object
@@ -7077,7 +7169,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_75
+          enum: *ref_77
           nullable: true
         title:
           type: object
@@ -7512,7 +7604,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: &ref_76
+          enum: &ref_78
             - enclosure
             - breaker
             - contactor
@@ -7562,7 +7654,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: *ref_76
+          enum: *ref_78
         unit:
           type: string
           description: Unit of measure, e.g. pcs, m, set
@@ -7802,7 +7894,7 @@ components:
       properties:
         category:
           type: string
-          enum: &ref_77
+          enum: &ref_79
             - design
             - labor
             - installation
@@ -7824,7 +7916,7 @@ components:
       properties:
         category:
           type: string
-          enum: *ref_77
+          enum: *ref_79
         description:
           type: object
           maxLength: 500
@@ -8066,7 +8158,7 @@ components:
         vatRate:
           type: number
           description: VAT rate in percent
-          enum: &ref_78
+          enum: &ref_80
             - 0
             - 5
             - 8
@@ -8105,7 +8197,7 @@ components:
         vatRate:
           type: number
           description: VAT rate in percent; 10 when left out
-          enum: *ref_78
+          enum: *ref_80
         lines:
           type: array
           items:
@@ -8125,7 +8217,7 @@ components:
           nullable: true
         vatRate:
           type: number
-          enum: *ref_78
+          enum: *ref_80
         note:
           type: object
           maxLength: 2000

@@ -1,0 +1,1 @@
+export const REPRESENTATIVE_NAME_MAX = 255;

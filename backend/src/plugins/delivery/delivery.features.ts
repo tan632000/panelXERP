@@ -1,3 +1,5 @@
+import { AcceptanceModule } from '@plugins/delivery/acceptance/acceptance.module';
+import { acceptancePermissions } from '@plugins/delivery/acceptance/permissions/acceptance.permissions';
 import { DeliveryNoteModule } from '@plugins/delivery/delivery-note/delivery-note.module';
 import { deliveryNotePermissions } from '@plugins/delivery/delivery-note/permissions/delivery-note.permissions';
 import { InstallationModule } from '@plugins/delivery/installation/installation.module';
@@ -41,10 +43,18 @@ export const INSTALLATION_FEATURE: ErpFeature = {
   permissions: installationPermissions,
 };
 
+export const ACCEPTANCE_FEATURE: ErpFeature = {
+  key: 'acceptance',
+  plugin: 'delivery',
+  module: AcceptanceModule,
+  permissions: acceptancePermissions,
+};
+
 /** Delivery feature catalog — a feature left out of ENABLED_FEATURES loses its routes and migrations. */
 export const DELIVERY_FEATURES: ErpFeature[] = [
   QC_CHECKLIST_FEATURE,
   QC_INSPECTION_FEATURE,
   DELIVERY_NOTE_FEATURE,
   INSTALLATION_FEATURE,
+  ACCEPTANCE_FEATURE,
 ];

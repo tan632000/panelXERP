@@ -15,6 +15,7 @@
     "reports": "Reports"
   },
   "resources": {
+    "acceptance": "Acceptance minutes",
     "assembly": "Assembly",
     "business_report": "Business report",
     "calibration_equipment": "Calibration equipment registration",

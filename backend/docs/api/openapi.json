@@ -11324,6 +11324,152 @@
           "delivery/installation"
         ]
       }
+    },
+    "/api/v1/delivery/orders/{orderId}/acceptance": {
+      "post": {
+        "description": "The representative name, the Vietnam signed date and 1 to 10 files (PDF, PNG or JPEG, up to 20 MB each). Once, while the order is delivered and its installation, if any, is done; moves the order to completed.",
+        "operationId": "AcceptanceController_create",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "representativeName": {
+                    "type": "string"
+                  },
+                  "signedDate": {
+                    "type": "string",
+                    "example": "2026-12-20"
+                  },
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                },
+                "required": [
+                  "representativeName",
+                  "signedDate",
+                  "files"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The acceptance minutes"
+          },
+          "400": {
+            "description": "Name or date invalid, date out of bounds, file missing, type not allowed, content mismatch, or too many files"
+          },
+          "403": {
+            "description": "Forbidden — requires acceptance:create"
+          },
+          "404": {
+            "description": "No such order in the caller’s scope"
+          },
+          "409": {
+            "description": "The order is not delivered, its installation is not done, or it has minutes already"
+          },
+          "413": {
+            "description": "File larger than 20 MB"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Upload the signed acceptance minutes of a delivered order",
+        "tags": [
+          "delivery/acceptance"
+        ]
+      },
+      "get": {
+        "description": "Answers 200 with null while the order has none.",
+        "operationId": "AcceptanceController_findOne",
+        "parameters": [
+          {
+            "name": "orderId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The minutes, or null"
+          },
+          "403": {
+            "description": "Forbidden — requires acceptance:read"
+          },
+          "404": {
+            "description": "No such order in the caller’s scope"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The acceptance minutes of an order",
+        "tags": [
+          "delivery/acceptance"
+        ]
+      }
+    },
+    "/api/v1/delivery/acceptance-files/{fileId}/content": {
+      "get": {
+        "description": "Served as an attachment, never inline. Requires access to the order.",
+        "operationId": "AcceptanceController_content",
+        "parameters": [
+          {
+            "name": "fileId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File content"
+          },
+          "403": {
+            "description": "Forbidden — requires acceptance:read"
+          },
+          "404": {
+            "description": "File not found, or outside the caller’s scope"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Download a file of the acceptance minutes",
+        "tags": [
+          "delivery/acceptance"
+        ]
+      }
     }
   },
   "info": {

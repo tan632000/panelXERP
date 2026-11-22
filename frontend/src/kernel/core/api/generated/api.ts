@@ -3675,6 +3675,50 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/delivery/orders/{orderId}/acceptance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The acceptance minutes of an order
+         * @description Answers 200 with null while the order has none.
+         */
+        get: operations["AcceptanceController_findOne"];
+        put?: never;
+        /**
+         * Upload the signed acceptance minutes of a delivered order
+         * @description The representative name, the Vietnam signed date and 1 to 10 files (PDF, PNG or JPEG, up to 20 MB each). Once, while the order is delivered and its installation, if any, is done; moves the order to completed.
+         */
+        post: operations["AcceptanceController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/delivery/acceptance-files/{fileId}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Download a file of the acceptance minutes
+         * @description Served as an attachment, never inline. Requires access to the order.
+         */
+        get: operations["AcceptanceController_content"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -13090,6 +13134,138 @@ export interface operations {
                 content?: never;
             };
             /** @description Photo not found, or outside the caller’s scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AcceptanceController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The minutes, or null */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires acceptance:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such order in the caller’s scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AcceptanceController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                orderId: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    representativeName: string;
+                    /** @example 2026-12-20 */
+                    signedDate: string;
+                    files: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description The acceptance minutes */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Name or date invalid, date out of bounds, file missing, type not allowed, content mismatch, or too many files */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires acceptance:create */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such order in the caller’s scope */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The order is not delivered, its installation is not done, or it has minutes already */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File larger than 20 MB */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    AcceptanceController_content: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                fileId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description File content */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden — requires acceptance:read */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File not found, or outside the caller’s scope */
             404: {
                 headers: {
                     [name: string]: unknown;
