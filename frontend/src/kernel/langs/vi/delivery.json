@@ -7,6 +7,7 @@
   "checklistMenu": "Mẫu checklist",
   "notesMenu": "Phiếu giao hàng",
   "orderDeliveryMenu": "Giao hàng của đơn",
+  "installationMenu": "Lắp đặt",
   "checklist": {
     "title": "Mẫu checklist",
     "description": "Các hạng mục kiểm tra chung cho mọi tủ; mỗi lượt QC sao chép các hạng mục đang hiện",
@@ -47,7 +48,18 @@
     "noteRejected": "Phiếu giao hàng không hợp lệ, vui lòng kiểm tra lại các thông tin đã nhập",
     "receiveRejected": "Không ghi nhận được: kiểm tra tên người nhận, ngày nhận và các tệp biên bản",
     "fileTooLarge": "Có tệp lớn hơn 20 MB",
-    "downloadFailed": "Không tải được tệp"
+    "downloadFailed": "Không tải được tệp",
+    "installationCreated": "Đã tạo lắp đặt",
+    "installationStarted": "Đã bắt đầu lắp đặt",
+    "installationFinished": "Đã hoàn tất lắp đặt",
+    "installationPhotoUploaded": "Đã tải ảnh lắp đặt lên",
+    "installationPhotoTooLarge": "Ảnh lớn hơn 10 MB",
+    "installationPhotoRejected": "Không tải ảnh lên được: chỉ nhận ảnh PNG hoặc JPEG hợp lệ, tối đa 30 ảnh",
+    "installationConflict": "Lắp đặt hoặc đơn hàng đã thay đổi trạng thái, đã tải lại",
+    "installationRejected": "Lắp đặt không hợp lệ, vui lòng kiểm tra lại các thông tin đã nhập",
+    "acceptanceCreated": "Đã tải biên bản nghiệm thu, đơn hàng hoàn thành",
+    "acceptanceConflict": "Chưa nghiệm thu được: đơn chưa giao xong, lắp đặt chưa hoàn tất hoặc đã có biên bản",
+    "acceptanceRejected": "Không ghi nhận được: kiểm tra người đại diện, ngày ký và các tệp biên bản"
   },
   "qc": {
     "title": "Kiểm tra QC",
@@ -226,5 +238,73 @@
     "notes": "Phiếu giao hàng",
     "noNotes": "Đơn hàng chưa có phiếu giao hàng nào",
     "noteUnits": "{count} tủ"
+  },
+  "installation": {
+    "title": "Lắp đặt tại dự án",
+    "description": "Lắp đặt các tủ của đơn hàng tại công trình: lên kế hoạch, bắt đầu, hoàn tất và chụp ảnh",
+    "allStatuses": "Tất cả trạng thái",
+    "statuses": {
+      "planned": "Đã lên kế hoạch",
+      "in_progress": "Đang lắp đặt",
+      "done": "Đã hoàn tất"
+    },
+    "fields": {
+      "status": "Trạng thái",
+      "siteAddress": "Địa chỉ dự án",
+      "plannedDate": "Ngày dự kiến",
+      "personInCharge": "Người phụ trách",
+      "note": "Ghi chú"
+    },
+    "none": "Đơn hàng chưa có lắp đặt",
+    "noneListed": "Chưa có lắp đặt nào",
+    "noneFound": "Không có lắp đặt nào khớp bộ lọc",
+    "loadError": "Không tải được danh sách lắp đặt",
+    "item": "lắp đặt",
+    "create": {
+      "open": "Tạo lắp đặt",
+      "title": "Tạo lắp đặt",
+      "submit": "Tạo"
+    },
+    "actions": {
+      "start": "Bắt đầu lắp đặt",
+      "finish": "Hoàn tất lắp đặt"
+    },
+    "photos": {
+      "choose": "Thêm ảnh",
+      "hint": "PNG hoặc JPEG, tối đa 10 MB, tối đa 30 ảnh",
+      "empty": "Chưa có ảnh lắp đặt nào",
+      "full": "Đã đủ {count} ảnh",
+      "problems": {
+        "type": "Chỉ nhận ảnh PNG hoặc JPEG",
+        "size": "Ảnh tối đa 10 MB",
+        "empty": "Tệp ảnh trống"
+      }
+    }
+  },
+  "acceptance": {
+    "title": "Biên bản nghiệm thu",
+    "none": "Đơn hàng chưa có biên bản nghiệm thu",
+    "fields": {
+      "representativeName": "Người đại diện",
+      "signedDate": "Ngày ký"
+    },
+    "hints": {
+      "notDelivered": "Chỉ tải biên bản nghiệm thu khi đơn hàng đã giao xong.",
+      "installationNotDone": "Chỉ tải biên bản nghiệm thu khi lắp đặt đã hoàn tất."
+    },
+    "upload": {
+      "open": "Tải biên bản nghiệm thu",
+      "title": "Tải biên bản nghiệm thu",
+      "submit": "Tải lên",
+      "representativeName": "Người đại diện",
+      "signedDate": "Ngày ký",
+      "files": "Biên bản nghiệm thu",
+      "fileHint": "PDF, JPG hoặc PNG, 1 đến 10 tệp, mỗi tệp tối đa 20 MB",
+      "problems": {
+        "count": "Tối đa 10 tệp",
+        "type": "Chỉ nhận tệp PDF, JPG hoặc PNG",
+        "size": "Mỗi tệp tối đa 20 MB"
+      }
+    }
   }
 }

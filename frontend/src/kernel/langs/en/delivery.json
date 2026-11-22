@@ -7,6 +7,7 @@
   "checklistMenu": "Checklist template",
   "notesMenu": "Delivery notes",
   "orderDeliveryMenu": "Order delivery",
+  "installationMenu": "Installation",
   "checklist": {
     "title": "Checklist template",
     "description": "The checks shared by every cabinet; each QC round copies the items that are shown",
@@ -47,7 +48,18 @@
     "noteRejected": "The delivery note is not valid, please check what you entered",
     "receiveRejected": "Not recorded: check the receiver name, the date and the handover files",
     "fileTooLarge": "A file is larger than 20 MB",
-    "downloadFailed": "The file could not be downloaded"
+    "downloadFailed": "The file could not be downloaded",
+    "installationCreated": "Installation created",
+    "installationStarted": "Installation started",
+    "installationFinished": "Installation finished",
+    "installationPhotoUploaded": "Installation photo uploaded",
+    "installationPhotoTooLarge": "The photo is larger than 10 MB",
+    "installationPhotoRejected": "The photo could not be uploaded: only valid PNG or JPEG images, up to 30 photos",
+    "installationConflict": "The installation or the order changed status, reloaded",
+    "installationRejected": "The installation is not valid, please check the entered details",
+    "acceptanceCreated": "Acceptance minutes uploaded, the order is completed",
+    "acceptanceConflict": "Cannot accept yet: the order is not delivered, its installation is not done, or it already has minutes",
+    "acceptanceRejected": "Could not be recorded: check the representative, the signed date and the files"
   },
   "qc": {
     "title": "QC inspection",
@@ -226,5 +238,73 @@
     "notes": "Delivery notes",
     "noNotes": "The order has no delivery note yet",
     "noteUnits": "{count} cabinets"
+  },
+  "installation": {
+    "title": "Installation at the project",
+    "description": "Installing the order's cabinets on site: plan, start, finish and photograph",
+    "allStatuses": "All statuses",
+    "statuses": {
+      "planned": "Planned",
+      "in_progress": "In progress",
+      "done": "Done"
+    },
+    "fields": {
+      "status": "Status",
+      "siteAddress": "Project address",
+      "plannedDate": "Planned date",
+      "personInCharge": "Person in charge",
+      "note": "Note"
+    },
+    "none": "The order has no installation yet",
+    "noneListed": "No installation yet",
+    "noneFound": "No installation matches the filter",
+    "loadError": "Could not load the installations",
+    "item": "installation",
+    "create": {
+      "open": "Create installation",
+      "title": "Create installation",
+      "submit": "Create"
+    },
+    "actions": {
+      "start": "Start installation",
+      "finish": "Finish installation"
+    },
+    "photos": {
+      "choose": "Add photo",
+      "hint": "PNG or JPEG, up to 10 MB, up to 30 photos",
+      "empty": "No installation photo yet",
+      "full": "All {count} photos are used",
+      "problems": {
+        "type": "Only PNG or JPEG images are accepted",
+        "size": "A photo is at most 10 MB",
+        "empty": "The photo file is empty"
+      }
+    }
+  },
+  "acceptance": {
+    "title": "Acceptance minutes",
+    "none": "The order has no acceptance minutes yet",
+    "fields": {
+      "representativeName": "Representative",
+      "signedDate": "Signed date"
+    },
+    "hints": {
+      "notDelivered": "Acceptance minutes can only be uploaded once the order is delivered.",
+      "installationNotDone": "Acceptance minutes can only be uploaded once the installation is done."
+    },
+    "upload": {
+      "open": "Upload acceptance minutes",
+      "title": "Upload acceptance minutes",
+      "submit": "Upload",
+      "representativeName": "Representative",
+      "signedDate": "Signed date",
+      "files": "Acceptance minutes",
+      "fileHint": "PDF, JPG or PNG, 1 to 10 files, each up to 20 MB",
+      "problems": {
+        "count": "At most 10 files",
+        "type": "Only PDF, JPG or PNG files are accepted",
+        "size": "Each file is at most 20 MB"
+      }
+    }
   }
 }
