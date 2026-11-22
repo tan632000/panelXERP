@@ -1,8 +1,8 @@
 # Hướng dẫn luồng thao tác trên giao diện panelXERP
 
-Tài liệu này đi theo đúng đường đi của một đơn hàng tủ điện qua hệ thống: từ lúc khách hỏi giá đến lúc xưởng làm xong tủ. Mỗi bước ghi rõ ai làm, vào màn hình nào, bấm nút gì và hệ thống tự làm gì sau đó.
+Tài liệu này đi theo đúng đường đi của một đơn hàng tủ điện qua hệ thống: từ lúc khách hỏi giá đến lúc nghiệm thu tại dự án. Mỗi bước ghi rõ ai làm, vào màn hình nào, bấm nút gì và hệ thống tự làm gì sau đó.
 
-Phạm vi: các giai đoạn đã hoàn thành P1 (bán hàng), P2 (mua hàng và kho) và P3 (sản xuất). QC, giao hàng, kế toán và báo cáo (P4–P6) chưa làm.
+Phạm vi: các giai đoạn đã làm P1 (bán hàng), P2 (mua hàng và kho), P3 (sản xuất) và P4 (QC và giao hàng). Kế toán và báo cáo (P5–P6) chưa làm.
 
 ---
 
@@ -17,8 +17,10 @@ Phạm vi: các giai đoạn đã hoàn thành P1 (bán hàng), P2 (mua hàng v�
                                                            │                  (Mua hàng)      (Mua hàng)    (GĐ)     (Thủ kho)
                                                            └─► Lệnh sản xuất ─► Phát hành ─► 6 công đoạn / tủ ─► Hoàn thành
                                                                (QL sản xuất)                 (Kỹ thuật viên)
-                                                                          ▲
-                                                           Xuất kho cho xưởng (Thủ kho)
+                                                                          ▲                          │
+                                                           Xuất kho cho xưởng (Thủ kho)              ▼
+                                                           QC từng tủ ─► Phiếu giao từng đợt ─► Lắp đặt ─► Nghiệm thu ─► Đơn Hoàn thành
+                                                            (QC, QL SX)     (Thủ kho)          (Thủ kho)   (Sales)
 ```
 
 | Bước | Chứng từ | Mã | Người làm chính |
@@ -31,6 +33,9 @@ Phạm vi: các giai đoạn đã hoàn thành P1 (bán hàng), P2 (mua hàng v�
 | 6 | Đề nghị mua → Đơn mua → Phiếu nhập | `PR_…`, `PO_…`, `NK_…` | Mua hàng, Giám đốc, Thủ kho |
 | 7 | Phiếu xuất kho / nhập trả | `XK_…`, `NT_…` | Thủ kho |
 | 8 | Lệnh sản xuất, tủ | `LSX_2026_0001`, `MSB-01-1` | QL sản xuất, Kỹ thuật viên |
+| 9 | Kiểm tra QC theo tủ | (không có mã riêng; theo mã tủ) | QC, QL sản xuất |
+| 10 | Phiếu giao hàng | `PGH_2026_0001` | Thủ kho |
+| 11 | Lắp đặt, Biên bản nghiệm thu | (một lần mỗi đơn) | Thủ kho, Sales phụ trách |
 
 Mã chứng từ dạng `XX_YYYY_NNNN` được đánh số lại từ `0001` mỗi năm. Riêng mã báo giá đánh số theo ngày.
 
@@ -54,6 +59,7 @@ Môi trường dev và demo có sẵn các tài khoản dưới đây (đều �
 | Thủ kho (storekeeper) | `storekeeper` | Vật tư, kho (không thấy giá mua) |
 | QL sản xuất (productionManager) | `production_manager` / `production.manager@…` | Vật tư, sản xuất (không thấy giá) |
 | Kỹ thuật viên (technician) | `technician_a`, `technician_b` | Chỉ các tủ được giao |
+| QC (qcInspector) | `qc_a` / `qc.a@…` | Tủ chờ QC, checklist (không thấy giá) |
 
 Mở một bản ghi nằm ngoài phạm vi của mình sẽ thấy trang "không tìm thấy" (404). Đó là cố ý: hệ thống không tiết lộ rằng bản ghi đó có tồn tại.
 
@@ -61,7 +67,7 @@ Mở một bản ghi nằm ngoài phạm vi của mình sẽ thấy trang "khôn
 
 - **Đăng nhập** tại `/login`. Ô "Tên đăng nhập / Email" nhận cả hai dạng. Phiên làm việc kéo dài 8 giờ. Quên mật khẩu thì dùng link "Quên mật khẩu?".
 - **Trang chủ** không có dashboard. Sau khi đăng nhập, hệ thống tự chuyển tới màn hình đầu tiên trên sidebar mà bạn có quyền.
-- **Sidebar** chia nhóm theo thứ tự: Khách hàng → Danh mục → Bán hàng → Mua hàng & Kho → Sản xuất. Mục nào bạn không có quyền xem sẽ bị ẩn. Có ô "Tìm chức năng…" và nút ghim mục hay dùng.
+- **Sidebar** chia nhóm theo thứ tự: Khách hàng → Danh mục → Bán hàng → Mua hàng & Kho → Sản xuất → QC & Giao hàng. Mục nào bạn không có quyền xem sẽ bị ẩn. Có ô "Tìm chức năng…" và nút ghim mục hay dùng.
 - **Menu tài khoản** (avatar góc trên): Hồ Sơ, Ngôn Ngữ, Đăng Xuất. Admin thấy thêm "Quản lý người dùng" và "Phân quyền".
 - **Chuông thông báo** trên header: bấm một dòng để mở đúng chứng từ. Thông báo không tự cập nhật theo thời gian thực; số đếm mới sẽ hiện khi bạn quay lại tab hoặc tải lại trang.
 
@@ -164,8 +170,9 @@ Muốn sửa một báo giá đã gửi duyệt, đã duyệt hay bị từ ch�
 4. Trang đơn hàng có hai nút dẫn sang các khâu sau:
    - **"Vật tư"**: mở màn hình Vật tư đơn hàng (mục 4.1).
    - **"Sản xuất"**: mở danh sách lệnh sản xuất của đơn (mục 5).
+   - **"Giao hàng"** (người có quyền xem phiếu giao): mở trang giao hàng của đơn (mục 6).
 
-Trạng thái đơn: **Đang mở** → **Đang sản xuất** (khi lệnh sản xuất được phát hành) → *Đã giao / Hoàn thành* (chưa có luồng, thuộc P4).
+Trạng thái đơn: **Đang mở** → **Đang sản xuất** (khi lệnh sản xuất được phát hành) → **Đã giao** (khi khách đã nhận hết các tủ của lệnh, mục 6.3) → **Hoàn thành** (khi có biên bản nghiệm thu, mục 6.5).
 
 **"Hủy đơn hàng"** chỉ dùng được khi đơn Đang mở; cần lý do; chỉ Trưởng phòng KD, Giám đốc và admin. Nếu đơn còn lệnh sản xuất chưa huỷ, phải huỷ lệnh đó trước. Huỷ đơn sẽ trả lại vật tư đã giữ và chuyển yêu cầu sang **Thất bại**.
 
@@ -229,7 +236,7 @@ Phiếu nhập không sửa được. Nếu nhập sai hoặc hàng lỗi, dùng
    - Vật tư không có trong BOM của tủ sẽ nằm ở dòng "Ngoài BOM".
    - Xuất vượt BOM thì phải nhập "Lý do vượt BOM".
    - Hệ thống chỉ lấy hàng đã giữ cho chính đơn này, không lấy sang phần đã giữ cho đơn khác.
-3. Xưởng trả lại vật tư thừa: **"Nhập trả từ xưởng"** (phiếu `NT_…`). Không được trả nhiều hơn số xưởng đang giữ.
+3. Xưởng trả lại vật tư thừa: **"Nhập trả từ xưởng"** (phiếu `NT_…`). Không được trả nhiều hơn số xưởng đang giữ. Nhập trả vẫn làm được khi đơn đã **Đã giao** hoặc **Hoàn thành**; xuất kho cho các đơn đó thì không.
 
 ### 4.6 Tồn kho và kiểm kê
 
@@ -279,7 +286,7 @@ Thao tác với từng công đoạn:
 - **"Hoàn thành"**: Đang làm → Đã xong.
 - **"Hoàn tác"** (chỉ QL sản xuất và admin, cần lý do): đưa công đoạn đã xong gần nhất về Đang làm, khi công đoạn sau còn chưa bắt đầu.
 
-Mọi thao tác chỉ làm được khi lệnh **Đã phát hành**. Khi tủ cuối cùng xong "Hoàn thiện/đóng gói", lệnh tự chuyển **Hoàn thành**; QL sản xuất và sales phụ trách nhận thông báo. Đơn hàng vẫn ở **Đang sản xuất** cho tới khi có luồng giao hàng (P4).
+Mọi thao tác chỉ làm được khi lệnh **Đã phát hành**. Khi tủ cuối cùng xong "Hoàn thiện/đóng gói", lệnh tự chuyển **Hoàn thành**; QL sản xuất và sales phụ trách nhận thông báo. Đơn hàng vẫn ở **Đang sản xuất** cho tới khi khách nhận hết các tủ (mục 6.3).
 
 ### 5.3 Ảnh và sự cố (trên trang tủ)
 
@@ -299,7 +306,64 @@ Mở một tủ (`/production/units/…`):
 
 ---
 
-## 6. Quản trị hệ thống (Admin)
+## 6. QC và giao hàng
+
+Sidebar nhóm **QC & Giao hàng** gồm: Kiểm tra QC, Lỗi QC, Mẫu checklist, Phiếu giao hàng, Lắp đặt (mục nào bạn không có quyền sẽ bị ẩn). Tài khoản QC đăng nhập sẽ vào thẳng "Kiểm tra QC". Không màn hình nào ở nhóm này cần quyền xem đơn hàng, và không màn hình nào hiện giá.
+
+### 6.1 Mẫu checklist (QL sản xuất)
+
+**QC & Giao hàng › Mẫu checklist** là một danh sách hạng mục kiểm tra chung cho mọi tủ; hệ thống có sẵn 10 hạng mục (vỏ tủ và sơn, siết lực đầu cốt, đấu dây, đo cách điện, nối đất, thử không tải, thử chức năng, tem nhãn, tài liệu kèm theo…).
+
+- QL sản xuất **thêm** hạng mục, **đổi tên**, **ẩn / hiện** và **chuyển lên / xuống**. Không xoá được.
+- Mỗi lượt QC sao chép các hạng mục đang hiện tại thời điểm ghi nhận, nên sửa mẫu không làm đổi các lượt đã ghi.
+- QC chỉ xem được mẫu.
+
+### 6.2 Kiểm tra QC theo tủ và xử lý lỗi (QC, QL sản xuất)
+
+1. **QC & Giao hàng › Kiểm tra QC** liệt kê các tủ có bộ lọc theo trạng thái QC: **Chờ QC** (đã xong công đoạn "Hoàn thiện/đóng gói"), **Không đạt**, **Đạt**, **Chưa sẵn sàng** (chưa xong công đoạn cuối). Mở một tủ.
+2. Ở "Kiểm tra lần mới", chọn kết quả từng hạng mục: **Đạt**, **Không đạt** hoặc **Không áp dụng**. Hạng mục không đạt bắt buộc có ghi chú. Có thể thêm ảnh (PNG hoặc JPEG, tối đa 10 MB mỗi ảnh, 30 ảnh mỗi lượt). Bấm **"Ghi nhận lượt kiểm tra"**. Chỉ làm được khi lệnh sản xuất của tủ đang **Đã phát hành** hoặc đã **Hoàn thành**.
+3. Kết quả:
+   - Không có hạng mục nào không đạt: tủ **Đạt**; Thủ kho nhận thông báo "Tủ … đạt QC, sẵn sàng giao".
+   - Có hạng mục không đạt: tủ **Không đạt**, mỗi hạng mục không đạt mở một lỗi; QL sản xuất nhận thông báo "Tủ … không đạt QC".
+4. Xử lý lỗi ở **QC & Giao hàng › Lỗi QC**: QL sản xuất bấm **"Đã khắc phục"** và nhập nội dung khắc phục (lỗi sang **Chờ xác nhận**); sau đó QC hoặc QL sản xuất bấm **"Xác nhận"** (lỗi sang **Đã xác nhận**). Người xác nhận phải khác người đã bấm "Đã khắc phục".
+5. Khi tủ còn lỗi chưa được xác nhận thì không ghi nhận được lượt mới; khi mọi lỗi đã xác nhận, QC kiểm tra lại (lần 2, 3…). Tủ đã Đạt thì không kiểm tra lại.
+
+Đã có lượt QC trên tủ thì không hoàn tác công đoạn cuối của tủ đó, và không huỷ được lệnh sản xuất có tủ đã có lượt QC. Lượt QC đã ghi không sửa được.
+
+### 6.3 Phiếu giao hàng từng đợt (Thủ kho)
+
+1. **QC & Giao hàng › Phiếu giao hàng** → **"Lập phiếu giao"**: chọn đơn hàng (chỉ đơn **Đang sản xuất** có tủ sẵn sàng giao), tick các tủ đã **Đạt** QC và chưa nằm trên phiếu nào; có thể nhập Ngày giao dự kiến, Địa chỉ giao hàng (lấy sẵn từ địa chỉ dự án của đơn, sửa ngay trong form lập phiếu; sau khi lập phiếu không sửa được địa chỉ) và Ghi chú. Tủ không hợp lệ bị từ chối kèm mã tủ.
+2. Kết quả: phiếu `PGH_…` (ví dụ `PGH_2026_0001`) ở trạng thái **Nháp**. Một đơn có thể có nhiều phiếu, mỗi phiếu giao một đợt. Phiếu nháp không sửa danh sách tủ: muốn đổi thì huỷ rồi lập lại.
+3. **"Xuất xưởng"**: Nháp → **Đã xuất xưởng**.
+4. **"Khách đã nhận"**: nhập Người nhận, Ngày nhận (không sau hôm nay, không trước ngày xuất xưởng) và tải 1 đến 5 biên bản bàn giao (PDF, JPG hoặc PNG, tối đa 20 MB mỗi tệp) → **"Xác nhận đã nhận"**. Phiếu sang **Khách đã nhận**.
+5. **"Huỷ phiếu"** (cần lý do): dùng được khi Nháp hoặc Đã xuất xưởng; các tủ trên phiếu được giải phóng ngay để lập phiếu khác. Phiếu đã nhận không huỷ hay mở lại được.
+6. Khi khách đã nhận hết các tủ của đơn, đơn tự chuyển **Đã giao** (đúng một lần), vật tư còn giữ cho đơn được trả về kho. Mỗi lần khách nhận, người theo dõi đơn nhận thông báo "khách đã nhận phiếu …" hoặc "đã giao đủ".
+
+Phiếu giao không có giá và không làm thay đổi tồn kho. Tủ nằm trên phiếu chưa huỷ thì không hoàn tác công đoạn cuối và không huỷ được lệnh sản xuất của tủ đó.
+
+### 6.4 Lắp đặt tại dự án (Thủ kho)
+
+Mở trang giao hàng của đơn (nút **"Giao hàng"** trên trang đơn); mục Lắp đặt tại dự án:
+
+1. **"Tạo lắp đặt"** khi đơn **Đang sản xuất** hoặc **Đã giao**. Mỗi đơn chỉ có một lắp đặt. Địa chỉ dự án lấy sẵn từ dự án của đơn (hoặc địa chỉ khách), sửa ngay trong hộp thoại Tạo lắp đặt (sau khi tạo, màn hình chưa có chỗ sửa); có thể nhập Ngày dự kiến, Người phụ trách, Ghi chú.
+2. **"Bắt đầu lắp đặt"**: Đã lên kế hoạch → **Đang lắp đặt**; **"Hoàn tất lắp đặt"**: → **Đã hoàn tất**. Chỉ đi tiến, không huỷ được.
+3. Tải ảnh lắp đặt (PNG hoặc JPEG, tối đa 10 MB, 30 ảnh). Ảnh không xoá được.
+
+QL sản xuất, Sales và Trưởng phòng KD xem được lắp đặt nhưng không sửa.
+
+### 6.5 Biên bản nghiệm thu (Sales phụ trách)
+
+Trên trang giao hàng của đơn, mục Biên bản nghiệm thu:
+
+1. Chỉ tải được khi đơn đã **Đã giao** và lắp đặt (nếu có) đã **Đã hoàn tất**; nếu chưa, màn hình nói rõ lý do.
+2. **"Tải biên bản nghiệm thu"**: nhập Người đại diện, Ngày ký (không sau hôm nay, không trước ngày khách nhận gần nhất), tải 1 đến 10 tệp (PDF, JPG hoặc PNG, tối đa 20 MB) → **"Tải lên"**.
+3. Kết quả: đơn tự chuyển **Hoàn thành**; người theo dõi đơn nhận thông báo "đã nghiệm thu, hoàn thành". Mỗi đơn chỉ có một biên bản.
+
+Sales chỉ nghiệm thu được đơn của mình; Trưởng phòng KD và Giám đốc nghiệm thu được mọi đơn. Thủ kho chỉ xem biên bản.
+
+---
+
+## 7. Quản trị hệ thống (Admin)
 
 Vào từ menu tài khoản ở góc trên.
 
@@ -309,7 +373,7 @@ Vào từ menu tài khoản ở góc trên.
 
 ---
 
-## 7. Kịch bản chạy thử đầu-cuối
+## 8. Kịch bản chạy thử đầu-cuối
 
 Dùng kịch bản này để demo hoặc kiểm thử một vòng đầy đủ. Mỗi bước ghi tài khoản cần dùng.
 
@@ -328,12 +392,18 @@ Dùng kịch bản này để demo hoặc kiểm thử một vòng đầy đủ.
 | 11 | `storekeeper` | Xuất kho cho từng tủ | Cột Đã xuất tăng |
 | 12 | `technician_a` | Tủ của tôi → làm lần lượt 6 công đoạn, tải ảnh, báo một sự cố | Tiến độ 6/6 |
 | 13 | `production_manager` | Giải quyết sự cố; khi tủ cuối xong | Lệnh Hoàn thành; lịch sử đầy đủ |
+| 14 | `qc_a` | Kiểm tra QC từng tủ; cho một hạng mục "Không đạt" kèm ghi chú | Tủ Không đạt; QL sản xuất có thông báo; lỗi mở |
+| 15 | `production_manager` | Lỗi QC → "Đã khắc phục" | Lỗi Chờ xác nhận |
+| 16 | `qc_a` | "Xác nhận" lỗi, kiểm tra lại tủ, tất cả Đạt | Tủ Đạt; Thủ kho có thông báo |
+| 17 | `storekeeper` | Lập phiếu giao cho tủ thứ nhất → "Xuất xưởng" → "Khách đã nhận" (kèm biên bản); lập phiếu thứ hai cho tủ còn lại và nhận tương tự | Phiếu `PGH_2026_0001`, `PGH_2026_0002`; sau phiếu cuối đơn **Đã giao** |
+| 18 | `storekeeper` | Trang giao hàng của đơn → tạo lắp đặt, bắt đầu, hoàn tất | Lắp đặt Đã hoàn tất |
+| 19 | `sales_a` | Trang giao hàng của đơn → "Tải biên bản nghiệm thu" | Đơn **Hoàn thành** |
 
 ---
 
-## 8. Những gì chưa có
+## 9. Những gì chưa có
 
-- **P4 – QC và giao hàng:** checklist xuất xưởng, phiếu giao từng đợt, nghiệm thu. Vì vậy đơn hàng chưa thể chuyển sang Đã giao / Hoàn thành.
+- **P4 – QC và giao hàng:** chưa in PDF phiếu giao hay báo cáo QC, chưa có chữ ký điện tử của khách, chưa trừ kho thành phẩm, chưa có chi phí giao hàng; không xoá được ảnh hay tệp đã tải, không huỷ được lắp đặt và biên bản nghiệm thu, không sửa được lượt QC đã ghi; không sửa được địa chỉ của phiếu giao và của lắp đặt sau khi lập.
 - **P5 – Kế toán** và **P6 – Báo cáo/KPI**; hoá đơn điện tử.
 - Duyệt đề nghị mua; nhiều kho / chuyển kho; lô và serial; gửi PO qua email.
 - Công đoạn sản xuất cấu hình được; lệnh sản xuất từng phần; xoá ảnh tủ.

@@ -11,6 +11,21 @@ const REQUIRED_ROWS = [
   'estimate:price',
   'reference_price:read',
   'purchase_price:read',
+  'qc_checklist:read',
+  'qc_checklist:manage',
+  'qc_inspection:read',
+  'qc_inspection:create',
+  'qc_inspection:fix',
+  'qc_inspection:verify',
+  'delivery_note:read',
+  'delivery_note:create',
+  'delivery_note:ship',
+  'delivery_note:receive',
+  'delivery_note:cancel',
+  'installation:read',
+  'installation:manage',
+  'acceptance:read',
+  'acceptance:create',
 ];
 
 /** Backend root: `/app` in the container, `<repo>/backend` on the host. */
@@ -89,6 +104,10 @@ describe('role matrix document', () => {
     expect(roles.length).toBeGreaterThan(0);
     const unseeded = roles.filter((role) => !seededRolePermissions(role));
     expect(unseeded).toEqual([]);
+  });
+
+  it('has a column for qcInspector', () => {
+    expect(roles).toContain('qcInspector');
   });
 
   it.each(REQUIRED_ROWS)('has a row for %s', (scope) => {
