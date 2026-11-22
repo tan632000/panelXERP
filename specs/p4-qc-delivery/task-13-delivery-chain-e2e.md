@@ -1,6 +1,6 @@
 # Task 13 — QC and delivery chain e2e over HTTP
 
-Status: pending
+Status: done
 
 ## Outcome
 The P4 chain runs end to end over HTTP on the compose Postgres, as each role, from a converted order to a `completed` order.
@@ -38,3 +38,23 @@ The P4 chain runs end to end over HTTP on the compose Postgres, as each role, fr
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f test/delivery-chain.e2e-spec.ts && npm run migration:run && npm run seed && npm run test:e2e -- delivery-chain production-chain inventory-chain sales-chain"
+Exit: 0
+Base: 55f6825254fb736d232a13342017f9407f65cc21
+Head: ff82bf5e27c74a23f4675f46bcd882f35766fb776ca33c6e0ef01e837c81e274
+```text
+$ docker compose exec -T backend sh -c "test -f test/delivery-chain.e2e-spec.ts && npm run migration:run && npm run seed && npm run test:e2e -- delivery-chain production-chain inventory-chain sales-chain"
+PASS test/sales-chain.e2e-spec.ts (34.5 s)
+PASS test/production-chain.e2e-spec.ts (36.857 s)
+PASS test/inventory-chain.e2e-spec.ts (44.32 s)
+PASS test/delivery-chain.e2e-spec.ts (48.001 s)
+Test Suites: 4 passed, 4 total
+Tests:       4 passed, 4 total
+FINAL_EXIT=0
+```
+Skipped: none reported in the log. Extra checks outside the Command: `npm run typecheck && npm run lint` in the backend container exited 0; after the run, `delivery_notes`, `installations`, `acceptances` and `qc_rounds` held 0 rows in Postgres (the spec cleans its P4 rows and stored S3 objects). Counterexamples (each run once against a temporary mutation of product code, reverted afterwards; SHA-256 of `delivery-note.service.ts` `1cc8bf1de2d61952…` and `acceptance.service.ts` `ef6355599a33c835…` identical before and after): (1) the order becoming `delivered` after the first of two receipts (`Number(remaining) <= 1` instead of `=== 0`) failed `delivery-chain.e2e-spec.ts:860` (expected `in_production`, received `delivered`); (2) acceptance accepted while the installation is `in_progress` (installation-done check disabled) failed `delivery-chain.e2e-spec.ts:945` (the 409 expected from the acceptance).
+Review: code-auditor PASS (0 critical/high/medium). Low, left as is: acceptance is refused only while the installation is `in_progress`, not while it is `planned`; the Q1/Q2 vetoes assert only the 409 status and the production order staying `released`, with no check that the finishing stage of MSB-1 is still done; one negative notice assertion (before the first receipt's `delivered` notice) reads once without a wait; the "unit already on a note" 400 is tested only against a received note; `installPhotoId` could be a `const`; the e2e does not check that the refused acceptance stored no object (covered by the acceptance unit specs).
+Deviations from the Scope chain: before delivery the storekeeper is issued 1 of the 2 units of stock (so that "reservations > 0, then 0 once delivered" and the Q9 workshop return to the `delivered` order have a real precondition); the final read matrix asserts 403 for productionManager and qcInspector on the acceptance read, which is the planned grant (plan D-02 and `seed-roles.ts`), not a test bent to the seed; follower notices are read by productionManager and sales_a (sales manager for `completed`), not by the storekeeper. The three existing e2e specs needed no change (P4 rows did not block their cleanup). Pre-change run by the controller: the `test -f` check failed (exit 1). The implementer reported `tsc --noEmit` errors in other spec files; `npm run typecheck` (the project script) and lint are clean, so that was a different invocation and is not pursued. Not verified: no browser walkthrough (out of scope for this task, done at GATE-DONE).
+Docs impact: none yet (docs are task-14).
