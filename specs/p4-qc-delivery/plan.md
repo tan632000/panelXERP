@@ -85,7 +85,7 @@ Strictly sequential (shared registration files, one writer each, as P2/P3).
 | 07 | Sales/inventory deltas | P1 | AC-08, AC-16 | sales `_shared`, inventory reservation/shortage/returnable | 06 | done |
 | 08 | Delivery notes + order `delivered` | P1 | AC-05, AC-06, AC-07, AC-08, AC-11, AC-12 | `backend/src/plugins/delivery/delivery-note` | 07 | done |
 | 09 | Delivery note screens + order entry | P1 | AC-13 | `frontend/src/plugins/delivery/delivery-note`, `OrderDetailPage.tsx`, `common.json` | 08 | done |
-| 10 | Installation backend | P1 | AC-09, AC-11, AC-12 | `backend/src/plugins/delivery/installation` | 09 | pending |
+| 10 | Installation backend | P1 | AC-09, AC-11, AC-12 | `backend/src/plugins/delivery/installation` | 09 | done |
 | 11 | Acceptance backend + order `completed` | P1 | AC-10, AC-11, AC-12 | `backend/src/plugins/delivery/acceptance` | 10 | pending |
 | 12 | Installation + acceptance screens | P1 | AC-13 | `frontend/src/plugins/delivery/{installation,acceptance}` | 11 | pending |
 | 13 | Chain e2e | P1 | AC-11, AC-14 | `backend/test/delivery-chain.e2e-spec.ts` | 12 | pending |

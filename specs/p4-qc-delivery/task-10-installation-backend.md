@@ -1,6 +1,6 @@
 # Task 10 — Installation at the project site
 
-Status: pending
+Status: done
 
 ## Outcome
 A storekeeper records at most one installation per order (address prefilled from the project, planned date, person in charge, notes, photos) and moves it `planned → in_progress → done` while the order is in production or delivered; sales and managers read it within their scope.
@@ -40,3 +40,26 @@ A storekeeper records at most one installation per order (address prefilled from
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "test -f src/plugins/delivery/installation/services/installation.service.spec.ts && test -f src/plugins/delivery/installation/services/installation-photo.service.spec.ts && test -f src/plugins/delivery/installation/installation.controller.spec.ts && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/delivery src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations" && MSYS_NO_PATHCONV=1 docker compose run --rm --no-deps -v "$(pwd -W)/backend:/backend:ro" frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+Exit: 0
+Base: 5afcb85629b59dd620dc8e0e3e6287158c335ac4
+Head: a9be09a6b4f609a4163859ae93378a6513eb7984d6fb735181afab013e42d65f
+```text
+$ docker compose exec -T backend sh -c "test -f ...installation.service.spec.ts && ... && npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/plugins/delivery src/kernel/core/database/seeds src/kernel/core/database/soft-delete-unique-index.spec.ts && npm run validate:migrations"
+PASS src/plugins/delivery/installation/services/installation-photo.service.spec.ts (20.519 s)
+PASS src/plugins/delivery/installation/services/installation.service.spec.ts (21.345 s)
+PASS src/plugins/delivery/installation/installation.controller.spec.ts (31.573 s)
+Test Suites: 23 passed, 23 total
+Tests:       219 passed, 219 total
+Migration filename check passed (53 files).
+$ docker compose run --rm --no-deps -v .../backend:/backend:ro frontend npx vitest run src/kernel/langs/tests/permission-labels.test.ts
+ ✓ src/kernel/langs/tests/permission-labels.test.ts (6 tests)
+ Test Files  1 passed (1)
+FINAL_EXIT=0
+```
+Skipped: none reported in the log. Counterexample (run once against a temporary mutation of `installation-access.service.ts`, reverted afterwards; SHA-256 `29ab42d8e6570c9a…` identical before and after): removing the order-status re-check from `lockForWrite`, so the status is checked only at create, failed 4 of 35 installation tests: "refuses start / finish / patch on an installation whose order was cancelled meanwhile" and "refuses a photo for an installation whose order was cancelled, leaving no object".
+Review: code-auditor PASS (0 critical/high/medium). Low, left as is: `plannedDate: ''` is a 400 and only `null` clears the planned date (the task does not require clearing it); photo file validation (400/413) runs before the 404 visibility check, as in the delivery-note photo service; an empty PATCH still bumps `updated_at`; the empty `siteAddress` fallback to the prefill has no explicit test. One Low was fixed before the final run: the implementer's edit had removed the space after the colon of `iqc_commercial_goods:approve` in `frontend/src/kernel/langs/vi/permission.json`; restored, so that file now differs only by the two new installation keys.
+Deviations: implementation delegated to the implementer agent and verified independently by the controller (pre-change run by the controller: the `test -f` check failed, exit 1, because the spec files did not exist). Photo uploads also take the order-status check (409 after the object is stored, then deleted; R-02 visibility still runs first), because AC-09 says "refuse any write while the order is not `in_production|delivered`" while the task text names only start, finish and PATCH; a photo on a `done` installation is allowed when the order is writable (the task does not forbid it). `soft-delete-unique-index.spec.ts` needed no change (`uq_installations_order` is partial on `is_deleted = false`). `delivery.module.ts` needed no change (it spreads the feature list). Not verified: the full Nest app was not booted; runtime DI of `InstallationModule` is covered through the spec harness and the migration run only.
+Docs impact: none yet (API docs are task-14); openapi.json/.yaml and `api.ts` were regenerated.
