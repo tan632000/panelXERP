@@ -255,6 +255,8 @@
     "delivery_note:issue": "Scan QR and complete the stock-out",
     "delivery_note:price:read": "View prices and invoice",
     "delivery_note:price:write": "Edit prices, invoice and exchange rate",
+    "delivery_note:receive": "Record the customer receipt with the handover minutes",
+    "delivery_note:ship": "Ship a delivery note",
     "delivery_note:write": "Create, edit, request edits, draft invoice",
     "finished_product_receipt_ng:approve": "Approve post-stocktake adjustments",
     "finished_product_receipt_ok:approve": "Approve post-stocktake adjustments",

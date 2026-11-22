@@ -6411,6 +6411,271 @@ paths:
       security: *ref_65
       summary: The image of a QC photo
       tags: *ref_66
+  /api/v1/delivery/orders/deliverable:
+    get:
+      description: In-production orders in the caller’s scope with at least one QC-passed cabinet on no live delivery note.
+      operationId: DeliveryNoteController_listDeliverableOrders
+      parameters: []
+      responses:
+        '200':
+          description: Order code, customer and project
+        '403':
+          description: Forbidden — requires delivery_note:create
+      security: &ref_67
+        - bearer: []
+      summary: Orders with cabinets ready to deliver
+      tags: &ref_68
+        - delivery/delivery-note
+  /api/v1/delivery/orders/{orderId}:
+    get:
+      description: Cabinets with their QC and delivery status, the delivery notes, and the prefilled address.
+      operationId: DeliveryNoteController_getOrder
+      parameters:
+        - name: orderId
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: The order’s cabinets and notes
+        '403':
+          description: Forbidden — requires delivery_note:read
+        '404':
+          description: No such order in the caller’s scope
+      security: *ref_67
+      summary: One order’s delivery page
+      tags: *ref_68
+  /api/v1/delivery/notes:
+    get:
+      operationId: DeliveryNoteController_list
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: Page number
+          schema:
+            default: 1
+            type: number
+        - name: limit
+          required: false
+          in: query
+          description: Items per page
+          schema:
+            default: 25
+            type: number
+        - name: search
+          required: false
+          in: query
+          description: Search keyword
+          schema:
+            type: string
+        - name: searchClassifications
+          required: false
+          in: query
+          description: Enum values whose translated label matched the keyword
+          schema:
+            type: array
+            items:
+              type: string
+        - name: columnFilters
+          required: false
+          in: query
+          description: JSON map of column key to selected values, e.g. {"classification":["mechanical"]}
+          schema:
+            type: string
+        - name: status
+          required: false
+          in: query
+          schema:
+            type: string
+            enum:
+              - draft
+              - shipped
+              - received
+              - cancelled
+        - name: orderId
+          required: false
+          in: query
+          description: Only the notes of this sales order
+          schema:
+            type: number
+      responses:
+        '200':
+          description: A page of delivery notes
+        '403':
+          description: Forbidden — requires delivery_note:read
+      security: *ref_67
+      summary: List delivery notes
+      tags: *ref_68
+    post:
+      description: PGH_YYYY_NNNN from QC-passed cabinets of one in-production order that are on no live note.
+      operationId: DeliveryNoteController_create
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDeliveryNoteDto'
+      responses:
+        '201':
+          description: The delivery note, as a draft
+        '400':
+          description: A cabinet is not of the order, not QC-passed, or on a note
+        '403':
+          description: Forbidden — requires delivery_note:create
+        '404':
+          description: No such order in the caller’s scope
+        '409':
+          description: The order is not in production
+      security: *ref_67
+      summary: Create a delivery note
+      tags: *ref_68
+  /api/v1/delivery/notes/{id}:
+    get:
+      operationId: DeliveryNoteController_findOne
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: The delivery note
+        '404':
+          description: No such delivery note in the caller’s scope
+      security: *ref_67
+      summary: One delivery note with its cabinets and files
+      tags: *ref_68
+  /api/v1/delivery/notes/{id}/ship:
+    post:
+      operationId: DeliveryNoteController_ship
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: The shipped delivery note
+        '403':
+          description: Forbidden — requires delivery_note:ship
+        '404':
+          description: No such delivery note in the caller’s scope
+        '409':
+          description: The note is not a draft
+      security: *ref_67
+      summary: Ship a draft delivery note
+      tags: *ref_68
+  /api/v1/delivery/notes/{id}/cancel:
+    post:
+      description: Frees its cabinets for another note at once.
+      operationId: DeliveryNoteController_cancel
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelDeliveryNoteDto'
+      responses:
+        '200':
+          description: The cancelled delivery note
+        '403':
+          description: Forbidden — requires delivery_note:cancel
+        '404':
+          description: No such delivery note in the caller’s scope
+        '409':
+          description: The note is received or cancelled
+      security: *ref_67
+      summary: Cancel a draft or shipped delivery note
+      tags: *ref_68
+  /api/v1/delivery/notes/{id}/receive:
+    post:
+      description: >-
+        The receiver name, the Vietnam date of receipt and 1 to 5 handover files (PDF, PNG or JPEG, up to 20 MB each).
+        The receipt that leaves no cabinet of the order un-received moves the order to delivered.
+      operationId: DeliveryNoteFileController_receive
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                receiverName:
+                  type: string
+                receivedDate:
+                  type: string
+                  example: '2026-12-02'
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+              required:
+                - receiverName
+                - receivedDate
+                - files
+      responses:
+        '200':
+          description: The received delivery note
+        '400':
+          description: >-
+            Name or date invalid, date out of bounds, file missing, type not allowed, content mismatch, or too many
+            files
+        '403':
+          description: Forbidden — requires delivery_note:receive
+        '404':
+          description: No such delivery note in the caller’s scope
+        '409':
+          description: The note is not shipped
+        '413':
+          description: File larger than 20 MB
+      security: &ref_69
+        - bearer: []
+      summary: Record the customer receipt of a shipped delivery note
+      tags: &ref_70
+        - delivery/delivery-note
+  /api/v1/delivery/notes/{id}/files/{fileId}/content:
+    get:
+      description: Served as an attachment, never inline. Requires access to the note’s order.
+      operationId: DeliveryNoteFileController_content
+      parameters:
+        - name: id
+          required: true
+          in: path
+          schema:
+            type: number
+        - name: fileId
+          required: true
+          in: path
+          schema:
+            type: number
+      responses:
+        '200':
+          description: File content
+        '403':
+          description: Forbidden — requires delivery_note:read
+        '404':
+          description: Note or file not found, or outside the caller’s scope
+      security: *ref_69
+      summary: Download a handover file of a delivery note
+      tags: *ref_70
 info:
   title: panelXERP
   description: REST API — ERP Hải Phòng Manufacturing Platform
@@ -6495,7 +6760,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: &ref_67
+          enum: &ref_71
             - sales
             - planning
             - purchasing
@@ -6536,7 +6801,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_67
+          enum: *ref_71
           nullable: true
         title:
           type: object
@@ -6571,7 +6836,7 @@ components:
           nullable: true
         department:
           type: string
-          enum: *ref_67
+          enum: *ref_71
           nullable: true
         title:
           type: object
@@ -7006,7 +7271,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: &ref_68
+          enum: &ref_72
             - enclosure
             - breaker
             - contactor
@@ -7056,7 +7321,7 @@ components:
         group:
           type: string
           description: Item group
-          enum: *ref_68
+          enum: *ref_72
         unit:
           type: string
           description: Unit of measure, e.g. pcs, m, set
@@ -7296,7 +7561,7 @@ components:
       properties:
         category:
           type: string
-          enum: &ref_69
+          enum: &ref_73
             - design
             - labor
             - installation
@@ -7318,7 +7583,7 @@ components:
       properties:
         category:
           type: string
-          enum: *ref_69
+          enum: *ref_73
         description:
           type: object
           maxLength: 500
@@ -7560,7 +7825,7 @@ components:
         vatRate:
           type: number
           description: VAT rate in percent
-          enum: &ref_70
+          enum: &ref_74
             - 0
             - 5
             - 8
@@ -7599,7 +7864,7 @@ components:
         vatRate:
           type: number
           description: VAT rate in percent; 10 when left out
-          enum: *ref_70
+          enum: *ref_74
         lines:
           type: array
           items:
@@ -7619,7 +7884,7 @@ components:
           nullable: true
         vatRate:
           type: number
-          enum: *ref_70
+          enum: *ref_74
         note:
           type: object
           maxLength: 2000
@@ -8018,3 +8283,35 @@ components:
           description: What was done
       required:
         - note
+    CreateDeliveryNoteDto:
+      type: object
+      properties:
+        orderId:
+          type: number
+          description: The in_production order the cabinets belong to
+        unitIds:
+          description: QC-passed cabinets of the order that are on no live note
+          type: array
+          items:
+            type: number
+        plannedDate:
+          type: string
+          example: '2026-12-01'
+        deliveryAddress:
+          type: string
+          maxLength: 500
+          description: Defaults to the project site address, else the customer address
+        note:
+          type: string
+          maxLength: 1000
+      required:
+        - orderId
+        - unitIds
+    CancelDeliveryNoteDto:
+      type: object
+      properties:
+        reason:
+          type: string
+          maxLength: 1000
+      required:
+        - reason

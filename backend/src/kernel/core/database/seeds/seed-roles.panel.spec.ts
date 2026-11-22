@@ -31,7 +31,6 @@ const PANEL_ROLES = [
  * is empty once its feature is built; until then `seedRoles` stores none of these scopes.
  */
 const PENDING_MODULES: Readonly<Record<string, string>> = {
-  delivery_note: 'delivery plugin, delivery-note feature',
   installation: 'delivery plugin, installation feature',
   acceptance: 'delivery plugin, acceptance feature',
 };

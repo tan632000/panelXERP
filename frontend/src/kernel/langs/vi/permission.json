@@ -255,6 +255,8 @@
     "delivery_note:issue": "Quét QR và hoàn tất xuất kho giao hàng",
     "delivery_note:price:read": "Xem giá và hoá đơn",
     "delivery_note:price:write": "Sửa giá, hoá đơn và tỷ giá",
+    "delivery_note:receive": "Ghi nhận khách đã nhận hàng kèm biên bản bàn giao",
+    "delivery_note:ship": "Xuất phiếu giao hàng đi giao",
     "delivery_note:write": "Thêm mới, sửa, gửi yêu cầu sửa, xuất hoá đơn tạm",
     "finished_product_receipt_ng:approve": "Duyệt điều chỉnh tồn kho sau kiểm kê",
     "finished_product_receipt_ok:approve": "Duyệt điều chỉnh tồn kho sau kiểm kê",

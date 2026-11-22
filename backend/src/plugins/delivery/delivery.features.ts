@@ -1,3 +1,5 @@
+import { DeliveryNoteModule } from '@plugins/delivery/delivery-note/delivery-note.module';
+import { deliveryNotePermissions } from '@plugins/delivery/delivery-note/permissions/delivery-note.permissions';
 import { qcChecklistPermissions } from '@plugins/delivery/qc-checklist/permissions/qc-checklist.permissions';
 import { QcChecklistModule } from '@plugins/delivery/qc-checklist/qc-checklist.module';
 import { qcInspectionPermissions } from '@plugins/delivery/qc-inspection/permissions/qc-inspection.permissions';
@@ -23,8 +25,16 @@ export const QC_INSPECTION_FEATURE: ErpFeature = {
   permissions: qcInspectionPermissions,
 };
 
+export const DELIVERY_NOTE_FEATURE: ErpFeature = {
+  key: 'delivery-note',
+  plugin: 'delivery',
+  module: DeliveryNoteModule,
+  permissions: deliveryNotePermissions,
+};
+
 /** Delivery feature catalog — a feature left out of ENABLED_FEATURES loses its routes and migrations. */
 export const DELIVERY_FEATURES: ErpFeature[] = [
   QC_CHECKLIST_FEATURE,
   QC_INSPECTION_FEATURE,
+  DELIVERY_NOTE_FEATURE,
 ];
