@@ -7,6 +7,7 @@ plans/*
 !plans/templates/
 !plans/templates/**
 .cafekit-backup/
+.localstack-backup/
 .cafekit.lock
 .claude/
 .codex/
