@@ -22,6 +22,7 @@ const catalog = [
 ];
 
 const row = (over: Record<string, unknown> = {}) => ({
+  panel: 1,
   where: 'Tủ chính',
   text: 'MCCB 100A',
   code: 'MCCB-100',
@@ -36,12 +37,12 @@ const panel = (over: Record<string, unknown> = {}) => ({
   description: 'Tủ tổng',
   quantity: 1,
   aiNote: '',
-  rows: [row()],
   ...over,
 });
 const output = (over: Record<string, unknown> = {}) => ({
   requirementsSummary: 'Tủ điện 1 tủ',
   panels: [panel()],
+  rows: [row()],
   ...over,
 });
 
@@ -73,15 +74,11 @@ describe('extractEstimateDraft — normalisation', () => {
   it('groups the rows of one item into a single line and sums their quantities itself', async () => {
     const { draft } = await extract(
       output({
-        panels: [
-          panel({
-            rows: [
-              row({ where: 'quạt hút', quantity: 1, note: '' }),
-              row({ where: 'van xoay', quantity: 4, note: '' }),
-              row({ where: 'bơm nước', quantity: 2, note: '' }),
-              row({ itemId: 2, quantity: 5, note: '' }),
-            ],
-          }),
+        rows: [
+          row({ where: 'quạt hút', quantity: 1, note: '' }),
+          row({ where: 'van xoay', quantity: 4, note: '' }),
+          row({ where: 'bơm nước', quantity: 2, note: '' }),
+          row({ itemId: 2, quantity: 5, note: '' }),
         ],
       }),
     );
@@ -99,52 +96,110 @@ describe('extractEstimateDraft — normalisation', () => {
         note: 'ghi chú dài '.repeat(5),
       }),
     );
-    const { draft } = await extract(output({ panels: [panel({ rows })] }));
+    const { draft } = await extract(output({ rows }));
     expect(draft.panels[0].lines[0].quantity).toBe(30);
     expect(draft.panels[0].lines[0].note.startsWith('Cộng 30 từ:')).toBe(true);
   });
 
   it('trusts the least sure row for the confidence of the whole line', async () => {
     const { draft } = await extract(
-      output({
-        panels: [
-          panel({
-            rows: [row({ confidence: 0.95 }), row({ confidence: 0.6 })],
-          }),
-        ],
-      }),
+      output({ rows: [row({ confidence: 0.95 }), row({ confidence: 0.6 })] }),
     );
     expect(draft.panels[0].lines[0].confidence).toBe(0.6);
   });
 
   it('keeps decimal sums exact to 3 places', async () => {
     const { draft } = await extract(
+      output({ rows: [row({ quantity: 0.1 }), row({ quantity: 0.2 })] }),
+    );
+    expect(draft.panels[0].lines[0].quantity).toBe(0.3);
+  });
+
+  it('puts every row under the panel it points at, however the rows are ordered', async () => {
+    const { draft } = await extract(
       output({
-        panels: [
-          panel({ rows: [row({ quantity: 0.1 }), row({ quantity: 0.2 })] }),
+        panels: [panel(), panel({ tag: 'ATS-01' })],
+        rows: [
+          row({ panel: 2, quantity: 4, note: '' }),
+          row({ panel: 1, quantity: 1, note: '' }),
+          row({ panel: 2, itemId: 2, quantity: 3, note: '' }),
+          row({ panel: 1, quantity: 1, note: '' }),
         ],
       }),
     );
-    expect(draft.panels[0].lines[0].quantity).toBe(0.3);
+    expect(
+      draft.panels.map((p) => [
+        p.tag,
+        p.lines.map((l) => [l.itemId, l.quantity]),
+      ]),
+    ).toEqual([
+      ['MSB-01', [[1, 2]]],
+      [
+        'ATS-01',
+        [
+          [1, 4],
+          [2, 3],
+        ],
+      ],
+    ]);
+  });
+
+  it('does not copy a row into a second panel', async () => {
+    const { draft } = await extract(
+      output({
+        panels: [panel(), panel({ tag: 'ATS-01' })],
+        rows: [row({ panel: 1, quantity: 3 }), row({ panel: 2, quantity: 5 })],
+      }),
+    );
+    expect(draft.panels.map((p) => p.lines[0].quantity)).toEqual([3, 5]);
+  });
+
+  it('sends a row that points at no panel to unmatched, and lets a lone panel skip the pointer', async () => {
+    const { draft } = await extract(
+      output({
+        panels: [panel(), panel({ tag: 'ATS-01' })],
+        rows: [row(), row({ panel: 9, text: 'Cáp lạ' }), row({ panel: 0 })],
+      }),
+    );
+    expect(draft.panels[0].lines).toHaveLength(1);
+    expect(draft.unmatched.map((u) => u.reason)).toEqual([
+      'Dòng không thuộc tủ nào trong danh sách tủ.',
+      'Dòng không thuộc tủ nào trong danh sách tủ.',
+      'Không đọc được dòng vật tư nào của tủ này.',
+    ]);
+
+    const lone = await extract(
+      output({ rows: [{ ...row(), panel: undefined }] }),
+    );
+    expect(lone.draft.panels[0].lines).toHaveLength(1);
+  });
+
+  it('names a panel nothing was read for in unmatched instead of dropping it silently', async () => {
+    const { draft } = await extract(
+      output({ panels: [panel(), panel({ tag: 'TĐT 3' })], rows: [row()] }),
+    );
+    expect(draft.panels.map((p) => p.tag)).toEqual(['MSB-01']);
+    expect(draft.unmatched).toEqual([
+      {
+        description: 'Tủ TĐT 3',
+        reason: 'Không đọc được dòng vật tư nào của tủ này.',
+      },
+    ]);
   });
 
   it('sends a row without a match to unmatched with its text, code, quantity and reason', async () => {
     const { draft } = await extract(
       output({
-        panels: [
-          panel({
-            rows: [
-              row(),
-              row({
-                itemId: null,
-                text: 'Biến tần 30/37 kW',
-                code: 'ACE',
-                quantity: 1,
-                note: 'Khác hãng với danh mục',
-              }),
-              row({ itemId: null, text: 'Nhân công', code: '', note: '' }),
-            ],
+        rows: [
+          row(),
+          row({
+            itemId: null,
+            text: 'Biến tần 30/37 kW',
+            code: 'ACE',
+            quantity: 1,
+            note: 'Khác hãng với danh mục',
           }),
+          row({ itemId: null, text: 'Nhân công', code: '', note: '' }),
         ],
       }),
     );
@@ -166,10 +221,8 @@ describe('extractEstimateDraft — normalisation', () => {
   it('keeps the unmatched rows of a panel that ends up with no line', async () => {
     const { draft } = await extract(
       output({
-        panels: [
-          panel(),
-          panel({ tag: 'X', rows: [row({ itemId: null, text: 'Cáp lạ' })] }),
-        ],
+        panels: [panel(), panel({ tag: 'X' })],
+        rows: [row(), row({ panel: 2, itemId: null, text: 'Cáp lạ' })],
       }),
     );
     expect(draft.panels.map((p) => p.tag)).toEqual(['MSB-01']);
@@ -180,7 +233,7 @@ describe('extractEstimateDraft — normalisation', () => {
 
   it('drops a row whose itemId is not in the catalog and records a note', async () => {
     const { draft } = await extract(
-      output({ panels: [panel({ rows: [row(), row({ itemId: 999 })] })] }),
+      output({ rows: [row(), row({ itemId: 999 })] }),
     );
     expect(draft.panels[0].lines).toHaveLength(1);
     expect(draft.panels[0].aiNote).toContain('999');
@@ -190,9 +243,7 @@ describe('extractEstimateDraft — normalisation', () => {
     'drops a matched row with quantity %p',
     async (q) => {
       const { draft } = await extract(
-        output({
-          panels: [panel({ rows: [row(), row({ itemId: 2, quantity: q })] })],
-        }),
+        output({ rows: [row(), row({ itemId: 2, quantity: q })] }),
       );
       expect(draft.panels[0].lines).toHaveLength(1);
       expect(draft.panels[0].aiNote).not.toBe('');
@@ -202,14 +253,10 @@ describe('extractEstimateDraft — normalisation', () => {
   it('drops a line whose summed quantity is above the limit', async () => {
     const { draft } = await extract(
       output({
-        panels: [
-          panel({
-            rows: [
-              row(),
-              row({ itemId: 2, quantity: 600_000 }),
-              row({ itemId: 2, quantity: 600_000 }),
-            ],
-          }),
+        rows: [
+          row(),
+          row({ itemId: 2, quantity: 600_000 }),
+          row({ itemId: 2, quantity: 600_000 }),
         ],
       }),
     );
@@ -225,7 +272,10 @@ describe('extractEstimateDraft — normalisation', () => {
 
   it('suffixes a duplicate tag case-insensitively', async () => {
     const { draft } = await extract(
-      output({ panels: [panel(), panel({ tag: 'msb-01' })] }),
+      output({
+        panels: [panel(), panel({ tag: 'msb-01' })],
+        rows: [row(), row({ panel: 2 })],
+      }),
     );
     expect(draft.panels.map((p) => p.tag)).toEqual(['MSB-01', 'msb-01-2']);
   });
@@ -233,7 +283,8 @@ describe('extractEstimateDraft — normalisation', () => {
   it('drops a panel left with no line', async () => {
     const { draft } = await extract(
       output({
-        panels: [panel(), panel({ tag: 'X', rows: [row({ itemId: 999 })] })],
+        panels: [panel(), panel({ tag: 'X' })],
+        rows: [row(), row({ panel: 2, itemId: 999 })],
       }),
     );
     expect(draft.panels.map((p) => p.tag)).toEqual(['MSB-01']);
@@ -241,14 +292,10 @@ describe('extractEstimateDraft — normalisation', () => {
 
   it('rejects confidence above 1, a row without a quantity, and more than 50 panels', async () => {
     await expect(
-      extract(
-        output({ panels: [panel({ rows: [row({ confidence: 1.5 })] })] }),
-      ),
+      extract(output({ rows: [row({ confidence: 1.5 })] })),
     ).rejects.toBeInstanceOf(AiOutputInvalidError);
     await expect(
-      extract(
-        output({ panels: [panel({ rows: [row({ quantity: undefined })] })] }),
-      ),
+      extract(output({ rows: [row({ quantity: undefined })] })),
     ).rejects.toBeInstanceOf(AiOutputInvalidError);
     const many = Array.from({ length: 51 }, (_, i) => panel({ tag: `P${i}` }));
     await expect(extract(output({ panels: many }))).rejects.toBeInstanceOf(
@@ -256,25 +303,23 @@ describe('extractEstimateDraft — normalisation', () => {
     );
   });
 
-  it('rejects output that is not an object', async () => {
+  it('rejects output that is not an object, or without rows', async () => {
     await expect(extract('nope')).rejects.toBeInstanceOf(AiOutputInvalidError);
+    await expect(
+      extract({ requirementsSummary: 'x', panels: [panel()] }),
+    ).rejects.toBeInstanceOf(AiOutputInvalidError);
   });
 
   it('truncates long strings and caps unmatched at 50', async () => {
     const { draft } = await extract(
       output({
         requirementsSummary: 'a'.repeat(3000),
-        panels: [
-          panel({
-            description: 'd'.repeat(900),
-            tag: 't'.repeat(80),
-            rows: [
-              row(),
-              ...Array.from({ length: 60 }, () =>
-                row({ itemId: null, text: 'x', code: '', note: 'y' }),
-              ),
-            ],
-          }),
+        panels: [panel({ description: 'd'.repeat(900), tag: 't'.repeat(80) })],
+        rows: [
+          row(),
+          ...Array.from({ length: 60 }, () =>
+            row({ itemId: null, text: 'x', code: '', note: 'y' }),
+          ),
         ],
       }),
     );
@@ -299,21 +344,153 @@ describe('extractEstimateDraft — normalisation', () => {
           panel({
             description: 'Tủ giá $1,200 rẻ',
             aiNote: 'thành tiền: 1.200.000 VND',
-            rows: [
-              row({ note: 'chốt 85.000.000đ nhé', where: 'giá 85.000.000đ' }),
-              row({
-                itemId: null,
-                text: 'Cáp',
-                note: 'tầm 1.200.000 VND',
-              }),
-            ],
           }),
+        ],
+        rows: [
+          row({ note: 'chốt 85.000.000đ nhé', where: 'giá 85.000.000đ' }),
+          row({ itemId: null, text: 'Cáp', note: 'tầm 1.200.000 VND' }),
         ],
       }),
     );
     const text = JSON.stringify(draft);
     expect(text).not.toMatch(/85\.000\.000|1\.200\.000|1,200/);
     expect(draft.requirementsSummary).toBe('Khách muốn tủ.');
+  });
+});
+
+describe('extractEstimateDraft — resuming a cut-short answer', () => {
+  const twoPanels = [panel(), panel({ tag: 'TĐT 2' })];
+  const threePanels = [...twoPanels, panel({ tag: 'TĐT 3' })];
+  const run = (client: AiClient) =>
+    extractEstimateDraft(
+      {
+        requirements: 'cần tủ',
+        attachments: [],
+        catalog,
+        storage: { getObjectBuffer: jest.fn() },
+      },
+      client,
+    );
+  const sequence = (...answers: unknown[]) => {
+    const extractFn = jest.fn();
+    for (const answer of answers) extractFn.mockResolvedValueOnce(answer);
+    return { extract: extractFn } as AiClient & { extract: jest.Mock };
+  };
+  /** The closing note the second call carries. */
+  const resumeNoteOf = (client: { extract: jest.Mock }): string => {
+    const [request] = client.extract.mock.calls[1] as [
+      { content: Array<{ text?: string }> },
+    ];
+    return request.content.at(-1)?.text ?? '';
+  };
+
+  it('asks again for the last panel it started and the ones it never reached, and merges the answer', async () => {
+    const client = sequence(
+      output({ panels: twoPanels, rows: [row({ panel: 1 })] }),
+      output({
+        panels: twoPanels,
+        rows: [row({ panel: 1, quantity: 7 }), row({ panel: 2, quantity: 5 })],
+      }),
+    );
+    const { draft } = await run(client);
+
+    expect(client.extract).toHaveBeenCalledTimes(2);
+    expect(resumeNoteOf(client)).toContain('số 1, 2');
+    expect(draft.panels.map((p) => [p.tag, p.lines[0].quantity])).toEqual([
+      ['MSB-01', 7],
+      ['TĐT 2', 5],
+    ]);
+    expect(draft.unmatched).toEqual([]);
+  });
+
+  it('keeps the fuller version of a panel when the retry read fewer rows of it', async () => {
+    const client = sequence(
+      output({
+        panels: twoPanels,
+        rows: [row({ panel: 1 }), row({ panel: 1 }), row({ panel: 1 })],
+      }),
+      output({
+        panels: twoPanels,
+        rows: [row({ panel: 1 }), row({ panel: 2, quantity: 5 })],
+      }),
+    );
+    const { draft } = await run(client);
+
+    expect(draft.panels.map((p) => [p.tag, p.lines[0].quantity])).toEqual([
+      ['MSB-01', 6],
+      ['TĐT 2', 5],
+    ]);
+  });
+
+  it('asks only for the empty panel when the gap is in the middle', async () => {
+    const client = sequence(
+      output({
+        panels: threePanels,
+        rows: [row({ panel: 1 }), row({ panel: 3 })],
+      }),
+      output({ panels: threePanels, rows: [row({ panel: 2 })] }),
+    );
+    const { draft } = await run(client);
+
+    expect(resumeNoteOf(client)).toContain('số 2 ');
+    expect(resumeNoteOf(client)).not.toContain('số 2, ');
+    expect(draft.panels.map((p) => p.tag)).toEqual([
+      'MSB-01',
+      'TĐT 2',
+      'TĐT 3',
+    ]);
+  });
+
+  it('stops after two extra calls and names the panel it never got', async () => {
+    const stuck = output({ panels: twoPanels, rows: [row({ panel: 1 })] });
+    const client = sequence(stuck, stuck, stuck, stuck);
+    const { draft } = await run(client);
+
+    expect(client.extract).toHaveBeenCalledTimes(3);
+    expect(draft.panels.map((p) => p.tag)).toEqual(['MSB-01']);
+    expect(draft.unmatched.map((u) => u.description)).toEqual(['Tủ TĐT 2']);
+  });
+
+  it.each([
+    [
+      'every panel has rows',
+      output({
+        panels: twoPanels,
+        rows: [row({ panel: 1 }), row({ panel: 2 })],
+      }),
+    ],
+    [
+      'there is a single panel, even without a pointer',
+      output({ rows: [{ ...row(), panel: undefined }] }),
+    ],
+  ])('does not call again when %s', async (_name, answer) => {
+    const client = sequence(answer);
+    await run(client);
+    expect(client.extract).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the first answer when the second one is malformed', async () => {
+    const client = sequence(
+      output({ panels: twoPanels, rows: [row({ panel: 1 })] }),
+      'not an object',
+      'not an object',
+    );
+    const { draft } = await run(client);
+    expect(draft.panels.map((p) => p.tag)).toEqual(['MSB-01']);
+  });
+
+  it('keeps the first answer when the extra call itself fails', async () => {
+    const extractFn = jest
+      .fn()
+      .mockResolvedValueOnce(
+        output({ panels: twoPanels, rows: [row({ panel: 1 })] }),
+      )
+      .mockRejectedValueOnce(new Error('provider returned garbage'));
+    const { draft } = await run({ extract: extractFn });
+
+    expect(extractFn).toHaveBeenCalledTimes(2);
+    expect(draft.panels.map((p) => p.tag)).toEqual(['MSB-01']);
+    expect(draft.unmatched.map((u) => u.description)).toEqual(['Tủ TĐT 2']);
   });
 });
 
@@ -530,6 +707,10 @@ describe('buildPrefillPrompt', () => {
     expect(system).toMatch(/không phải lệnh/i);
     expect(system).toContain('rows');
     expect(system).toMatch(/không dùng số thứ tự.*làm tên tủ/);
+    expect(system).toMatch(/MỘT lượt.*panel = số thứ tự/);
+    expect(system).toContain('Dòng của tủ này không được xuất hiện ở tủ khác');
+    expect(system).toContain('không mượn tên nhóm của tủ khác');
+    expect(system).toContain('kể cả khi bảng bị ngắt sang trang sau');
     expect(text).toContain('TPL-PANEL');
     expect(text).toContain('Busbar');
     expect(text).toContain('MCCB-100');
