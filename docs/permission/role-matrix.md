@@ -1,6 +1,6 @@
 # Ma trận phân quyền và tài khoản demo
 
-Cập nhật: 2026-11-22. Nguồn: `backend/src/kernel/core/database/seeds/seed-roles.ts` (quyền theo role), `seed-users.ts` (tài khoản), `kernel/shared/services/data-scope.service.ts` (phạm vi dữ liệu). Ma trận được sinh bằng chính hàm `holds()` mà guard dùng, nên wildcard (`order:*`, `*:*`) đã được bung ra từng quyền.
+Cập nhật: 2026-11-24. Nguồn: `backend/src/kernel/core/database/seeds/seed-roles.ts` (quyền theo role), `seed-users.ts` (tài khoản), `kernel/shared/services/data-scope.service.ts` (phạm vi dữ liệu). Ma trận được sinh bằng chính hàm `holds()` mà guard dùng, nên wildcard (`order:*`, `*:*`) đã được bung ra từng quyền.
 
 Lúc lập tài liệu, trong DB không có role nào bị admin sửa trên màn hình phân quyền (`roles.updated_by` rỗng), nên quyền thực tế khớp seed. Nếu admin đã sửa một role, seed giữ nguyên bản sửa đó và tài liệu này không còn đúng cho role ấy.
 
@@ -80,7 +80,12 @@ Quyền quyết định **được làm hành động nào**; phạm vi dữ li�
 | `estimate:create` | ✅ | ✅ |  |  | ✅ | ✅ |  |  |  |  |  |
 | `estimate:update` | ✅ | ✅ |  |  | ✅ | ✅ |  |  |  |  |  |
 | `estimate:submit` | ✅ | ✅ |  |  | ✅ | ✅ |  |  |  |  |  |
+| `estimate:ai_prefill` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |  |
 | `estimate:price` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |  |
+| `quotation_template:read` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |
+| `quotation_template:create` | ✅ | ✅ | ✅ |  | ✅ |  |  |  |  |  |  |
+| `quotation_template:update` | ✅ | ✅ | ✅ |  | ✅ |  |  |  |  |  |  |
+| `quotation_template:delete` | ✅ | ✅ | ✅ |  | ✅ |  |  |  |  |  |  |
 | `quotation:read` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |  |
 | `quotation:create` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |  |
 | `quotation:update` | ✅ | ✅ | ✅ | ✅ |  |  |  |  |  |  |  |
@@ -163,6 +168,8 @@ Quyền quyết định **được làm hành động nào**; phạm vi dữ li�
 - Chỉ `admin`, `director`, `salesManager` duyệt được báo giá (`quotation:approve`) và huỷ được đơn (`order:cancel`).
 - `engineer` và `engineeringLead` không có quyền xem giá nào (`reference_price:read`, `purchase_price:read`) và không có `estimate:price`: màn hình và API dự toán không trả tiền cho họ, kỹ sư chỉ nhập tủ, vật tư và số lượng.
 - `estimate:price` (điền đơn giá vốn và chi phí khác của dự toán đã gửi, rồi "Hoàn tất giá") do `sales` và `salesManager` giữ; `director` và `admin` có qua `*:*`. Báo giá chỉ lập được từ dự toán đã điền giá.
+- `estimate:ai_prefill` (nút "Phân tích & Điền bằng AI") do `sales` và `salesManager` giữ. `director` có qua `*:*`, và API AI chỉ nhận Sales, Trưởng phòng KD và Giám đốc; `admin` có `*:*` nhưng API trả 403. Kỹ sư không chạy AI; bản nháp AI được kỹ sư kiểm tra và gửi như dự toán thường.
+- `quotation_template:create|update|delete` chỉ `salesManager` và `engineeringLead` giữ (cộng `director` và `admin` qua `*:*`). Vai trò có `quotation_template:read` chỉ xem được mẫu; mẫu không chứa giá.
 - productionManager và technician không có `order:read` và không thấy giá (`purchase_price:read`, `reference_price:read`).
 - `qcInspector` (`qc_a`, phòng `qcLab`) chỉ có `qc_checklist:read` và `qc_inspection:read|create|verify`: không có `order:read`, không có `material:read`, không thấy giá và không thấy bản ghi bán hàng; chỉ ghi nhận lượt QC theo từng tủ và xác nhận lỗi đã khắc phục.
 - productionManager giữ mẫu checklist (`qc_checklist:*`) và xử lý lỗi QC (`qc_inspection:fix`); người xác nhận (`qc_inspection:verify`) phải khác người đã đánh dấu khắc phục, nên productionManager không tự xác nhận lỗi mình sửa. productionManager chỉ đọc phiếu giao và lắp đặt.

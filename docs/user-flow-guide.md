@@ -81,6 +81,8 @@ Trước khi chạy luồng bán hàng, cần có sẵn:
    - Phần "Kho" trong form gồm Mã vạch, Vị trí mặc định, Tồn tối thiểu. Thủ kho cũng sửa được phần này.
 2. **Vị trí kho** (Danh mục › Vị trí kho): admin hoặc thủ kho bấm "Thêm vị trí", nhập Mã vị trí (ví dụ `A-01-02`) và Tên vị trí.
 3. **Nhà cung cấp** (Mua hàng & Kho › Nhà cung cấp): admin, director hoặc purchasing bấm "Thêm nhà cung cấp", nhập Mã (ví dụ `NCC_0001`) và Tên.
+4. **Mẫu báo giá** (Bán hàng › Template báo giá): seed chạy với `SEED_SCOPE=all` tạo sẵn 5 mẫu `TPL_0001`–`TPL_0005`. Mỗi mẫu gồm tủ, vật tư và số lượng, không có giá. Trưởng phòng KD và Trưởng kỹ thuật thêm, sửa, bật/tắt mẫu; không xoá được mẫu đang có dự án dùng.
+5. **Dịch vụ AI** (tuỳ chọn, chỉ cần cho nút "Phân tích & Điền bằng AI"): trong `backend/.env` đặt `AI_PROVIDER` (`anthropic` là mặc định, hoặc `openai`) cùng khoá của nhà cung cấp đã chọn: `ANTHROPIC_API_KEY` và `ANTHROPIC_MODEL`, hoặc `OPENAI_API_KEY` và `OPENAI_MODEL`. Sau khi đổi khoá phải tạo lại container (recreate), không chỉ restart. Thiếu khoá thì nút vẫn hiện; bấm sẽ báo dịch vụ AI chưa được cấu hình.
 
 ---
 
@@ -92,7 +94,7 @@ Trước khi chạy luồng bán hàng, cần có sẵn:
    - Bắt buộc: Mã khách hàng (tự sinh `KH_0001`, sửa được) và Tên khách hàng.
    - "Nhân viên phụ trách" mặc định là bạn. Chỉ Trưởng phòng KD, Giám đốc và admin đổi được người phụ trách. Khi đổi, mọi yêu cầu, báo giá và đơn hàng của khách chuyển theo người mới.
 2. Mở chi tiết khách hàng, bấm **"Thêm người liên hệ"**. Có thể đánh dấu "Người liên hệ chính"; mỗi khách chỉ có một người chính.
-3. Vào **Khách hàng › Dự án**, bấm **"Thêm dự án"**: chọn Khách hàng, nhập Tên dự án (mã `DA_0001` tự sinh).
+3. Vào **Khách hàng › Dự án**, bấm **"Thêm dự án"**: chọn Khách hàng, nhập Tên dự án (mã `DA_0001` tự sinh). Mục **"Mẫu dự toán"** là tuỳ chọn: chỉ liệt kê mẫu đang bật, để "Không dùng" thì như trước. Mẫu của dự án được AI dùng khi điền dự toán (mục 3.2). Dự án đã gắn một mẫu nay đã tắt: khi sửa dự án, form không gửi lại mẫu đó.
 
 Khách hàng hoặc dự án đã dùng trong chứng từ bán hàng thì không xoá được.
 
@@ -104,7 +106,13 @@ Khách hàng hoặc dự án đã dùng trong chứng từ bán hàng thì khôn
    - Có thể đính kèm ngay tài liệu nhận từ khách ở mục "Tài liệu từ khách hàng"; tệp được tải lên sau khi yêu cầu được tạo, tệp nào lỗi sẽ được nêu tên để đính kèm lại trong chi tiết. Muốn phân công kỹ sư, yêu cầu phải có Yêu cầu kỹ thuật hoặc ít nhất 1 tài liệu đính kèm.
    - Kết quả: mã `YC_…`, trạng thái **Nháp**.
 2. Trong chi tiết yêu cầu, mục "Tài liệu đính kèm" → **"Chọn tệp"** để đính kèm bản vẽ (pdf, dwg, dxf, xlsx, png, jpg; tối đa 20 MB/tệp, 20 tệp).
-3. Bấm **"Phân công"**, chọn một kỹ sư → **"Xác nhận"**. Yêu cầu chuyển **Đã phân công**, kỹ sư nhận thông báo. Có thể "Đổi kỹ sư" cho đến khi dự toán được gửi.
+3. (Tuỳ chọn) Bấm **"Phân tích & Điền bằng AI"** để AI lập nháp dự toán. Nút hiện khi yêu cầu ở **Nháp** hoặc **Đã phân công** và có Yêu cầu kỹ thuật hoặc tài liệu đính kèm. Nút hiện với mọi người có quyền `estimate:ai_prefill` (Sales, Trưởng phòng KD, Giám đốc, và admin vì có `*:*`). API chỉ nhận Sales, Trưởng phòng KD và Giám đốc; admin bấm sẽ nhận lỗi 403.
+   - Trước khi chạy, hộp xác nhận báo rằng yêu cầu kỹ thuật và tài liệu đính kèm sẽ được gửi tới dịch vụ AI bên ngoài.
+   - Chạy nền; trong lần thử đo được 14–35 giây. Màn hình hiện tiến trình (đang xếp hàng, đang chạy, xong, lỗi). Khi xong có tóm tắt và liên kết tới dự toán. Nếu yêu cầu đang **Đã phân công**, AI chuyển yêu cầu sang **Đang dự toán**.
+   - AI chỉ chọn vật tư có trong danh mục; tủ do AI đề xuất hoặc lấy từ mẫu dự toán. Mỗi dòng có số lượng, độ tin cậy và ghi chú cho từng dòng. Vật tư không khớp được liệt kê trong tóm tắt, không tự thêm. AI không điền giá. Phần Yêu cầu kỹ thuật trống được AI điền; nếu đã có chữ, nội dung của AI được thêm xuống dưới, bắt đầu bằng `[AI] `.
+   - Chạy lại được khi yêu cầu còn **Nháp** và bản nháp hiện tại toàn dòng AI chưa xác nhận; bản nháp cũ bị thay thế. Khi yêu cầu đã **Đang dự toán** hoặc **Đã dự toán**, nút bị ẩn.
+   - Giới hạn: 5 lần/phút và 20 lần/ngày cho mỗi người.
+4. Bấm **"Phân công"**, chọn một kỹ sư → **"Xác nhận"**. Yêu cầu chuyển **Đã phân công**, kỹ sư nhận thông báo. Nếu yêu cầu đã có nháp dự toán (từ AI) thì chuyển thẳng sang **Đang dự toán**. Có thể "Đổi kỹ sư" cho đến khi dự toán được gửi.
 
 Trạng thái của yêu cầu chạy theo luồng:
 
@@ -112,6 +120,10 @@ Trạng thái của yêu cầu chạy theo luồng:
 Nháp → Đã phân công → Đang dự toán → Đã dự toán → Đã báo giá → Đã lên đơn hàng
                                                    └──────────► Thất bại / Đã hủy
 ```
+
+Hai đường tắt khi có nháp dự toán do AI tạo:
+- AI chạy khi yêu cầu đang **Đã phân công**: hệ thống chuyển thẳng sang **Đang dự toán**.
+- Phân công yêu cầu **Nháp** đã có nháp AI: hệ thống chuyển qua **Đã phân công** rồi sang **Đang dự toán** trong cùng một thao tác.
 
 - **"Hủy yêu cầu"** (cần lý do): dùng được từ Nháp đến Đã dự toán.
 - **"Đánh dấu thất bại"** (cần lý do): khi Đã dự toán hoặc Đã báo giá.
@@ -121,13 +133,17 @@ Nháp → Đã phân công → Đang dự toán → Đã dự toán → Đã bá
 
 Chỉ kỹ sư được giao, Trưởng kỹ thuật và Giám đốc được soạn dự toán. Admin chỉ xem được. Phòng kỹ thuật **không thấy giá**: không có đơn giá, chi phí hay tổng tiền trên màn hình dự toán. Giá do Sales điền ở bước 6.
 
-1. Đăng nhập bằng tài khoản kỹ sư, mở yêu cầu đã được giao, bấm **"Tạo dự toán"**. Mã `DT_…`, bản #1 ở trạng thái **Nháp**; yêu cầu chuyển **Đang dự toán**.
+Dự toán cũng có thể do AI lập nháp từ yêu cầu (mục 3.2, bước 3); khi đó kỹ sư kiểm tra và gửi như dưới đây. Sales không sửa được bản nháp do AI tạo.
+
+1. Đăng nhập bằng tài khoản kỹ sư, mở yêu cầu đã được giao, bấm **"Tạo dự toán"**. Mã `DT_…`, bản #1 ở trạng thái **Nháp**; yêu cầu chuyển **Đang dự toán**. Nếu AI đã lập nháp cho yêu cầu này, mở dự toán đó thay vì tạo mới.
 2. **"Thêm tủ"**: nhập Ký hiệu tủ (ví dụ `MSB-01`), Mô tả, Số lượng tủ.
 3. Trong từng tủ:
    - "Vật tư của tủ" → chọn vật tư, nhập số lượng. Kỹ sư không nhập đơn giá.
    - Cột Tồn kho / Khả dụng / Thiếu cho biết kho đang có bao nhiêu.
+   - Dòng do AI tạo có nhãn **AI**, độ tin cậy và ghi chú; dòng chưa xác nhận được tô nổi bật. Bấm **"Xác nhận dòng này"** cho từng dòng, hoặc **"Xác nhận tất cả"** cho mọi dòng AI.
 4. Kiểm tra mục "Tổng hợp", rồi bấm **"Gửi dự toán"**. Mỗi tủ cần có ít nhất một vật tư.
    - Bản vừa gửi bị khoá số lượng, không sửa được nữa. Yêu cầu chuyển **Đã dự toán**, sales nhận thông báo. Bản dự toán hiện chip **"Chờ điền giá"**.
+   - Còn dòng AI chưa xác nhận thì hiện "Còn N dòng AI chưa được xác nhận." kèm nút **"Vẫn gửi"**. Đây chỉ là cảnh báo, không chặn việc gửi.
 5. Cần sửa lại thì bấm **"Lập bản mới"** để chép thành bản #2 ở trạng thái Nháp; bản cũ chuyển "Đã thay thế". Khi yêu cầu đã **Đã báo giá** thì không lập bản mới được nữa. Bản mới chép cả đơn giá Sales đã điền (kỹ sư không thấy), nhưng bắt đầu ở trạng thái chưa điền giá: sau khi kỹ sư gửi, Sales điền lại từ số liệu đã chép.
 6. **Điền giá (Sales, Trưởng phòng KD, Giám đốc)**: mở bản dự toán đã gửi đang **"Chờ điền giá"**.
    - Nhập đơn giá vốn từng vật tư (lấy sẵn từ Giá tham khảo) và quản lý mục **"Chi phí khác"** của từng tủ (Thiết kế / Nhân công / Lắp đặt / Vận chuyển / Khác, tính cho 1 tủ).
@@ -375,7 +391,9 @@ Vào từ menu tài khoản ở góc trên.
 
 ## 8. Kịch bản chạy thử đầu-cuối
 
-Dùng kịch bản này để demo hoặc kiểm thử một vòng đầy đủ. Mỗi bước ghi tài khoản cần dùng.
+Dùng kịch bản này để demo hoặc kiểm thử một vòng đầy đủ. Mỗi bước ghi tài khoản cần dùng; mật khẩu xem mục 2.1. Có hai đường: thủ công (8.1) và điền dự toán bằng AI (8.2).
+
+### 8.1 Đường thủ công
 
 | # | Tài khoản | Việc làm | Kết quả cần thấy |
 |---|---|---|---|
@@ -399,10 +417,31 @@ Dùng kịch bản này để demo hoặc kiểm thử một vòng đầy đủ.
 | 18 | `storekeeper` | Trang giao hàng của đơn → tạo lắp đặt, bắt đầu, hoàn tất | Lắp đặt Đã hoàn tất |
 | 19 | `sales_a` | Trang giao hàng của đơn → "Tải biên bản nghiệm thu" | Đơn **Hoàn thành** |
 
+### 8.2 Đường điền dự toán bằng AI
+
+Đường này thay bước 1–3 của đường thủ công. Từ bước 4 trở đi, làm tiếp như mục 8.1.
+
+| # | Tài khoản | Việc làm | Kết quả cần thấy |
+|---|---|---|---|
+| 1 | `sales_a` | Tạo khách hàng, tạo dự án và chọn **Mẫu dự toán** (ví dụ `TPL_0001`) | Dự án có mẫu |
+| 2 | `sales_a` | Tạo yêu cầu báo giá cho dự án, đính kèm tài liệu hoặc nhập Yêu cầu kỹ thuật | `YC_…` ở Nháp |
+| 3 | `sales_a` | Mở yêu cầu → **"Phân tích & Điền bằng AI"** → xác nhận | Thông báo AI đã điền nháp, có liên kết tới `DT_…`. Đường này chạy AI trên yêu cầu **Nháp**, nên yêu cầu vẫn Nháp |
+| 4 | `sales_mgr` | Phân công yêu cầu cho `engineer_a` | Yêu cầu chuyển thẳng **Đang dự toán** (đường tắt khi đã có nháp AI); engineer_a có thông báo |
+| 5 | `engineer_a` | Mở dự toán, xác nhận các dòng AI (hoặc "Xác nhận tất cả"), kiểm tra tủ và số lượng, bấm **"Gửi dự toán"** | Yêu cầu **Đã dự toán**. Nếu còn dòng chưa xác nhận, cảnh báo hiện và "Vẫn gửi" vẫn gửi được |
+| 6 | `sales_a` | Điền đơn giá, bấm **"Hoàn tất giá"** (mục 3.3, bước 6) | Dự toán **Đã điền giá**; tiếp tục từ bước 4 của mục 8.1 (báo giá) |
+
 ---
 
 ## 9. Những gì chưa có
 
+- **Điền dự toán bằng AI:**
+  - Nút "Phân tích & Điền bằng AI" vẫn hiện khi dịch vụ AI chưa cấu hình; bấm rồi mới báo chưa cấu hình.
+  - Rời trang khi đang chạy thì mất tiến trình; bấm lại nhận lỗi 409 (đang có lượt chạy).
+  - Lỗi từ server hiện nguyên văn tiếng Anh, dạng "MÃ: câu".
+  - Độ tin cậy AI thường đều ở mức cao, nên chưa phân biệt được dòng nào cần xem kỹ hơn.
+  - Kết quả AI luôn cần kỹ sư kiểm tra.
+  - Chưa kiểm trên giao diện thật: tải lại trang giữa lúc đang chạy; sửa dự toán khi đang có lượt chạy lại.
+  - Môi trường dev (LocalStack) không giữ dữ liệu khi tạo lại container: file đã tải lên sẽ mất, AI bỏ qua file đó và ghi chú.
 - **P4 – QC và giao hàng:** chưa in PDF phiếu giao hay báo cáo QC, chưa có chữ ký điện tử của khách, chưa trừ kho thành phẩm, chưa có chi phí giao hàng; không xoá được ảnh hay tệp đã tải, không huỷ được lắp đặt và biên bản nghiệm thu, không sửa được lượt QC đã ghi; không sửa được địa chỉ của phiếu giao và của lắp đặt sau khi lập.
 - **P5 – Kế toán** và **P6 – Báo cáo/KPI**; hoá đơn điện tử.
 - Duyệt đề nghị mua; nhiều kho / chuyển kho; lô và serial; gửi PO qua email.
