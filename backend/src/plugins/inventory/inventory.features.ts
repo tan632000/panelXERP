@@ -8,6 +8,7 @@ import { purchaseRequestPermissions } from '@plugins/inventory/purchase-request/
 import { PurchaseRequestModule } from '@plugins/inventory/purchase-request/purchase-request.module';
 import { stockReceiptPermissions } from '@plugins/inventory/receipt/permissions/receipt.permissions';
 import { StockReceiptModule } from '@plugins/inventory/receipt/receipt.module';
+import { seedOpeningStock } from '@plugins/inventory/stock/database/seed-opening-stock';
 import { stockPermissions } from '@plugins/inventory/stock/permissions/stock.permissions';
 import { StockModule } from '@plugins/inventory/stock/stock.module';
 import { stocktakePermissions } from '@plugins/inventory/stocktake/permissions/stocktake.permissions';
@@ -31,6 +32,7 @@ export const INVENTORY_FEATURES: ErpFeature[] = [
     plugin: 'inventory',
     module: StockModule,
     permissions: stockPermissions,
+    seed: seedOpeningStock,
   },
   {
     key: 'purchase-order',
