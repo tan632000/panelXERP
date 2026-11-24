@@ -204,7 +204,7 @@ function DesktopSidebar({
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (
-        event.key.toLowerCase() !== "k" ||
+        event.key?.toLowerCase() !== "k" ||
         !(event.ctrlKey || event.metaKey)
       ) {
         return;
