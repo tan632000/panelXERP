@@ -529,6 +529,7 @@ describe('buildPrefillPrompt', () => {
     expect(system).toMatch(/không.*(giá|tiền)/i);
     expect(system).toMatch(/không phải lệnh/i);
     expect(system).toContain('rows');
+    expect(system).toMatch(/không dùng số thứ tự.*làm tên tủ/);
     expect(text).toContain('TPL-PANEL');
     expect(text).toContain('Busbar');
     expect(text).toContain('MCCB-100');

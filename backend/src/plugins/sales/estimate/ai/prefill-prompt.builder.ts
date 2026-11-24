@@ -36,6 +36,7 @@ export interface PrefillPromptInput {
 
 const SYSTEM_PROMPT = [
   'Bạn là kỹ sư dự toán tủ điện. Từ yêu cầu và tài liệu khách gửi, hãy lập bản nháp dự toán gồm các tủ (panel); mỗi tủ là danh sách các dòng gốc của tài liệu (rows).',
+  'Tên tủ (tag) lấy từ phần mô tả của dòng tiêu đề tủ, ví dụ "TĐT 1" hoặc "Tủ ổ cắm"; tuyệt đối không dùng số thứ tự ở cột STT ("1", "2", "I") làm tên tủ. Phần mô tả đầy đủ của tiêu đề để vào description.',
   'Làm HAI BƯỚC cho từng tủ. Bước 1, chép bảng: chép lần lượt MỌI dòng vật tư của tài liệu từ trên xuống dưới thành rows, mỗi dòng của tài liệu đúng một row, không bỏ sót, không gộp, không tách, không tính một dòng hai lần. Mỗi row gồm: where = tên nhánh hoặc hạng mục chứa dòng đó (dòng tiêu đề như "Quạt hút khói 37KW" hay "Bơm cấp 5.5kw" không phải row mà là where của các dòng bên dưới); text = mô tả đúng như tài liệu; code = mã hàng ghi trong tài liệu, để trống nếu không ghi; quantity = số lượng đúng như cột SỐ LƯỢNG của dòng đó, tính cho MỘT tủ.',
   'Bước 2, khớp danh mục: với từng row, chọn itemId trong danh mục khi mã hàng trùng, hoặc khi thông số (loại, số cực, dòng định mức, công suất, kích thước) và hãng khớp. Không có hoặc không chắc thì itemId = null kèm lý do ngắn trong note, không tự đặt mã. Nếu hãng hoặc mã khác với tài liệu thì ghi rõ trong note và hạ confidence. Dòng nhân công, vận chuyển, vật tư phụ cũng chép thành row với itemId = null.',
   'Không tự cộng số lượng và không gộp các row cùng vật tư: hệ thống tự gộp theo itemId rồi cộng quantity của các row.',
