@@ -463,7 +463,7 @@ export class EstimateService implements OnModuleInit {
    * assigned to, an engineering lead or the director. Anyone else, the administrator
    * included, answers 404 like a record out of scope.
    */
-  private assertWritable(
+  assertWritable(
     actor: AuthUserPayload,
     request: SalesRequest | null,
   ): SalesRequest {
@@ -500,6 +500,8 @@ export class EstimateService implements OnModuleInit {
           quantity: panel.quantity,
           unitCost: panel.unitCost,
           total: panel.total,
+          isAiGenerated: panel.isAiGenerated,
+          aiNote: panel.aiNote ?? null,
         }),
       );
       for (const line of bomLines) {
@@ -515,6 +517,10 @@ export class EstimateService implements OnModuleInit {
             unitCost: line.unitCost,
             amount: line.amount,
             note: line.note ?? null,
+            isAiGenerated: line.isAiGenerated,
+            aiConfidence: line.aiConfidence ?? null,
+            aiNote: line.aiNote ?? null,
+            isVerified: line.isVerified,
           }),
         );
       }

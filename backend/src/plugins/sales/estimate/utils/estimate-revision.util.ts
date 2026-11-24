@@ -22,6 +22,10 @@ export interface EstimateBomLineView {
   unitCost: number;
   amount: number;
   note: string | null;
+  isAiGenerated: boolean;
+  aiConfidence: number | null;
+  aiNote: string | null;
+  isVerified: boolean;
 }
 
 export interface EstimateCostLineView {
@@ -40,6 +44,8 @@ export interface EstimatePanelView {
   unitCost: number;
   /** `unitCost × quantity`. */
   total: number;
+  isAiGenerated: boolean;
+  aiNote: string | null;
   bomLines: EstimateBomLineView[];
   costLines: EstimateCostLineView[];
 }
@@ -56,6 +62,8 @@ export interface EstimateRevisionView {
   pricedAt: Date | null;
   pricedBy: number | null;
   createdAt: Date;
+  /** AI lines of this revision the engineer has not verified yet. */
+  unverifiedAiCount: number;
   panels: EstimatePanelView[];
 }
 
@@ -147,6 +155,13 @@ export function toRevisionView(
     pricedAt: revision.pricedAt ?? null,
     pricedBy: revision.pricedBy ?? null,
     createdAt: revision.createdAt,
+    unverifiedAiCount: tree.panels.reduce(
+      (count, { bomLines }) =>
+        count +
+        bomLines.filter((line) => line.isAiGenerated && !line.isVerified)
+          .length,
+      0,
+    ),
     panels: tree.panels.map(({ panel, bomLines, costLines }) => ({
       id: panel.id,
       tag: panel.tag,
@@ -154,6 +169,8 @@ export function toRevisionView(
       quantity: panel.quantity,
       unitCost: panel.unitCost,
       total: panel.total,
+      isAiGenerated: panel.isAiGenerated,
+      aiNote: panel.aiNote ?? null,
       bomLines: bomLines.map((line) => ({
         id: line.id,
         itemId: line.itemId,
@@ -165,6 +182,10 @@ export function toRevisionView(
         unitCost: line.unitCost,
         amount: line.amount,
         note: line.note ?? null,
+        isAiGenerated: line.isAiGenerated,
+        aiConfidence: line.aiConfidence ?? null,
+        aiNote: line.aiNote ?? null,
+        isVerified: line.isVerified,
       })),
       costLines: costLines.map((line) => ({
         id: line.id,

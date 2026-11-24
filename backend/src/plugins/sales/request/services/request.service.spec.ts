@@ -748,6 +748,91 @@ describe('RequestService', () => {
       expect(fixture.notifications.emit).toHaveBeenCalledTimes(1);
     });
 
+    describe('when the request already has an estimate', () => {
+      const estimateOf = (requestId: number, isDeleted = false) =>
+        ({ code: 'DT_2027_0001', requestId, isDeleted }) as never;
+
+      it('moves a draft straight to estimating and notifies the engineer exactly once', async () => {
+        const fixture = buildRequestFixture();
+        const { estimates } = fixture;
+        const created = await createDraft(fixture);
+        estimates.seed(estimateOf(created.id));
+
+        const assigned = await fixture.service.assign(
+          created.id,
+          { engineerId: ENGINEER_A.userId },
+          SALES_A,
+        );
+
+        expect(assigned).toMatchObject({
+          status: 'estimating',
+          assignedEngineerId: ENGINEER_A.userId,
+        });
+        expect(fixture.requests.rows[0].status).toBe('estimating');
+        expect(fixture.notifications.emit).toHaveBeenCalledTimes(1);
+        expect(fixture.activities.rows.map((a) => a.action)).toEqual([
+          'created',
+          'status_changed',
+          'status_changed',
+          'assigned',
+        ]);
+      });
+
+      it('leaves a draft without an estimate at assigned', async () => {
+        const fixture = buildRequestFixture();
+        const created = await createDraft(fixture);
+
+        const assigned = await fixture.service.assign(
+          created.id,
+          { engineerId: ENGINEER_A.userId },
+          SALES_A,
+        );
+
+        expect(assigned.status).toBe('assigned');
+        expect(fixture.notifications.emit).toHaveBeenCalledTimes(1);
+      });
+
+      it('does not count a deleted estimate', async () => {
+        const fixture = buildRequestFixture();
+        const { estimates } = fixture;
+        const created = await createDraft(fixture);
+        estimates.seed(estimateOf(created.id, true));
+
+        const assigned = await fixture.service.assign(
+          created.id,
+          { engineerId: ENGINEER_A.userId },
+          SALES_A,
+        );
+
+        expect(assigned.status).toBe('assigned');
+      });
+
+      it('keeps estimating when the engineer is changed mid-estimate', async () => {
+        const fixture = buildRequestFixture();
+        const { estimates } = fixture;
+        const created = await createDraft(fixture);
+        estimates.seed(estimateOf(created.id));
+        await fixture.service.assign(
+          created.id,
+          { engineerId: ENGINEER_A.userId },
+          SALES_A,
+        );
+        fixture.notifications.emit.mockClear();
+
+        const second = await fixture.service.assign(
+          created.id,
+          { engineerId: ENGINEER_B.userId },
+          MANAGER,
+        );
+
+        expect(second).toMatchObject({
+          status: 'estimating',
+          assignedEngineerId: ENGINEER_B.userId,
+        });
+        expect(fixture.notifications.emit).toHaveBeenCalledTimes(1);
+      });
+    });
+
     it('does not notify again when the same engineer is assigned twice', async () => {
       const fixture = buildRequestFixture();
       const created = await createDraft(fixture);

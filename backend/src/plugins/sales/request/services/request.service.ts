@@ -47,6 +47,7 @@ import {
   requireText,
   trimToNull,
 } from '@plugins/sales/_shared/utils/text.util';
+import { Estimate } from '@plugins/sales/estimate/entities/estimate.entity';
 import {
   REQUEST_ASSIGNABLE_STATUSES,
   REQUEST_EDITABLE_STATUSES,
@@ -437,7 +438,8 @@ export class RequestService implements OnModuleInit {
 
   /**
    * Gives the request to an engineer, or hands it to another one. The first assignment moves
-   * a draft to `assigned`; later ones keep the status. The engineer is notified once the
+   * a draft to `assigned` (or to `estimating` when an estimate already exists); later ones keep
+   * the status. The engineer is notified once the
    * transaction has committed, so a rolled-back assignment tells nobody.
    */
   async assign(
@@ -478,6 +480,18 @@ export class RequestService implements OnModuleInit {
             RequestStatus.ASSIGNED,
             { actorId: actor.userId },
           );
+          // An estimate already exists (an AI draft): the engineer picks it up, so estimating starts now.
+          const hasEstimate = await manager
+            .getRepository(Estimate)
+            .count({ where: { requestId: id, isDeleted: false } });
+          if (hasEstimate > 0) {
+            request = await this.statusPort.advance(
+              manager,
+              id,
+              RequestStatus.ESTIMATING,
+              { actorId: actor.userId },
+            );
+          }
         }
         request.assignedEngineerId = dto.engineerId;
         request.updatedBy = actor.userId;

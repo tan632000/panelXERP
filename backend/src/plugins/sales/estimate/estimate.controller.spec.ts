@@ -20,6 +20,7 @@ import {
 import { EstimateController } from '@plugins/sales/estimate/estimate.controller';
 import { EstimateEditService } from '@plugins/sales/estimate/services/estimate-edit.service';
 import { EstimatePricingService } from '@plugins/sales/estimate/services/estimate-pricing.service';
+import { EstimateVerifyService } from '@plugins/sales/estimate/services/estimate-verify.service';
 import { EstimateService } from '@plugins/sales/estimate/services/estimate.service';
 import { RequestStatus } from '@plugins/sales/request/enums/request-status.enum';
 
@@ -122,6 +123,7 @@ describe('EstimateController', () => {
         { provide: EstimateService, useValue: fixture.service },
         { provide: EstimateEditService, useValue: fixture.editor },
         { provide: EstimatePricingService, useValue: fixture.pricing },
+        { provide: EstimateVerifyService, useValue: fixture.verify },
         { provide: APP_GUARD, useClass: HeaderAuthGuard },
         { provide: APP_GUARD, useClass: RolesGuard },
       ],
@@ -192,6 +194,8 @@ describe('EstimateController', () => {
       ['addBomLine', 'estimate:update'],
       ['updateBomLine', 'estimate:update'],
       ['deleteBomLine', 'estimate:update'],
+      ['verifyBomLine', 'estimate:update'],
+      ['verifyAll', 'estimate:update'],
       ['setUnitCost', 'estimate:price'],
       ['completePricing', 'estimate:price'],
       ['addCostLine', 'estimate:price'],
@@ -315,6 +319,59 @@ describe('EstimateController', () => {
       await post(`/${made.id}/revise`, ENGINEER_B).expect(404);
       await get(`/${made.id}`, ENGINEER_B).expect(404);
       expect(fixture.panels.rows).toHaveLength(0);
+    });
+  });
+
+  describe('verifying AI lines over HTTP', () => {
+    /** A draft with one panel and one line an AI run is taken to have chosen. */
+    const aiDraft = async () => {
+      const made = await start();
+      const panelId = bodyOf(
+        await post(`/${made.id}/panels`, ENGINEER_A, {
+          tag: 'P',
+          quantity: 1,
+        }).expect(201),
+      ).panels[0].id;
+      const lineId = bodyOf(
+        await post(`/${made.id}/panels/${panelId}/bom-lines`, ENGINEER_A, {
+          itemId,
+          quantity: 1,
+        }).expect(201),
+      ).panels[0].bomLines[0].id;
+      Object.assign(fixture.bomLines.rows[0], {
+        isAiGenerated: true,
+        isVerified: false,
+      });
+      return { id: made.id, lineId };
+    };
+
+    it('answers 403 to sales and the manager, 404 to engineer B, and 200 to engineer A, with no money in the body', async () => {
+      const { id, lineId } = await aiDraft();
+
+      for (const token of [SALES_A, MANAGER, PURCHASING]) {
+        await patch(`/${id}/bom-lines/${lineId}/verify`, token, {}).expect(403);
+        await post(`/${id}/verify`, token).expect(403);
+      }
+      await patch(`/${id}/bom-lines/${lineId}/verify`, ENGINEER_B, {}).expect(
+        404,
+      );
+      await post(`/${id}/verify`, ENGINEER_B).expect(404);
+      expect(fixture.bomLines.rows[0]).toMatchObject({ isVerified: false });
+
+      const one = await patch(
+        `/${id}/bom-lines/${lineId}/verify`,
+        ENGINEER_A,
+        {},
+      ).expect(200);
+      expectPriceFree(bodyOf(one));
+      expect(fixture.bomLines.rows[0]).toMatchObject({ isVerified: true });
+      expect(
+        (bodyOf(one) as unknown as { unverifiedAiCount: number })
+          .unverifiedAiCount,
+      ).toBe(0);
+      expectPriceFree(
+        bodyOf(await post(`/${id}/verify`, ENGINEER_A).expect(200)),
+      );
     });
   });
 

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 
+import aiProviderConfig from '@kernel/core/config/ai-provider.config';
 import appTimezoneConfig from '@kernel/core/config/app-timezone.config';
 import appConfig from '@kernel/core/config/app.config';
 import awsConfig from '@kernel/core/config/aws.config';
@@ -29,6 +30,7 @@ import redisConfig from '@kernel/core/config/redis.config';
         bullConfig,
         loggingConfig,
         mailConfig,
+        aiProviderConfig,
       ],
     }),
   ],

@@ -41,4 +41,10 @@ export class EstimatePanel {
     transformer: numericColumnTransformer,
   })
   total: number;
+  /** True when an AI run created the panel (the AI columns stay with it through every revision). */
+  @Column({ type: 'boolean', name: 'is_ai_generated', default: false })
+  isAiGenerated: boolean;
+
+  @Column({ type: 'varchar', length: 1000, name: 'ai_note', nullable: true })
+  aiNote?: string | null;
 }

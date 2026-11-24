@@ -5,6 +5,7 @@ import { DataScopeService } from '@shared/services/data-scope.service';
 import { ReferenceCheckRegistry } from '@plugins/catalog/_shared/gateways/reference-check-registry';
 import { EstimateReadPort } from '@plugins/sales/_shared/ports/estimate-read.port';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
+import { EstimateAiRun } from '@plugins/sales/estimate/entities/estimate-ai-run.entity';
 import { EstimateBomLine } from '@plugins/sales/estimate/entities/estimate-bom-line.entity';
 import { EstimateCostLine } from '@plugins/sales/estimate/entities/estimate-cost-line.entity';
 import { EstimatePanel } from '@plugins/sales/estimate/entities/estimate-panel.entity';
@@ -13,8 +14,10 @@ import { Estimate } from '@plugins/sales/estimate/entities/estimate.entity';
 import { EstimateRevisionStatus } from '@plugins/sales/estimate/enums/estimate-revision-status.enum';
 import { EstimateEditService } from '@plugins/sales/estimate/services/estimate-edit.service';
 import { EstimatePricingService } from '@plugins/sales/estimate/services/estimate-pricing.service';
+import { EstimateVerifyService } from '@plugins/sales/estimate/services/estimate-verify.service';
 import { EstimateService } from '@plugins/sales/estimate/services/estimate.service';
 import { SalesRequestActivity } from '@plugins/sales/request/entities/request-activity.entity';
+import { SalesRequestAttachment } from '@plugins/sales/request/entities/request-attachment.entity';
 import { SalesRequest } from '@plugins/sales/request/entities/request.entity';
 import {
   ENGINEER_A,
@@ -122,6 +125,19 @@ export function buildEstimateFixture(
     ],
   });
   const bomLines = new SalesFakeRepo<Row<EstimateBomLine>>();
+  /** One queued or running run per request, like the partial unique index of the migration. */
+  const aiRuns = new SalesFakeRepo<Row<EstimateAiRun>>({
+    unique: [
+      {
+        constraint: 'uq_sales_estimate_ai_runs_active',
+        collides: (a, b) =>
+          a.requestId === b.requestId &&
+          ['queued', 'running'].includes(a.status) &&
+          ['queued', 'running'].includes(b.status),
+      },
+    ],
+  });
+  const attachments = new SalesFakeRepo<Row<SalesRequestAttachment>>();
   const costLines = new SalesFakeRepo<Row<EstimateCostLine>>();
   const items = new SalesFakeRepo<ItemRow>();
 
@@ -133,41 +149,46 @@ export function buildEstimateFixture(
     [EstimatePanel, panels],
     [EstimateBomLine, bomLines],
     [EstimateCostLine, costLines],
+    [EstimateAiRun, aiRuns],
+    [SalesRequestAttachment, attachments],
   ] as Array<[unknown, SalesFakeRepo<FakeRow>]>);
 
   /** Emulates `previewMaxBasedCode`'s query: the highest number among the codes matching. */
-  const query = jest.fn((sql: string, [param]: [string | number]) => {
-    // The shared item read of an added BOM line: the live row, in the table's own columns.
-    if (sql.includes('FROM items')) {
-      const item = items.rows.find(
-        (row) => row.id === param && !row.isDeleted && !row.deletedAt,
-      );
-      return Promise.resolve(
-        item
-          ? [
-              {
-                id: item.id,
-                code: item.code,
-                name: item.name,
-                brand: item.brand,
-                unit: item.unit,
-                reference_price: item.referencePrice,
-              },
-            ]
-          : [],
-      );
-    }
-    const pattern = param as string;
-    const matcher = new RegExp(pattern);
-    const codes = estimates.rows
-      .map((row) => row.code)
-      .filter((code) => matcher.test(code))
-      .sort(
-        (a, b) =>
-          Number(/\d+$/.exec(b)?.[0] ?? 0) - Number(/\d+$/.exec(a)?.[0] ?? 0),
-      );
-    return Promise.resolve(codes.length ? [{ code: codes[0] }] : []);
-  });
+  const query = jest.fn(
+    (sql: string, [param]: [string | number | number[]]) => {
+      // The shared item read of an added BOM line: the live row, in the table's own columns.
+      if (sql.includes('FROM items')) {
+        const live = items.rows.filter(
+          (row) =>
+            (Array.isArray(param)
+              ? param.includes(row.id)
+              : row.id === param) &&
+            !row.isDeleted &&
+            !row.deletedAt,
+        );
+        return Promise.resolve(
+          live.map((item) => ({
+            id: item.id,
+            code: item.code,
+            name: item.name,
+            brand: item.brand,
+            unit: item.unit,
+            reference_price: item.referencePrice,
+          })),
+        );
+      }
+      const pattern = param as string;
+      const matcher = new RegExp(pattern);
+      const codes = estimates.rows
+        .map((row) => row.code)
+        .filter((code) => matcher.test(code))
+        .sort(
+          (a, b) =>
+            Number(/\d+$/.exec(b)?.[0] ?? 0) - Number(/\d+$/.exec(a)?.[0] ?? 0),
+        );
+      return Promise.resolve(codes.length ? [{ code: codes[0] }] : []);
+    },
+  );
 
   const manager = {
     getRepository: (target: unknown) => repos.get(target),
@@ -248,6 +269,7 @@ export function buildEstimateFixture(
     service,
     dataScope,
   );
+  const verify = new EstimateVerifyService(dataSource as never, service);
   const readPort = new EstimateReadPort();
   // A Nest app calls this itself when it initialises the service, so it may opt out.
   if (options.registerReferenceChecks ?? true) service.onModuleInit();
@@ -286,6 +308,7 @@ export function buildEstimateFixture(
     service,
     editor,
     pricing,
+    verify,
     readPort,
     statusPort,
     registry,
@@ -296,6 +319,8 @@ export function buildEstimateFixture(
     panels,
     bomLines,
     costLines,
+    aiRuns,
+    attachments,
     items,
     manager,
     dataSource,

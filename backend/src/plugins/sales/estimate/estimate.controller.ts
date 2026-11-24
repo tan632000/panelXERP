@@ -49,6 +49,7 @@ import {
 } from '@plugins/sales/estimate/permissions/estimate.permissions';
 import { EstimateEditService } from '@plugins/sales/estimate/services/estimate-edit.service';
 import { EstimatePricingService } from '@plugins/sales/estimate/services/estimate-pricing.service';
+import { EstimateVerifyService } from '@plugins/sales/estimate/services/estimate-verify.service';
 import { EstimateService } from '@plugins/sales/estimate/services/estimate.service';
 
 import type { AuthUserPayload } from '@kernel/core/auth/decorators/auth.decorators';
@@ -67,6 +68,7 @@ export class EstimateController {
     private readonly service: EstimateService,
     private readonly editor: EstimateEditService,
     private readonly pricing: EstimatePricingService,
+    private readonly verifier: EstimateVerifyService,
   ) {}
 
   @Get()
@@ -293,6 +295,41 @@ export class EstimateController {
     @CurrentUser() user: AuthUserPayload,
   ) {
     return this.editor.deleteBomLine(id, lineId, user);
+  }
+
+  @Patch(':id/bom-lines/:lineId/verify')
+  @RequirePermission(ESTIMATE_UPDATE)
+  @ApiOperation({
+    summary: 'Verify one AI-chosen BOM line of the draft',
+    description:
+      'The engineer’s check of a line an AI run chose. Idempotent; a manual line is left as it is. Returns the whole revision.',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiParam({ name: 'lineId', type: Number })
+  @ApiResponse({ status: 200, description: 'Line verified' })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({ status: 409, description: READ_ONLY })
+  verifyBomLine(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('lineId', ParseIntPipe) lineId: number,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.verifier.verifyBomLine(id, lineId, user);
+  }
+
+  @Post(':id/verify')
+  @HttpCode(200)
+  @RequirePermission(ESTIMATE_UPDATE)
+  @ApiOperation({ summary: 'Verify every AI-chosen BOM line of the draft' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Lines verified' })
+  @ApiResponse({ status: 404, description: NOT_FOUND })
+  @ApiResponse({ status: 409, description: READ_ONLY })
+  verifyAll(
+    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: AuthUserPayload,
+  ) {
+    return this.verifier.verifyAll(id, user);
   }
 
   @Patch(':id/bom-lines/:lineId/unit-cost')

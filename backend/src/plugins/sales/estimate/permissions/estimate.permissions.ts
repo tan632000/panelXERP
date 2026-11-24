@@ -3,6 +3,7 @@ export const ESTIMATE_CREATE = 'estimate:create' as const;
 export const ESTIMATE_UPDATE = 'estimate:update' as const;
 export const ESTIMATE_SUBMIT = 'estimate:submit' as const;
 export const ESTIMATE_PRICE = 'estimate:price' as const;
+export const ESTIMATE_AI_PREFILL = 'estimate:ai_prefill' as const;
 
 export const estimatePermissions = [
   ESTIMATE_READ,
@@ -10,4 +11,5 @@ export const estimatePermissions = [
   ESTIMATE_UPDATE,
   ESTIMATE_SUBMIT,
   ESTIMATE_PRICE,
+  ESTIMATE_AI_PREFILL,
 ] as const;

@@ -58,4 +58,25 @@ export class EstimateBomLine {
 
   @Column({ type: 'varchar', length: 500, nullable: true })
   note?: string | null;
+  /** True when an AI run chose the line; the engineer checks it with `isVerified`. */
+  @Column({ type: 'boolean', name: 'is_ai_generated', default: false })
+  isAiGenerated: boolean;
+
+  /** How sure the AI was of the match, 0..1; null for a manual line. */
+  @Column({
+    type: 'numeric',
+    precision: 3,
+    scale: 2,
+    name: 'ai_confidence',
+    nullable: true,
+    transformer: numericColumnTransformer,
+  })
+  aiConfidence?: number | null;
+
+  @Column({ type: 'varchar', length: 1000, name: 'ai_note', nullable: true })
+  aiNote?: string | null;
+
+  /** The engineer's check of an AI line; editing the line does not set it. */
+  @Column({ type: 'boolean', name: 'is_verified', default: false })
+  isVerified: boolean;
 }

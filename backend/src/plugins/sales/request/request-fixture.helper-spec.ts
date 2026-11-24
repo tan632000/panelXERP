@@ -11,6 +11,7 @@ import { CustomerOwnerChangeRegistry } from '@plugins/crm/_shared/gateways/custo
 import { ReferenceCheckRegistry } from '@plugins/crm/_shared/gateways/reference-check-registry';
 import { RequestCloseRegistry } from '@plugins/sales/_shared/ports/request-close-registry';
 import { RequestStatusPort } from '@plugins/sales/_shared/ports/request-status.port';
+import { Estimate } from '@plugins/sales/estimate/entities/estimate.entity';
 import { SalesRequestActivity } from '@plugins/sales/request/entities/request-activity.entity';
 import { SalesRequestAttachment } from '@plugins/sales/request/entities/request-attachment.entity';
 import { SalesRequest } from '@plugins/sales/request/entities/request.entity';
@@ -77,10 +78,13 @@ export function buildRequestFixture(
   });
   const activities = new SalesFakeRepo<SalesRequestActivity & FakeRow>();
   const attachments = new SalesFakeRepo<SalesRequestAttachment & FakeRow>();
+  // Assigning looks for an existing estimate; the estimate feature's other tables are not modelled.
+  const estimates = new SalesFakeRepo<Estimate & FakeRow>();
   const repos = new Map<unknown, SalesFakeRepo<FakeRow>>([
     [SalesRequest, requests],
     [SalesRequestActivity, activities],
     [SalesRequestAttachment, attachments],
+    [Estimate, estimates],
   ]);
 
   /** Emulates `previewMaxBasedCode`'s query: the highest number among codes matching the pattern. */
@@ -311,6 +315,7 @@ export function buildRequestFixture(
     requests,
     activities,
     attachments,
+    estimates,
     manager,
     dataSource,
     crm,
