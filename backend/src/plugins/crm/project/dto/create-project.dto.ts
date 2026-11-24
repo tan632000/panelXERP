@@ -46,6 +46,17 @@ export class CreateProjectDto {
   @MaxLength(500, { message: 'Site address must not exceed 500 characters.' })
   siteAddress?: string;
 
+  @ApiPropertyOptional({
+    description:
+      'Active quotation template to prefill estimates from; null clears it',
+    nullable: true,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'Quotation template must be an integer.' })
+  @Min(1, { message: 'Quotation template must be an integer.' })
+  quotationTemplateId?: number | null;
+
   @ApiPropertyOptional({ description: 'Note', maxLength: 2000 })
   @IsOptional()
   @IsString({ message: 'Note must be a string.' })

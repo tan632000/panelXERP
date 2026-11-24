@@ -7,6 +7,8 @@
   "customer": "Customer",
   "siteAddress": "Site address",
   "note": "Note",
+  "quotationTemplate": "Quotation template",
+  "quotationTemplateNone": "None",
   "addButton": "Add project",
   "addModalTitle": "Add new project",
   "editModalTitle": "Edit project: {code}",

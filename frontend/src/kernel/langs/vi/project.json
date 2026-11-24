@@ -7,6 +7,8 @@
   "customer": "Khách hàng",
   "siteAddress": "Địa chỉ dự án",
   "note": "Ghi chú",
+  "quotationTemplate": "Mẫu dự toán",
+  "quotationTemplateNone": "Không dùng",
   "addButton": "Thêm dự án",
   "addModalTitle": "Thêm dự án mới",
   "editModalTitle": "Sửa dự án: {code}",

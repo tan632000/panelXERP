@@ -7,22 +7,32 @@ import { FormInput } from "@/kernel/core/components/ui/FormInput";
 import { FormTextArea } from "@/kernel/core/components/ui/FormTextArea";
 
 import { CustomerPicker } from "./CustomerPicker";
+import { TemplatePicker } from "./TemplatePicker";
 
 import type { ProjectFormInput } from "@plugins/crm/project/schemas/project.schema";
 import type { Project } from "@plugins/crm/project/types";
+import type { QuotationTemplate } from "@plugins/sales/template/types";
 import type { UseFormReturn } from "react-hook-form";
 
 interface ProjectFormFieldsProps {
   form: UseFormReturn<ProjectFormInput>;
   /** The project being edited; absent when creating one. */
   project?: Project;
+  /** Whether the actor may read templates; the picker is hidden otherwise. */
+  showTemplate?: boolean;
+  templates?: QuotationTemplate[];
 }
 
 function customerLabel(code?: string | null, name?: string | null): string {
   return [code, name].filter(Boolean).join(" — ");
 }
 
-export function ProjectFormFields({ form, project }: ProjectFormFieldsProps) {
+export function ProjectFormFields({
+  form,
+  project,
+  showTemplate = false,
+  templates = [],
+}: ProjectFormFieldsProps) {
   const t = useTranslations("project");
   const {
     register,
@@ -82,6 +92,24 @@ export function ProjectFormFields({ form, project }: ProjectFormFieldsProps) {
         error={errors.name?.message}
         {...register("name")}
       />
+
+      {showTemplate && (
+        <TemplatePicker
+          templates={templates}
+          value={watch("quotationTemplateId") ?? ""}
+          onChange={(next) =>
+            setValue("quotationTemplateId", next, { shouldDirty: true })
+          }
+          current={
+            project?.quotationTemplateId
+              ? {
+                  id: project.quotationTemplateId,
+                  name: project.quotationTemplateName,
+                }
+              : undefined
+          }
+        />
+      )}
 
       <FormInput
         label={t("siteAddress")}

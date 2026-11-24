@@ -57,6 +57,11 @@ interface ResponseBody {
   failed: unknown[];
 }
 
+interface TemplateBody {
+  quotationTemplateId: number | null;
+  quotationTemplateName: string | null;
+}
+
 const bodyOf = (res: request.Response): ResponseBody =>
   res.body as ResponseBody;
 
@@ -65,6 +70,12 @@ describe('ProjectController', () => {
   let registry: ReferenceCheckRegistry;
   let projects: FakeRepo<Project & FakeRow>;
   let customerId: number;
+  let templateRows: Array<{
+    id: number;
+    name: string;
+    isActive: boolean;
+    isDeleted: boolean;
+  }>;
   let newProject: { code: string; customerId: number; name: string };
 
   beforeEach(async () => {
@@ -86,6 +97,26 @@ describe('ProjectController', () => {
         },
       ],
     });
+
+    // The service reads quotation_templates through the repo's manager: one query to validate an
+    // assignment (live and active only) and one to name the templates a view shows.
+    templateRows = [
+      { id: 1, name: 'Main board', isActive: true, isDeleted: false },
+      { id: 2, name: 'Retired', isActive: false, isDeleted: false },
+      { id: 3, name: 'Gone', isActive: true, isDeleted: true },
+    ];
+    projects.manager = {
+      ...projects.manager,
+      query: jest.fn((sql: string, [param]: [number | number[]]) => {
+        const ids = Array.isArray(param) ? param : [param];
+        const found = templateRows.filter(
+          (row) =>
+            ids.includes(row.id) &&
+            (!sql.includes('is_active') || (row.isActive && !row.isDeleted)),
+        );
+        return Promise.resolve(found);
+      }),
+    } as never;
 
     const moduleRef = await Test.createTestingModule({
       controllers: [ProjectController],
@@ -259,6 +290,92 @@ describe('ProjectController', () => {
       expect(bodyOf(bulk).deleted).toEqual([]);
       expect(bodyOf(bulk).failed).toHaveLength(1);
       expect(projects.rows[0].isDeleted).toBe(false);
+    });
+  });
+
+  describe('quotation template', () => {
+    const post = (body: object) =>
+      request(app.getHttpServer())
+        .post('/projects')
+        .set(as(SALES_A))
+        .send(body);
+    const patch = (id: number, body: object) =>
+      request(app.getHttpServer())
+        .patch(`/projects/${id}`)
+        .set(as(SALES_A))
+        .send(body);
+    const detail = async (id: number) =>
+      (
+        await request(app.getHttpServer())
+          .get(`/projects/${id}`)
+          .set(as(SALES_A))
+      ).body as TemplateBody;
+
+    it('creates a project without a template as before', async () => {
+      const res = await post(newProject);
+      expect(res.status).toBe(201);
+      expect(res.body).toMatchObject({
+        quotationTemplateId: null,
+        quotationTemplateName: null,
+      });
+    });
+
+    it('stores a live active template and returns it on detail and list', async () => {
+      const res = await post({ ...newProject, quotationTemplateId: 1 });
+      expect(res.status).toBe(201);
+
+      expect(await detail(bodyOf(res).id)).toMatchObject({
+        quotationTemplateId: 1,
+        quotationTemplateName: 'Main board',
+      });
+      const list = await request(app.getHttpServer())
+        .get('/projects')
+        .set(as(SALES_A));
+      expect((list.body as { data: TemplateBody[] }).data[0]).toMatchObject({
+        quotationTemplateId: 1,
+        quotationTemplateName: 'Main board',
+      });
+    });
+
+    it.each([
+      ['unknown', 99],
+      ['inactive', 2],
+      ['deleted', 3],
+    ])(
+      'answers 400 to a %s template on create and stores nothing',
+      async (_l, id) => {
+        const res = await post({ ...newProject, quotationTemplateId: id });
+        expect(res.status).toBe(400);
+        expect(projects.rows).toHaveLength(0);
+      },
+    );
+
+    it('sets, rejects and clears the template on PATCH', async () => {
+      const id = bodyOf(await post(newProject)).id;
+
+      expect((await patch(id, { quotationTemplateId: 2 })).status).toBe(400);
+      expect(projects.rows[0].quotationTemplateId ?? null).toBeNull();
+
+      expect((await patch(id, { quotationTemplateId: 1 })).status).toBe(200);
+      expect(projects.rows[0].quotationTemplateId).toBe(1);
+
+      // A name edit leaves the template alone; null clears it.
+      expect((await patch(id, { name: 'Renamed' })).status).toBe(200);
+      expect(projects.rows[0].quotationTemplateId).toBe(1);
+      const cleared = await patch(id, { quotationTemplateId: null });
+      expect(cleared.status).toBe(200);
+      expect(projects.rows[0].quotationTemplateId).toBeNull();
+    });
+
+    it('keeps naming a template that was deactivated after the assignment', async () => {
+      const id = bodyOf(
+        await post({ ...newProject, quotationTemplateId: 1 }),
+      ).id;
+      templateRows[0].isActive = false;
+      expect(await detail(id)).toMatchObject({
+        quotationTemplateId: 1,
+        quotationTemplateName: 'Main board',
+      });
     });
   });
 

@@ -1,7 +1,9 @@
 import api from "@/kernel/core/api/api";
 import { requestBulkDelete } from "@/kernel/core/api/bulk-delete";
+import { MAX_PAGE_SIZE } from "@/kernel/core/constants/list-ui";
 
 import { projectApiRoutes } from "@plugins/crm/project/constants";
+import { templateApiRoutes } from "@plugins/sales/template/constants";
 
 import type { BulkDeleteResult } from "@/kernel/core/types/bulk-delete";
 import type { PaginatedResponse } from "@/kernel/core/types/common";
@@ -12,6 +14,7 @@ import type {
   ProjectNextCode,
   UpdateProjectDto,
 } from "@plugins/crm/project/types";
+import type { QuotationTemplate } from "@plugins/sales/template/types";
 
 export async function getProjects(
   params: ProjectListParams = {},
@@ -52,4 +55,18 @@ export async function deleteProject(id: number): Promise<void> {
 
 export function bulkDeleteProjects(ids: number[]): Promise<BulkDeleteResult> {
   return requestBulkDelete(projectApiRoutes.bulkDelete, ids);
+}
+
+/**
+ * The active quotation templates a project may pick. One request: the template list is a
+ * handful of masters, so a list past the page cap is not expected.
+ */
+export async function getActiveQuotationTemplates(): Promise<
+  QuotationTemplate[]
+> {
+  const { data } = await api.get<PaginatedResponse<QuotationTemplate>>(
+    templateApiRoutes.list,
+    { params: { isActive: true, limit: MAX_PAGE_SIZE } },
+  );
+  return data.data;
 }

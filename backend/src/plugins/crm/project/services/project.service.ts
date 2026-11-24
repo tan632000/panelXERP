@@ -1,4 +1,9 @@
-import { ConflictException, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -49,12 +54,15 @@ export const PROJECT_COLUMN_FILTERS: ColumnFilterMap = {
 export type ProjectView = Omit<Project, 'customer'> & {
   customerCode: string | null;
   customerName: string | null;
+  quotationTemplateName: string | null;
 };
 
 const PROJECT_LABEL = 'Project';
 const CUSTOMER_LABEL = 'Customer';
 const REFERENCED_MESSAGE =
   'Cannot delete project because it is referenced by sales documents.';
+
+const TEMPLATE_NOT_USABLE = 'Quotation template must be an active template.';
 
 /** Name the project registers under at the customer delete check. */
 const CUSTOMER_CHECK_NAME = 'project';
@@ -124,12 +132,7 @@ export class ProjectService implements OnModuleInit {
       order,
     });
 
-    return paginate(
-      rows.map((row) => this.toView(row)),
-      total,
-      page,
-      limit,
-    );
+    return paginate(await this.toViews(rows), total, page, limit);
   }
 
   /** Distinct values of one filterable column, limited to the projects the actor can see. */
@@ -143,7 +146,8 @@ export class ProjectService implements OnModuleInit {
   }
 
   async findOne(id: number, actor: AuthUserPayload): Promise<ProjectView> {
-    return this.toView(await this.findVisible(id, actor));
+    const [view] = await this.toViews([await this.findVisible(id, actor)]);
+    return view;
   }
 
   async create(
@@ -155,6 +159,7 @@ export class ProjectService implements OnModuleInit {
 
     const code = dto.code.trim();
     await this.assertCodeUnique(code);
+    await this.assertTemplateUsable(dto.quotationTemplateId);
 
     const project = this.projectRepo.create({
       code,
@@ -162,13 +167,15 @@ export class ProjectService implements OnModuleInit {
       name: requireText(dto.name, 'Project name is required.'),
       siteAddress: trimToNull(dto.siteAddress),
       note: trimToNull(dto.note),
+      quotationTemplateId: dto.quotationTemplateId ?? null,
       createdBy: actor.userId,
       isDeleted: false,
     });
 
     try {
       const saved = await this.projectRepo.save(project);
-      return this.toView({ ...saved, customer });
+      const [view] = await this.toViews([{ ...saved, customer }]);
+      return view;
     } catch (error: unknown) {
       return rethrowUniqueViolation(error, () => this.assertCodeUnique(code));
     }
@@ -190,9 +197,14 @@ export class ProjectService implements OnModuleInit {
       project.siteAddress = trimToNull(dto.siteAddress);
     }
     if (dto.note !== undefined) project.note = trimToNull(dto.note);
+    if (dto.quotationTemplateId !== undefined) {
+      await this.assertTemplateUsable(dto.quotationTemplateId);
+      project.quotationTemplateId = dto.quotationTemplateId;
+    }
     project.updatedBy = actor.userId;
 
-    return this.toView(await this.projectRepo.save(project));
+    const [view] = await this.toViews([await this.projectRepo.save(project)]);
+    return view;
   }
 
   async remove(id: number, actor: AuthUserPayload) {
@@ -259,12 +271,47 @@ export class ProjectService implements OnModuleInit {
     });
   }
 
-  private toView(project: Project): ProjectView {
-    const { customer, ...row } = project;
-    return {
-      ...row,
-      customerCode: customer?.code ?? null,
-      customerName: customer?.name ?? null,
-    };
+  /**
+   * A project accepts a live, active template or none. Skipped for null so CRM never touches
+   * sales tables unless a template is chosen.
+   * shortcut: cross-plugin table read, move to a gateway if more template fields are needed
+   */
+  private async assertTemplateUsable(id: number | null | undefined) {
+    if (id === null || id === undefined) return;
+    const rows: unknown[] = await this.projectRepo.manager.query(
+      `SELECT id FROM quotation_templates
+        WHERE id = $1 AND is_deleted = false AND is_active = true`,
+      [id],
+    );
+    if (rows.length === 0) throw new BadRequestException(TEMPLATE_NOT_USABLE);
+  }
+
+  /** Names of the templates the rows point at (any state: a deactivated one keeps its name). */
+  private async templateNames(rows: Project[]): Promise<Map<number, string>> {
+    const ids = [
+      ...new Set(rows.map((row) => row.quotationTemplateId).filter(Boolean)),
+    ] as number[];
+    if (ids.length === 0) return new Map();
+    // shortcut: cross-plugin table read, move to a gateway if more template fields are needed
+    const found: Array<{ id: number; name: string }> =
+      await this.projectRepo.manager.query(
+        `SELECT id, name FROM quotation_templates WHERE id = ANY($1::int[])`,
+        [ids],
+      );
+    return new Map(found.map((row) => [Number(row.id), row.name]));
+  }
+
+  private async toViews(rows: Project[]): Promise<ProjectView[]> {
+    const names = await this.templateNames(rows);
+    return rows.map((project) => {
+      const { customer, ...row } = project;
+      return {
+        ...row,
+        customerCode: customer?.code ?? null,
+        customerName: customer?.name ?? null,
+        quotationTemplateName:
+          names.get(project.quotationTemplateId ?? 0) ?? null,
+      };
+    });
   }
 }

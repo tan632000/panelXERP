@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import React, { useEffect } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 
+import { useOptionalAuth } from "@/kernel/core/auth/AuthContext";
 import { Modal } from "@/kernel/core/components/ui/Modal";
 import { useFormApiErrorReporter } from "@/kernel/core/hooks/useFormApiErrorReporter";
 import { useNextCodeErrorToast } from "@/kernel/core/hooks/useNextCodeErrorToast";
@@ -14,6 +15,7 @@ import {
   useNextProjectCode,
   useUpdateProject,
 } from "@plugins/crm/project/hooks/api/useProject";
+import { useActiveTemplates } from "@plugins/crm/project/hooks/useActiveTemplates";
 import { useProjectFormSchema } from "@plugins/crm/project/hooks/useProjectFormSchema";
 import {
   EMPTY_PROJECT_FORM,
@@ -22,6 +24,7 @@ import {
   toProjectUpdatePayload,
 } from "@plugins/crm/project/utils/form-payload";
 import { mapProjectApiErrorsToForm } from "@plugins/crm/project/utils/map-project-api-errors";
+import { TemplatePermission } from "@plugins/sales/template/permissions/template-permission.keys";
 
 import { ProjectFormFields } from "./ProjectFormFields";
 
@@ -45,6 +48,12 @@ export function ProjectFormModal({
 }: ProjectFormModalProps) {
   const t = useTranslations("project");
   const tCommon = useTranslations("common");
+  const canReadTemplates =
+    useOptionalAuth()?.can(TemplatePermission.read) ?? false;
+  const templatesQuery = useActiveTemplates(canReadTemplates);
+  // A failed list (e.g. the template feature is off) hides the picker and leaves the stored
+  // template untouched instead of clearing it.
+  const templateEnabled = canReadTemplates && !templatesQuery.isError;
   const { schema, tValidation } = useProjectFormSchema();
   const createMutation = useCreateProject();
   const updateMutation = useUpdateProject();
@@ -81,10 +90,15 @@ export function ProjectFormModal({
       if (project) {
         await updateMutation.mutateAsync({
           id: project.id,
-          data: toProjectUpdatePayload(values),
+          data: toProjectUpdatePayload(values, {
+            templateEnabled,
+            currentTemplateId: project.quotationTemplateId,
+          }),
         });
       } else {
-        await createMutation.mutateAsync(toProjectCreatePayload(values));
+        await createMutation.mutateAsync(
+          toProjectCreatePayload(values, { templateEnabled }),
+        );
       }
       onClose();
     } catch (error: unknown) {
@@ -113,7 +127,12 @@ export function ProjectFormModal({
       cancelLabel={tCommon("cancel")}
       wide
     >
-      <ProjectFormFields form={form} project={project ?? undefined} />
+      <ProjectFormFields
+        form={form}
+        project={project ?? undefined}
+        showTemplate={templateEnabled}
+        templates={templatesQuery.data}
+      />
     </Modal>
   );
 }

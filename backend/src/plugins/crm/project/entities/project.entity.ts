@@ -27,6 +27,10 @@ export class Project extends BaseEntity {
   @Column({ type: 'text', nullable: true })
   note?: string | null;
 
+  /** The quotation template this project's estimates start from; no foreign key, plugins stay decoupled. */
+  @Column({ type: 'int', name: 'quotation_template_id', nullable: true })
+  quotationTemplateId?: number | null;
+
   /** Joined for scope checks and the list; visibility follows `customer.salesOwnerId`. */
   @ManyToOne(() => Customer)
   @JoinColumn({ name: 'customer_id' })

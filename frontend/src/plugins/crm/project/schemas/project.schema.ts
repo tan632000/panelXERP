@@ -36,6 +36,8 @@ export function createProjectSchema(messages: ProjectValidationMessages) {
       .max(255, messages.nameMax),
     siteAddress: optionalMaxString(500, messages.siteAddressMax),
     note: optionalMaxString(2000, messages.noteMax),
+    /** Template id as the select holds it; empty means no template. */
+    quotationTemplateId: z.string().optional(),
   });
 }
 
