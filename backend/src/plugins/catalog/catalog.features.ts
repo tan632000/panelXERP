@@ -1,3 +1,4 @@
+import { seedCatalogItems } from '@plugins/catalog/item/database/seed-catalog-items';
 import { ItemModule } from '@plugins/catalog/item/item.module';
 import { itemPermissions } from '@plugins/catalog/item/permissions/item.permissions';
 import { LocationModule } from '@plugins/catalog/location/location.module';
@@ -12,6 +13,7 @@ export const CATALOG_FEATURES: ErpFeature[] = [
     plugin: 'catalog',
     module: ItemModule,
     permissions: itemPermissions,
+    seed: seedCatalogItems,
   },
   {
     key: 'location',
