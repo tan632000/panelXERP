@@ -4,5 +4,6 @@
   "requests": "Quote requests",
   "estimates": "Estimates",
   "quotations": "Quotations",
+  "templates": "Quotation templates",
   "orders": "Orders"
 }

@@ -6,6 +6,9 @@ import { quotationPermissions } from '@plugins/sales/quotation/permissions/quota
 import { QuotationModule } from '@plugins/sales/quotation/quotation.module';
 import { requestPermissions } from '@plugins/sales/request/permissions/request.permissions';
 import { RequestModule } from '@plugins/sales/request/request.module';
+import { seedQuotationTemplates } from '@plugins/sales/template/database/seed-quotation-templates';
+import { quotationTemplatePermissions } from '@plugins/sales/template/permissions/quotation-template.permissions';
+import { TemplateModule } from '@plugins/sales/template/template.module';
 
 import type { ErpFeature } from '@kernel/platform/features/feature.contract';
 
@@ -37,5 +40,12 @@ export const SALES_FEATURES: ErpFeature[] = [
     module: OrderModule,
     permissions: orderPermissions,
     dependsOn: ['request', 'estimate', 'quotation'],
+  },
+  {
+    key: 'template',
+    plugin: 'sales',
+    module: TemplateModule,
+    permissions: quotationTemplatePermissions,
+    seed: seedQuotationTemplates,
   },
 ];

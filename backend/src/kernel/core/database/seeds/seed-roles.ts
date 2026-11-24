@@ -28,11 +28,21 @@ const REQUEST_SALES = [
   'request:assign',
   'request:cancel',
 ];
+/** The AI action only; Sales never gets `estimate:create/update/submit`, the engineer edits the draft. */
+const ESTIMATE_AI = ['estimate:ai_prefill'];
 const ESTIMATE_WRITE = [
   'estimate:read',
   'estimate:create',
   'estimate:update',
   'estimate:submit',
+];
+/** Everyone who builds or prices an estimate may read the templates; only the leads maintain them. */
+const TEMPLATE_READ = ['quotation_template:read'];
+const TEMPLATE_MAINTAIN = [
+  ...TEMPLATE_READ,
+  'quotation_template:create',
+  'quotation_template:update',
+  'quotation_template:delete',
 ];
 const QUOTATION_SALES = [
   'quotation:read',
@@ -91,6 +101,8 @@ const ROLES: ReadonlyArray<
       'request:*',
       'estimate:read',
       'estimate:price',
+      ...ESTIMATE_AI,
+      ...TEMPLATE_MAINTAIN,
       'quotation:*',
       'order:*',
       'reference_price:read',
@@ -113,6 +125,8 @@ const ROLES: ReadonlyArray<
       ...REQUEST_SALES,
       'estimate:read',
       'estimate:price',
+      ...ESTIMATE_AI,
+      ...TEMPLATE_READ,
       ...QUOTATION_SALES,
       ...ORDER_SALES,
       'reference_price:read',
@@ -138,6 +152,7 @@ const ROLES: ReadonlyArray<
       'request:assign',
       // Explicit actions, not `estimate:*`: pricing an estimate belongs to sales.
       ...ESTIMATE_WRITE,
+      ...TEMPLATE_MAINTAIN,
       'stock:availability',
       'material:read',
       ...PURCHASE_REQUEST_RAISE,
@@ -153,6 +168,7 @@ const ROLES: ReadonlyArray<
       'item:read',
       'request:read',
       ...ESTIMATE_WRITE,
+      ...TEMPLATE_READ,
       'stock:availability',
       ...PURCHASE_REQUEST_RAISE,
     ],

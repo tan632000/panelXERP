@@ -99,6 +99,7 @@
     "qc_checklist": "Mẫu checklist QC",
     "qc_inspection": "Kiểm tra QC",
     "quotation": "Báo giá",
+    "quotation_template": "Mẫu báo giá",
     "raw_material_issue_mold": "Xuất kho NVL khuôn",
     "raw_material_issue_ng": "Xuất kho NVL NG",
     "raw_material_issue_ok": "Xuất kho NVL OK",
@@ -178,6 +179,7 @@
   },
   "actions": {
     "adjust_balance": "Điều chỉnh SO balance",
+    "ai_prefill": "Điền dự toán bằng AI",
     "approve": "Duyệt",
     "approve:manager": "Duyệt — cấp quản lý",
     "approve:qc": "Duyệt — QC",

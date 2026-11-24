@@ -29,6 +29,7 @@ import stocktakeEn from "@kernel/langs/en/stocktake.json";
 import supplierEn from "@kernel/langs/en/supplier.json";
 import supplierReturnEn from "@kernel/langs/en/supplierReturn.json";
 import systemEn from "@kernel/langs/en/system.json";
+import templateEn from "@kernel/langs/en/template.json";
 import authVi from "@kernel/langs/vi/auth.json";
 import catalogVi from "@kernel/langs/vi/catalog.json";
 import commonVi from "@kernel/langs/vi/common.json";
@@ -60,6 +61,7 @@ import stocktakeVi from "@kernel/langs/vi/stocktake.json";
 import supplierVi from "@kernel/langs/vi/supplier.json";
 import supplierReturnVi from "@kernel/langs/vi/supplierReturn.json";
 import systemVi from "@kernel/langs/vi/system.json";
+import templateVi from "@kernel/langs/vi/template.json";
 
 export const enMessages = {
   auth: authEn,
@@ -88,6 +90,7 @@ export const enMessages = {
   delivery: deliveryEn,
   location: locationEn,
   system: systemEn,
+  template: templateEn,
   permission: permissionEn,
   common: commonEn,
   metadata: metadataEn,
@@ -122,6 +125,7 @@ export const viMessages = {
   delivery: deliveryVi,
   location: locationVi,
   system: systemVi,
+  template: templateVi,
   permission: permissionVi,
   common: commonVi,
   metadata: metadataVi,

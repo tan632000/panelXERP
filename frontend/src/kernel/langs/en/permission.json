@@ -99,6 +99,7 @@
     "qc_checklist": "QC checklist",
     "qc_inspection": "QC inspection",
     "quotation": "Quotation",
+    "quotation_template": "Quotation template",
     "raw_material_issue_mold": "Raw material issue — mold",
     "raw_material_issue_ng": "Raw material issue NG",
     "raw_material_issue_ok": "Raw material issue OK",
@@ -178,6 +179,7 @@
   },
   "actions": {
     "adjust_balance": "Adjust SO balance",
+    "ai_prefill": "Fill estimates with AI",
     "approve": "Approve",
     "approve:manager": "Approve — manager",
     "approve:qc": "Approve — QC",
