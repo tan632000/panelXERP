@@ -117,6 +117,7 @@ export function EstimateDetailPage() {
   }
 
   const revision = estimate.current;
+  const unverifiedAiCount = revision.unverifiedAiCount ?? 0;
   const isLatest = revision.revision === estimate.latestRevision;
   const isDraft = revision.status === "draft";
   // Only the assigned engineer and an engineering lead write an estimate, and only while the
@@ -289,7 +290,9 @@ export function EstimateDetailPage() {
         icon="check"
         title={t("confirmSubmitTitle", { code: estimate.code })}
         description={t("confirmSubmitDescription")}
-        confirmLabel={t("submit")}
+        confirmLabel={
+          unverifiedAiCount > 0 ? t("review.submitAnyway") : t("submit")
+        }
         cancelLabel={tCommon("cancel")}
         pending={submit.isPending}
         onCancel={() => setConfirm(null)}
@@ -298,7 +301,14 @@ export function EstimateDetailPage() {
             onSettled: () => setConfirm(null),
           })
         }
-      />
+      >
+        {/* A warning only: unverified AI lines never block the submit. */}
+        {unverifiedAiCount > 0 ? (
+          <p className="rounded-md bg-warning-bg p-3 text-sm text-warning-text">
+            {t("review.unverifiedWarning", { count: unverifiedAiCount })}
+          </p>
+        ) : null}
+      </ConfirmDialog>
       <ConfirmDialog
         open={confirm === "price"}
         variant="default"

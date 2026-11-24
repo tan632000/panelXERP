@@ -10,6 +10,7 @@ export const EstimatePermission = {
   update: "estimate:update",
   submit: "estimate:submit",
   price: "estimate:price",
+  aiPrefill: "estimate:ai_prefill",
 } as const;
 
 export type EstimatePermissionKey =

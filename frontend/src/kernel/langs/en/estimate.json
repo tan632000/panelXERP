@@ -103,6 +103,16 @@
     "short": "Short",
     "stockLoading": "Loading stock"
   },
+  "review": {
+    "ai": "AI",
+    "confidence": "AI confidence",
+    "verified": "Verified",
+    "verify": "Verify this line",
+    "verifyLine": "Verify line {code}",
+    "verifyAll": "Verify all",
+    "unverifiedWarning": "{count} AI lines are still unverified.",
+    "submitAnyway": "Submit anyway"
+  },
   "cost": {
     "title": "Other panel costs",
     "category": "Cost type",

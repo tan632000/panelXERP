@@ -68,6 +68,8 @@
     "fallbackMessage": "You have a new notification",
     "events": {
       "sales_estimate_submitted": "Estimate {code} for request {requestCode} has been submitted (revision #{revision}).",
+      "sales_estimate_ai_filled": "AI filled the draft estimate {code} for request {requestCode}. Review it before use.",
+      "sales_estimate_ai_failed": "AI could not fill the estimate for request {requestCode}.",
       "sales_request_assigned": "You have been assigned to estimate quote request {code} — {title}.",
       "sales_quotation_submitted": "Quotation {code} for request {requestCode} (version {ver}) is waiting for your approval.",
       "sales_quotation_approved": "Quotation {code} for request {requestCode} has been approved.",

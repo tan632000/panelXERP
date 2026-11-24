@@ -42,6 +42,12 @@ export interface EstimateBomLine {
   unitCost?: number;
   amount?: number;
   note?: string | null;
+  /** True when an AI run chose the line; the engineer checks it with `isVerified`. */
+  isAiGenerated?: boolean;
+  /** 0..1; null for a manual line. */
+  aiConfidence?: number | null;
+  aiNote?: string | null;
+  isVerified?: boolean;
 }
 
 export interface EstimateCostLine {
@@ -57,6 +63,8 @@ export interface EstimatePanel {
   tag: string;
   description?: string | null;
   quantity: number;
+  isAiGenerated?: boolean;
+  aiNote?: string | null;
   /** Cost of one panel. */
   unitCost?: number;
   /** `unitCost × quantity`. */
@@ -77,6 +85,8 @@ export interface EstimateRevision {
   /** Set once sales completes the pricing; a submitted revision without it awaits pricing. */
   pricedAt?: string | null;
   pricedBy?: number | null;
+  /** AI lines the engineer has not verified yet; submitting is allowed regardless. */
+  unverifiedAiCount?: number;
   createdAt?: string;
   panels: EstimatePanel[];
 }

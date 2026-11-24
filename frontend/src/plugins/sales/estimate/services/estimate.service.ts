@@ -126,6 +126,23 @@ export async function setBomLineUnitCost(
   return data;
 }
 
+export async function verifyBomLine(
+  id: number,
+  lineId: number,
+): Promise<EstimateRevision> {
+  const { data } = await api.patch<EstimateRevision>(
+    estimateApiRoutes.verifyBomLine(id, lineId),
+  );
+  return data;
+}
+
+export async function verifyAllBomLines(id: number): Promise<EstimateRevision> {
+  const { data } = await api.post<EstimateRevision>(
+    estimateApiRoutes.verifyAll(id),
+  );
+  return data;
+}
+
 export async function completeEstimatePricing(
   id: number,
 ): Promise<EstimateRevision> {

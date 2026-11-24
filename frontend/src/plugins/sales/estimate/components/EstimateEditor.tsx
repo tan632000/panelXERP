@@ -61,6 +61,7 @@ export function EstimateEditor({
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const panels = revision.panels;
+  const unverifiedAiCount = revision.unverifiedAiCount ?? 0;
   // A panel that vanished (deleted, or a revision switched) falls back to the first one.
   const panel =
     panels.find((entry) => entry.id === chosenPanelId) ?? panels[0] ?? null;
@@ -118,6 +119,18 @@ export function EstimateEditor({
                 <div className="text-sm text-text-primary">
                   {panel.description || t("emptyValue")}
                 </div>
+                {panel.isAiGenerated ? (
+                  <div className="mt-1 flex items-start gap-1.5">
+                    <span className="rounded bg-info-bg px-1.5 py-0.5 text-[10px] font-bold uppercase text-info-text">
+                      {t("review.ai")}
+                    </span>
+                    {panel.aiNote ? (
+                      <span className="text-xs text-text-secondary">
+                        {panel.aiNote}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
               <div>
                 <div className="text-xs font-semibold uppercase text-text-tertiary">
@@ -191,9 +204,22 @@ export function EstimateEditor({
             </div>
 
             <div className="flex flex-col gap-2">
-              <h5 className="text-sm font-semibold text-brand">
-                {t("bom.title")}
-              </h5>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h5 className="text-sm font-semibold text-brand">
+                  {t("bom.title")}
+                </h5>
+                {editable && unverifiedAiCount > 0 ? (
+                  <button
+                    type="button"
+                    className="inline-flex cursor-pointer items-center gap-1 text-sm font-semibold text-brand"
+                    disabled={edits.verifyAll.isPending}
+                    onClick={() => edits.verifyAll.mutate()}
+                  >
+                    <Icon name="check" size={14} />
+                    {t("review.verifyAll")}
+                  </button>
+                ) : null}
+              </div>
               <EstimateBomGrid
                 panel={panel}
                 revisionPanels={panels}

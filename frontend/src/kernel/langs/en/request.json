@@ -118,6 +118,7 @@
     "attachment_added": "Attachment added",
     "attachment_removed": "Attachment removed",
     "estimate_created": "Estimate created",
+    "estimate_ai_filled": "AI filled a draft estimate",
     "estimate_submitted": "Estimate submitted",
     "estimate_revised": "New estimate revision",
     "quotation_created": "Quotation created",
@@ -133,6 +134,25 @@
     "order_updated": "Order updated",
     "order_cancelled": "Order cancelled",
     "other": "Other update"
+  },
+  "ai": {
+    "title": "Fill the estimate with AI",
+    "button": "Analyse & fill with AI",
+    "hint": "AI reads the technical requirements and attached documents to draft an estimate. An engineer must review it.",
+    "noInput": "Enter the technical requirements or attach at least one document before using AI.",
+    "confirmTitle": "Analyse with AI?",
+    "confirmDescription": "The technical requirements and attached documents will be sent to an external AI service for analysis. Continue only if you agree.",
+    "confirmAction": "Send and analyse",
+    "queued": "Waiting in the AI queue...",
+    "running": "AI is analysing the documents, this can take a few minutes...",
+    "succeeded": "AI has filled the draft estimate.",
+    "openEstimate": "Open the estimate",
+    "failed": "AI could not fill the estimate: {reason}",
+    "failedNoReason": "AI could not fill the estimate.",
+    "conflict": "This request cannot be filled by AI right now: it has an estimate AI cannot replace, another run is in progress, or the item catalog is too large.",
+    "unavailable": "The AI service is not configured or is temporarily unavailable. Please contact an administrator.",
+    "limitReached": "You have reached the AI run limit. Please try again later.",
+    "error": "Something went wrong, please try again later."
   },
   "toast": {
     "createSuccess": "Quote request created.",

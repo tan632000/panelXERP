@@ -39,6 +39,8 @@ import type {
 const CELL = "border-b border-border-secondary px-2 py-1.5 align-middle";
 const HEAD =
   "border-b border-border-secondary bg-surface-secondary px-2 py-2 text-left text-xs font-semibold uppercase text-text-tertiary";
+const AI_BADGE =
+  "rounded bg-info-bg px-1.5 py-0.5 text-[10px] font-bold uppercase text-info-text";
 const NUMBER_CELL = `${CELL} text-right tabular-nums`;
 /** Read-only stock columns, in the order `stockCells` fills them. */
 const STOCK_COLUMNS = ["onHand", "available", "short"] as const;
@@ -176,7 +178,7 @@ export function EstimateBomGrid({
                   </>
                 ) : null}
                 <th className={HEAD}>{t("bom.note")}</th>
-                {editable ? <th className={`${HEAD} w-12`} /> : null}
+                {editable ? <th className={`${HEAD} w-20`} /> : null}
               </tr>
             </thead>
             <tbody>
@@ -206,10 +208,48 @@ export function EstimateBomGrid({
                 const unitCost =
                   drafts[draftKey(unitCostField)] ?? line.unitCost ?? 0;
 
+                const aiPending = line.isAiGenerated && !line.isVerified;
+
                 return (
-                  <tr key={line.id}>
+                  <tr
+                    key={line.id}
+                    className={aiPending ? "bg-warning-bg" : undefined}
+                    data-ai-unverified={aiPending ? "true" : undefined}
+                  >
                     <td className={`${CELL} font-mono`}>{line.itemCode}</td>
-                    <td className={CELL}>{line.itemName}</td>
+                    <td className={CELL}>
+                      {line.itemName}
+                      {line.isAiGenerated ? (
+                        <div className="mt-1 flex flex-col gap-0.5">
+                          <span className="flex items-center gap-1.5">
+                            <span className={AI_BADGE}>{t("review.ai")}</span>
+                            {line.aiConfidence != null ? (
+                              <span
+                                className="text-xs text-text-secondary"
+                                title={t("review.confidence")}
+                              >
+                                {`${Math.round(line.aiConfidence * 100)}%`}
+                              </span>
+                            ) : null}
+                            {line.isVerified ? (
+                              <span
+                                className="text-success-text"
+                                role="img"
+                                aria-label={t("review.verified")}
+                                title={t("review.verified")}
+                              >
+                                <Icon name="circle-check" size={14} />
+                              </span>
+                            ) : null}
+                          </span>
+                          {line.aiNote ? (
+                            <span className="text-xs text-text-secondary">
+                              {line.aiNote}
+                            </span>
+                          ) : null}
+                        </div>
+                      ) : null}
+                    </td>
                     <td className={CELL}>
                       {line.itemBrand || t("emptyValue")}
                     </td>
@@ -299,16 +339,37 @@ export function EstimateBomGrid({
                     </td>
                     {editable ? (
                       <td className={CELL}>
-                        <button
-                          type="button"
-                          className="cursor-pointer text-danger-text"
-                          aria-label={t("bom.removeLine", {
-                            code: line.itemCode,
-                          })}
-                          onClick={() => setLineToRemove(line)}
-                        >
-                          <Icon name="trash" size={16} />
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {aiPending ? (
+                            <button
+                              type="button"
+                              className="cursor-pointer text-success-text"
+                              aria-label={t("review.verifyLine", {
+                                code: line.itemCode,
+                              })}
+                              title={t("review.verify")}
+                              disabled={
+                                edits.verifyBomLine.isPending &&
+                                edits.verifyBomLine.variables === line.id
+                              }
+                              onClick={() =>
+                                edits.verifyBomLine.mutate(line.id)
+                              }
+                            >
+                              <Icon name="check" size={16} />
+                            </button>
+                          ) : null}
+                          <button
+                            type="button"
+                            className="cursor-pointer text-danger-text"
+                            aria-label={t("bom.removeLine", {
+                              code: line.itemCode,
+                            })}
+                            onClick={() => setLineToRemove(line)}
+                          >
+                            <Icon name="trash" size={16} />
+                          </button>
+                        </div>
                       </td>
                     ) : null}
                   </tr>

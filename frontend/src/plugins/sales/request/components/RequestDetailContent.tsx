@@ -13,6 +13,7 @@ import { formatIsoDate } from "@/kernel/core/lib/formatters";
 import { RequestEstimateSection } from "@plugins/sales/estimate/components/RequestEstimateSection";
 import { RequestQuotationSection } from "@plugins/sales/quotation/components/RequestQuotationSection";
 
+import { AiPrefillPanel } from "./AiPrefillPanel";
 import { RequestAttachments } from "./RequestAttachments";
 import { RequestStatusBadge } from "./RequestStatusBadge";
 import { RequestTimeline } from "./RequestTimeline";
@@ -143,6 +144,12 @@ export function RequestDetailContent({
             : t("noRequirements")}
         </DetailNoteBox>
       </DetailSection>
+
+      <AiPrefillPanel
+        requestId={request.id}
+        status={request.status}
+        technicalRequirements={request.technicalRequirements}
+      />
 
       <RequestEstimateSection
         requestId={request.id}

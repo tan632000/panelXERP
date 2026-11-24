@@ -103,6 +103,16 @@
     "short": "Thiếu",
     "stockLoading": "Đang tải tồn kho"
   },
+  "review": {
+    "ai": "AI",
+    "confidence": "Độ tin cậy của AI",
+    "verified": "Đã xác nhận",
+    "verify": "Xác nhận dòng này",
+    "verifyLine": "Xác nhận dòng {code}",
+    "verifyAll": "Xác nhận tất cả",
+    "unverifiedWarning": "Còn {count} dòng AI chưa được xác nhận.",
+    "submitAnyway": "Vẫn gửi"
+  },
   "cost": {
     "title": "Chi phí khác của tủ",
     "category": "Loại chi phí",

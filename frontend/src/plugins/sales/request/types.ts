@@ -53,6 +53,16 @@ export interface RequestDetail extends RequestListItem {
   updatedAt?: string;
 }
 
+export type AiPrefillRunStatus = "queued" | "running" | "succeeded" | "failed";
+
+/** One AI fill run as the server reports it; `error` and `summary` are server text. */
+export interface AiPrefillRun {
+  status: AiPrefillRunStatus;
+  error: string | null;
+  estimateId: number | null;
+  summary: string | null;
+}
+
 export interface RequestListParams {
   page?: number;
   limit?: number;

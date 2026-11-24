@@ -118,6 +118,7 @@
     "attachment_added": "Thêm tài liệu",
     "attachment_removed": "Xoá tài liệu",
     "estimate_created": "Tạo dự toán",
+    "estimate_ai_filled": "AI điền nháp dự toán",
     "estimate_submitted": "Gửi dự toán",
     "estimate_revised": "Lập bản dự toán mới",
     "quotation_created": "Tạo báo giá",
@@ -133,6 +134,25 @@
     "order_updated": "Cập nhật đơn hàng",
     "order_cancelled": "Huỷ đơn hàng",
     "other": "Cập nhật khác"
+  },
+  "ai": {
+    "title": "Điền dự toán bằng AI",
+    "button": "Phân tích & Điền bằng AI",
+    "hint": "AI đọc yêu cầu kỹ thuật và tài liệu đính kèm để lập nháp dự toán. Kỹ sư cần kiểm tra lại.",
+    "noInput": "Cần nhập yêu cầu kỹ thuật hoặc đính kèm ít nhất 1 tài liệu trước khi dùng AI.",
+    "confirmTitle": "Phân tích bằng AI?",
+    "confirmDescription": "Yêu cầu kỹ thuật và tài liệu đính kèm sẽ được gửi tới dịch vụ AI bên ngoài để phân tích. Chỉ tiếp tục nếu bạn đồng ý.",
+    "confirmAction": "Gửi và phân tích",
+    "queued": "Đang xếp hàng chờ AI...",
+    "running": "AI đang phân tích tài liệu, có thể mất vài phút...",
+    "succeeded": "AI đã điền xong nháp dự toán.",
+    "openEstimate": "Mở dự toán",
+    "failed": "AI không điền được dự toán: {reason}",
+    "failedNoReason": "AI không điền được dự toán.",
+    "conflict": "Yêu cầu này hiện không thể điền bằng AI: đã có dự toán không thay thế được, đang có lượt chạy khác, hoặc danh mục vật tư quá lớn.",
+    "unavailable": "Dịch vụ AI chưa được cấu hình hoặc tạm thời không dùng được. Vui lòng liên hệ quản trị viên.",
+    "limitReached": "Bạn đã đạt giới hạn số lượt chạy AI. Vui lòng thử lại sau.",
+    "error": "Đã có lỗi xảy ra, vui lòng thử lại sau."
   },
   "toast": {
     "createSuccess": "Tạo yêu cầu báo giá thành công.",

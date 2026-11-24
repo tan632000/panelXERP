@@ -138,6 +138,7 @@ describe("RequestDetailPage", () => {
   it("names every step the estimate, quotation and order write to the timeline, never a raw key", async () => {
     const actions = [
       "estimate_created",
+      "estimate_ai_filled",
       "estimate_submitted",
       "quotation_created",
       "quotation_submitted",

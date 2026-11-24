@@ -68,6 +68,8 @@
     "fallbackMessage": "Bạn có thông báo mới",
     "events": {
       "sales_estimate_submitted": "Dự toán {code} của yêu cầu {requestCode} đã được gửi (bản #{revision}).",
+      "sales_estimate_ai_filled": "AI đã điền nháp dự toán {code} cho yêu cầu {requestCode}. Hãy kiểm tra trước khi dùng.",
+      "sales_estimate_ai_failed": "AI không điền được dự toán cho yêu cầu {requestCode}.",
       "sales_request_assigned": "Bạn được giao dự toán yêu cầu báo giá {code} — {title}.",
       "sales_quotation_submitted": "Báo giá {code} của yêu cầu {requestCode} (phiên bản {ver}) đang chờ bạn duyệt.",
       "sales_quotation_approved": "Báo giá {code} của yêu cầu {requestCode} đã được duyệt.",

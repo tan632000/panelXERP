@@ -24,6 +24,7 @@ const TIMELINE_ACTIONS = [
   "attachment_added",
   "attachment_removed",
   "estimate_created",
+  "estimate_ai_filled",
   "estimate_submitted",
   "estimate_revised",
   "quotation_created",

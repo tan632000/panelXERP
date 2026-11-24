@@ -10,6 +10,7 @@ import {
 import type { RecordPickerPageParams } from "@/kernel/core/hooks/useRecordPickerQuery";
 import type { PaginatedResponse } from "@/kernel/core/types/common";
 import type {
+  AiPrefillRun,
   AssignRequestDto,
   CreateRequestDto,
   EngineerOption,
@@ -148,6 +149,23 @@ export async function fetchRequestAttachment(
   return data;
 }
 
+const AI_PREFILL_ROUTE = "/sales/estimates/ai-prefill";
+
+/** Queues an AI run that fills the estimate of a request; the run is polled by its id. */
+export async function startAiPrefill(
+  requestId: number,
+): Promise<{ runId: number }> {
+  const { data } = await api.post<{ runId: number }>(AI_PREFILL_ROUTE, {
+    requestId,
+  });
+  return data;
+}
+
+export async function getAiPrefillRun(runId: number): Promise<AiPrefillRun> {
+  const { data } = await api.get<AiPrefillRun>(`${AI_PREFILL_ROUTE}/${runId}`);
+  return data;
+}
+
 /** The projects of one customer, for the project select of the request form. */
 export async function getCustomerProjectOptions(
   customerId: number,
@@ -179,7 +197,9 @@ export async function searchProjectOptions(
 ): Promise<PaginatedResponse<ProjectSearchOption>> {
   const { data } = await api.get<PaginatedResponse<ProjectSearchOption>>(
     projectApiRoutes.list,
-    { params: { page: params.page, limit: params.limit, search: params.search } },
+    {
+      params: { page: params.page, limit: params.limit, search: params.search },
+    },
   );
   return data;
 }

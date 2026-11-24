@@ -50,6 +50,9 @@ export const estimateApiRoutes = {
     `/sales/estimates/${id}/bom-lines/${lineId}`,
   unitCost: (id: number | string, lineId: number | string) =>
     `/sales/estimates/${id}/bom-lines/${lineId}/unit-cost`,
+  verifyBomLine: (id: number | string, lineId: number | string) =>
+    `/sales/estimates/${id}/bom-lines/${lineId}/verify`,
+  verifyAll: (id: number | string) => `/sales/estimates/${id}/verify`,
   price: (id: number | string) => `/sales/estimates/${id}/price`,
   costLines: (id: number | string, panelId: number | string) =>
     `/sales/estimates/${id}/panels/${panelId}/cost-lines`,

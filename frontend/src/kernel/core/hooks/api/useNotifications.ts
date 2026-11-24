@@ -171,6 +171,8 @@ export const NOTIFICATION_EVENT_KEYS = [
   "sp_can_bo_sung_ky_thuat",
   "sales.request.assigned",
   "sales.estimate.submitted",
+  "sales.estimate.ai_filled",
+  "sales.estimate.ai_failed",
   "sales.quotation.submitted",
   "sales.quotation.approved",
   "sales.quotation.rejected",
@@ -1240,6 +1242,25 @@ export function resolveNotificationMessage(
           requestCode: field(payload.requestCode),
           revision: displayNumber(payload.revision),
         },
+      };
+    }
+
+    if (item.eventType === "sales.estimate.ai_filled") {
+      return {
+        kind: "key",
+        key: "events.sales_estimate_ai_filled",
+        values: {
+          code: field(payload.code),
+          requestCode: field(payload.requestCode),
+        },
+      };
+    }
+
+    if (item.eventType === "sales.estimate.ai_failed") {
+      return {
+        kind: "key",
+        key: "events.sales_estimate_ai_failed",
+        values: { requestCode: field(payload.requestCode) },
       };
     }
 

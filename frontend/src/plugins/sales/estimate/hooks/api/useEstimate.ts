@@ -27,6 +27,8 @@ import {
   updateBomLine,
   updateCostLine,
   updatePanel,
+  verifyAllBomLines,
+  verifyBomLine,
 } from "@plugins/sales/estimate/services/estimate.service";
 import { resolveEstimateToastKey } from "@plugins/sales/estimate/utils/map-estimate-api-errors";
 import { requestQueryKeys } from "@plugins/sales/request/constants";
@@ -214,6 +216,14 @@ export function useEstimateEdits(estimateId: number, revisionKey?: number) {
     setUnitCost: useMutationFeedback({
       mutationFn: (input: { lineId: number; data: PriceBomLineDto }) =>
         setBomLineUnitCost(estimateId, input.lineId, input.data),
+      ...options,
+    }),
+    verifyBomLine: useMutationFeedback({
+      mutationFn: (lineId: number) => verifyBomLine(estimateId, lineId),
+      ...options,
+    }),
+    verifyAll: useMutationFeedback({
+      mutationFn: () => verifyAllBomLines(estimateId),
       ...options,
     }),
     deleteBomLine: useMutationFeedback({
