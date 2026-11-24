@@ -105,17 +105,26 @@ export class OpenAiAiClient implements AiClient {
     }
 
     const body = (await response.json().catch(() => null)) as {
+      status?: string;
+      incomplete_details?: { reason?: string } | null;
       output?: Array<{ type?: string; name?: string; arguments?: string }>;
     } | null;
     const call = body?.output?.find(
       (item) => item.type === 'function_call' && item.name === request.toolName,
     );
+    // Only provider status codes are logged, never document or answer content.
     if (!call || typeof call.arguments !== 'string') {
+      this.logger.warn(
+        `OpenAI answer has no tool call status=${body?.status ?? 'none'} incomplete=${body?.incomplete_details?.reason ?? 'none'}`,
+      );
       throw new AiOutputInvalidError();
     }
     try {
       return JSON.parse(call.arguments) as unknown;
     } catch {
+      this.logger.warn(
+        `OpenAI tool arguments are not JSON status=${body?.status ?? 'none'} incomplete=${body?.incomplete_details?.reason ?? 'none'}`,
+      );
       throw new AiOutputInvalidError();
     }
   }
