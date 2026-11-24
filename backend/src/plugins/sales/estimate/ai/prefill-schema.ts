@@ -64,6 +64,19 @@ export const PREFILL_TOOL_SCHEMA = {
               properties: {
                 itemId: { type: 'integer' },
                 quantity: { type: 'number' },
+                // One entry per place the item appears in the document; the server sums them,
+                // so the model never adds in its head. When present it overrides `quantity`.
+                breakdown: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    required: ['where', 'quantity'],
+                    properties: {
+                      where: { type: 'string' },
+                      quantity: { type: 'number' },
+                    },
+                  },
+                },
                 confidence: { type: 'number', minimum: 0, maximum: 1 },
                 note: { type: 'string' },
               },
@@ -86,6 +99,50 @@ export const PREFILL_TOOL_SCHEMA = {
     },
   },
 } as const;
+
+const MAX_BREAKDOWN_ENTRIES = 100;
+const MAX_BREAKDOWN_WHERE_LENGTH = 60;
+
+/**
+ * Adds up the per-place quantities of one line. A missing or malformed breakdown answers
+ * undefined so the line keeps the quantity the model gave: a helper field must not fail a run.
+ */
+function sumBreakdown(
+  value: unknown,
+): { total: number; label: string } | undefined {
+  if (
+    !Array.isArray(value) ||
+    value.length === 0 ||
+    value.length > MAX_BREAKDOWN_ENTRIES
+  ) {
+    return undefined;
+  }
+  const parts: Array<{ where: string; quantity: number }> = [];
+  for (const entry of value) {
+    if (!isRecord(entry)) return undefined;
+    const { where, quantity } = entry;
+    if (
+      typeof where !== 'string' ||
+      typeof quantity !== 'number' ||
+      !Number.isFinite(quantity) ||
+      quantity <= 0
+    ) {
+      return undefined;
+    }
+    parts.push({
+      where: redactMoney(where).trim().slice(0, MAX_BREAKDOWN_WHERE_LENGTH),
+      quantity,
+    });
+  }
+  // Rounded to the 3 decimals the quantity column stores, so 0.1 + 0.2 stays 0.3.
+  const total =
+    Math.round(parts.reduce((s, p) => s + p.quantity, 0) * 1000) / 1000;
+  const label =
+    parts.length > 1
+      ? `Cộng từ: ${parts.map((p) => `${p.where} ${p.quantity}`).join(' + ')} = ${total}.`
+      : '';
+  return { total, label };
+}
 
 const invalid = (): never => {
   throw new AiOutputInvalidError();
@@ -158,10 +215,14 @@ export function normalizeDraft(
     for (const lineValue of linesRaw) {
       const l = asRecord(lineValue);
       const itemId = asNumber(l.itemId);
-      const lineQuantity = asNumber(l.quantity);
+      const summed = sumBreakdown(l.breakdown);
+      const lineQuantity = summed ? summed.total : asNumber(l.quantity);
       const confidence = asNumber(l.confidence);
       if (confidence < 0 || confidence > 1) invalid();
-      const note = text(l.note, MAX_NOTE_LENGTH, false);
+      const note = [text(l.note, MAX_NOTE_LENGTH, false), summed?.label]
+        .filter(Boolean)
+        .join(' ')
+        .slice(0, MAX_NOTE_LENGTH);
       if (!catalogIds.has(itemId)) {
         notes.push(`Bỏ dòng: vật tư #${itemId} không có trong danh mục.`);
       } else if (lineQuantity <= 0 || lineQuantity > MAX_BOM_QUANTITY) {

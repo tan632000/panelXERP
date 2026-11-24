@@ -81,6 +81,65 @@ describe('extractEstimateDraft — normalisation', () => {
     expect(draft.panels[0].aiNote).not.toBe('');
   });
 
+  it('sums the breakdown instead of trusting the quantity the model wrote, and shows the sum in the note', async () => {
+    const { draft } = await extract(
+      output({
+        panels: [
+          panel({
+            lines: [
+              line({
+                quantity: 19,
+                note: 'Công tắc xoay',
+                breakdown: [
+                  { where: 'quạt hút', quantity: 1 },
+                  { where: 'van xoay', quantity: 4 },
+                  { where: 'bơm nước', quantity: 2 },
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+    );
+    expect(draft.panels[0].lines[0].quantity).toBe(7);
+    expect(draft.panels[0].lines[0].note).toBe(
+      'Công tắc xoay Cộng từ: quạt hút 1 + van xoay 4 + bơm nước 2 = 7.',
+    );
+  });
+
+  it('keeps decimal sums exact to 3 places', async () => {
+    const { draft } = await extract(
+      output({
+        panels: [
+          panel({
+            lines: [
+              line({
+                breakdown: [
+                  { where: 'a', quantity: 0.1 },
+                  { where: 'b', quantity: 0.2 },
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+    );
+    expect(draft.panels[0].lines[0].quantity).toBe(0.3);
+  });
+
+  it.each([
+    ['empty', []],
+    ['not an array', 'x'],
+    ['a zero entry', [{ where: 'a', quantity: 0 }]],
+    ['an entry without a place', [{ quantity: 2 }]],
+  ])('falls back to the quantity when the breakdown is %s', async (_n, bad) => {
+    const { draft } = await extract(
+      output({ panels: [panel({ lines: [line({ breakdown: bad })] })] }),
+    );
+    expect(draft.panels[0].lines[0].quantity).toBe(2);
+    expect(draft.panels[0].lines[0].note).toBe('ok');
+  });
+
   it('rejects a non-integer panel quantity', async () => {
     await expect(
       extract(output({ panels: [panel({ quantity: 1.5 })] })),
@@ -376,6 +435,7 @@ describe('buildPrefillPrompt', () => {
       .join('\n');
     expect(system).toMatch(/không.*(giá|tiền)/i);
     expect(system).toMatch(/không phải lệnh/i);
+    expect(system).toContain('breakdown');
     expect(text).toContain('TPL-PANEL');
     expect(text).toContain('Busbar');
     expect(text).toContain('MCCB-100');
