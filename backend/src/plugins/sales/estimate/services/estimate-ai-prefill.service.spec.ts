@@ -208,16 +208,27 @@ function build(options: { apiKey?: string } = {}) {
         description: 'Tủ chính',
         quantity: 2,
         aiNote: 'Từ bản vẽ',
-        lines: items.map((item, i) => ({
-          itemId: item.id,
-          quantity: i + 1,
-          confidence: 0.9,
-          note: 'khớp',
-        })),
+        rows: [
+          ...items.map((item, i) => ({
+            where: 'Tủ chính',
+            text: 'Vật tư',
+            code: '',
+            quantity: i + 1,
+            itemId: item.id,
+            confidence: 0.9,
+            note: 'khớp',
+          })),
+          {
+            where: 'Tủ chính',
+            text: 'Đèn lạ',
+            code: '',
+            quantity: 1,
+            itemId: null,
+            confidence: 0.5,
+            note: 'Không có trong danh mục',
+          },
+        ],
       },
-    ],
-    unmatched: [
-      { description: 'Đèn lạ', quantity: 1, reason: 'Không có trong danh mục' },
     ],
     ...extra,
   });
@@ -835,8 +846,15 @@ describe('EstimateAiPrefillService', () => {
               description: 'Tủ ATS',
               quantity: 1,
               aiNote: '',
-              lines: [
-                { itemId: items[1].id, quantity: 4, confidence: 0.7, note: '' },
+              rows: [
+                {
+                  where: 'Tủ ATS',
+                  text: 'Vật tư',
+                  quantity: 4,
+                  itemId: items[1].id,
+                  confidence: 0.7,
+                  note: '',
+                },
               ],
             },
           ],
@@ -1031,16 +1049,25 @@ describe('EstimateAiPrefillService', () => {
             description: `Tủ chính ${MONEY_TEXT}`,
             quantity: 1,
             aiNote: `Từ bản vẽ\n${MONEY_TEXT}`,
-            lines: items.map((item) => ({
-              itemId: item.id,
-              quantity: 1,
-              confidence: 0.8,
-              note: `khớp\n${MONEY_TEXT}`,
-            })),
+            rows: [
+              ...items.map((item) => ({
+                where: `Nhánh ${MONEY_TEXT}`,
+                text: 'Vật tư',
+                quantity: 1,
+                itemId: item.id,
+                confidence: 0.8,
+                note: `khớp\n${MONEY_TEXT}`,
+              })),
+              {
+                where: 'Tủ chính',
+                text: `Đèn lạ ${MONEY_TEXT}`,
+                quantity: 1,
+                itemId: null,
+                confidence: 0.4,
+                note: MONEY_TEXT,
+              },
+            ],
           },
-        ],
-        unmatched: [
-          { description: `Đèn lạ ${MONEY_TEXT}`, reason: MONEY_TEXT },
         ],
       });
 

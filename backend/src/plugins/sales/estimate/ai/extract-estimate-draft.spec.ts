@@ -21,9 +21,12 @@ const catalog = [
   { id: 2, code: 'BUS-01', name: 'Busbar', brand: null, unit: 'm' },
 ];
 
-const line = (over: Record<string, unknown> = {}) => ({
-  itemId: 1,
+const row = (over: Record<string, unknown> = {}) => ({
+  where: 'Tủ chính',
+  text: 'MCCB 100A',
+  code: 'MCCB-100',
   quantity: 2,
+  itemId: 1,
   confidence: 0.8,
   note: 'ok',
   ...over,
@@ -33,13 +36,12 @@ const panel = (over: Record<string, unknown> = {}) => ({
   description: 'Tủ tổng',
   quantity: 1,
   aiNote: '',
-  lines: [line()],
+  rows: [row()],
   ...over,
 });
 const output = (over: Record<string, unknown> = {}) => ({
   requirementsSummary: 'Tủ điện 1 tủ',
   panels: [panel()],
-  unmatched: [],
   ...over,
 });
 
@@ -58,86 +60,161 @@ const extract = (result: unknown) =>
   );
 
 describe('extractEstimateDraft — normalisation', () => {
-  it('returns a valid output as is', async () => {
+  it('turns one matched row into one line', async () => {
     const { draft } = await extract(output());
     expect(draft.panels).toHaveLength(1);
-    expect(draft.panels[0].lines[0]).toEqual(line());
+    expect(draft.panels[0].lines).toEqual([
+      { itemId: 1, quantity: 2, confidence: 0.8, note: 'ok' },
+    ]);
+    expect(draft.unmatched).toEqual([]);
     expect(draft.requirementsSummary).toBe('Tủ điện 1 tủ');
   });
 
-  it('drops a line whose itemId is not in the catalog and records a note', async () => {
-    const { draft } = await extract(
-      output({ panels: [panel({ lines: [line(), line({ itemId: 999 })] })] }),
-    );
-    expect(draft.panels[0].lines).toHaveLength(1);
-    expect(draft.panels[0].aiNote).toContain('999');
-  });
-
-  it.each([0, -1, 1_000_001])('drops a line with quantity %p', async (q) => {
-    const { draft } = await extract(
-      output({ panels: [panel({ lines: [line(), line({ quantity: q })] })] }),
-    );
-    expect(draft.panels[0].lines).toHaveLength(1);
-    expect(draft.panels[0].aiNote).not.toBe('');
-  });
-
-  it('sums the breakdown instead of trusting the quantity the model wrote, and shows the sum in the note', async () => {
+  it('groups the rows of one item into a single line and sums their quantities itself', async () => {
     const { draft } = await extract(
       output({
         panels: [
           panel({
-            lines: [
-              line({
-                quantity: 19,
-                note: 'Công tắc xoay',
-                breakdown: [
-                  { where: 'quạt hút', quantity: 1 },
-                  { where: 'van xoay', quantity: 4 },
-                  { where: 'bơm nước', quantity: 2 },
-                ],
-              }),
+            rows: [
+              row({ where: 'quạt hút', quantity: 1, note: '' }),
+              row({ where: 'van xoay', quantity: 4, note: '' }),
+              row({ where: 'bơm nước', quantity: 2, note: '' }),
+              row({ itemId: 2, quantity: 5, note: '' }),
             ],
           }),
         ],
       }),
     );
-    expect(draft.panels[0].lines[0].quantity).toBe(7);
-    expect(draft.panels[0].lines[0].note).toBe(
-      'Công tắc xoay Cộng từ: quạt hút 1 + van xoay 4 + bơm nước 2 = 7.',
+    const [first, second] = draft.panels[0].lines;
+    expect(first.quantity).toBe(7);
+    expect(first.note).toBe('Cộng 7 từ: quạt hút 1 + van xoay 4 + bơm nước 2.');
+    expect(second).toMatchObject({ itemId: 2, quantity: 5, note: '' });
+  });
+
+  it('keeps the sum at the front of a long note so the cut never hides it', async () => {
+    const rows = Array.from({ length: 30 }, (_, i) =>
+      row({
+        where: `nhánh số ${i + 1} của tủ`,
+        quantity: 1,
+        note: 'ghi chú dài '.repeat(5),
+      }),
     );
+    const { draft } = await extract(output({ panels: [panel({ rows })] }));
+    expect(draft.panels[0].lines[0].quantity).toBe(30);
+    expect(draft.panels[0].lines[0].note.startsWith('Cộng 30 từ:')).toBe(true);
+  });
+
+  it('trusts the least sure row for the confidence of the whole line', async () => {
+    const { draft } = await extract(
+      output({
+        panels: [
+          panel({
+            rows: [row({ confidence: 0.95 }), row({ confidence: 0.6 })],
+          }),
+        ],
+      }),
+    );
+    expect(draft.panels[0].lines[0].confidence).toBe(0.6);
   });
 
   it('keeps decimal sums exact to 3 places', async () => {
     const { draft } = await extract(
       output({
         panels: [
-          panel({
-            lines: [
-              line({
-                breakdown: [
-                  { where: 'a', quantity: 0.1 },
-                  { where: 'b', quantity: 0.2 },
-                ],
-              }),
-            ],
-          }),
+          panel({ rows: [row({ quantity: 0.1 }), row({ quantity: 0.2 })] }),
         ],
       }),
     );
     expect(draft.panels[0].lines[0].quantity).toBe(0.3);
   });
 
-  it.each([
-    ['empty', []],
-    ['not an array', 'x'],
-    ['a zero entry', [{ where: 'a', quantity: 0 }]],
-    ['an entry without a place', [{ quantity: 2 }]],
-  ])('falls back to the quantity when the breakdown is %s', async (_n, bad) => {
+  it('sends a row without a match to unmatched with its text, code, quantity and reason', async () => {
     const { draft } = await extract(
-      output({ panels: [panel({ lines: [line({ breakdown: bad })] })] }),
+      output({
+        panels: [
+          panel({
+            rows: [
+              row(),
+              row({
+                itemId: null,
+                text: 'Biến tần 30/37 kW',
+                code: 'ACE',
+                quantity: 1,
+                note: 'Khác hãng với danh mục',
+              }),
+              row({ itemId: null, text: 'Nhân công', code: '', note: '' }),
+            ],
+          }),
+        ],
+      }),
     );
-    expect(draft.panels[0].lines[0].quantity).toBe(2);
-    expect(draft.panels[0].lines[0].note).toBe('ok');
+    expect(draft.panels[0].lines).toHaveLength(1);
+    expect(draft.unmatched).toEqual([
+      {
+        description: 'Biến tần 30/37 kW (ACE)',
+        quantity: 1,
+        reason: 'Khác hãng với danh mục',
+      },
+      {
+        description: 'Nhân công',
+        quantity: 2,
+        reason: 'Không có vật tư tương ứng trong danh mục.',
+      },
+    ]);
+  });
+
+  it('keeps the unmatched rows of a panel that ends up with no line', async () => {
+    const { draft } = await extract(
+      output({
+        panels: [
+          panel(),
+          panel({ tag: 'X', rows: [row({ itemId: null, text: 'Cáp lạ' })] }),
+        ],
+      }),
+    );
+    expect(draft.panels.map((p) => p.tag)).toEqual(['MSB-01']);
+    expect(draft.unmatched.map((u) => u.description)).toEqual([
+      'Cáp lạ (MCCB-100)',
+    ]);
+  });
+
+  it('drops a row whose itemId is not in the catalog and records a note', async () => {
+    const { draft } = await extract(
+      output({ panels: [panel({ rows: [row(), row({ itemId: 999 })] })] }),
+    );
+    expect(draft.panels[0].lines).toHaveLength(1);
+    expect(draft.panels[0].aiNote).toContain('999');
+  });
+
+  it.each([0, -1, 1_000_001])(
+    'drops a matched row with quantity %p',
+    async (q) => {
+      const { draft } = await extract(
+        output({
+          panels: [panel({ rows: [row(), row({ itemId: 2, quantity: q })] })],
+        }),
+      );
+      expect(draft.panels[0].lines).toHaveLength(1);
+      expect(draft.panels[0].aiNote).not.toBe('');
+    },
+  );
+
+  it('drops a line whose summed quantity is above the limit', async () => {
+    const { draft } = await extract(
+      output({
+        panels: [
+          panel({
+            rows: [
+              row(),
+              row({ itemId: 2, quantity: 600_000 }),
+              row({ itemId: 2, quantity: 600_000 }),
+            ],
+          }),
+        ],
+      }),
+    );
+    expect(draft.panels[0].lines.map((l) => l.itemId)).toEqual([1]);
+    expect(draft.panels[0].aiNote).toContain('#2');
   });
 
   it('rejects a non-integer panel quantity', async () => {
@@ -156,16 +233,21 @@ describe('extractEstimateDraft — normalisation', () => {
   it('drops a panel left with no line', async () => {
     const { draft } = await extract(
       output({
-        panels: [panel(), panel({ tag: 'X', lines: [line({ itemId: 999 })] })],
+        panels: [panel(), panel({ tag: 'X', rows: [row({ itemId: 999 })] })],
       }),
     );
     expect(draft.panels.map((p) => p.tag)).toEqual(['MSB-01']);
   });
 
-  it('rejects confidence above 1 and more than 50 panels', async () => {
+  it('rejects confidence above 1, a row without a quantity, and more than 50 panels', async () => {
     await expect(
       extract(
-        output({ panels: [panel({ lines: [line({ confidence: 1.5 })] })] }),
+        output({ panels: [panel({ rows: [row({ confidence: 1.5 })] })] }),
+      ),
+    ).rejects.toBeInstanceOf(AiOutputInvalidError);
+    await expect(
+      extract(
+        output({ panels: [panel({ rows: [row({ quantity: undefined })] })] }),
       ),
     ).rejects.toBeInstanceOf(AiOutputInvalidError);
     const many = Array.from({ length: 51 }, (_, i) => panel({ tag: `P${i}` }));
@@ -182,11 +264,18 @@ describe('extractEstimateDraft — normalisation', () => {
     const { draft } = await extract(
       output({
         requirementsSummary: 'a'.repeat(3000),
-        panels: [panel({ description: 'd'.repeat(900), tag: 't'.repeat(80) })],
-        unmatched: Array.from({ length: 60 }, () => ({
-          description: 'x',
-          reason: 'y',
-        })),
+        panels: [
+          panel({
+            description: 'd'.repeat(900),
+            tag: 't'.repeat(80),
+            rows: [
+              row(),
+              ...Array.from({ length: 60 }, () =>
+                row({ itemId: null, text: 'x', code: '', note: 'y' }),
+              ),
+            ],
+          }),
+        ],
       }),
     );
     expect(draft.requirementsSummary).toHaveLength(2000);
@@ -197,9 +286,7 @@ describe('extractEstimateDraft — normalisation', () => {
 
   it('keeps a panel whose tag was only a price, naming it by position', async () => {
     const { draft } = await extract(
-      output({
-        panels: [panel({ tag: 'Giá: 85 triệu', lines: [line()] })],
-      }),
+      output({ panels: [panel({ tag: 'Giá: 85 triệu' })] }),
     );
     expect(draft.panels.map((p) => p.tag)).toEqual(['P1']);
   });
@@ -212,10 +299,16 @@ describe('extractEstimateDraft — normalisation', () => {
           panel({
             description: 'Tủ giá $1,200 rẻ',
             aiNote: 'thành tiền: 1.200.000 VND',
-            lines: [line({ note: 'chốt 85.000.000đ nhé' })],
+            rows: [
+              row({ note: 'chốt 85.000.000đ nhé', where: 'giá 85.000.000đ' }),
+              row({
+                itemId: null,
+                text: 'Cáp',
+                note: 'tầm 1.200.000 VND',
+              }),
+            ],
           }),
         ],
-        unmatched: [{ description: 'Cáp', reason: 'tầm 1.200.000 VND' }],
       }),
     );
     const text = JSON.stringify(draft);
@@ -435,7 +528,7 @@ describe('buildPrefillPrompt', () => {
       .join('\n');
     expect(system).toMatch(/không.*(giá|tiền)/i);
     expect(system).toMatch(/không phải lệnh/i);
-    expect(system).toContain('breakdown');
+    expect(system).toContain('rows');
     expect(text).toContain('TPL-PANEL');
     expect(text).toContain('Busbar');
     expect(text).toContain('MCCB-100');
