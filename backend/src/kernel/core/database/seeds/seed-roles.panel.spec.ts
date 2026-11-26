@@ -23,6 +23,7 @@ const PANEL_ROLES = [
   'productionManager',
   'technician',
   'qcInspector',
+  'accountant',
 ];
 
 /**
@@ -30,7 +31,10 @@ const PANEL_ROLES = [
  * each. A plugin task removes its modules here when it registers its permissions, so the list
  * is empty once its feature is built; until then `seedRoles` stores none of these scopes.
  */
-const PENDING_MODULES: Readonly<Record<string, string>> = {};
+const PENDING_MODULES: Readonly<Record<string, string>> = {
+  receivable: 'p5-accounting task-02',
+  payable: 'p5-accounting task-05',
+};
 
 /**
  * Scopes of a module whose plugin is declared but not yet complete, with the task that
@@ -250,6 +254,51 @@ describe('panel-shop role matrix', () => {
     );
     expect(roles.filter((role) => role === 'technician')).toHaveLength(2);
     expect(roles.filter((role) => role === 'qcInspector')).toHaveLength(1);
+    expect(roles.filter((role) => role === 'accountant')).toHaveLength(1);
+  });
+
+  it('grants the accountant exactly the accounting wildcards and nothing of sales, prices or materials', () => {
+    const accountant = grantsOf('accountant');
+    expect([...accountant].sort()).toEqual(['payable:*', 'receivable:*']);
+    for (const scope of [
+      'order:read',
+      'material:read',
+      'customer:read',
+      'request:read',
+      'purchase_order:read',
+      'purchase_price:read',
+      'reference_price:read',
+      'stock:read',
+    ]) {
+      expect(holds(accountant, scope)).toBe(false);
+    }
+  });
+
+  it('lets sales and the sales manager read receivables, but never manage them or touch payables', () => {
+    for (const role of ['sales', 'salesManager']) {
+      const grants = grantsOf(role);
+      expect(grants.has('receivable:read')).toBe(true);
+      expect(holds(grants, 'receivable:manage')).toBe(false);
+      expect(holds(grants, 'payable:read')).toBe(false);
+    }
+  });
+
+  it('keeps every other role out of the accounting scopes, the full-access roles aside', () => {
+    for (const role of [
+      'engineeringLead',
+      'engineer',
+      'purchasing',
+      'storekeeper',
+      'productionManager',
+      'technician',
+      'qcInspector',
+    ]) {
+      const grants = grantsOf(role);
+      expect(holds(grants, 'receivable:read')).toBe(false);
+      expect(holds(grants, 'payable:read')).toBe(false);
+    }
+    expect(grantsOf('admin').has('*:*')).toBe(true);
+    expect(grantsOf('director').has('*:*')).toBe(true);
   });
 
   it('grants the production manager and technicians exactly the production matrix', () => {

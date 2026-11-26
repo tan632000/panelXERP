@@ -10,7 +10,8 @@ import { RequestContextStore } from '@shared/context/request-context.store';
  *   assignedEngineer — requests (and their estimates) whose `assignedEngineerId` is the actor
  *   material         — every order's material view (purchasing, storekeeper) and no sales-chain
  *                      record: customers, requests, estimates, quotations and orders stay hidden;
- *                      also every order's QC and delivery records (QC inspector)
+ *                      also every order's QC and delivery records (QC inspector) and, through
+ *                      the accounting plugin, every order's payment records (accountant)
  *   assignedTechnician — the production cabinets assigned to the actor; no sales-chain record and
  *                      no material view
  *
@@ -43,6 +44,10 @@ export const ROLE_DATA_SCOPES: Readonly<Record<string, DataScope>> = {
   // The QC inspector checks every finished cabinet; holding no `material:read`, the material
   // view the scope would allow stays out of reach.
   qcInspector: 'material',
+  // The accountant reaches every order and purchase order through the accounting plugin's
+  // own permissions; holding no `order:read` or `material:read`, no sales-chain or material
+  // record opens to it.
+  accountant: 'material',
   sales: 'ownSales',
   engineer: 'assignedEngineer',
 };

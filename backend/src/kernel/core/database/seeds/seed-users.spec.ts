@@ -126,6 +126,22 @@ describe('seedUsers', () => {
     ]);
   });
 
+  it('seeds one demo accountant in the accounting department', () => {
+    const accountants = DEMO_USER_SPECS.filter(
+      (spec) => spec.roleCode === 'accountant',
+    );
+    expect(accountants).toEqual([
+      {
+        username: 'accountant_a',
+        emailLocal: 'accountant.a',
+        fullName: 'Demo Accountant A',
+        roleCode: 'accountant',
+        department: 'accounting',
+        title: 'Accountant',
+      },
+    ]);
+  });
+
   it('creates demo accounts outside production only', async () => {
     expect(
       seedUserSpecsFor('development', [DEMO_SALES]).map((s) => s.username),

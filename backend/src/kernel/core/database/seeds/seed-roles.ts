@@ -109,6 +109,8 @@ const ROLES: ReadonlyArray<
       'purchase_price:read',
       ...STOCK_VIEW,
       'material:read',
+      // Every order's payment schedule and balances, read only: the accountant keeps the books.
+      'receivable:read',
       ...PRODUCTION_VIEW,
       ...DELIVERY_VIEW,
       // Any order's acceptance minutes, as the order's own sales owner may.
@@ -132,6 +134,8 @@ const ROLES: ReadonlyArray<
       'reference_price:read',
       'stock:availability',
       'material:read',
+      // The payment schedule and balances of their own orders, read only.
+      'receivable:read',
       // The progress of their own orders; issues stay with production.
       'production_order:read',
       'production_progress:read',
@@ -276,6 +280,12 @@ const ROLES: ReadonlyArray<
       'qc_inspection:create',
       'qc_inspection:verify',
     ],
+  ],
+  [
+    'Accountant',
+    'accountant',
+    'Keeps the books: payment schedules, invoices, collections and supplier payables; sees no sales record, price or material',
+    ['receivable:*', 'payable:*'],
   ],
 ];
 

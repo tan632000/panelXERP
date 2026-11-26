@@ -1,6 +1,6 @@
 # Task 01 — `accountant` role, grants, scope, labels and demo account
 
-Status: pending
+Status: done
 
 ## Outcome
 The seed creates role `accountant` ("NV Kế toán") with the D-02 grants and the demo account `accountant_a`; sales and salesManager hold their `receivable:read`; every other role holds no accounting scope; `accountant` reads no sales-chain and no material record; the role has a Vietnamese and an English label.
@@ -40,4 +40,37 @@ The seed creates role `accountant` ("NV Kế toán") with the D-02 grants and th
 On a failed Step or Verification Plan run: stop; do not widen scope, change the Command, or weaken a test; record observed versus expected; repair only the cited cause; after three failed rounds, stop and ask the user.
 
 ## Receipt
-<!-- Fill only after execution; see canonical form below. -->
+
+Verification: PASS
+Command: docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/kernel/core/database/seeds src/kernel/shared/services/data-scope.service.spec.ts src/kernel/core/database/soft-delete-unique-index.spec.ts" && docker compose exec -T frontend sh -c "npm run lint && npm run typecheck"
+Exit: 0
+Base: d42849f61081364fdb4cdad504c408595dd899ee
+Head: 87f8c834bf80bb143c488e1c056b0623c5a5f161d1d3b171a484416daab65b30
+```text
+$ docker compose exec -T backend sh -c "npm run lint && npm run typecheck && npm run migration:run && npm run seed && npx jest --ci src/kernel/core/database/seeds src/kernel/shared/services/data-scope.service.spec.ts src/kernel/core/database/soft-delete-unique-index.spec.ts" && docker compose exec -T frontend sh -c "npm run lint && npm run typecheck"
+No migrations are pending
+[seed-runner] Scope: all (NODE_ENV=development)
+[seed-runner] Running core seeds...
+[seed-roles] WARNING: unrecognized seed permissions are not declared by the plugin registry:
+  - salesManager: receivable:read
+  - sales: receivable:read
+[seed:users] 0 users created, 15 already existed and were left untouched (domain: example.com)
+[seed-runner] All seeds completed.
+PASS src/kernel/shared/services/data-scope.service.spec.ts
+PASS src/kernel/core/database/seeds/seed-users.spec.ts
+PASS src/kernel/core/database/seeds/helpers/seed-scope.spec.ts
+PASS src/kernel/core/database/seeds/permission-scope-conversion.spec.ts
+PASS src/kernel/core/database/seeds/seed-roles.inventory.spec.ts
+PASS src/kernel/core/database/seeds/seed-roles.panel.spec.ts
+PASS src/kernel/core/database/soft-delete-unique-index.spec.ts
+PASS src/kernel/core/database/seeds/role-matrix-doc.spec.ts
+Test Suites: 8 passed, 8 total
+Tests:       113 passed, 113 total
+> panelxerp-frontend@0.1.0 lint
+> eslint . --max-warnings=0 && npm run lint:i18n
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+> panelxerp-frontend@0.1.0 typecheck
+> tsc --noEmit
+EXIT=0
+```
