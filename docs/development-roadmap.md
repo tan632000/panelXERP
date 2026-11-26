@@ -23,7 +23,7 @@ Cập nhật: 2026-11-24
 | P4 | QC & Giao hàng: checklist xuất xưởng, lỗi/khắc phục, phiếu giao từng đợt, lắp đặt tại dự án, biên bản nghiệm thu | 6 | P3 | Hoàn thành (GATE-DONE 2026-11-22) — [specs/p4-qc-delivery](../specs/p4-qc-delivery/plan.md) |
 | P5 | Kế toán: kế hoạch xuất HĐ, đợt thanh toán, thu tiền, công nợ KH/NCC, nhắc hạn | 7 | P1, P2, P4 | Chưa bắt đầu |
 | P6 | Báo cáo & KPI: lãi lỗ dự kiến/thực tế theo đơn, KPI Sale/Kỹ thuật/Sản xuất theo công thức + trọng số | 8, phần còn lại của 9 | P1–P5 | Chưa bắt đầu |
-| AI | Điền dự toán bằng AI + Mẫu dự toán: quản lý mẫu báo giá, chọn mẫu trên dự án, nút AI trên yêu cầu, Review Mode cho kỹ sư | 3 (mở rộng dự toán) | P1 | Đã triển khai, chờ GATE-DONE. Còn: nút AI hiện dù chưa cấu hình; mất tiến trình khi rời trang giữa lúc chạy; lỗi tiếng Anh; độ tin cậy AI đều cao; cần kỹ sư kiểm tra; chưa kiểm live tải lại giữa lúc chạy; LocalStack dev mất file khi tạo lại container — [specs](../specs/ai-estimate-prefill/plan.md) |
+| AI | Điền dự toán bằng AI + Mẫu dự toán: quản lý mẫu báo giá, chọn mẫu trên dự án, nút AI trên yêu cầu, Review Mode cho kỹ sư | 3 (mở rộng dự toán) | P1 | Hoàn thành (GATE-DONE 2026-11-26). Hạn chế còn lại: AI đọc bản quét nhiều tủ (như LSX-115) có thể lệch/thiếu dòng ở một tủ và thỉnh thoảng báo `AI_OUTPUT_INVALID` chưa rõ nguyên nhân; nút AI hiện dù chưa cấu hình; mất tiến trình khi rời trang giữa lúc chạy; lỗi tiếng Anh; độ tin cậy AI đều cao; cần kỹ sư kiểm tra; chưa kiểm live tải lại giữa lúc chạy; LocalStack dev mất file khi tạo lại container — [specs](../specs/ai-estimate-prefill/plan.md) |
 
 Nhóm 9 (liên kết tự động, phân quyền, audit) được thực hiện dần trong từng packet:
 mỗi bước chuyển giao phát notification và ghi activity log ngay trong packet sở hữu bước đó.
